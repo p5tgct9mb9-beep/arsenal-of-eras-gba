@@ -39,12 +39,12 @@ extern const unsigned int camp_tiles[960];
 extern const unsigned short camp_pal[16];
 extern const unsigned short obj_team_pal[240];
 extern const unsigned short fx_pal[16];
-extern const unsigned int era_spr_0[1984];
-#define ES_N0 248
+extern const unsigned int era_spr_0[2240];
+#define ES_N0 280
 extern const unsigned int era_spr_1[576];
 #define ES_N1 72
-extern const unsigned int era_spr_2[576];
-#define ES_N2 72
+extern const unsigned int era_spr_2[704];
+#define ES_N2 88
 extern const unsigned int era_spr_3[576];
 #define ES_N3 72
 extern const unsigned int era_spr_4[576];
@@ -53,7 +53,9 @@ extern const unsigned int era_spr_4[576];
 #define ES_HULL 8
 #define ES_TUR 24
 #define ES_PLANE 40
-extern const unsigned int fx_tiles[384];
+#define ES_SHIP 72
+#define ES_SHIP0 264
+extern const unsigned int fx_tiles[512];
 #define FX_BULLET 0
 #define FX_LASER 1
 #define FX_PLASMA 2
@@ -71,7 +73,11 @@ extern const unsigned int fx_tiles[384];
 #define FX_CRATE 36
 #define FX_BANG 40
 #define FX_MED 44
-#define FX_NTILES 48
+#define FX_RETICLE 48
+#define FX_BRK_E 52
+#define FX_BRK_C 56
+#define FX_IFF 60
+#define FX_NTILES 64
 extern const unsigned short title_bmp[38400];
 extern const unsigned short title_dim[38400];
 extern const unsigned short title_song[64];

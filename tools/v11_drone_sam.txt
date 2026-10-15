@@ -1,0 +1,55 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 15
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap DOWN
+tap RIGHT
+tap DOWN
+tap RIGHT
+wait 6
+shot v11_drone_sam_hangar
+tap DOWN
+tap A
+wait 60
+shot v11_drone_sam_start
+hold UP 90
+shot v11_drone_sam_fly
+hold B 30
+tap A
+wait 20
+shot v11_drone_sam_strike
+wait 40
+shot v11_drone_sam_impact
+hold LEFT+UP 80
+hold B 25
+tap L
+wait 4
+tap A
+wait 30
+shot v11_drone_sam_b
+tap SELECT
+wait 10
+shot v11_drone_sam_bhot
+tap SELECT
+wait 10
+shot v11_drone_sam_tv
+tap SELECT
+wait 10
+hold RIGHT 120
+shot v11_drone_sam_c
+beat sam_mid
+wait 10
+hold L+R+SELECT 2
+wait 200
+shot v11_drone_sam_result
+beat sam_end

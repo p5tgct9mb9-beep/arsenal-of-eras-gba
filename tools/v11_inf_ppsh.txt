@@ -1,0 +1,69 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap A
+wait 12
+tap A
+wait 12
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+wait 4
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap RIGHT
+wait 6
+shot v11_inf_ppsh_loadout
+tap START
+wait 60
+shot v11_inf_ppsh_spawn
+hold A+UP 60
+shot v11_inf_ppsh_f0
+hold A+RIGHT 50
+shot v11_inf_ppsh_f1
+tap L
+hold A+UP 20
+shot v11_inf_ppsh_rpg0
+wait 25
+shot v11_inf_ppsh_rpg1
+hold A 40
+shot v11_inf_ppsh_rpg2
+tap L
+tap B
+wait 30
+shot v11_inf_ppsh_nade
+tap SELECT
+wait 20
+shot v11_inf_ppsh_smoke
+hold A+LEFT 60
+shot v11_inf_ppsh_f2
+hold A+UP 80
+shot v11_inf_ppsh_f3
+hold A+DOWN 60
+shot v11_inf_ppsh_f4
+hold A+RIGHT 60
+shot v11_inf_ppsh_f5
+tap L
+tap L
+hold A+UP 30
+shot v11_inf_ppsh_f6
+hold A+LEFT 300
+shot v11_inf_ppsh_late
+wait 4
+wait 10
+hold L+R+SELECT 2
+wait 200
+shot v11_inf_ppsh_result
+beat end

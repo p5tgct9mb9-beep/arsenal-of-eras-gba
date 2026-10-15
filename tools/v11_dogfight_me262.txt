@@ -1,0 +1,85 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 10
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+wait 12
+shot v11_dogfight_me262_era
+tap A
+wait 12
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+wait 6
+shot v11_dogfight_me262_select
+tap START
+wait 40
+shot v11_dogfight_me262_map
+tap A
+wait 60
+shot v11_dogfight_me262_spawn
+hold A+UP 50
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f00
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f01
+hold A+UP 50
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f02
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f03
+hold A+UP 50
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f04
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f05
+hold A+UP 50
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f06
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f07
+hold A+UP 50
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f08
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v11_dogfight_me262_f09
+beat end

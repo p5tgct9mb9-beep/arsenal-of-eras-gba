@@ -55,7 +55,7 @@ static const TankS TANKV[5][2]={
  {{"HOVER MBT",350,420,55,34,105,1500},{"RAIL WALKER",220,300,80,60,140,2200}},
  {{"GRAV TANK",320,420,50,30,100,1600},{"LUNAR CRAWLER",240,320,65,42,140,1600}}};
 typedef struct{const char*n;const char*mn;s16 spd,turn;u8 rate,dmg;s16 bspd;u8 ammo;s16 mturn,hp;u8 side,sec,spr,gunner;}AirS; // sec 0 rockets 1 missiles 2 bombs
-#define MAXAIR 13
+#define MAXAIR 14
 static const u8 NAIR[5]={13,2,2,2,2};
 static const AirS AIRV[5][MAXAIR]={
  {{"P-51D MUSTANG","HVAR ROCKETS",410,560,4,10,1150,6,0,100,0,0,0,0},{"SPITFIRE IX","RP-3 ROCKETS",380,640,4,9,1100,4,0,90,0,0,1,0},
@@ -64,7 +64,7 @@ static const AirS AIRV[5][MAXAIR]={
   {"HURRICANE IIC","RP-3 ROCKETS",340,600,4,10,1050,4,0,110,0,0,6,0},{"P-38 LIGHTNING","HVAR ROCKETS",420,450,3,12,1200,10,0,120,0,0,7,0},
   {"BF 109 G","WGR 21 ROCKETS",400,560,5,12,1150,2,0,90,1,0,8,0},{"FW 190 A","WGR 21 ROCKETS",400,540,4,13,1150,4,0,120,1,0,9,0},
   {"ME 262","R4M ROCKETS",580,360,5,16,1250,12,0,100,1,0,10,0},{"A6M ZERO","TYPE 3 ROCKETS",350,700,5,11,1050,2,0,70,1,0,11,0},
-  {"JU 87 STUKA","SC250 BOMBS",300,420,6,8,1050,4,0,130,1,2,12,1}},
+  {"JU 87 STUKA","SC250 BOMBS",300,420,6,8,1050,4,0,130,1,2,12,1},{"SBD DAUNTLESS","1000LB BOMBS",330,480,5,9,1050,6,0,150,0,2,13,1}},
  {{"MIG-21","K-13 AAM",480,520,5,11,1300,4,380,95,1,1,0,0},{"F-4 PHANTOM","AIM-7",460,470,5,12,1300,6,360,120,0,1,1,0}},
  {{"F-35A","AIM-120",520,540,4,10,1400,6,560,100,0,1,0,0},{"SU-57","R-77",540,580,4,10,1400,6,540,105,1,1,1,0}},
  {{"NGAD 6TH-GEN","SEEKERS",600,640,4,9,1500,6,700,100,0,1,0,0},{"X-90 ARROW","SWARM",640,600,4,8,1500,8,650,90,1,1,1,0}},
@@ -74,26 +74,53 @@ static Loadout LO[5];static u8 tankSel[5],airSel[5];
 static const char save_tag[] __attribute__((used,aligned(4)))="SRAM_V113";
 #define SRAM ((volatile u8*)0x0E000000)
 #define LO_F 10
-#define SAVE_N (5*LO_F+10+6+4)
-#define SAVE_V 2
-static u32 campUnlock=1;
-static void lo_defaults(void){campUnlock=1;memset(LO,0,sizeof LO);memset(tankSel,0,5);memset(airSel,0,5);}
+// ---------------------------------------------------------------- 6v6 ARSENAL: one pool across all eras + factions
+typedef struct{u8 pI,sI,lI,leth,tact,tkI,aI,fac0,fac1;}G6;
+static G6 g6={0,0,0,0,0,0,0,0,6};
+static const u8 N2[5]={2,2,2,2,2};
+static const char*const ERA_TAG[5]={"WW2","COLD WAR","MODERN","FUTURE","SPACE"};
+static int fsum(const u8*n){int s=0;for(int e=0;e<5;e++)s+=n[e];return s;}
+static int fdec(const u8*n,int idx,int*o){for(int e=0;e<5;e++){if(idx<n[e]){*o=idx;return e;}idx-=n[e];}*o=0;return 0;}
+static int fenc(const u8*n,int e,int i){int s=0;for(int k=0;k<e;k++)s+=n[k];return s+i;}
+#define NLETH6 6
+#define NTACT6 4
+static const char*const LETH6_N[NLETH6]={"MK2 FRAG","STIELHANDGRANATE","GAMMON BOMB","FRAG","SEMTEX","CLUSTER"};
+static const u8 LETH6_SUB[NLETH6]={0,3,4,0,1,2};
+static const char*const TACT6_N[NTACT6]={"SMOKE","MORPHINE","FLASHBANG","STIM"};
+static const u8 TACT6_FX[NTACT6]={1,2,0,2};
+typedef struct{const char*n;u8 m[3],h[3],t[3];u8 axis;}Fac;
+#define NFAC 11
+static const Fac FAC[NFAC]={{"USA",{92,104,58},{80,92,52},{70,150,255},0},{"UK",{124,104,66},{100,90,60},{90,200,255},0},{"USSR",{132,128,76},{90,96,60},{230,60,50},0},
+ {"GERMANY",{96,102,100},{80,86,88},{210,210,210},1},{"JAPAN",{150,132,80},{120,110,70},{240,140,60},1},{"CHINA",{80,110,70},{70,96,64},{255,90,90},0},
+ {"RUSSIA",{104,110,84},{84,92,70},{220,70,70},0},{"NATO",{82,98,64},{70,80,56},{80,140,255},0},{"COALITION",{170,148,104},{150,134,96},{90,220,160},0},
+ {"FEDERATION",{190,196,206},{170,176,190},{110,200,255},0},{"SYNDICATE",{80,64,92},{70,56,80},{255,80,200},0}};
+static u16 fac_c(const u8*c,int num,int den){return RGB(clampi(c[0]*num/den,0,255),clampi(c[1]*num/den,0,255),clampi(c[2]*num/den,0,255));}
+static void fac_pal(int bank,int f,int player){volatile u16*p=PAL_OBJ+bank*16;const Fac*F=&FAC[f];p[2]=fac_c(F->m,3,4);p[3]=fac_c(F->m,1,1);p[4]=fac_c(F->m,5,4);p[5]=fac_c(F->h,1,1);p[9]=player?RGB(255,220,40):fac_c(F->t,1,1);}
+#define SAVE_N2 (5*LO_F+10+6+4+2)
+#define SAVE_N (SAVE_N2+9+20)
+#define SAVE_V 3
+static u32 campUnlock=1;static u8 droneSel,droneCall;
+static void lo_defaults(void){campUnlock=1;droneSel=0;droneCall=0;{G6 d={0,0,0,0,0,0,0,0,6};g6=d;}{Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}memset(LO,0,sizeof LO);memset(tankSel,0,5);memset(airSel,0,5);}
 static int lo_valid(void){for(int e=0;e<5;e++){Loadout*l=&LO[e];if(l->prim>=NPRIM[e]||l->sec>=NSEC[e]||l->opt>2||l->muz>2||l->grip>2||l->mag>2||l->leth>2||l->tact>=NTACT[e]||l->perk>4||l->laun>2||tankSel[e]>1||airSel[e]>=NAIR[e])return 0;}return 1;}
 static void save_write(void){u8 b[SAVE_N];for(int e=0;e<5;e++){u8*p=&LO[e].prim;for(int k=0;k<LO_F;k++)b[e*LO_F+k]=p[k];b[5*LO_F+e]=tankSel[e];b[5*LO_F+5+e]=airSel[e];}
- {u8*q=&SET.track;for(int k=0;k<6;k++)b[5*LO_F+10+k]=q[k];for(int k=0;k<4;k++)b[5*LO_F+16+k]=campUnlock>>(8*k);}
+ {u8*q=&SET.track;for(int k=0;k<6;k++)b[5*LO_F+10+k]=q[k];for(int k=0;k<4;k++)b[5*LO_F+16+k]=campUnlock>>(8*k);b[5*LO_F+20]=droneSel;b[5*LO_F+21]=droneCall;}
+ {u8*q=&g6.pI;for(int k=0;k<9;k++)b[SAVE_N2+k]=q[k];u8*c=(u8*)&CH;for(int k=0;k<20;k++)b[SAVE_N2+9+k]=c[k];}
  u8 sum=0x5A;SRAM[0]='A';SRAM[1]='O';SRAM[2]='E';SRAM[3]='L';SRAM[4]=SAVE_V;
  for(int i=0;i<SAVE_N;i++){SRAM[5+i]=b[i];sum+=b[i]*(i+1);}SRAM[5+SAVE_N]=sum;}
-static int saveLoaded; // 0 none/defaults, 1 v2, 2 migrated from v1
+static int saveLoaded; // 0 none/defaults, 1 v3, 2 migrated from v1, 3 migrated from v2
 static int save_load(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!='O'||SRAM[2]!='E'||SRAM[3]!='L')return 0;
- int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:SAVE_N;if(v!=1&&v!=2)return 0;
+ int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:SAVE_N;if(v<1||v>3)return 0;
  u8 b[SAVE_N];u8 sum=0x5A;for(int i=0;i<n;i++){b[i]=SRAM[5+i];sum+=b[i]*(i+1);}if(sum!=SRAM[5+n])return 0;
  for(int e=0;e<5;e++){u8*p=&LO[e].prim;for(int k=0;k<nf;k++)p[k]=b[e*nf+k];tankSel[e]=b[5*nf+e];airSel[e]=b[5*nf+5+e];}
- if(v==2){u8*q=&SET.track;for(int k=0;k<6;k++)q[k]=b[5*LO_F+10+k];campUnlock=0;for(int k=0;k<4;k++)campUnlock|=(u32)b[5*LO_F+16+k]<<(8*k);
+ if(v>=2){u8*q=&SET.track;for(int k=0;k<6;k++)q[k]=b[5*LO_F+10+k];campUnlock=0;for(int k=0;k<4;k++)campUnlock|=(u32)b[5*LO_F+16+k]<<(8*k);droneSel=b[5*LO_F+20]%9;droneCall=b[5*LO_F+21]%3;
   if(SET.track>NTRK||SET.musVol>10||SET.sfxVol>10||SET.shake>1||SET.diff>2||SET.hints>1){Settings d={0,8,10,1,1,1};SET=d;}}
+ if(v==3){u8*q=&g6.pI;for(int k=0;k<9;k++)q[k]=b[SAVE_N2+k];u8*c=(u8*)&CH;for(int k=0;k<20;k++)c[k]=b[SAVE_N2+9+k];CH.name[10]=0;
+  if(g6.pI>=fsum(NPRIM)||g6.sI>=fsum(NSEC)||g6.lI>10||g6.leth>=NLETH6||g6.tact>=NTACT6||g6.tkI>=10||g6.aI>=fsum(NAIR)||g6.fac0>=NFAC||g6.fac1>=NFAC||g6.fac0==g6.fac1){G6 d={0,0,0,0,0,0,0,0,6};g6=d;}
+  if(CH.skin>=CH_NSKIN||CH.hair>=CH_NHAIR||CH.head>=CH_NHEAD||CH.hat>=CH_NHAT||CH.uni>=CH_NUNI||CH.camo>=CH_NCAMO||CH.vest>=CH_NVEST||CH.body>1||CH.use>1||!CH.name[0]){Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}}
  if(v==1){ // v1.0 -> v1.1 migration: WW2 tactical list changed (flash/smoke/stim -> smoke/morphine)
   for(int e=0;e<5;e++)LO[e].laun=0;LO[0].tact=LO[0].tact==2?1:0;}
  if(!lo_valid()){lo_defaults();return 0;}
- saveLoaded=v==1?2:1;if(v==1)save_write();return saveLoaded;}
+ saveLoaded=v==3?1:v==2?3:2;if(v<3)save_write();return saveLoaded;}
 static Wstat wcalc(int era,const Loadout*l,int slot){int secondary=slot!=0;const Wpn*w=slot==2?&LAUN[era][l->laun]:slot==1?&SEC[era][l->sec]:&PRIM[era][l->prim];Wstat s;s.kind=slot==2?K_ROCKET:K_BUL;
  s.n=w->n;s.dmg=w->dmg;s.rate=w->rate;s.spd16=w->spd16;s.spread=w->spread;s.pellets=w->pellets;s.life=w->life;s.mag=w->mag;s.reload=w->reload;s.move=w->move;
  if(!secondary){
@@ -157,5 +184,60 @@ static int loadout_menu(int ctx,int era){
   int dir=0;if(pressed&K_LEFT)dir=-1;if(pressed&K_RIGHT)dir=1;if((pressed&K_A)&&r!=R_DONE)dir=1;
   if(ctx==0&&(pressed&(K_L|K_R))){e=(e+((pressed&K_R)?1:4))%5;redraw=1;sfx_menu();}
   if(dir&&r!=R_DONE){int n=lo_optcount(r,e);if(r==R_ERA)e=(e+n+dir)%n;else{u8*f=lo_field(r,e);*f=(*f+n+dir)%n;}redraw=1;sfx_menu();}
+  if((pressed&(K_A|K_START))&&(r==R_DONE||(pressed&K_START))){save_write();sfx_ok();return 1;}
+  if(pressed&K_B){save_write();sfx_menu();return 0;}}}
+// ---------------------------------------------------------------- 6v6 ARSENAL menu (all eras in one pool)
+static const u8 NLAUN6[5]={2,2,2,2,2};
+static const char*a6_value(int r,int*era){int i,e;Loadout*l;
+ switch(r){
+  case R_PRIM:e=fdec(NPRIM,g6.pI,&i);*era=e;return PRIM[e][i].n;
+  case R_SEC:e=fdec(NSEC,g6.sI,&i);*era=e;return SEC[e][i].n;
+  case R_LAUN:if(!g6.lI){*era=-1;return "NONE";}e=(g6.lI-1)/2;*era=e;return LAUN[e][(g6.lI-1)%2+1].n;
+  case R_LETH:*era=-1;return LETH6_N[g6.leth];case R_TACT:*era=-1;return TACT6_N[g6.tact];
+  case R_TANK:e=fdec(N2,g6.tkI,&i);*era=e;return TANKV[e][i].n;
+  case R_AIR:e=fdec(NAIR,g6.aI,&i);*era=e;return AIRV[e][i].n;}
+ e=fdec(NPRIM,g6.pI,&i);l=&LO[e];*era=-1;
+ switch(r){case R_OPT:return OPTN[l->opt];case R_MUZ:return MUZN[l->muz];case R_GRIP:return GRIPN[l->grip];case R_MAG:return MAGN[l->mag];case R_PERK:return PERKN[l->perk];}return "";}
+static void a6_step(int r,int dir,int tab){int i,e;u8*f=0;int n=0;const u8*cnt=0;
+ switch(r){case R_PRIM:f=&g6.pI;cnt=NPRIM;break;case R_SEC:f=&g6.sI;cnt=NSEC;break;case R_TANK:f=&g6.tkI;cnt=N2;break;case R_AIR:f=&g6.aI;cnt=NAIR;break;
+  case R_LAUN:if(tab){int e2=g6.lI?(g6.lI-1)/2:-1;e2=(e2+(dir>0?1:5))%5;if(e2<0)e2+=5;g6.lI=1+e2*2;}else g6.lI=(g6.lI+11+dir)%11;return;
+  case R_LETH:g6.leth=(g6.leth+NLETH6+dir)%NLETH6;return;case R_TACT:g6.tact=(g6.tact+NTACT6+dir)%NTACT6;return;}
+ if(cnt){n=fsum(cnt);if(tab){e=fdec(cnt,*f,&i);e=(e+(dir>0?1:4))%5;*f=fenc(cnt,e,0);}else *f=(*f+n+dir)%n;return;}
+ e=fdec(NPRIM,g6.pI,&i);Loadout*l=&LO[e];
+ switch(r){case R_OPT:l->opt=(l->opt+3+dir)%3;break;case R_MUZ:l->muz=(l->muz+3+dir)%3;break;case R_GRIP:l->grip=(l->grip+3+dir)%3;break;case R_MAG:l->mag=(l->mag+3+dir)%3;break;case R_PERK:l->perk=(l->perk+5+dir)%5;break;}}
+static void a6_build(Loadout*lp,Wstat*w,int slot){int pi,si;int pe=fdec(NPRIM,g6.pI,&pi),se=fdec(NSEC,g6.sI,&si);*lp=LO[pe];lp->prim=pi;
+ int laun=g6.lI?(g6.lI-1)%2+1:0,le=g6.lI?(g6.lI-1)/2:pe;lp->laun=laun;
+ if(slot==0)*w=wcalc(pe,lp,0);else if(slot==1){Loadout ls=LO[se];ls.sec=si;ls.perk=lp->perk;ls.laun=laun;*w=wcalc(se,&ls,1);}else{Loadout ll=LO[le];ll.laun=laun;ll.perk=lp->perk;*w=wcalc(le,&ll,2);}}
+static int arsenal_menu(int mode){u8 rows[12];int nr=0;
+ if(mode==1){static const u8 RI[11]={R_PRIM,R_SEC,R_LAUN,R_OPT,R_MUZ,R_GRIP,R_MAG,R_LETH,R_TACT,R_PERK,R_DONE};for(int k=0;k<11;k++)rows[nr++]=RI[k];}
+ else{rows[nr++]=mode==2?R_TANK:R_AIR;rows[nr++]=R_DONE;}
+ int sel=0,redraw=2;
+ for(;;){int r=rows[sel];BEAT->screen=SCR_LOADOUT;BEAT->menu=r;BEAT->mode=mode;BEAT->extra=g6.pI|(g6.sI<<6)|(g6.lI<<10)|(g6.tkI<<14)|(g6.aI<<18);
+  if(redraw){if(redraw==2)m3_title(1);redraw=0;m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);
+   m3_ctext(8,mode==1?"6V6 ARSENAL - ALL ERAS":mode==2?"6V6 ARSENAL - ANY TANK":"6V6 ARSENAL - ANY AIRCRAFT",C_YEL,1);
+   int y0=mode==1?20:40;
+   for(int k=0;k<nr;k++){int q=rows[k];int y=y0+k*(mode==1?11:14)+(q==R_DONE?2:0);u16 c=k==sel?C_YEL:C_WHITE;
+    if(q==R_DONE){m3_text(10,y,k==sel?"> ":"  ",C_YEL,1);m3_text(22,y,"DEPLOY",c,1);continue;}
+    int e;const char*v=a6_value(q,&e);m3_text(7,y,RLAB[q],k==sel?C_YEL:C_GRAY,1);m3_text(63,y,v,c,1);
+    if(k==sel){m3_text(57,y,"<",C_YEL,1);m3_text(63+slen(v)*6+1,y,">",C_YEL,1);}}
+   int sx=162,sy=22,e;const char*nm=a6_value(r==R_DONE?rows[0]:r,&e);
+   if(r==R_TANK||mode==2){int i;int te=fdec(N2,g6.tkI,&i);const TankS*t=&TANKV[te][i];m3_text(sx,sy-1,trunc12(t->n),C_BLUE,1);m3_text(sx,sy+8,cat3("TAB: ",ERA_TAG[te],""),C_GRAY,1);sy+=20;
+    m3_bar(sx,sy,"ARMOR",t->hp,150,C_GREEN);m3_bar(sx,sy+16,"FIREPOWER",t->dmg,60,C_RED);m3_bar(sx,sy+32,"SPEED",t->spd,360,C_BLUE);m3_bar(sx,sy+48,"RELOAD",140-t->reload,100,C_YEL);m3_bar(sx,sy+64,"TURN",t->turn,440,C_WHITE);}
+   else if(r==R_AIR||mode==3){int i;int ae=fdec(NAIR,g6.aI,&i);const AirS*a=&AIRV[ae][i];m3_text(sx,sy-1,trunc12(a->n),C_BLUE,1);m3_text(sx,sy+8,cat3("TAB: ",ERA_TAG[ae],""),C_GRAY,1);sy+=20;
+    m3_bar(sx,sy,"SPEED",a->spd,650,C_BLUE);m3_bar(sx,sy+16,"TURN",a->turn,720,C_WHITE);m3_bar(sx,sy+32,"GUNS",a->dmg*60/a->rate,180,C_RED);m3_bar(sx,sy+48,"ARMOR",a->hp,150,C_GREEN);
+    m3_bar(sx,sy+64,cat(a->sec==2?"BOMBS ":a->mturn?"MISSILES ":"ROCKETS ",itoa(a->ammo)),a->ammo,12,C_YEL);}
+   else{int slot=r==R_SEC?1:(r==R_LAUN&&g6.lI)?2:0;Loadout lp;Wstat w;a6_build(&lp,&w,slot);int i,we=slot==1?fdec(NSEC,g6.sI,&i):slot==2?(g6.lI-1)/2:fdec(NPRIM,g6.pI,&i);
+    m3_text(sx,sy-1,trunc12(w.n),C_BLUE,1);m3_text(sx,sy+8,cat3("TAB: ",ERA_TAG[we],""),C_GRAY,1);sy+=20;
+    m3_bar(sx,sy,"DAMAGE",w.dmg*w.pellets,120,C_RED);m3_bar(sx,sy+16,"FIRE RATE",600/w.rate,200,C_YEL);m3_bar(sx,sy+32,"RANGE",w.spd16*w.life/16,420,C_BLUE);
+    m3_bar(sx,sy+48,"RECOIL",w.spread+1,13,RGB(255,140,60));m3_bar(sx,sy+64,"MOBILITY",w.move-70,45,C_GREEN);(void)nm;(void)e;}
+   const char*d=r==R_PRIM?cat3("L/R ERA TAB  <> ",itoa(fsum(NPRIM))," PRIMARIES"):r==R_SEC?cat3("L/R ERA TAB  <> ",itoa(fsum(NSEC))," SIDEARMS"):r==R_LAUN?"L/R ERA TAB  <> 10 LAUNCHERS + NONE":
+    r==R_TANK?"L/R ERA TAB  <> 10 TANKS, ALL ERAS":r==R_AIR?cat3("L/R ERA TAB  <> ",itoa(fsum(NAIR))," AIRCRAFT"):r==R_DONE?"SAVED TO SRAM - BOTS GET MIRRORED KITS":"ATTACHMENTS APPLY TO THE PRIMARY";
+   m3_ctext(146,d,C_GRAY,1);m3_present();}
+  next_frame();
+  if(pressed&K_UP){sel=(sel+nr-1)%nr;redraw=1;sfx_menu();}
+  if(pressed&K_DOWN){sel=(sel+1)%nr;redraw=1;sfx_menu();}
+  int dir=0;if(pressed&K_LEFT)dir=-1;if(pressed&K_RIGHT)dir=1;if((pressed&K_A)&&r!=R_DONE)dir=1;
+  if(r!=R_DONE&&(pressed&(K_L|K_R))){a6_step(r,(pressed&K_R)?1:-1,1);redraw=1;sfx_menu();}
+  else if(dir&&r!=R_DONE){a6_step(r,dir,0);redraw=1;sfx_menu();}
   if((pressed&(K_A|K_START))&&(r==R_DONE||(pressed&K_START))){save_write();sfx_ok();return 1;}
   if(pressed&K_B){save_write();sfx_menu();return 0;}}}

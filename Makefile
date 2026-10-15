@@ -5,7 +5,7 @@ all: $(ROM)
 src/assets.c src/assets.h: tools/gen_assets.py
 	@mkdir -p build
 	python3 tools/gen_assets.py
-build/game.elf: src/crt0.s src/main.c src/core.inc src/camp.inc src/mp.inc src/assets.c src/assets.h src/gba.h src/gba.ld
+build/game.elf: src/crt0.s src/main.c src/core.inc src/camp.inc src/mp.inc src/camp2.inc src/drone.inc src/loadout.inc src/char.inc src/assets.c src/assets.h src/gba.h src/gba.ld
 	@mkdir -p build
 	$(CC) $(CFLAGS) -nostartfiles -nostdlib -T src/gba.ld -o $@ src/crt0.s src/main.c src/assets.c -lgcc
 $(ROM): build/game.elf tools/gbafix

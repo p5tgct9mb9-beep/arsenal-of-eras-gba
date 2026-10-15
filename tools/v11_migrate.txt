@@ -1,0 +1,19 @@
+wait 100
+sram64
+tap START
+wait 15
+tap UP
+tap UP
+wait 10
+tap A
+wait 12
+tap A
+wait 12
+shot v11_sram_migrated_v1_loadout
+tap UP
+wait 4
+shot v11_sram_migrated_v1_aircraft
+tap B
+wait 10
+sram64
+beat end

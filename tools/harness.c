@@ -1,5 +1,6 @@
 // Headless mGBA test harness: runs an input script, dumps screenshots (PPM), soak tests.
 #include <mgba/core/core.h>
+#include <mgba/internal/arm/arm.h>
 #include <mgba/core/config.h>
 #include <mgba/core/log.h>
 #include <mgba-util/vfs.h>
@@ -44,6 +45,7 @@ int main(int argc,char**argv){
     if(i%20000==0)beat("soak");}
    beat("soak-end");}
   else if(!strcmp(c,"reset")){maxstall=0;stall=0;}
+  else if(!strcmp(c,"pc")){struct ARMCore*cpu=core->cpu;printf("[pc] %08x lr %08x sp %08x r0 %08x r1 %08x r2 %08x r6 %08x\n",cpu->gprs[15],cpu->gprs[14],cpu->gprs[13],cpu->gprs[0],cpu->gprs[1],cpu->gprs[2],cpu->gprs[6]);}
   else if(!strcmp(c,"peek")){unsigned ad=strtoul(a,0,16);int n=atoi(b);printf("[peek %08x]",ad);for(int i=0;i<n;i++)printf(" %04x",core->busRead16(core,ad+2*i));printf("\n");}
   else if(!strcmp(c,"corereset")){core->reset(core);}
   else if(!strcmp(c,"audio")){char p[512];snprintf(p,512,"%s/%s.wav",argv[3],a);wav=fopen(p,"wb");char hd[44]={0};fwrite(hd,1,44,wav);wavN=0;int N=atoi(b);for(int i=0;i<N;i++)step(held);

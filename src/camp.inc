@@ -38,10 +38,11 @@ static void radio(int id){radioId=id;radioT=230;}
 static void draw_msg(const Msg*m){hpanel(0,15,30,5);hptxt(1,15,m->who,HB_YEL);for(int i=0;i<3;i++)hptxt(1,16+i,m->l[i],HB_WHITE);}
 static void camp_complete(int t,int kills,int downs,int grenades);
 #define NEN 6
-static int campKills;
+static int campKills,campWon;
 static void camp_xdmg(int k,int dmg,int o){Unit*e=&U[k];if(k<5||!e->alive)return;e->hp-=dmg;if(e->hp<=0){e->alive=0;campKills++;fx_add(e->x>>8,e->y>>8,FXK_SMOKE);}}
 static int smoke_blocks(int x0,int y0,int x1,int y1){for(int k=0;k<4;k++){if(smT[k]<=0)continue;for(int i=1;i<16;i++){int x=x0+(x1-x0)*i/16,y=y0+(y1-y0)*i/16;if(idist(x-smX[k],y-smY[k])<26)return 1;}}return 0;}
 static void campaign(void){
+ nU=12;msOn=0;
  BEAT->mode=0;BEAT->era=0;
  tflag[CM_DEEP]=TF_SOLID;tflag[CM_WATER]=TF_SLOW;tflag[CM_SURF]=TF_SLOW;
  for(int i=0;i<32;i++)tflag[i]=0;tflag[CM_DEEP]=TF_SOLID;tflag[CM_WATER]=TF_SLOW;tflag[CM_SURF]=TF_SLOW;
@@ -153,7 +154,7 @@ static void campaign(void){
   if(!P->alive)hctxt(9,"HALE IS DOWN!",HB_RED,0);
   if(P->alive&&!planted&&phase>=1&&idist((P->x>>8)-(7*16+8),(P->y>>8)-(17*16+8))<20)hctxt(12,"A: PLACE BANGALORE",HB_YEL,0);
   if(planted==1){hctxt(12,cat("FUSE: ",itoa(fuse/60+1)),HB_RED,0);}
-  if(brief)draw_msg(&BRIEF[briefPg]);else if(radioT>0&&radioId>=0)draw_msg(&RADIO[radioId]);
+  if(brief&&briefPg<4)draw_msg(&BRIEF[briefPg]);else if(radioT>0&&radioId>=0)draw_msg(&RADIO[radioId]);
   // sprites (front to back)
   if(phase>=1&&!planted){int by=(17*16+2)+((frame>>3)&3)-camY;spr(7*16,by-12,OT_FX+FX_ARROW,0,1,3,1);}
   if(planted==1)spr(7*16,16*16-camY,OT_FX+FX_BANG,0,1,3,1);
@@ -161,13 +162,14 @@ static void campaign(void){
   for(int i=0;i<NS;i++){Shot*s=&S[i];if(s->life<=0)continue;int x=(s->x>>8)-camX,y=(s->y>>8)-camY;
    if(s->kind==K_GREN&&s->sub==20)spr_aff(x,y,OT_FX+FX_ROCKET,0,3,atan2i(s->vx,s->vy),0x100,1,0);else spr(x-4,y-4,OT_FX+(s->kind==K_GREN?FX_GRENADE:FX_BULLET),0,0,3,1);}
   fx_update_draw();smoke_tick_draw();
-  if(P->alive&&!((P->inv>>2)&1))spr_aff((P->x>>8)-camX,(P->y>>8)-camY,OT_ERA+ES_SOLDIER+((P->anim>>3)&1)*4,1,2,P->tur>>8,0x100,1,0);
+  if(P->alive&&!((P->inv>>2)&1))spr_aff((P->x>>8)-camX,(P->y>>8)-camY,CH.use?CH_TILE+((P->anim>>3)&1)*4:OT_ERA+ES_SOLDIER+((P->anim>>3)&1)*4,1,CH.use?6:2,P->tur>>8,0x100,1,0);
   for(int i=1;i<5+NEN;i++){Unit*u=&U[i];if(!u->alive)continue;spr_aff((u->x>>8)-camX,(u->y>>8)-camY,OT_ERA+ES_SOLDIER+((u->anim>>3)&1)*4,1,u->team?1:0,u->ang>>8,0x100,1,0);}
   if(P->hurt>0){P->hurt--;}
   draw_layer(map,bgw,camX,camY,0,0);
   present(0,0,0);}
 }
 static void camp_complete(int t,int kills,int downs,int gren){
+ campWon=1;
  music_victory();
  m3_title(1);m3_box(20,14,200,132,1);
  m3_ctext(22,"MISSION COMPLETE",C_YEL,2);m3_ctext(44,"DOG GREEN - OMAHA BEACH 1944",C_WHITE,1);

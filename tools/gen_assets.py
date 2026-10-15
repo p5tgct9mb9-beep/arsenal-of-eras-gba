@@ -641,7 +641,7 @@ def hellcat():  # Grumman F6F: stubby barrel fuselage, big radial cowl, squared 
     c.l(10,1,21,1,14);c.px(15,1,7);c.px(16,1,7)                # prop arc
     c.px(9,13,7);c.px(10,13,7);c.px(21,13,7);c.px(22,13,7)     # .50 cal ports
     return c.grid(1)
-WW2_PLANES=['P51','SPIT','F6F','P47','F4U','YAK3','HURRI','P38','BF109','FW190','ME262','ZERO','STUKA']
+WW2_PLANES=['P51','SPIT','F6F','P47','F4U','YAK3','HURRI','P38','BF109','FW190','ME262','ZERO','STUKA','SBD']
 def ww2plane(k):
     if k=='F6F':return hellcat()
     c=Cv(32,32)
@@ -685,6 +685,13 @@ def ww2plane(k):
         c.r(14,3,17,27,3);c.e(14,1,17,5,3);sym([(14,13),(10,16),(3,14),(2,16),(10,19),(14,18)],3);c.l(10,16,10,19,2);c.l(21,16,21,19,2)
         c.e(9,11,11,15,2);c.e(20,11,22,15,2);c.r(14,8,17,16,10);c.l(14,11,17,11,2);c.l(14,14,17,14,2)
         sym([(14,24),(9,24),(9,27),(14,27)],3);c.r(6,15,7,16,9);c.r(24,15,25,16,9);prop(1)
+    elif k=='SBD':
+        c.r(14,3,17,27,3);c.e(13,1,18,6,3);c.r(2,13,29,17,3);c.e(1,13,5,17,3);c.e(26,13,30,17,3);c.l(3,13,28,13,4)
+        c.r(5,17,26,17,2);c.r(14,8,17,17,10);c.l(14,12,17,12,2);sym([(14,24),(9,24),(9,27),(14,27)],3);roundel(6,15);c.r(15,18,16,20,15);prop(0)
+    return c.grid(1)
+def carrier():
+    c=Cv(32,32);c.p([(16,0),(20,4),(20,30),(12,30),(12,4)],8);c.r(13,3,19,29,4);c.l(16,4,16,28,5);c.r(19,12,20,17,8);c.r(19,13,20,15,2)
+    for y in (8,14,20,26):c.px(14,y,5);c.px(18,y,5)
     return c.grid(1)
 spr=[]
 for e in range(5):
@@ -693,9 +700,15 @@ for e in range(5):
     t+=tiles4(tank(e,'hull'),32,32);t+=tiles4(tank(e,'tur'),32,32)
     if e==0:
         for k in WW2_PLANES:t+=tiles4(ww2plane(k),32,32)
-    else:t+=tiles4(plane(e),32,32);t+=tiles4(plane(e),32,32)
+        t+=tiles4(carrier(),32,32)  # ES_SHIP0 aircraft carrier
+    else:
+        t+=tiles4(plane(e),32,32);t+=tiles4(plane(e),32,32)
+        if e==2:
+            c=Cv(32,32);c.p([(16,1),(21,8),(21,28),(11,28),(11,8)],8);c.p([(16,3),(19,9),(19,26),(13,26),(13,9)],14)
+            c.r(14,12,18,17,8);c.r(15,13,17,16,11);c.r(15,20,17,23,8);c.l(16,5,16,10,8);c.r(15,26,17,30,4)
+            t+=tiles4(c.grid(1),32,32)  # patrol boat / ship (ES_SHIP)
     emit(f"era_spr_{e}",t,"unsigned int");define(f"ES_N{e}",len(t)//8)
-define("ES_SOLDIER",0);define("ES_HULL",8);define("ES_TUR",24);define("ES_PLANE",40)
+define("ES_SOLDIER",0);define("ES_HULL",8);define("ES_TUR",24);define("ES_PLANE",40);define("ES_SHIP",72);define("ES_SHIP0",40+16*len(WW2_PLANES))
 # FX sprites (palette FXP)
 fx=[]
 def t8(rows,mp):return tiles4([[mp.get(ch,0) for ch in r] for r in rows],8,8)
@@ -730,10 +743,23 @@ c=Cv(16,16);c.p([(3,2),(12,2),(12,6),(15,6),(8,14),(1,6),(3,6)],6);c.p([(5,3),(1
 c=Cv(16,16);c.r(2,4,13,13,13);c.r(2,4,13,5,4);c.r(3,8,12,9,2);c.r(6,6,9,11,5);c.r(7,7,8,10,8);fx+=tiles4(c.grid(1),16,16)  #36 crate (green, white cross)
 c=Cv(16,16);c.r(1,7,14,8,3);c.l(1,7,14,7,4);c.px(15,7,6);c.px(15,6,7);c.px(14,6,5);fx+=tiles4(c.grid(1),16,16)  #40 bangalore
 c=Cv(16,16);c.e(3,3,12,12,13);c.r(7,4,8,11,5);c.r(4,7,11,8,5);fx+=tiles4(c.grid(1),16,16)  #44 health/respawn
+c=Cv(16,16)
+for (x0,y0,x1,y1) in [(7,0,8,4),(7,11,8,15),(0,7,4,8),(11,7,15,8)]:c.r(x0,y0,x1,y1,5)
+c.px(7,7,15);c.px(8,8,15);c.px(7,8,15);c.px(8,7,15)
+for (x,y) in [(2,2),(13,2),(2,13),(13,13)]:c.px(x,y,3)
+fx+=tiles4(c.grid(0),16,16)  #48 drone reticle
+def bracket(col):
+    c=Cv(16,16)
+    for (x0,y0,dx,dy) in [(0,0,1,1),(15,0,-1,1),(0,15,1,-1),(15,15,-1,-1)]:
+        c.l(x0,y0,x0+4*dx,y0,col);c.l(x0,y0,x0,y0+4*dy,col)
+    return c.grid(0)
+fx+=tiles4(bracket(15),16,16)  #52 enemy (red) target bracket
+fx+=tiles4(bracket(6),16,16)   #56 civilian (yellow) bracket
+c=Cv(16,16);c.p([(8,1),(14,8),(8,15),(2,8)],14);c.p([(8,4),(11,8),(8,12),(5,8)],0);fx+=tiles4(c.grid(0),16,16)  #60 friendly IFF diamond
 emit("fx_tiles",fx,"unsigned int")
 define("FX_BULLET",0);define("FX_LASER",1);define("FX_PLASMA",2);define("FX_SHELL",3);define("FX_GRENADE",4);define("FX_FLASH",5)
 define("FX_SMOKE",6);define("FX_SMOKE2",7);define("FX_SPARK",8);define("FX_RADAR",9);define("FX_MISSILE",13);define("FX_ROCKET",14)
-define("FX_EXPL",16);define("FX_ARROW",32);define("FX_CRATE",36);define("FX_BANG",40);define("FX_MED",44);define("FX_NTILES",48)
+define("FX_EXPL",16);define("FX_ARROW",32);define("FX_CRATE",36);define("FX_BANG",40);define("FX_MED",44);define("FX_RETICLE",48);define("FX_BRK_E",52);define("FX_BRK_C",56);define("FX_IFF",60);define("FX_NTILES",64)
 
 
 def preview():
@@ -768,7 +794,7 @@ def preview():
     ts.resize((ts.width*3,ts.height*3),Image.NEAREST).save(os.path.join(ROOT,'build','tiles_preview.png'))
 preview()
 def preview_planes():
-    sh=Image.new('RGB',(13*36,2*36),(40,70,110))
+    sh=Image.new('RGB',(len(WW2_PLANES)*36,2*36),(40,70,110))
     for side in (0,1):
         pal=[((v&31)<<3,((v>>5)&31)<<3,((v>>10)&31)<<3) for v in obj_pal(0,'A' if side==0 else 'E')]
         for i,k in enumerate(WW2_PLANES):

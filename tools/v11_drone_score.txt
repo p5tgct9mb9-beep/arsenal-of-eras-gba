@@ -1,0 +1,59 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 15
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap DOWN
+tap RIGHT
+tap DOWN
+tap RIGHT
+tap RIGHT
+tap RIGHT
+tap RIGHT
+wait 6
+shot v11_drone_score_hangar
+tap DOWN
+tap A
+wait 60
+shot v11_drone_score_start
+hold UP 90
+shot v11_drone_score_fly
+hold B 30
+tap A
+wait 20
+shot v11_drone_score_strike
+wait 40
+shot v11_drone_score_impact
+hold LEFT+UP 80
+hold B 25
+tap L
+wait 4
+tap A
+wait 30
+shot v11_drone_score_b
+tap SELECT
+wait 10
+shot v11_drone_score_bhot
+tap SELECT
+wait 10
+shot v11_drone_score_tv
+tap SELECT
+wait 10
+hold RIGHT 120
+shot v11_drone_score_c
+beat score_mid
+wait 10
+hold L+R+SELECT 2
+wait 200
+shot v11_drone_score_result
+beat score_end

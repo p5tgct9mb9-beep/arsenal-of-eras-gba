@@ -1,0 +1,34 @@
+wait 100
+tap START
+wait 15
+tap A
+wait 20
+hold L+R+SELECT 2
+wait 10
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 8
+tap A
+wait 10
+tap A
+wait 10
+tap A
+wait 10
+tap A
+wait 20
+tap START
+wait 110
+beat s0
+hold B 2400
+beat s1
+hold B 2400
+beat s2
+shot v11_campaign_frozenforest_obj2
+hold A+UP 600
+beat s3
+hold A+LEFT 600
+hold A+UP 1200
+beat s4
+shot v11_campaign_frozenforest_natural

@@ -1,0 +1,80 @@
+wait 100
+tap START
+wait 15
+tap A
+wait 12
+hold L+R+SELECT 2
+wait 8
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+shot v11_campaign_doggreen_select
+tap A
+wait 10
+shot v11_campaign_doggreen_brief1
+tap A
+wait 10
+shot v11_campaign_doggreen_brief2
+tap A
+wait 12
+wait 4
+tap DOWN
+tap DOWN
+tap RIGHT
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+shot v11_camp_loadout
+tap START
+wait 30
+tap A
+wait 8
+tap A
+wait 8
+tap A
+wait 8
+tap A
+wait 8
+wait 30
+shot v11_camp_start
+hold UP 80
+hold L+R+SELECT 2
+wait 30
+hold L+R+SELECT 2
+wait 20
+tap A
+wait 20
+hold LEFT 50
+wait 100
+hold L+R+SELECT 2
+wait 20
+shot v11_camp_bunker_approach
+tap L
+wait 4
+tap L
+wait 6
+shot v11_camp_bazooka_ready
+hold UP 2
+tap A
+wait 10
+shot v11_camp_bazooka_fire
+wait 90
+tap A
+wait 100
+tap A
+wait 60
+tap A
+wait 100
+tap A
+wait 100
+tap A
+wait 40
+shot v11_camp_bunker_down
+wait 260
+shot v11_camp_complete
+beat end

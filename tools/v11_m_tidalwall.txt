@@ -1,0 +1,47 @@
+wait 100
+tap START
+wait 15
+tap A
+wait 20
+hold L+R+SELECT 2
+wait 10
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 8
+shot v11_campaign_tidalwall_select
+tap A
+wait 10
+shot v11_campaign_tidalwall_side
+tap A
+wait 10
+shot v11_campaign_tidalwall_brief1
+tap A
+wait 10
+shot v11_campaign_tidalwall_brief2
+tap A
+wait 20
+shot v11_campaign_tidalwall_loadout
+tap START
+wait 20
+wait 90
+shot v11_campaign_tidalwall_start
+hold UP 90
+wait 30
+shot v11_campaign_tidalwall_play
+beat play
+hold A+UP 120
+wait 60
+shot v11_campaign_tidalwall_play2
+hold L+R+SELECT 2
+wait 50
+shot v11_campaign_tidalwall_skip
+wait 70
+shot v11_campaign_tidalwall_complete
+beat end
+tap A
+wait 30
+beat back

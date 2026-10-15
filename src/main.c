@@ -5,6 +5,7 @@
 #include "loadout.inc"
 #include "mp.inc"
 #include "camp.inc"
+#include "drone.inc"
 
 static void title_screen(void){
  m3_title(0);m3_present();BEAT->screen=SCR_TITLE;bgm(0,0);
@@ -45,16 +46,16 @@ static void settings_menu(void){
    redraw=1;if(sel!=2)sfx_menu();}
   if(((pressed&K_A)&&sel==7)||(pressed&(K_B|K_START))){save_write();sfx_ok();return;}}}
 static int main_menu(int sel){
- static const char*const items[6]={"CAMPAIGN","6V6 INFANTRY","6V6 TANKS","6V6 DOGFIGHT","LOADOUT","SETTINGS"};
- static const char*const desc[6]={"MISSIONS: WW2, COLD WAR, MODERN","TEAM DEATHMATCH VS BOTS","ARMOR BATTLE - HULL + TURRET","AIR SUPERIORITY - GUNS + MISSILES","CUSTOMIZE WEAPONS, PERKS, VEHICLES","MUSIC, VOLUME, SHAKE, DIFFICULTY"};
+ static const char*const items[7]={"CAMPAIGN","6V6 INFANTRY","6V6 TANKS","6V6 DOGFIGHT","DRONE OPS","LOADOUT","SETTINGS"};
+ static const char*const desc[7]={"MISSIONS: WW2, COLD WAR, MODERN","PICK A FACTION, ANY-ERA ARSENAL","ARMOR BATTLE - HULL + TURRET","AIR SUPERIORITY - GUNS + MISSILES","MODERN UAV STRIKES - MQ-9, TB2, TRITON","ERA KITS, 6V6 ARSENAL, CHARACTER","MUSIC, VOLUME, SHAKE, DIFFICULTY"};
  int redraw=1;
  for(;;){BEAT->screen=SCR_MENU;BEAT->menu=sel;
   if(redraw){m3_title(0);m3_fill(30,82,180,76,RGB(14,18,36));m3_box(30,82,180,76,2);
-   for(int k=0;k<6;k++)m3_text(56,85+k*10,cat(k==sel?"> ":"  ",items[k]),k==sel?C_YEL:C_WHITE,1);
+   for(int k=0;k<7;k++)m3_text(56,84+k*9,cat(k==sel?"> ":"  ",items[k]),k==sel?C_YEL:C_WHITE,1);
    m3_ctext(147,desc[sel],C_GRAY,1);redraw=0;m3_present();}
   next_frame();
-  if(pressed&K_UP){sel=(sel+5)%6;redraw=1;sfx_menu();}
-  if(pressed&K_DOWN){sel=(sel+1)%6;redraw=1;sfx_menu();}
+  if(pressed&K_UP){sel=(sel+6)%7;redraw=1;sfx_menu();}
+  if(pressed&K_DOWN){sel=(sel+1)%7;redraw=1;sfx_menu();}
   if(pressed&(K_A|K_START)){sfx_ok();return sel;}
   if(pressed&K_B)return -1;}}
 static int era_select(int mode,int *era){
@@ -77,40 +78,85 @@ static int era_select(int mode,int *era){
   if(pressed&(K_A|K_START)){sfx_ok();*era=e;return 1;}
   if(pressed&K_B){sfx_menu();return 0;}}}
 
-static int map_select(int mode,int era){
- static int last=0;int sel=last,redraw=2;
- for(;;){BEAT->screen=SCR_MAPSEL;BEAT->menu=sel;BEAT->era=era;BEAT->mode=mode;
+
+static int drone_hangar(int*mis){int sel=0,redraw=2;static const char*const RL[4]={"DRONE","CALL-IN","MISSION",""};
+ for(;;){const DroneS*Dr=&DRN[droneSel];BEAT->screen=SCR_HANGAR;BEAT->menu=sel;BEAT->extra=droneSel|(droneCall<<4)|(*mis<<8);
+  if(redraw){if(redraw==2)m3_title(1);redraw=0;m3_fill(4,4,232,152,RGB(10,20,14));m3_box(4,4,232,152,2);
+   m3_ctext(8,"DRONE OPS - MODERN - HANGAR",C_GREEN,1);
+   for(int k=0;k<4;k++){int y=24+k*12+(k==3?4:0);u16 c=k==sel?C_YEL:C_WHITE;
+    if(k==3){m3_text(10,y,k==sel?"> LAUNCH":"  LAUNCH",c,1);continue;}
+    m3_text(10,y,RL[k],k==sel?C_YEL:C_GRAY,1);const char*v=k==0?Dr->n:k==1?CALLN[droneCall]:DMN[*mis];m3_text(58,y,v,c,1);}
+   int sx=10,sy=74;m3_text(sx,sy,Dr->role,C_GREEN,1);sy+=10;
+   int pay=0;for(int k=0;k<3;k++)if(Dr->w[k]!=255&&Dr->c[k])pay+=Dr->c[k]*DWP[Dr->w[k]].dmg;
+   m3_bar(sx,sy,"SPEED",Dr->spd,640,C_BLUE);m3_bar(sx+76,sy,"ALTITUDE",Dr->alt,5,C_WHITE);m3_bar(sx+152,sy,"LOITER",Dr->loiter,600,C_GREEN);
+   m3_bar(sx,sy+18,"SENSOR",Dr->sensor,200,C_YEL);m3_bar(sx+76,sy+18,"PAYLOAD",pay,800,C_RED);m3_bar(sx+152,sy+18,"ARMOR",Dr->hp,120,RGB(255,140,60));
+   {int x=sx,y=sy+36;for(int k=0;k<3;k++)if(Dr->w[k]!=255&&Dr->c[k]){m3_text(x,y,cat3(itoa(Dr->c[k]),"X ",DWP[Dr->w[k]].n),C_WHITE,1);y+=8;}if(Dr->recon)m3_text(x+130,sy+36,"RECON: B MARKS",C_GRAY,1);}
+   m3_ctext(147,sel==2?DMD[*mis]:sel==1?"OPTIONAL OFF-BOARD SUPPORT, 1-2 USES":sel==0?"L/R OR LEFT/RIGHT: CHANGE DRONE":"A: LAUNCH   B: BACK",C_GRAY,1);m3_present();}
+  next_frame();
+  if(pressed&K_UP){sel=(sel+3)%4;redraw=1;sfx_menu();}
+  if(pressed&K_DOWN){sel=(sel+1)%4;redraw=1;sfx_menu();}
+  int dir=(pressed&(K_RIGHT|K_R))?1:(pressed&(K_LEFT|K_L))?-1:0;if((pressed&K_A)&&sel<3)dir=1;
+  if((pressed&(K_L|K_R))&&sel!=0){droneSel=(droneSel+NDRONE+dir)%NDRONE;redraw=1;sfx_menu();dir=0;}
+  if(dir){if(sel==0)droneSel=(droneSel+NDRONE+dir)%NDRONE;else if(sel==1)droneCall=(droneCall+3+dir)%3;else *mis=(*mis+DM_N+dir)%DM_N;redraw=1;sfx_menu();}
+  if((pressed&(K_A|K_START))&&(sel==3||(pressed&K_START))){save_write();sfx_ok();return 1;}
+  if(pressed&K_B){save_write();sfx_menu();return 0;}}}
+static int map_select(int mode,int*era){ // all maps of the mode across every era (+ RANDOM); returns map index, *era = map's era
+ static int last=0;int N=5*NMAPS;int sel=last,redraw=2,top=0;
+ for(;;){BEAT->screen=SCR_MAPSEL;BEAT->menu=sel;BEAT->mode=mode;
+  if(sel<top)top=sel;if(sel>top+7)top=sel-7;
   if(redraw){m3_title(1);m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);
-   m3_ctext(8,cat("SELECT MAP - ",ERA_NAME[era]),C_YEL,1);
-   for(int k=0;k<=NMAPS;k++){const char*n=k<NMAPS?map_def(mode,era,k)->n:"RANDOM";m3_text(10,24+k*12,k==sel?">":" ",C_YEL,1);m3_text(18,24+k*12,n,k==sel?C_YEL:C_WHITE,1);}
-   if(sel<NMAPS){const MapDef*md=map_def(mode,era,sel);gen_map(mode,era,sel);
-    const u32*tl=mode==MM_AIR?sky_t(era):arena_t(era);const u16*pl=mode==MM_AIR?sky_p(era):arena_p(era);const u16*wp=water_p(era);
+   m3_ctext(8,"SELECT MAP - ANY ERA",C_YEL,1);
+   for(int k=top;k<=N&&k<top+8;k++){int y=22+(k-top)*11;const char*n=k<N?map_def(mode,k/NMAPS,k%NMAPS)->n:"RANDOM";m3_text(8,y,k==sel?">":" ",C_YEL,1);m3_text(15,y,trunc12(n),k==sel?C_YEL:C_WHITE,1);
+    if(k<N)m3_text(92,y,ERA_TAG[k/NMAPS],C_GRAY,1);}
+   if(sel<N){int e=sel/NMAPS,mi=sel%NMAPS;const MapDef*md=map_def(mode,e,mi);gen_map(mode,e,mi);
+    const u32*tl=mode==MM_AIR?sky_t(e):arena_t(e);const u16*pl=mode==MM_AIR?sky_p(e):arena_p(e);const u16*wp=water_p(e);
     int PX=146,PY=22,PS=84;m3_fill(PX-2,PY-2,PS+4,PS+4,RGB(0,0,0));
     for(int y=0;y<PS;y++)for(int x=0;x<PS;x++){int t=map[(y*mapH/PS)*MAXW+(x*mapW/PS)];u32 w=tl[(t*4+3)*8+((x+y)&3)];int ci=(w>>(((x>>1)&7)*4))&15;
      u16 c=(mode!=MM_AIR&&mtBank[t])?wp[ci?ci:2]:pl[ci?ci:1];M3[(PY+y)*240+PX+x]=tint_c(c,md->theme);}
-    m3_text(10,110,md->d,C_GRAY,1);
+    m3_text(8,114,md->n,C_WHITE,1);m3_text(8,124,md->d,C_GRAY,1);
     static const char*const LN[4]={"OPEN FIELD","TOWN BLOCKS","RIVER CROSSING","FOREST / RUINS"};static const char*const SN[4]={"COAST + TERRAIN","OCEAN + ISLANDS","MOUNTAINS","DEBRIS FIELD"};
     static const char*const TN[5]={"","  SNOW","  DESERT","  NIGHT","  DUSK"};
-    m3_text(10,121,cat(mode==MM_AIR?SN[md->layout]:LN[md->layout],TN[md->theme]),C_BLUE,1);}
-   else{m3_text(160,56,"???",C_YEL,2);m3_text(10,110,"ONE OF THE MAPS AT RANDOM",C_GRAY,1);}
-   m3_text(10,132,cat(itoa(NMAPS)," MAPS PER MODE PER ERA"),C_GRAY,1);
-   m3_ctext(142,"A: DEPLOY   B: BACK",C_GRAY,1);redraw=0;m3_present();}
+    m3_text(8,134,cat3(ERA_NAME[e]," - ",cat(mode==MM_AIR?SN[md->layout]:LN[md->layout],TN[md->theme])),C_BLUE,1);}
+   else{m3_text(160,56,"???",C_YEL,2);m3_text(8,114,"RANDOM",C_WHITE,1);m3_text(8,124,"ANY MAP FROM ANY ERA",C_GRAY,1);}
+   m3_ctext(146,cat3(itoa(N)," MAPS   A: DEPLOY   B: BACK",""),C_GRAY,1);redraw=0;m3_present();}
   next_frame();
-  if(pressed&K_UP){sel=(sel+NMAPS)%(NMAPS+1);redraw=1;sfx_menu();}
-  if(pressed&K_DOWN){sel=(sel+1)%(NMAPS+1);redraw=1;sfx_menu();}
-  if(pressed&(K_A|K_START)){sfx_ok();last=sel;return sel<NMAPS?sel:rr(NMAPS);}
+  if(pressed&K_UP){sel=(sel+N)%(N+1);redraw=1;sfx_menu();}
+  if(pressed&K_DOWN){sel=(sel+1)%(N+1);redraw=1;sfx_menu();}
+  if(pressed&K_L){sel=sel>=NMAPS?sel-NMAPS:N;redraw=1;sfx_menu();}
+  if(pressed&K_R){sel=sel+NMAPS<=N?sel+NMAPS:0;redraw=1;sfx_menu();}
+  if(pressed&(K_A|K_START)){sfx_ok();last=sel;int k=sel<N?sel:rr(N);*era=k/NMAPS;return k%NMAPS;}
   if(pressed&K_B){sfx_menu();return -1;}}}
+static void swatch(int x,int y,int f){const Fac*F=&FAC[f];m3_fill(x,y,8,8,fac_c(F->m,1,1));m3_fill(x+8,y,4,8,fac_c(F->t,1,1));}
+static int faction_select(int mode){int col=0,redraw=2;
+ for(;;){BEAT->screen=SCR_ERA;BEAT->mode=mode;BEAT->menu=col;BEAT->extra=g6.fac0|(g6.fac1<<8);
+  if(redraw){m3_title(1);m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);
+   m3_ctext(8,mode==MM_INF?"6V6 INFANTRY - CHOOSE SIDE":mode==MM_TANK?"6V6 TANKS - CHOOSE SIDE":"6V6 DOGFIGHT - CHOOSE SIDE",C_YEL,1);
+   m3_text(20,22,"YOUR FACTION",col==0?C_YEL:C_GRAY,1);m3_text(132,22,"ENEMY FACTION",col==1?C_YEL:C_GRAY,1);
+   for(int k=0;k<NFAC;k++){int y=34+k*9;
+    m3_text(14,y,k==g6.fac0?">":" ",col==0?C_YEL:C_BLUE,1);swatch(22,y,k);m3_text(38,y,FAC[k].n,k==g6.fac0?C_BLUE:C_WHITE,1);
+    m3_text(126,y,k==g6.fac1?">":" ",col==1?C_YEL:C_RED,1);swatch(134,y,k);m3_text(150,y,FAC[k].n,k==g6.fac1?C_RED:(k==g6.fac0?C_GRAY:C_WHITE),1);}
+   m3_ctext(136,"COLORS BY FACTION, GENERIC MARKINGS",C_GRAY,1);
+   m3_ctext(146,"UP/DN:PICK  </>:SWAP  A:NEXT  B:BACK",C_GRAY,1);redraw=0;m3_present();}
+  next_frame();
+  u8*f=col?&g6.fac1:&g6.fac0;u8 other=col?g6.fac0:g6.fac1;
+  if(pressed&(K_UP|K_DOWN)){int d=(pressed&K_UP)?NFAC-1:1;do{*f=(*f+d)%NFAC;}while(*f==other);redraw=1;sfx_menu();}
+  if(pressed&(K_LEFT|K_RIGHT)){col^=1;redraw=1;sfx_menu();}
+  if(pressed&(K_A|K_START)){sfx_ok();save_write();return 1;}
+  if(pressed&K_B){sfx_menu();return 0;}}}
 static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present();next_frame();}
+#include "camp2.inc"
+#include "char.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
  for(;;){
   title_screen();
   int sel=0,era=0;
   for(;;){bgm(1,0);sel=main_menu(sel);if(sel<0)break;
-   if(sel==5){settings_menu();}
-   else if(sel==4){loadout_menu(0,era);}
-   else if(sel==0){if(loadout_menu(2,0)){loading("DEPLOYING TO DOG GREEN...");campaign();}}
-   else if(era_select(sel,&era)){if(loadout_menu(sel==1?1:sel==2?3:4,era)){int mi=map_select(sel,era);if(mi>=0){loading(cat("DEPLOYING: ",map_def(sel,era,mi)->n));mp_run(sel,era,mi);}}}
+   if(sel==6){settings_menu();}
+   else if(sel==5){loadout_hub(&era);}
+   else if(sel==4){static int dm=0;if(drone_hangar(&dm)){loading(cat("LAUNCHING: ",DRN[droneSel].n));drone_run(dm);}}
+   else if(sel==0){mission_select();}
+   else if(faction_select(sel)){if(arsenal_menu(sel)){int me=0;int mi=map_select(sel,&me);if(mi>=0){loading(cat("DEPLOYING: ",map_def(sel,me,mi)->n));mpMixed=1;mp_run(sel,me,mi);mpMixed=0;}}}
    }
  }
 }
