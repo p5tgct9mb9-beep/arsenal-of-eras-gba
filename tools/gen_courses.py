@@ -1,13 +1,21 @@
 # v1.2 SPEC OPS: 90-course table (10 worlds). Each entry: name, stars(1-5), flags, boss ai, boss sprite A, boss sprite B, [theme, enemy set, enemy pal]
 # flags: c paradrop j jetpack b boat w water d dark t tunnel l low-g z zero-g s spikes v vaults i ice n wind r rising tide a autoscroll airship x secret exit k bonus course
-WDEF=[(0,0,0,0),(1,0,1,1),(2,0,2,2),(3,0,3,3),(4,0,4,4),(5,0,5,5),(6,1,6,6),(7,2,7,7),(9,4,10,9),(12,6,13,11)]  # theme, eset, epal, bosspal
+WDEF=[(6,7,14,12),(2,8,15,13),(0,9,16,14),(5,10,17,15),(1,11,18,16),(11,12,19,17),(6,1,6,6),(7,2,7,7),(9,4,10,9),(12,6,13,11)]  # theme, eset, epal, bosspal
+J=(3,7,14);D=(6,8,15);CY_=(2,8,15);K=(5,9,16);CT=(4,11,18);M=(5,12,19)
+def T(t):return [None,None,None]+list(t)
 PF_COURSES=[
- [("TREELINE",1,""),("OLD MILL",1,"w"),("LOGGING CAMP",2,"x"),("RIVER CROSSING",2,"w"),("SUPPLY DEPOT",1,"k"),("RIDGE BUNKERS",3,"v"),("HILLTOP RADIO",2,"c"),("BOMBER RUN",3,"a"),("TANK TRAP",2,"","tank","tank")],
- [("DROP ZONE",1,"c"),("ICE CAVES",2,"ti"),("FROZEN LAKE",2,"ix"),("AURORA CACHE",2,"ki"),("BLIZZARD PASS",3,"n"),("RADAR STATION",3,"vi"),("ICEBREAKER DOCK",3,"w"),("SKY FORTRESS",4,"a"),("GUNSHIP NEST",3,"","heli","heli")],
- [("DRY WASH",1,"s"),("MESA CLIFFS",2,"c"),("DUST DEVIL",2,"nx"),("OASIS",2,"kw"),("RAIL YARD",3,"v"),("SLOT CANYON",3,"s"),("ORE CONVEYOR",4,""),("CARGO PLANE",4,"a"),("ARMORED TRAIN",3,"","train","loco","car")],
- [("RIVER BANK",1,"w"),("BOAT RUN",2,"b"),("MANGROVE",2,"wx"),("HIDDEN LAGOON",2,"kw"),("RISING TIDE",3,"r"),("SUNKEN TEMPLE",3,"wd"),("WATERFALL CLIMB",4,"w"),("SEAPLANE RAID",4,"a"),("GUNBOAT BAY",3,"w","boat","boat")],
- [("ROOFTOPS",2,"j"),("NIGHT MARKET",2,"dv"),("SUBWAY",3,"tx"),("NEON ARCADE",2,"k"),("FACTORY LINE",3,""),("SKY TOWER",4,"j"),("BLACKOUT",4,"d"),("AIRSHIP DOCK",4,"a"),("WALKER PLAZA",4,"","walker","walker")],
- [("SWITCHBACKS",2,"s"),("CABLE CAR",2,"c"),("GALE RIDGE",3,"nx"),("EAGLE'S NEST",3,"k"),("ICE FALLS",3,"i"),("FORTRESS WALLS",4,"v"),("CANNON ROW",4,""),("FLYING FORTRESS",5,"a"),("THE BIG GUN",4,"","fort","fort")],
+ [("BORDER CROSSING",1,""),("DRY RIVERBED",1,"w",*T(J)),("CANTINA ROW",2,"x"),("JUNGLE AIRSTRIP",2,"w",*T(J)),("STASH HOUSE",1,"k"),("HACIENDA WALLS",3,"v"),
+  ("RIDGE LOOKOUT",2,"c",*T(J)),("SMUGGLER PLANE",3,"a",*T(J)),("ARMORED TRUCK",2,"","tank","armtruck")],
+ [("DROP ZONE",1,"c"),("WADI CAVES",2,"t"),("DUST STORM",2,"nx",*T(D)),("OASIS CACHE",2,"kw",*T(D)),("COMPOUND WALLS",3,"v",*T(D)),("SLOT CANYON",3,"s"),
+  ("DESALINATION DOCK",3,"w",*T(D)),("CARGO PLANE",4,"a"),("TECHNICAL CONVOY",3,"","tank","technical","",*D)],
+ [("DMZ TREELINE",1,"s"),("INFILTRATION TUNNEL",2,"td"),("MINEFIELD",2,"sx"),("OBSERVATION POST",2,"k"),("DEEP TUNNEL",3,"tv"),("BORDER RIVER",3,"w"),
+  ("ARTILLERY RIDGE",4,"",*T(K)),("BOMBER RUN",4,"a"),("KPA ARMOR",3,"","tank","kpatank")],
+ [("VALLEY ROAD",1,""),("CABLE CAR",2,"c"),("GALE RIDGE",2,"nx"),("EAGLE'S NEST",2,"k"),("ICE FALLS",3,"i"),("FORTRESS WALLS",3,"v"),
+  ("CANNON ROW",4,""),("TRANSPORT RUN",4,"a"),("HIND HUNTER",3,"","heli","hind")],
+ [("FROZEN HARBOR",2,"i"),("ICE CAVES",2,"ti"),("METRO TUNNELS",3,"tx",*T(CT)),("SUPPLY CACHE",2,"ki"),("BLIZZARD PASS",3,"n"),("ROOFTOPS",4,"j",*T(CT)),
+  ("BLACKOUT",4,"d",*T(CT)),("ICEBREAKER RUN",4,"a"),("T-90 PLAZA",4,"","tank","t90","",*CT)],
+ [("BEACH LANDING",2,"w"),("REEF CROSSING",2,"b"),("JUNGLE BATTERY",3,"x"),("HIDDEN COVE",3,"kw"),("RISING TIDE",3,"r"),("FORTRESS WALLS",4,"v",*T(M)),
+  ("TYPE 99 BEACHHEAD",4,"","tank","type99"),("FLYING FORTRESS",5,"a"),("CARRIER FINALE",4,"w","heli","z10")],
  [("DESERT OUTPOST",2,"v"),("MINE SHAFTS",3,"tdx"),("ABANDONED PIT",3,"k"),("ORE CRUSHERS",3,""),("PROCESSING PLANT",4,"s"),("FUEL DEPOT",4,""),("MERC CONVOY",4,"","convoy"),("CARGO JET RUN",4,"a"),("MERCENARY AIRBASE",5,"","mi8","mi8","cmdr")],
  [("JUNGLE PATROL",2,"w"),("RICE PADDIES",2,"w"),("TUNNEL NETWORK",3,"tdx"),("FIREBASE CACHE",3,"k"),("AA EMPLACEMENT",3,"","fort","aagun"),("PBR RIVER RUN",3,"b"),
   ("FULDA GAP",4,"v","tank","t55","",8,3,9),("BORDER WIRE",4,"sn",None,None,None,8,3,9),("SNOW BASE",5,"i","heli","hind","",8,3,8)],

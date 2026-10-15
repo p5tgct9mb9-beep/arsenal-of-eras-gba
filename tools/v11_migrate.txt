@@ -4,6 +4,7 @@ tap START
 wait 15
 tap UP
 tap UP
+tap UP
 wait 10
 tap A
 wait 12

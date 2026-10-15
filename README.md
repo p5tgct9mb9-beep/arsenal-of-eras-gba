@@ -1,4 +1,4 @@
-# Arsenal of Eras — GBA demake (personal build) · v1.2
+# Arsenal of Eras — GBA demake (personal build) · v1.3
 
 A Game Boy Advance homebrew demake of LT Vasquez's *Arsenal of Eras*: a top-down 240x160 pixel-art shooter.
 It's a personal build, made to be played in an emulator such as Delta on iPhone. All art and music are original and generated procedurally.
@@ -7,7 +7,14 @@ It's a personal build, made to be played in an emulator such as Delta on iPhone.
 Download it from the GitHub release, then use *Open in… → Delta*. Saves from v1.0, v1.1 WIP and v1.1 (v3) are migrated automatically. Arsenal picks are re-mapped onto the bigger v1.2 lists (tested with a real v1.1 save), and Bot Difficulty starts at Regular. Spec Ops progress, the KC tutorial flag and the new attachment slots each live in their own checksummed SRAM blocks.
 
 ## Main menu
-CAMPAIGN · 6V6 INFANTRY · 6V6 ARMOR · 6V6 DOGFIGHT · 6V6 NAVAL · DRONE OPS · WORLD FLIGHT · SPEC OPS · LOADOUT · SETTINGS · TUTORIAL (two columns; Left/Right switches column)
+CAMPAIGN · 6V6 INFANTRY · 6V6 ARMOR · 6V6 DOGFIGHT · 6V6 NAVAL · DRONE OPS · WORLD FLIGHT · SPEC OPS · LOADOUT · SETTINGS · TUTORIAL · SPACE LAUNCH (two columns; Left/Right switches column)
+
+## What's new in v1.3
+* **Space Launch (new main-menu mode):** 35 real launch vehicles from 6 agencies. You fly the countdown (TR_ASCENT theme), the ascent (throttle, pitch, stage separation, max-Q stress), booster landings, a debris field and docking. Best scores are saved to SRAM. See [Space Launch](#space-launch) below.
+* **Spec Ops enemy factions per world:** worlds 1–6 are renamed and rethemed, and each has its own enemy sprites, colours, vehicles and boss. W1 Border Towns are held by cartels, W2 Desert Compounds by proxy militias, W3 The DMZ by the KPA, W4 Mountain Bases by the CSTO, W5 Arctic City by Russian forces and W6 Island Fortress by the PLA (carrier finale). W7 Wagner, W8 NVA/VC + Warsaw Pact, W9 Axis and W10 aliens are unchanged.
+* **4 Israeli units:** Sayeret Matkal, Shayetet 13, Unit 669 and a Mossad operative. That makes 25 units.
+* **Unit choice is now up front:** entering Spec Ops always opens SELECT UNIT. It's a grid grouped by nation, with flag-colour tags and a big portrait, and all 25 units are free from the start. Every course opens with a *DEPLOY AS: <unit> · A=GO · SELECT=CHANGE UNIT* prompt. The campaign map and world maps show *SELECT: CHANGE UNIT* in the bottom bar, and KC's boot camp mentions it.
+* **Fix:** artillery call-ins (Paladin, HIMARS/MLRS, TOS-1A…) now land inside the visible screen, even near map edges.
 
 ## What's new in v1.2
 * **Bot Difficulty** (Settings): Recruit / Regular / Veteran / Elite. It sets enemy aim jitter, reaction/think time, fire delay, engagement range, aggression (grenades, missiles, torpedoes), bot HP, and drone SAM/AAA strength. It applies to 6v6 enemy bots (allied bots stay Regular), campaign enemies and Drone Ops air defences. The old Easy/Normal/Hard option stays as **Damage Taken** (how hard *you* get hit).
@@ -149,25 +156,26 @@ The flow is **Choose side → Arsenal → Map → match**. There's no era select
 * **Controls:**
   * Movement: D-pad to move/climb/crouch; A to jump (hold for higher); R to sprint where your unit has it.
   * Combat: B to shoot; L to throw a grenade; R for your unit's special ability.
-  * Menus: START to pause; SELECT on the map for unit select.
+  * Menus: START to pause. Entering Spec Ops opens unit select. SELECT on the campaign map, a world map or the deploy prompt changes unit.
   * Course clear: there's no stomping; you finish a course at its flag.
 * **Pickups:** intel (3 per course), dog tags (100 = 1-up), ammo, medkits (hearts), armor, rapid fire, jetpack/parachute, and plasma rifle/coilgun in World 10.
 * **Obstacles (SMB3-style, military reskins):** moving and falling platforms, conveyors, spinning flame/laser bars, shell cannons, vents and pipes to secret rooms, hydraulic crushers, spikes/wire, fuel pits, rising water, auto-scroll river boats and bomber decks, crumbling bridges, jump pads, P-switch-style timed switches, ice, wind, low/zero gravity, and hidden blocks.
-* **21 playable units, each with a look, weapon and ability:**
+* **25 playable units from 8 nations, each with a look, weapon and ability. All are unlocked from the start:**
   * **USA:** 101st, 82nd, PJ, CCT, 75th Ranger, Marine Recon, MARSOC, DEVGRU, CIA SAD and LRRP.
   * **UK:** SAS and RM Commando.
   * **Others:** Ukraine SOF; JGSDF SF; KSK; Mexico's GAFE and SEMAR.
-  * **Poland (new):** **JW GROM** (fast-rope insertion; R = breach charge), **JW FORMOZA** (combat diver: fast swim with no air limit, limpet mine, rapid fire from boats), **JW KOMANDOS** (paradrop start; R = chute or demolition charge) and **JW AGAT** (LMG; R = plant a heavy MG for 2x fire rate).
+  * **Poland:** **JW GROM** (fast-rope insertion; R = breach charge), **JW FORMOZA** (combat diver: fast swim with no air limit, limpet mine, rapid fire from boats), **JW KOMANDOS** (paradrop start; R = chute or demolition charge) and **JW AGAT** (LMG; R = plant a heavy MG for 2x fire rate).
+  * **Israel (new in v1.3):** **Sayeret Matkal** (Tavor X95 carbine; R = stealth recon, enemies can't see you and your shots do 2x damage), **Shayetet 13** (naval commando: swims with no air limit; R = DPV dash underwater or a limpet mine on land), **Unit 669** (airborne rescue: paradrop start, 8 lives instead of 5; R = chute in the air or a +1 casevac heal on the ground) and **Mossad operative** (suppressed pistol; R = disguise in enemy colours so enemies ignore you and contact doesn't hurt, until you fire; walks through locked doors with a lockpick).
 * **10 worlds, 90 courses.** Each world ends in a boss fortress, and bonus/secret courses count toward the total.
 
 | World | Theme / enemies | Courses | 1★ | 2★ | 3★ | 4★ | 5★ |
 |---|---|---|---|---|---|---|---|
-| 1 Forest Ridge | Syndicate (fictional PMC) | 9 | 3 | 4 | 2 | 0 | 0 |
-| 2 Arctic Station | Syndicate | 9 | 1 | 3 | 4 | 1 | 0 |
-| 3 Canyon Railway | Syndicate | 9 | 1 | 3 | 3 | 2 | 0 |
-| 4 Jungle River | Syndicate | 9 | 1 | 3 | 3 | 2 | 0 |
-| 5 Neon Megacity | Syndicate | 9 | 0 | 3 | 2 | 4 | 0 |
-| 6 Mountain Fortress | Syndicate | 9 | 0 | 2 | 3 | 3 | 1 |
+| 1 Border Towns (desert / jungle) | Drug cartels (bandanas, SUVs); boss: cartel armored truck | 9 | 3 | 4 | 2 | 0 | 0 |
+| 2 Desert Compounds (canyon / desert) | Proxy militias (scarves, technicals); boss: heavy technical | 9 | 1 | 3 | 4 | 1 | 0 |
+| 3 The DMZ (forest / tunnels / ridges) | KPA (soft caps, olive); boss: KPA tank | 9 | 1 | 3 | 3 | 2 | 0 |
+| 4 Mountain Bases | CSTO coalition (mountain flora, BTRs); boss: Mi-24 Hind | 9 | 1 | 3 | 3 | 2 | 0 |
+| 5 Arctic City (arctic / urban night) | Russian forces (winter white); boss: T-90 | 9 | 0 | 3 | 2 | 4 | 0 |
+| 6 Island Fortress (pacific / fortress) | Chinese PLA (blue digital); bosses: Type 99 beachhead, Z-10 carrier finale | 9 | 0 | 2 | 3 | 3 | 1 |
 | 7 Mining Compound | Wagner Group (PMC); boss: commander "GRANIT" | 9 | 0 | 1 | 3 | 4 | 1 |
 | 8 Cold War | NVA/VC, Warsaw Pact; bosses: AA emplacement, Mi-24 Hind | 9 | 0 | 2 | 4 | 2 | 1 |
 | 9 World War II | Axis (generic grey markings, no Nazi symbols); bosses: Tiger, armored train, bunker, fortress cannon | 10 | 0 | 0 | 4 | 3 | 3 |
@@ -177,6 +185,26 @@ The flow is **Choose side → Arsenal → Map → match**. There's no era select
 * **Verification:**
   * **BFS validator:** every course passes a reachability check when it's generated.
   * **Autopilot bot:** it clears 45/90 courses headless (`build/run_demo.sh`), with at least one clear in every world. The failures are bot skill, not level faults (mostly long jumps on auto-scroll decks and timing-heavy late courses).
+
+## Space Launch
+* **Menu:** pick an agency with L/R or Left/Right, then a rocket. The preview draws the actual stack: stages, boosters, fairing, escape tower or orbiter. It also shows the rocket's best score and any bonus mission. All agency colour schemes are generic, with no logos.
+* **Roster (35):**
+  * **NASA / USA:** Mercury-Redstone (suborbital: reach 187 km), Mercury-Atlas, Titan II Gemini, Saturn IB, Saturn V (Apollo bonus: CSM/LM docking, then a lunar landing), the Space Shuttle as Columbia, Challenger, Discovery, Atlantis and Endeavour (one fact each; no disaster is depicted), Delta II, Delta IV Heavy, Atlas V, Titan IV, Antares and SLS/Orion.
+  * **SpaceX:** Falcon 1, Falcon 9 Block 5 (drone-ship booster landing), Falcon Heavy (twin side-booster landings), Starship + Super Heavy (tower catch), Crew Dragon, Cargo Dragon and Grasshopper (a 250 m hop and landing).
+  * **ESA:** Ariane 5, Ariane 6, Vega.
+  * **Russia / USSR:** Soyuz, Proton, Energia/Buran, N1.
+  * **China:** Long March 5, Long March 2F.
+  * **Japan:** H-IIA, H3, Epsilon.
+* **Countdown:** T-10 with the countdown theme. Press A within about 0.2 s of T-0 for a perfect-ignition bonus; START skips to T-3.
+* **Ascent:**
+  * UP/DOWN sets throttle (40–100%), LEFT/RIGHT pitches, and A separates stages. Spent stages and boosters fall away on screen.
+  * Each stage has its own fuel and thrust. You get a bonus for staging cleanly within 1 s of burnout and a penalty for staging early.
+  * Dynamic pressure is modelled. Above 30 kPa the stress bar fills, so throttle down through max-Q. If it fills completely you get a non-destructive abort: launch escape, RTLS or range-safety abort.
+  * Reach 150 km at 7.7 km/s to make orbit. A yellow tick on the attitude dial is a closed-loop guidance cue.
+  * Every rocket's stage data is test-flown by `tools/gen_rockets.py`, so the build fails if any rocket can't reach its goal.
+* **Booster landings:** A/UP fires the engine and LEFT/RIGHT cancels drift on limited fuel. Land softly on the pad, ship or zone, or stop between the tower's chopsticks.
+* **Orbit:** RCS on the D-pad. Dodge satellites, spent stages and micrometeoroids (3 hull points), then dock below 0.75 m/s and within 3 px of the port.
+* **Autopilot:** hold SELECT in any phase. It's a training aid that halves the score.
 
 ## Drone Ops (Modern only)
 * **Drones (9):** MQ-9 Reaper, MQ-1C Gray Eagle, MQ-1 Predator, RQ-4 Global Hawk (recon/mark), Bayraktar TB2 (MAM-L), MQ-20 Avenger, Switchblade 600 (kamikaze), Wing Loong II, MQ-4C Triton (maritime recon, unarmed).
@@ -220,8 +248,8 @@ Objective arrows and brackets point to the current target, and the radar shows o
 * `make` builds the ROM. It needs `gcc-arm-none-eabi` and `python3-pil`, and is bare metal with its own crt0 and linker script.
 * `tools/gen_assets.py` draws every sprite, tile, palette and the music data procedurally.
 * Headless tests: `make tools/harness` (needs libmgba). Then run `tools/harness ROM script outdir [save]` and `python3 tools/topng.py outdir`.
-* Screenshots: v1.2 in `shots/v12_*.png` (3x; Spec Ops `v12_platformer_*`, `v12_specops_*`; KC `v12_kc_*`; gear `v12_gear_*`; vehicles `v12_armor_*`), v1.1 in `shots/v11_*.png`, and music WAVs in `shots/v11_music_*.wav`.
+* Screenshots: v1.3 in `shots/v13_*.png` (unit select, factions, Israeli units, Space Launch). v1.2 in `shots/v12_*.png` (3x; Spec Ops `v12_platformer_*`, `v12_specops_*`; KC `v12_kc_*`; gear `v12_gear_*`; vehicles `v12_armor_*`), v1.1 in `shots/v11_*.png`, and music WAVs in `shots/v11_music_*.wav`.
 * `tools/gen_vehicles.py` holds every land vehicle, aircraft and ship (stats plus parametric sprite specs) and emits `src/vehdb.inc`.
-* `tools/gen_platform.py`, `gen_courses.py` and `gen_levels.py` build the Spec Ops units, themes, bosses and the 90 RLE-compressed courses (`src/platdb.inc`, `src/pflevels.inc`). `tools/gen_kc.py` draws KC.
+* `tools/gen_platform.py`, `gen_courses.py` and `gen_levels.py` build the Spec Ops units, themes, bosses and the 90 RLE-compressed courses (`src/platdb.inc`, `src/pflevels.inc`). `tools/gen_kc.py` draws KC. `tools/gen_rockets.py` builds and test-flies the Space Launch roster (`src/rocketdb.inc`).
 * Regression: `tools/run_v12_regress.sh` (it auto-skips the first-boot tutorial via `tools/kcskip.py`).
 * `tools/gen_world.py` builds the World Flight map, tiles and landmark data. Its land mask is cached in `tools/world_mask.bin`; it was originally built with the `global-land-mask` Python package.

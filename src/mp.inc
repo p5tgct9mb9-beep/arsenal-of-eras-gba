@@ -256,7 +256,8 @@ static void deploy(int i){Unit*u=&U[i];if(u->gren<=0)return;int n=0;
  if(n){u->gren--;if(u->isp)feed(n==2?"SQUAD DISMOUNTED (RIFLE + AT)":"DISMOUNTED",HB_GREEN);sfx_ok();}}
 static void tank_b(int i){Unit*u=&U[i];const TankS*T=TV(u);
  if(T->cls==VC_ARTY||T->cls==VC_MLRS){if(u->ammo>0&&u->cd2<=0){u->ammo--;u->cd2=240;int tx,ty;
-   if(!u->isp&&u->tgt>=0&&U[u->tgt].alive){tx=U[u->tgt].x>>8;ty=U[u->tgt].y>>8;}else{int a=u->tur>>8;tx=(u->x>>8)+(SIN(a)*120>>8);ty=(u->y>>8)-(COS(a)*120>>8);}
+   if(!u->isp&&u->tgt>=0&&U[u->tgt].alive){tx=U[u->tgt].x>>8;ty=U[u->tgt].y>>8;}else{int a=u->tur>>8;tx=(u->x>>8)+(SIN(a)*120>>8);ty=(u->y>>8)-(COS(a)*120>>8);
+    if(!mapWrap){tx=clampi(tx,camX+28,camX+212);ty=clampi(ty,camY+28,camY+132);tx=clampi(tx,16,worldPx()-16);ty=clampi(ty,16,mapH*16-16);}}
    zone_add(tx,ty,ZK_ARTY,T->cls==VC_MLRS?170:150,u->team,i);zn_last->n=T->cls==VC_MLRS?(T->dmg>=46?8:12):5;if(u->isp)feed(T->cls==VC_MLRS?"ROCKET STRIKE INBOUND":"FIRE MISSION - SPLASH IN 2",HB_YEL);sfx_ok();}return;}
  if(T->cls==VC_SPAA||T->cls==VC_MRAP){if(u->ammo>0&&u->cd2<=0){u->ammo--;u->cd2=T->cls==VC_SPAA?60:100;launch_missile(i,u->tur>>8,5,T->cls==VC_SPAA?50:70,330,700);if(u->isp)feed(T->cls==VC_SPAA?"SAM AWAY":"TOW AWAY",HB_YEL);}return;}
  if(T->cls==VC_IFV){if(u->ammo>0&&u->cd2<=0){u->ammo--;u->cd2=90;launch_missile(i,u->tur>>8,5,70,330,700);}return;}
