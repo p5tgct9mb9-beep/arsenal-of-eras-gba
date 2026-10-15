@@ -512,16 +512,16 @@ static void mp_run(int mode,int era,int mapi){
   U[i].wpn=i==0?0:rr(NPRIM[era]);if(era==0&&i>0)U[i].wpn=U[i].team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];spawn(&U[i],i);}
  if(mpMixed){ // balanced arsenal: bot k on each team draws from the same era
   int ncv[2]={0,0};
-  for(int k=0;k<6;k++){int e=rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;
+  for(int k=0;k<6;k++){int e=rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0)e=1; // Warsaw Pact bots: Cold War kit
     if(k==0){if(mode==MM_SEA)e=fdec(NSH,g6.shI,&vi);else if(mode==MM_TANK)e=fdec(NTK,g6.tkI,&vi);else if(mode==MM_AIR)e=fdec(NAIR,g6.aI,&vi);else e=fdec(NPRIM,g6.pI,&vi);}
     u->ve=e;
     if(i==0){u->veh=vi;}
     else if(mode==MM_SEA){int east=e==0?ax:(f==2||f==5||f==6||f==10);int pick[MAXSH],np=0;for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].axis==east&&!(SHIPV[e][q].cls==SC_CV&&ncv[t]))pick[np++]=q;
       if(!np)for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].cls!=SC_CV)pick[np++]=q;u->veh=pick[rr(np)];}
-    else if(mode==MM_TANK){if(e==0){int pick[MAXTK],np=0;for(int q=0;q<NTK[0];q++)if(TANKV[0][q].axis==ax&&TANKV[0][q].cls!=VC_MINE&&(TANKV[0][q].cls!=VC_JEEP||rr(2)))pick[np++]=q;u->veh=pick[rr(np)];}else{int east=(f==2||f==5||f==6||f==10);int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==east)pick[np++]=q;u->veh=np&&e<=2?pick[rr(np)]:rr(NTK[e]);}}
-    else if(mode==MM_AIR){if(e==0){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[0];q++)if(AIRV[0][q].side==ax)pick[np++]=q;u->veh=pick[rr(np)];}else u->veh=rr(NAIR[e]);}
-    else u->wpn=e==0?(ax?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM[e]);
-    if(i==0)u->wpn=0;if(mode==MM_SEA&&SHIPV[u->ve][u->veh].cls==SC_CV)ncv[t]++;spawn(u,i);}}
+    else if(mode==MM_TANK){if(e==0){int pick[MAXTK],np=0;for(int q=0;q<NTK[0];q++)if(TANKV[0][q].axis==ax&&TANKV[0][q].cls!=VC_MINE&&(TANKV[0][q].cls!=VC_JEEP||rr(2)))pick[np++]=q;u->veh=pick[rr(np)];}else{int east=(f==2||f==5||f==6||f==10||f==FAC_WP);int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++){const char*vn=TANKV[e][q].n;if(f==FAC_WP?((vn[0]=='T'&&vn[1]=='-')||(vn[0]=='B'&&vn[1]=='M'&&vn[2]=='P')):TANKV[e][q].axis==east)pick[np++]=q;}u->veh=np&&e<=2?pick[rr(np)]:rr(NTK[e]);}}
+    else if(mode==MM_AIR){if(e==0){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[0];q++)if(AIRV[0][q].side==ax)pick[np++]=q;u->veh=pick[rr(np)];}else if(f==FAC_WP){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==1)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NAIR[e]);}else u->veh=rr(NAIR[e]);}
+    else u->wpn=f==FAC_WP?(const u8[]){0,3,5,6,5,6}[rr(6)]:e==0?(ax?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM[e]);
+    if(i==0)u->wpn=0;if(mode==MM_SEA&&SHIPV[u->ve][u->veh].cls==SC_CV)ncv[t]++;spawn(u,i);e=e0;}}
   fac_pal(0,g6.fac0,0);fac_pal(1,g6.fac1,0);fac_pal(2,g6.fac0,1);
   vsNext=VS_BASE;vsN=0;for(int i=0;i<12;i++){Unit*u=&U[i];u->vt=mode==MM_TANK?vslot(0,TV(u)->gs):mode==MM_AIR?vslot(1,AV(u)->gs):mode==MM_SEA?vslot(2,SV(u)->gs):0;
    if(mode==MM_SEA&&SV(u)->w2==3)wingTile[i]=vslot(1,AIRV[SV(u)->we][SV(u)->wi].gs);}

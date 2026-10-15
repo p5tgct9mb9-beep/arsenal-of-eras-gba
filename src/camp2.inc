@@ -8,7 +8,7 @@ enum{ST_AA,ST_PILL,ST_CACHE,ST_CARRIER,ST_RADIO,ST_BLOCK};
 #define MM_DOGGREEN 9
 typedef struct{const char*name,*place,*date,*pov;u8 grp,mode,sEra,tEra,layout,theme,nAlly,nEnemy,flags,skind,ncv;
  u8 ob[3];s16 arg[3];const char*od[3];const char*b[4];}CMis;
-#define NCM 14
+#define NCM 15
 static const CMis CM[NCM]={
  {"POINT LUCK","OFF MIDWAY ATOLL, PACIFIC","4 JUNE 1942","LT.(JG) FRANK DOYLE - SBD PILOT",0,MM_AIR,0,0,1,0,3,6,0,ST_CARRIER,0,
   {OB_KILL,OB_DESTROY,0},{4,2,0},{"BREAK THE FIGHTER SCREEN","DIVE-BOMB THE CARRIERS",""},
@@ -51,8 +51,11 @@ static const CMis CM[NCM]={
   {"THIN AIR, SNOW AND ROCK. MORTARS ARE","ZEROED ON THE VALLEY FLOOR - KEEP","MOVING. HOLD THE BLOCKING POSITION,","THEN CLIMB TO THE DOWNED CREW."}},
  {"PHANTOM FURY","CITY DISTRICT, FALLUJAH","NOVEMBER 2004","CAPT. ELENA HALE - ARMOUR COMMANDER",2,MM_INF,2,2,LY_TOWN,TH_NIGHT,3,9,MF_ROE|MF_CIVESC,ST_CACHE,3,
   {OB_KILL,OB_ESCORT,OB_DESTROY},{8,3,1},{"CLEAR THE DISTRICT","EVACUATE THE FAMILY","SEIZE THE WEAPONS CACHE"},
-  {"STACK, BREACH, CLEAR, MARK, MOVE ON.","A FAMILY IS SHELTERING IN A CELLAR.","FIND THEM AND WALK THEM OUT SAFELY.","RULES OF ENGAGEMENT ARE STRICT."}}};
-static const char*const GRPN[3]={"WORLD WAR II","COLD WAR","MODERN"};
+  {"STACK, BREACH, CLEAR, MARK, MOVE ON.","A FAMILY IS SHELTERING IN A CELLAR.","FIND THEM AND WALK THEM OUT SAFELY.","RULES OF ENGAGEMENT ARE STRICT."}},
+ {"FULDA GAP (WHAT-IF)","FULDA GAP, WEST GERMANY","1985 - FICTIONAL","LT. ANNA HALE - M60A3 PLATOON LEADER",3,MM_TANK,1,1,LY_FOREST,TH_DUSK,3,6,0,0,0,
+  {OB_SURVIVE,OB_KILL,0},{70,6,0},{"HOLD THE GAP","STOP THE FIRST ECHELON",""},
+  {"A FICTIONAL WAR THAT NEVER HAPPENED.","WARSAW PACT ARMOUR IS POURING INTO","THE GAP. HOLD THE TREELINE UNTIL THE","REINFORCEMENTS CROSS THE RHINE."}}};
+static const char*const GRPN[4]={"WORLD WAR II","COLD WAR","MODERN","WHAT-IF"};
 static const CMis*cm;static int msGath,cmIdx,msObi,msNob,msT,msObT,msCount,msCivLost,msCivPlayer,msSaved,msE0,msX0,msXN,msCPx,msCPy,msGx,msGy,msReady,msMortT;
 static MapDef msMapDef;static u8 msAlt;
 static int ms_obj(void){return msObi<msNob?cm->ob[msObi]:OB_NONE;}
@@ -213,7 +216,7 @@ static void ms_result_fn(int win){Unit*P=&U[0];int was=(campUnlock>>(cmIdx+1))&1
  music_stop();}
 // ---- alternate side (mirrored objectives, fictional characters, generic markings, no civilians involved)
 typedef struct{u8 mi;const char*side0,*side1,*pov;u8 ob[3];s16 arg[3];const char*od[3];const char*b[4];}CAlt;
-#define NALT 9
+#define NALT 10
 static const CAlt CALT[NALT]={
  {0,"US NAVY","IMPERIAL JAPANESE NAVY","FPO KENJI SATO - CARRIER FIGHTER PILOT",{OB_SURVIVE,OB_KILL,0},{50,5,0},{"INTERCEPT THE STRIKE","PROTECT THE FLEET",""},
   {"AMERICAN DIVE-BOMBERS ARE INBOUND AND","THE FLIGHT DECKS ARE FULL. CLIMB HARD,","BREAK UP THEIR FORMATION AND KEEP","THEM AWAY FROM THE CARRIERS."}},
@@ -232,7 +235,9 @@ static const CAlt CALT[NALT]={
  {8,"US AIR CAVALRY","PEOPLE'S ARMY OF VIETNAM","SGT. NGUYEN VAN AN - PAVN INFANTRY",{OB_KILL,OB_SURVIVE,0},{10,50,0},{"ASSAULT THE LANDING ZONE","HOLD UNDER ARTILLERY",""},
   {"HELICOPTERS HAVE LANDED IN THE VALLEY","BELOW THE MOUNTAIN. MOVE CLOSE - SO","CLOSE THEIR ARTILLERY CANNOT REACH","YOU - AND PRESS THE ASSAULT."}},
  {10,"US ARMY","DEFENDING ARMOUR","CAPT. SAMIR HADDAD - TANK COMPANY",{OB_SURVIVE,OB_KILL,0},{60,6,0},{"HOLD THE RIDGE IN THE STORM","STOP THE ARMOURED ADVANCE",""},
-  {"THE SANDSTORM BLINDS YOUR SIGHTS BUT","NOT THEIRS. ORDERS ARE TO HOLD THE","RIDGE. SHOOT FAST, MOVE BETWEEN","FIGHTING POSITIONS, BRING YOUR CREW HOME."}}};
+  {"THE SANDSTORM BLINDS YOUR SIGHTS BUT","NOT THEIRS. ORDERS ARE TO HOLD THE","RIDGE. SHOOT FAST, MOVE BETWEEN","FIGHTING POSITIONS, BRING YOUR CREW HOME."}},
+ {14,"NATO","WARSAW PACT","STARSHINA ILYA DOROV - T-72 COMMANDER",{OB_KILL,OB_REACH,0},{6,3,0},{"BREAK THE NATO SCREEN","REACH THE RIVER CROSSING",""},
+  {"A FICTIONAL WAR THAT NEVER HAPPENED.","THE FIRST ECHELON ROLLS AT DAWN. YOUR","COMPANY MUST PUNCH THROUGH THE SCREEN","AND SEIZE THE CROSSING BY NOON."}}};
 static int alt_of(int mi){for(int k=0;k<NALT;k++)if(CALT[k].mi==mi)return k;return -1;}
 static CMis cmAlt;
 static int side_select(int mi,int*side){int a=alt_of(mi);if(a<0){*side=0;return 1;}const CAlt*A=&CALT[a];int s=*side,redraw=1;
@@ -273,7 +278,8 @@ static void mission_run(int i,int side){cmIdx=i;cm=mis_for(i,side);msAlt=side;ca
  msNob=0;while(msNob<3&&cm->ob[msNob])msNob++;msReady=0;
  ms_role=ms_role_fn;ms_draw=ms_draw_fn;ms_death=ms_death_fn;ms_init=ms_init_fn;ms_tick=ms_tick_fn;ms_hud=ms_hud_fn;ms_spawn=ms_spawn_fn;ms_result=ms_result_fn;ms_skip=ms_skip_fn;
  msOn=1;nU=MAXU;mp_run(cm->mode,cm->sEra,0);msOn=0;msReady=0;nU=12;}
-static void mission_select(void){static int sel=0;int redraw=2,top=0;bgm(1,0);
+static void mission_select(void){static int sel=0;campUnlock|=1u<<14; // v1.3 what-if bonus mission is always open
+int redraw=2,top=0;bgm(1,0);
  for(;;){BEAT->screen=SCR_MSEL;BEAT->menu=sel;BEAT->extra=campUnlock;
   if(sel<top)top=sel;if(sel>top+7)top=sel-7;
   if(redraw){m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);m3_ctext(8,"CAMPAIGN - MISSION SELECT",C_YEL,1);

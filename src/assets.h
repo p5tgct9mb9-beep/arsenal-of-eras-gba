@@ -124,7 +124,7 @@ extern const unsigned char trk_meta[396];
 extern const unsigned char*const trk_data[33];
 #define NTRK 33
 extern const unsigned char wave_shapes[32];
-extern const unsigned int tank_spr[26880];
+extern const unsigned int tank_spr[27392];
 extern const unsigned int plane_spr[18176];
 extern const unsigned int ship_spr[2944];
 extern const unsigned short world_pal[64];

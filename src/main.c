@@ -135,7 +135,7 @@ static int faction_select(int mode){int col=0,redraw=2;
   if(redraw){m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);
    m3_ctext(8,mode==MM_INF?"6V6 INFANTRY - CHOOSE SIDE":mode==MM_TANK?"6V6 ARMOR - CHOOSE SIDE":mode==MM_SEA?"6V6 NAVAL - CHOOSE SIDE":"6V6 DOGFIGHT - CHOOSE SIDE",C_YEL,1);
    m3_text(20,22,"YOUR FACTION",col==0?C_YEL:C_GRAY,1);m3_text(132,22,"ENEMY FACTION",col==1?C_YEL:C_GRAY,1);
-   for(int k=0;k<NFAC;k++){int y=34+k*9;
+   for(int k=0;k<NFAC;k++){int y=33+k*8;
     m3_text(14,y,k==g6.fac0?">":" ",col==0?C_YEL:C_BLUE,1);swatch(22,y,k);m3_text(38,y,FAC[k].n,k==g6.fac0?C_BLUE:C_WHITE,1);
     m3_text(126,y,k==g6.fac1?">":" ",col==1?C_YEL:C_RED,1);swatch(134,y,k);m3_text(150,y,FAC[k].n,k==g6.fac1?C_RED:(k==g6.fac0?C_GRAY:C_WHITE),1);}
    m3_ctext(136,"COLORS BY FACTION, GENERIC MARKINGS",C_GRAY,1);

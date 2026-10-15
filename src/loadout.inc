@@ -4,7 +4,8 @@ typedef struct{const char*n;u8 dmg,rate,spd16,spread,pellets,life,mag,reload,mov
 typedef struct{int dmg,rate,spd16,spread,pellets,life,mag,reload,move,kind,fl;const char*n;}Wstat;
 #define MAXPRIM 35
 #define MAXSEC 8
-static const u8 NPRIM[5]={35,5,30,4,4};
+static const u8 NPRIM[5]={35,7,30,4,4};
+static const u8 NPRIM_V5[5]={35,5,30,4,4},NSEC_V5[5]={8,2,6,2,2},NL_V5[5]={4,2,6,2,2},NTK_V5[5]={55,6,40,2,2},NAIR_V5[5]={93,17,28,2,2}; // v1.2 layouts (save migration v5 -> v6)
 static const u8 NPRIM_V4[5]={17,5,5,4,4},NSEC_V4[5]={5,2,2,2,2},NL_V4[5]={3,2,2,2,2},NTK_V4[5]={55,6,6,2,2}; // v1.2-pre layouts (save migration)
 #define PRIM_EXP0 15 // WW2 primaries 15..16 are tagged EXPERIMENTAL
 #define PRIM_ISEXP(i) ((i)>=PRIM_EXP0&&(i)<17)
@@ -19,7 +20,7 @@ static const Wpn PRIM[5][MAXPRIM]={
   {"M3 GREASE GUN",22,8,70,6,1,28,30,105,104},{"M1903 SCOPED",105,46,110,0,1,58,5,130,95},{"M97 TRENCH GUN",16,34,76,14,6,18,6,170,100},
   {"STG 44 VAMPIR",28,7,96,1,1,52,30,125,94},{"STG 44 KRUMMLAUF",24,7,64,9,1,22,30,110,100},
   {"M1A1 CARBINE FOLD",29,10,80,3,1,34,15,80,107},{"JOHNSON M1941",48,18,86,2,1,44,10,95,99},{"M1919A6 BROWNING",30,4,84,9,1,42,100,250,82},{"GEWEHR 43",48,16,88,2,1,46,10,95,98},{"FG 42",32,5,86,6,1,42,20,105,99},{"MG34",25,3,84,9,1,40,50,240,85},{"BERETTA M38",19,6,74,6,1,30,40,100,105},{"TYPE 99 ARISAKA",92,40,100,1,1,50,5,120,98},{"TYPE 100 SMG",17,6,70,7,1,28,30,100,105},{"TYPE 96 LMG",27,5,84,7,1,42,30,180,88},{"BREN MK II",31,6,86,5,1,44,30,150,90},{"OWEN GUN",19,6,72,6,1,30,33,100,105},{"DE LISLE CARBINE",60,26,84,2,1,40,8,110,100},{"SVT-40",46,16,88,3,1,44,10,95,99},{"DP-28",28,5,84,7,1,42,47,200,88},{"PPS-43",17,4,72,8,1,28,35,95,106},{"BOYS AT RIFLE",130,55,130,1,1,56,5,160,86},{"M2 FLAMETHROWER",7,2,44,14,2,11,60,200,90}},
- {{"AK-47",30,7,88,6,1,40,30,110,98},{"M16A1",26,6,96,4,1,40,20,100,102},{"M60",26,5,84,8,1,40,100,240,86},{"DRAGUNOV SVD",75,24,112,1,1,52,10,120,96},{"UZI",18,4,76,8,1,28,32,90,108}},
+ {{"AK-47",30,7,88,6,1,40,30,110,98},{"M16A1",26,6,96,4,1,40,20,100,102},{"M60",26,5,84,8,1,40,100,240,86},{"DRAGUNOV SVD",75,24,112,1,1,52,10,120,96},{"UZI",18,4,76,8,1,28,32,90,108},{"AKM",30,7,90,5,1,40,30,105,99},{"RPK",28,6,88,7,1,44,40,170,90}},
  {{"M4A1",26,5,96,4,1,40,30,95,102},{"HK416",28,5,96,3,1,42,30,100,100},{"AK-12",30,6,96,4,1,42,30,100,99},{"SCAR-H",40,8,100,4,1,46,20,110,96},{"BARRETT M82",120,45,140,1,1,56,10,160,88},
   {"M27 IAR",27,4,96,4,1,42,30,110,98},{"M7 (XM7 NGSW)",36,6,104,3,1,48,20,105,97},{"M250 (XM250)",32,4,100,7,1,46,100,230,85},{"MK 18 CQBR",25,5,90,5,1,36,30,90,104},{"REMINGTON ACR",27,5,96,4,1,42,30,100,101},{"TAVOR X95",26,5,92,4,1,40,30,95,104},{"GALIL ACE",29,6,94,4,1,42,35,105,99},{"FN F2000",26,5,94,4,1,42,30,100,102},{"FAMAS",24,4,92,5,1,40,25,100,102},{"HK433",27,5,96,4,1,42,30,100,101},{"QBZ-191",27,5,96,4,1,42,30,100,101},{"AK-15",32,6,96,4,1,44,30,105,98},{"AK-308",40,8,100,4,1,46,20,110,96},{"AN-94",30,4,100,2,1,44,30,110,98},{"SR-25",62,16,112,1,1,52,20,115,96},{"M2010 ESR",100,40,130,0,1,56,5,130,92},{"CHEYTAC M200",125,48,145,0,1,58,7,150,88},{"AWM",110,44,135,0,1,56,5,140,90},{"AI AX50",130,50,140,1,1,58,5,160,87},{"KS-23",24,36,72,15,6,18,4,160,98},{"BENELLI M4",16,14,78,12,6,18,7,140,100},{"AA-12",14,7,76,13,5,18,20,170,96},{"FN P90",19,3,84,6,1,30,50,110,107},{"HK UMP45",23,5,80,6,1,32,25,95,106},{"PP-19 BIZON",18,4,78,7,1,30,64,120,105}},
  {{"SMART RIFLE",30,6,104,1,1,44,30,100,100},{"RAILGUN",110,42,170,0,1,46,5,150,92},{"LASER CARBINE",22,3,140,2,1,36,60,140,100},{"PULSE SMG",18,3,96,6,1,30,45,90,108}},
@@ -94,17 +95,18 @@ static const u8 LETH6_SUB[NLETH6]={0,3,4,0,1,2,5,6,7,8,9,9,6,4};
 static const char*const TACT6_N[NTACT6]={"SMOKE","MORPHINE","FLASHBANG","STIM","CS GAS","DECOY","EMP GRENADE","MED KIT","AMMO CRATE","DEPLOY COVER","TROPHY SYSTEM","RECON DRONE"};
 static const u8 TACT6_FX[NTACT6]={1,2,0,2,3,4,5,6,7,8,9,10};
 typedef struct{const char*n;u8 m[3],h[3],t[3];u8 axis;}Fac;
-#define NFAC 11
+#define NFAC 12
+#define FAC_WP 11
 static const Fac FAC[NFAC]={{"USA",{92,104,58},{80,92,52},{70,150,255},0},{"UK",{124,104,66},{100,90,60},{90,200,255},0},{"USSR",{132,128,76},{90,96,60},{230,60,50},0},
  {"GERMANY",{96,102,100},{80,86,88},{210,210,210},1},{"JAPAN",{150,132,80},{120,110,70},{240,140,60},1},{"CHINA",{80,110,70},{70,96,64},{255,90,90},0},
  {"RUSSIA",{104,110,84},{84,92,70},{220,70,70},0},{"NATO",{82,98,64},{70,80,56},{80,140,255},0},{"COALITION",{170,148,104},{150,134,96},{90,220,160},0},
- {"FEDERATION",{190,196,206},{170,176,190},{110,200,255},0},{"SYNDICATE",{80,64,92},{70,56,80},{255,80,200},0}};
+ {"FEDERATION",{190,196,206},{170,176,190},{110,200,255},0},{"SYNDICATE",{80,64,92},{70,56,80},{255,80,200},0},{"WARSAW PACT",{118,112,78},{96,94,66},{230,180,60},0}};
 static u16 fac_c(const u8*c,int num,int den){return RGB(clampi(c[0]*num/den,0,255),clampi(c[1]*num/den,0,255),clampi(c[2]*num/den,0,255));}
 static void fac_pal(int bank,int f,int player){volatile u16*p=PAL_OBJ+bank*16;const Fac*F=&FAC[f];p[2]=fac_c(F->m,3,4);p[3]=fac_c(F->m,1,1);p[4]=fac_c(F->m,5,4);p[5]=fac_c(F->h,1,1);p[9]=player?RGB(255,220,40):fac_c(F->t,1,1);}
 #define SAVE_N2 (5*LO_F+10+6+4+2)
 #define SAVE_N3 (SAVE_N2+9+20)
 #define SAVE_N (SAVE_N2+10+20+1)
-#define SAVE_V 5
+#define SAVE_V 6
 static u32 campUnlock=1;static u8 droneSel,droneCall;
 static void lo_defaults(void){campUnlock=1;droneSel=0;droneCall=0;{G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}SET.bot=1;{Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}memset(LO,0,sizeof LO);memset(tankSel,0,5);memset(airSel,0,5);}
 static int lo_valid(void){for(int e=0;e<5;e++){Loadout*l=&LO[e];if(l->prim>=NPRIM[e]||l->sec>=NSEC[e]||l->opt>=NATL[0][e]||l->muz>=NATL[1][e]||l->grip>=NATL[2][e]||l->mag>=NATL[3][e]||l->leth>=NLE[e]||l->tact>=NTACT[e]||l->perk>4||l->laun>NL[e]||tankSel[e]>=NTK[e]||airSel[e]>=NAIR[e])return 0;}return 1;}
@@ -115,7 +117,7 @@ static void save_write(void){u8 b[SAVE_N];for(int e=0;e<5;e++){u8*p=&LO[e].prim;
  for(int i=0;i<SAVE_N;i++){SRAM[5+i]=b[i];sum+=b[i]*(i+1);}SRAM[5+SAVE_N]=sum;}
 static int saveLoaded; // 0 none/defaults, 1 v4, 2 migrated from v1, 3 migrated from v2, 4 migrated from v3
 static int save_load(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!='O'||SRAM[2]!='E'||SRAM[3]!='L')return 0;
- int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:v==3?SAVE_N3:SAVE_N;if(v<1||v>5)return 0;
+ int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:v==3?SAVE_N3:SAVE_N;if(v<1||v>6)return 0;
  u8 b[SAVE_N];u8 sum=0x5A;for(int i=0;i<n;i++){b[i]=SRAM[5+i];sum+=b[i]*(i+1);}if(sum!=SRAM[5+n])return 0;
  for(int e=0;e<5;e++){u8*p=&LO[e].prim;for(int k=0;k<nf;k++)p[k]=b[e*nf+k];tankSel[e]=b[5*nf+e];airSel[e]=b[5*nf+5+e];}
  if(v>=2){u8*q=&SET.track;for(int k=0;k<6;k++)q[k]=b[5*LO_F+10+k];campUnlock=0;for(int k=0;k<4;k++)campUnlock|=(u32)b[5*LO_F+16+k]<<(8*k);droneSel=b[5*LO_F+20]%9;droneCall=b[5*LO_F+21]%3;
@@ -130,12 +132,15 @@ static int save_load(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!=
   if(v==4){int i,e; // v1.2-pre -> v1.2: weapon pools grew at era ends; vehicles grew too
    e=fdec(NPRIM_V4,g6.pI,&i);g6.pI=fenc(NPRIM,e,i);e=fdec(NSEC_V4,g6.sI,&i);g6.sI=fenc(NSEC,e,i);
    if(g6.lI){e=fdec(NL_V4,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V4,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);}
+  if(v==5){int i,e; // v1.2 -> v1.3: Cold War gained AKM/RPK + T-62/BMP-1 (flat 6v6 indices shift)
+   e=fdec(NPRIM_V5,g6.pI,&i);g6.pI=fenc(NPRIM,e,i);e=fdec(NSEC_V5,g6.sI,&i);g6.sI=fenc(NSEC,e,i);
+   if(g6.lI){e=fdec(NL_V5,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V5,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);e=fdec(NAIR_V5,g6.aI,&i);g6.aI=fenc(NAIR,e,i);}
   if(g6.pI>=fsum(NPRIM)||g6.sI>=fsum(NSEC)||g6.lI>fsum(NL)||g6.leth>=NLETH6||g6.tact>=NTACT6||g6.tkI>=fsum(NTK)||g6.aI>=fsum(NAIR)||g6.shI>=fsum(NSH)||g6.fac0>=NFAC||g6.fac1>=NFAC||g6.fac0==g6.fac1){G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}
   if(CH.skin>=CH_NSKIN||CH.hair>=CH_NHAIR||CH.head>=CH_NHEAD||CH.hat>=CH_NHAT||CH.uni>=CH_NUNI||CH.camo>=CH_NCAMO||CH.vest>=CH_NVEST||CH.body>1||CH.use>1||!CH.name[0]){Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}}
  if(v==1){ // v1.0 -> v1.1 migration: WW2 tactical list changed (flash/smoke/stim -> smoke/morphine)
   for(int e=0;e<5;e++)LO[e].laun=0;LO[0].tact=LO[0].tact==2?1:0;}
  if(!lo_valid()){lo_defaults();return 0;}
- saveLoaded=v>=4?1:v==3?4:v==2?3:2;if(v<5)save_write();lx_read();return saveLoaded;}
+ saveLoaded=v>=4?1:v==3?4:v==2?3:2;if(v<SAVE_V)save_write();lx_read();return saveLoaded;}
 static Wstat wcalc(int era,const Loadout*l,int slot){int secondary=slot!=0;const Wpn*w=slot==2?&LAUN[era][l->laun]:slot==1?&SEC[era][l->sec]:&PRIM[era][l->prim];Wstat s;s.kind=slot==2?K_ROCKET:K_BUL;
  s.n=w->n;s.dmg=w->dmg;s.rate=w->rate;s.spd16=w->spd16;s.spread=w->spread;s.pellets=w->pellets;s.life=w->life;s.mag=w->mag;s.reload=w->reload;s.move=w->move;
  s.fl=(era==0&&slot==0&&l->prim==PRIM_FLAME)?1:(era==0&&((slot==0&&l->prim==PRIM_DELISLE)||(slot==1&&l->sec==SEC_WELROD)))?2:0;
