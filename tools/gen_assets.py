@@ -1,3 +1,4 @@
+import re,math
 #!/usr/bin/env python3
 """Arsenal of Eras GBA - procedural asset generator.
 Every tile, sprite, palette and the title illustration is drawn here from code
@@ -301,12 +302,32 @@ def arena_set(era):
     cv=Cv(16,16);ground(cv,era*100+5,(5,5,6),6,0.0);cv.r(0,0,15,0,15);cv.r(0,15,15,15,15)
     cv.p([(8,3),(12,8),(10,8),(10,12),(6,12),(6,8),(4,8)],15)
     out.append(cv.grid())
+    # 11 water / ford (uses BG palette bank 1: 1-5 water, 6-9 wood, 10 foam)
+    cv=Cv(16,16)
+    for y in range(16):
+        for x in range(16):
+            h=H(era*31+11,x,y);cv.px(x,y,2 if h<0.55 else 3 if h<0.85 else 1)
+    for (x,y) in [(2,3),(9,6),(4,11),(12,13)]:cv.l(x,y,x+3,y,4);cv.px(x+1,y-1,5)
+    out.append(cv.grid())
+    # 12 bridge planks over water
+    cv=Cv(16,16);cv.r(0,0,15,15,2)
+    for y in range(1,15,3):cv.r(1,y,14,y+1,7);cv.l(1,y+1,14,y+1,6)
+    cv.l(0,0,0,15,8);cv.l(15,0,15,15,8);cv.l(1,0,1,15,9);cv.l(14,0,14,15,6)
+    out.append(cv.grid())
     tl=[]
     for g in out:tl+=meta_tiles(g)
     return tl
+WATER_PALS=[
+ [(0,0,0),(40,70,96),(52,88,118),(62,102,134),(110,150,176),(170,200,214),(84,56,32),(118,84,50),(60,40,24),(150,112,70)],
+ [(0,0,0),(70,100,130),(90,124,156),(106,140,170),(170,200,220),(230,240,250),(84,60,40),(120,90,60),(60,44,30),(150,118,84)],
+ [(0,0,0),(28,78,96),(36,98,118),(46,116,134),(98,164,176),(170,210,214),(96,80,60),(130,110,84),(70,58,44),(160,138,104)],
+ [(0,0,0),(10,30,60),(14,44,84),(20,60,110),(40,200,230),(160,255,255),(50,50,70),(80,80,110),(30,30,44),(255,60,200)],
+ [(0,0,0),(8,8,14),(14,14,22),(20,20,30),(46,46,64),(90,90,120),(70,76,92),(100,108,126),(46,50,62),(140,150,170)],
+]
+
 for e in range(5):
-    emit(f"arena_tiles_{e}",arena_set(e),"unsigned int");emit(f"arena_pal_{e}",pal16(ARENA_PALS[e]))
-Hh.append("enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_N};")
+    emit(f"arena_tiles_{e}",arena_set(e),"unsigned int");emit(f"arena_pal_{e}",pal16(ARENA_PALS[e]));emit(f"water_pal_{e}",pal16(WATER_PALS[e]))
+Hh.append("enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_WATER,AM_BRIDGE,AM_N};")
 
 # dogfight terrain (seen from altitude) + clouds
 SKY_PALS=[
@@ -620,13 +641,61 @@ def hellcat():  # Grumman F6F: stubby barrel fuselage, big radial cowl, squared 
     c.l(10,1,21,1,14);c.px(15,1,7);c.px(16,1,7)                # prop arc
     c.px(9,13,7);c.px(10,13,7);c.px(21,13,7);c.px(22,13,7)     # .50 cal ports
     return c.grid(1)
+WW2_PLANES=['P51','SPIT','F6F','P47','F4U','YAK3','HURRI','P38','BF109','FW190','ME262','ZERO','STUKA']
+def ww2plane(k):
+    if k=='F6F':return hellcat()
+    c=Cv(32,32)
+    def sym(pts,col):c.p(pts,col);c.p([(31-x,y) for x,y in pts],col)
+    def prop(y,x0=10,x1=21):c.l(x0,y,x1,y,14);c.px((x0+x1)//2,y,7);c.px((x0+x1)//2+1,y,7)
+    def roundel(x,y,r=1):c.e(x-r,y-r,x+r,y+r,9);c.e(31-x-r,y-r,31-x+r,y+r,9)
+    if k=='P47':
+        c.e(1,12,30,18,3);c.l(2,13,29,13,4);c.r(12,8,19,25,3);c.l(15,8,15,24,4);c.e(11,2,20,10,3);c.e(12,3,19,8,7);c.e(13,4,18,7,2)
+        c.e(9,24,22,28,3);c.r(15,25,16,30,3);c.e(14,11,17,15,10);roundel(5,15);prop(1)
+    elif k=='ME262':
+        c.p([(16,1),(18,6),(18,26),(13,26),(13,6),(15,1)],3);sym([(13,12),(2,19),(2,21),(13,18)],3);sym([(13,13),(3,19)],4)
+        c.e(6,10,9,21,2);c.e(22,10,25,21,2);c.r(7,10,8,11,7);c.r(23,10,24,11,7);c.px(7,21,15);c.px(24,21,15)
+        sym([(13,23),(9,27),(13,27)],3);c.e(14,9,17,13,10);c.px(5,20,9);c.px(26,20,9)
+    elif k=='BF109':
+        c.r(14,3,17,27,3);c.p([(14,3),(17,3),(16,1),(15,1)],3);sym([(14,12),(3,14),(3,17),(14,18)],3);c.l(4,14,13,13,4);c.l(18,13,27,14,4)
+        sym([(14,25),(10,26),(10,28),(14,28)],3);c.r(14,9,17,12,10);c.r(14,3,17,4,5);c.r(6,15,7,16,9);c.r(24,15,25,16,9);prop(1)
+    elif k=='P51':
+        c.r(14,3,17,27,3);c.e(14,1,17,6,3);sym([(14,11),(2,15),(2,17),(14,19)],3);c.l(3,15,13,12,4);c.l(18,12,28,15,4)
+        sym([(14,24),(9,25),(9,27),(14,27)],3);c.e(14,9,17,13,10);roundel(6,16);prop(1)
+    elif k=='SPIT':
+        c.r(14,3,17,27,3);c.e(14,1,17,6,3);c.e(2,11,29,19,3);c.l(4,13,27,13,4);c.e(10,24,21,28,3);c.r(14,9,17,13,10);roundel(6,15);prop(1)
+    elif k=='FW190':
+        c.r(13,6,18,26,3);c.e(12,2,19,8,3);c.e(13,3,18,7,7);sym([(13,12),(3,13),(3,17),(13,18)],3);c.l(4,13,12,12,4);c.l(19,12,27,13,4)
+        sym([(13,24),(10,25),(10,27),(13,27)],3);c.r(14,9,17,13,10);c.r(6,14,7,15,9);c.r(24,14,25,15,9);prop(1)
+    elif k=='ZERO':
+        c.r(14,5,17,27,3);c.e(12,3,19,9,3);c.e(13,4,18,8,7);c.r(4,12,27,16,3);c.e(1,12,7,16,3);c.e(24,12,30,16,3);c.l(3,12,28,12,4)
+        c.e(11,24,20,27,3);c.r(14,9,17,15,10);c.e(4,13,7,16,9);c.e(24,13,27,16,9);prop(2)
+    elif k=='F4U':
+        c.r(14,2,17,26,3);c.e(13,1,18,5,3);c.e(14,1,17,3,7);sym([(14,13),(9,15),(3,13),(2,15),(9,18),(14,19)],3);c.l(9,15,9,18,2);c.l(22,15,22,18,2)
+        sym([(14,24),(9,25),(9,27),(14,27)],3);c.e(14,13,17,17,10);roundel(5,15);prop(0)
+    elif k=='YAK3':
+        c.r(14,4,17,26,3);c.p([(14,4),(17,4),(16,2),(15,2)],3);sym([(14,12),(5,14),(5,17),(14,18)],3);c.l(6,14,13,13,4);c.l(18,13,25,14,4)
+        sym([(14,23),(11,24),(11,26),(14,26)],3);c.r(14,9,17,12,10);c.px(7,15,9);c.px(24,15,9);c.px(15,24,9);prop(2,11,20)
+    elif k=='HURRI':
+        c.r(13,3,18,27,3);c.e(13,1,18,6,3);sym([(14,11),(2,13),(2,18),(14,19)],3);c.l(3,13,13,11,4);c.l(18,11,28,13,4)
+        c.e(10,24,21,28,3);c.e(13,9,18,15,10);c.e(14,10,17,13,2);c.e(14,11,17,14,10);roundel(5,15);prop(1)
+    elif k=='P38':
+        c.r(1,12,30,15,3);c.l(1,12,30,12,4);c.r(7,6,9,28,3);c.r(22,6,24,28,3);c.e(6,4,10,10,3);c.e(21,4,25,10,3)
+        c.l(4,3,11,3,14);c.l(20,3,27,3,14);c.e(13,6,18,19,3);c.e(14,8,17,12,10);c.r(7,26,24,28,3);c.l(7,26,24,26,4);c.px(4,13,9);c.px(27,13,9)
+    elif k=='STUKA':
+        c.r(14,3,17,27,3);c.e(14,1,17,5,3);sym([(14,13),(10,16),(3,14),(2,16),(10,19),(14,18)],3);c.l(10,16,10,19,2);c.l(21,16,21,19,2)
+        c.e(9,11,11,15,2);c.e(20,11,22,15,2);c.r(14,8,17,16,10);c.l(14,11,17,11,2);c.l(14,14,17,14,2)
+        sym([(14,24),(9,24),(9,27),(14,27)],3);c.r(6,15,7,16,9);c.r(24,15,25,16,9);prop(1)
+    return c.grid(1)
 spr=[]
 for e in range(5):
     t=[]
     t+=tiles4(soldier(e,0),16,16);t+=tiles4(soldier(e,1),16,16)
-    t+=tiles4(tank(e,'hull'),32,32);t+=tiles4(tank(e,'tur'),32,32);t+=tiles4(plane(e),32,32);t+=tiles4(hellcat() if e==0 else plane(e),32,32)
-    emit(f"era_spr_{e}",t,"unsigned int")
-define("ES_SOLDIER",0);define("ES_HULL",8);define("ES_TUR",24);define("ES_PLANE",40);define("ES_PLANE2",56);define("ES_NTILES",72)
+    t+=tiles4(tank(e,'hull'),32,32);t+=tiles4(tank(e,'tur'),32,32)
+    if e==0:
+        for k in WW2_PLANES:t+=tiles4(ww2plane(k),32,32)
+    else:t+=tiles4(plane(e),32,32);t+=tiles4(plane(e),32,32)
+    emit(f"era_spr_{e}",t,"unsigned int");define(f"ES_N{e}",len(t)//8)
+define("ES_SOLDIER",0);define("ES_HULL",8);define("ES_TUR",24);define("ES_PLANE",40)
 # FX sprites (palette FXP)
 fx=[]
 def t8(rows,mp):return tiles4([[mp.get(ch,0) for ch in r] for r in rows],8,8)
@@ -698,6 +767,16 @@ def preview():
     for i in range(30):putm(tl,i,i*16,10*16,p)
     ts.resize((ts.width*3,ts.height*3),Image.NEAREST).save(os.path.join(ROOT,'build','tiles_preview.png'))
 preview()
+def preview_planes():
+    sh=Image.new('RGB',(13*36,2*36),(40,70,110))
+    for side in (0,1):
+        pal=[((v&31)<<3,((v>>5)&31)<<3,((v>>10)&31)<<3) for v in obj_pal(0,'A' if side==0 else 'E')]
+        for i,k in enumerate(WW2_PLANES):
+            for y,row in enumerate(ww2plane(k)):
+                for x,v in enumerate(row):
+                    if v:sh.putpixel((i*36+2+x,side*36+2+y),pal[v])
+    sh.resize((sh.width*3,sh.height*3),Image.NEAREST).save(os.path.join(ROOT,'build','ww2_planes_preview.png'))
+preview_planes()
 # ------------------------------------------------------------------ title illustration (mode 3, 240x160, RGB15)
 W,Hh_=240,160
 im=Image.new('RGB',(W,Hh_));px=im.load()
@@ -789,6 +868,122 @@ song=("G4 - C5 - C5 C5 D5 - E5 - E5 - D5 - C5 - "
 emit("title_song",[nr(n) for n in song]);define("SONG_LEN",len(song))
 fan="C5 E5 G5 C6 - G5 C6 - - -".split();emit("fanfare",[nr(n) for n in fan]);define("FANFARE_LEN",len(fan))
 
+
+# ======================= v1.1 PSG music (original compositions) =======================
+NN={'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11}
+def midi(n):
+    m=re.match(r'([A-G][#b]?)(\d)',n);return 12*(int(m.group(2))+1)+NN[m.group(1)]
+def voice(spec,total):
+    out=[]
+    for tok in spec.split():
+        n,d=(tok.split(':')+['1'])[:2];d=int(d)
+        if n=='.':out+=[1]+[0]*(d-1)
+        else:out+=[midi(n)]+[0]*(d-1)
+    assert len(out)<=total,(len(out),total,spec[:40])
+    return out+[0]*(total-len(out))
+def drums(spec,total):
+    m={'.':0,'K':1,'S':2,'H':3,'R':4,'T':5,'C':6}
+    out=[m[c] for c in spec.replace(' ','').replace('|','')];assert len(out)<=total,(len(out),total)
+    return (out*((total+len(out)-1)//len(out)))[:total]
+def bars(pattern_per_bar,chords,steps):
+    # bass from chord roots: pattern like "R:2 .:2 F:2 .:2" R=root F=fifth O=octave
+    s=[]
+    for ch in chords:
+        r=midi(ch);parts=[]
+        for tok in pattern_per_bar.split():
+            k,d=tok.split(':');d=int(d)
+            if k=='.':parts+=[1]+[0]*(d-1)
+            else:parts+=[{'R':r,'F':r+7,'O':r+12,'3':r+3,'4':r+4,'m':r-5}[k]]+[0]*(d-1)
+        s+=parts
+    return s
+TRK=[]
+def track(name,spd,loop,lead,bass,harm,drum,duty=2,lenv=0,hduty=1,henv=0,wave=0,lvol=11,hvol=6,bvol=2):
+    n=len(lead);assert len(bass)==n and len(harm)==n and len(drum)==n,(name,n,len(bass),len(harm),len(drum))
+    TRK.append((name,spd,loop,lead,bass,harm,drum,duty,lenv,hduty,henv,wave,lvol,hvol,bvol))
+# 0 BUGLE CALL (menus) - bugle harmonic series only (C G C E G), C major, steps=16th
+L=voice("G4:2 G4:1 G4:1 C5:4 E5:2 C5:2 G4:4  E5:2 E5:1 E5:1 G5:4 E5:2 C5:2 E5:4  G5:3 E5:1 C5:2 E5:2 G4:3 G4:1 C5:4  E5:2 G4:2 C5:8 .:4 "
+        "C5:2 E5:2 G5:4 G5:2 E5:2 C5:4  E5:2 G5:2 C6:6 G5:2 E5:4  G5:2 E5:2 C5:2 E5:2 G4:4 C5:4  C5:12 .:4",128)
+B=voice("C3:8 G2:8 C3:8 C3:8 C3:8 G2:8 C3:8 .:8 C3:8 G2:8 C3:8 E3:8 G2:8 G2:8 C3:12 .:4",128)
+Hm=voice(".:16 .:16 .:16 E4:8 .:8 .:16 G4:8 E4:8 .:16 E4:12 .:4",128)
+D=drums("................"*3+"........R.R.RRRR"+"................"*3+"RRRRRRRRK...K...",128)
+track("BUGLE CALL",8,1,L,B,Hm,D,duty=2,lenv=0,lvol=12)
+# 1 OMAHA - DOG GREEN: somber, tense, D minor, slow
+L=voice("D4:8 F4:4 E4:4  D4:12 .:4  A3:4 C4:4 D4:4 F4:4  E4:12 .:4  F4:6 G4:2 A4:8  G4:4 F4:4 E4:8  D4:4 E4:4 F4:4 A4:4  C#4:12 .:4",128)
+B=bars("R:2 .:2 R:2 .:2 R:2 .:2 R:2 .:2",["D2","D2","D2","A1","A#1","A#1","D2","A1"],16)
+Hm=voice("A3:16 A3:16 F3:16 E3:16 D3:16 D3:16 F3:16 E3:16",128)
+D=drums("K..K............"*3+"K..K........RRRR"+"K..K............"*3+"K..K....RRRRRRRR",128)
+track("DOG GREEN",11,1,L,B,Hm,D,duty=1,lenv=0,hduty=0,lvol=10,hvol=5,bvol=3)
+# 2 HEDGEROW MARCH: 1940s military march, brass square lead, snare rolls
+L=voice("G4:2 C5:2 C5:3 C5:1 E5:4 C5:4  D5:2 E5:2 F5:2 D5:2 G5:8  E5:3 F5:1 G5:2 E5:2 C5:2 E5:2 D5:4  B4:2 C5:2 D5:2 B4:2 G4:8 "
+        "G4:2 C5:2 C5:3 C5:1 E5:4 G5:4  A5:4 G5:2 F5:2 E5:4 C5:4  F5:3 E5:1 D5:2 C5:2 B4:4 D5:4  C5:8 .:4 G4:4",128)
+B=bars("R:2 .:2 F:2 .:2 R:2 .:2 F:2 .:2",["C3","G2","C3","G2","C3","F2","G2","C3"],16)
+Hm=voice("E4:8 C4:8 B3:8 B3:8 C4:8 G3:8 D4:8 D4:8 E4:8 E4:8 F4:8 A4:8 A3:8 B3:8 E4:8 .:8",128)
+D=drums("K.S.K.S.K.S.KSSS"*3+"RRRRRRRRK.S.K.S."+"K.S.K.S.K.S.KSSS"*3+"K.S.K.S.RRRRRRRR",128)
+track("HEDGEROW MARCH",7,1,L,B,Hm,D,duty=2,lenv=0,lvol=12)
+# 3 SWING SQUADRON: big-band swing dogfight (12 steps per bar = triplet feel)
+L=voice("F4:2 A4:1 C5:2 D5:1 F5:3 D5:3  D#5:2 D5:1 C5:2 A4:1 C5:6  D5:2 F5:1 A5:3 G5:2 F5:1 D5:3  F5:9 .:3 "
+        "A4:2 C5:1 D5:2 F5:1 G5:2 F5:1 D5:3  C5:2 A4:1 G4:2 F4:1 A4:6  A#4:2 D5:1 F5:2 A#5:1 A5:2 G5:1 F5:3  F5:3 C5:3 F4:3 .:3",96)
+B=voice("F2:3 A2:3 C3:3 D3:3 D#3:3 D3:3 C3:3 A2:3 A#2:3 D3:3 F3:3 D3:3 F2:3 C3:3 F3:3 C3:3 "
+        "F2:3 A2:3 C3:3 A2:3 G2:3 A#2:3 C3:3 E2:3 A#2:3 D3:3 F3:3 A#2:3 C3:3 E3:3 F2:3 .:3",96)
+Hm=voice((".:2 A4:1 .:5 A4:1 .:3 ")*2+(".:2 A#4:1 .:5 A#4:1 .:3 ")*2+(".:2 A4:1 .:5 C5:1 .:3 ")*2+(".:2 D5:1 .:5 C5:1 .:3 ")*2,96)
+D=drums("K..HSH..HSH.",96)
+track("SWING SQUADRON",6,1,L,B,Hm,D,duty=2,lenv=1,hduty=1,henv=1,lvol=12,hvol=7)
+# 4 IRON CURTAIN: Cold War spy synth, A minor ostinato
+L=voice("E5:6 D5:2 C5:4 B4:4  A4:12 .:4  C5:4 E5:4 A5:6 G5:2  F5:8 E5:8  E5:6 D5:2 C5:4 B4:4  A4:4 C5:4 B4:4 G#4:4  A4:4 B4:4 C5:4 D5:4  E5:12 .:4",128)
+B=bars("R:2 R:2 3:2 R:2 F:2 R:2 4:2 3:2",["A2","A2","F2","E2","A2","E2","F2","E2"],16)
+Hm=voice(".:16 .:8 C4:8 .:16 .:8 G#3:8 .:16 .:16 .:16 B3:16",128)
+D=drums("K...S...K.K.S..H",128)
+track("IRON CURTAIN",7,1,L,B,Hm,D,duty=1,lenv=0,hduty=2,lvol=10,bvol=2,wave=1)
+# 5 TASK FORCE: Modern, driving E minor
+L=voice("E5:4 B4:4 E5:2 F#5:2 G5:4  F#5:4 D5:4 B4:8  C5:4 E5:4 G5:4 A5:4  B5:12 .:4  E5:4 B4:4 E5:2 F#5:2 G5:4  A5:4 G5:4 F#5:4 D5:4  C5:4 D5:4 E5:4 F#5:4  E5:12 .:4",128)
+B=bars("R:1 R:1 O:1 R:1 R:1 R:1 O:1 R:1 R:1 R:1 O:1 R:1 R:1 F:1 O:1 F:1",["E2","D2","C2","B1","E2","D2","C2","B1"],16)
+Hm=voice("B4:16 A4:16 G4:16 F#4:16 B4:16 D5:16 A4:16 G4:16",128)
+D=drums("K.H.S.KHK.H.S.HH",128)
+track("TASK FORCE",6,1,L,B,Hm,D,duty=2,lenv=0,hduty=0,lvol=11,hvol=5,wave=1)
+# 6 NEON PROTOCOL: Futuristic synth arps, C minor
+def arp(ns):return ' '.join(f"{n}:1" for n in ns*4)
+L=voice(" ".join(arp(a) for a in [["C5","D#5","G5","C6"],["G#4","C5","D#5","G#5"],["A#4","D5","F5","A#5"],["G4","B4","D5","G5"],
+                                  ["C5","D#5","G5","C6"],["G#4","C5","D#5","G#5"],["D#5","G5","A#5","D#6"],["G4","B4","D5","G5"]]),128)
+B=bars("R:2 O:2 R:2 O:2 R:2 O:2 R:2 O:2",["C2","G#1","A#1","G1","C2","G#1","D#2","G1"],16)
+Hm=voice("G4:16 G#4:16 F4:16 D4:16 G4:12 A#4:4 C5:16 B4:16",128)
+D=drums("K.H.KSH.K.H.KSHH",128)
+track("NEON PROTOCOL",6,1,L,B,Hm,D,duty=0,lenv=1,hduty=2,lvol=10,hvol=7,wave=1)
+# 7 VOID DRIFT: Space ambient, D lydian
+L=voice("A5:8 E5:8  F#5:12 .:4  G#5:8 E5:4 B4:4  C#5:16  A5:8 B5:8  G#5:8 F#5:8  E5:8 C#5:8  D5:16",128)
+B=voice("D2:16 D2:16 E2:16 A1:16 D2:16 B1:16 E2:16 A1:16",128)
+Hm=voice(" ".join(f"{n}:4" for n in ["D4","A4","E5","A4"]*2+["E4","B4","G#4","B4","A3","E4","C#5","E4"]+["D4","A4","E5","A4","B3","F#4","D5","F#4","E4","B4","G#4","B4","A3","E4","C#5","E4"]),128)
+D=drums("........C.......",128)
+track("VOID DRIFT",12,1,L,B,Hm,D,duty=2,lenv=0,hduty=1,henv=2,lvol=9,hvol=6,bvol=3)
+# 8 ARSENAL THEME (title) - from v1.0 title melody, now with bass and drums
+old=("G4 - C5 - C5 C5 D5 - E5 - E5 - D5 - C5 - E5 - G5 - G5 G5 A5 - G5 - E5 - C5 - D5 - "
+     "C5 - E5 - D5 C5 B4 - C5 - A4 - G4 - - - C5 - E5 - G5 - E5 - F5 - D5 - C5 - - - ").split()
+L=[0 if t=='-' else midi(t) for t in old]
+B=bars("R:4 F:4 R:4 F:4",["C3","C3","F2","C3"],16)
+Hm=[1]*64
+D=drums("K...S...K.K.S...",64)
+track("ARSENAL THEME",9,1,L,B,Hm,D,duty=2,lenv=2,lvol=11)
+# 9 VICTORY FANFARE (one-shot)
+L=voice("C5:2 E5:2 G5:2 C6:4 G5:2 C6:8 .:4",24)
+B=voice("C3:6 G2:4 C3:10 .:4",24)
+Hm=voice("E4:6 E4:4 G4:10 .:4",24)
+D=drums("RRRRRRK...K.....R.R.K...",24)
+track("VICTORY",7,0,L,B,Hm,D,duty=2,lenv=0,lvol=13)
+# note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
+f=lambda m:440*2**((m-69)/12)
+emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])
+emit("wv_freq",[max(0,min(2047,int(round(2048-65536/f(m))))) if m>=24 else 0 for m in range(110)])
+for i,t in enumerate(TRK):
+    name,spd,loop,lead,bass,harm,drum=t[:7]
+    emit(f"trk{i}",[v for st in zip(lead,bass,harm,drum) for v in st],"unsigned char")
+emit("trk_meta",[v for t in TRK for v in (len(t[3]),t[1],t[2],t[7],t[8],t[9],t[10],t[11],t[12],t[13],t[14],0)],"unsigned char")
+Hh.append("extern const unsigned char*const trk_data[%d];"%len(TRK))
+C.append("const unsigned char*const trk_data[%d]={%s};"%(len(TRK),",".join(f"trk{i}" for i in range(len(TRK)))))
+define("NTRK",len(TRK))
+# wave shapes (32 x 4-bit, packed two per byte, high nibble first)
+tri=[int(round(7.5+7.5*(1-abs((i/16.0)-1)*2))) for i in range(32)]
+org=[min(15,int(7.5+5*math.sin(2*math.pi*i/32)+2.5*math.sin(4*math.pi*i/32))) for i in range(32)]
+def pack(w):return [(w[2*i]<<4)|w[2*i+1] for i in range(16)]
+emit("wave_shapes",pack(tri)+pack(org),"unsigned char")
 open(os.path.join(ROOT,'src','assets.h'),'w').write("#pragma once\n"+"\n".join(Hh)+"\n")
 open(os.path.join(ROOT,'src','assets.c'),'w').write('#include "assets.h"\n'+"\n".join(C)+"\n")
 print("assets ok", len(C),"arrays")

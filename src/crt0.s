@@ -29,3 +29,13 @@ rom_start:
     bx r0
 3:  b 3b
     .pool
+    .global isr_stub
+    .arm
+isr_stub:
+    stmfd sp!,{lr}
+    ldr r0,=mus_isr
+    mov lr,pc
+    bx r0
+    ldmfd sp!,{lr}
+    bx lr
+    .pool

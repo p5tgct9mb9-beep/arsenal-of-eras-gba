@@ -10,7 +10,7 @@ static inline int clampi(int v,int a,int b){return v<a?a:v>b?b:v;}
 static inline int angd(int a,int b){return ((a-b+128)&255)-128;}   // signed diff in 256-units
 typedef struct{u32 magic,frame,screen,mode,era,hp,scoreA,scoreB,timer,phase,kills,deaths,menu,x,y,extra;}Beat;
 #define BEAT ((volatile Beat*)0x0203FF00)
-enum{SCR_TITLE=1,SCR_MENU,SCR_ERA,SCR_CAMP,SCR_INF,SCR_TANK,SCR_AIR,SCR_RESULT,SCR_PAUSE,SCR_DONE,SCR_LOADOUT};
+enum{SCR_TITLE=1,SCR_MENU,SCR_ERA,SCR_CAMP,SCR_INF,SCR_TANK,SCR_AIR,SCR_RESULT,SCR_PAUSE,SCR_DONE,SCR_LOADOUT,SCR_SETTINGS,SCR_MAPSEL,SCR_MSEL,SCR_MISSION,SCR_MBRIEF};
 static u16 keys,prevk,pressed;static u32 frame;
 static void poll(void){prevk=keys;keys=~REG_KEYINPUT&0x3FF;pressed=keys&~prevk;}
 static void vsync(void){while(REG_VCOUNT>=160);while(REG_VCOUNT<160);}
@@ -26,24 +26,76 @@ static int atan2i(int x,int y){ // 0=north(-y), clockwise, 256 units
 static int idist(int dx,int dy){dx=iabs(dx);dy=iabs(dy);return dx>dy?dx+dy*3/8:dy+dx*3/8;}
 
 // ---------------------------------------------------------------- sound
-static int musPos=-1,musT,musLen;static const u16*musData;static int musRate=8;
-static void snd_init(void){REG_SOUNDCNT_X=0x80;REG_SOUNDCNT_L=0xFF77;REG_SOUNDCNT_H=2;}
-static void sfx_shot(int heavy){REG_SND4CNT=((heavy?0xF:0xA)<<12)|((heavy?3:1)<<8);REG_SND4FREQ=0x8000|(heavy?(5<<4)|4:(2<<4)|1);}
-static void sfx_laser(void){REG_SND1SWEEP=(1<<4)|(1<<3)|3;REG_SND1CNT=(0xB<<12)|(1<<8)|(2<<6);REG_SND1FREQ=0x8000|1900;}
-static void sfx_boom(void){REG_SND4CNT=(0xF<<12)|(5<<8);REG_SND4FREQ=0x8000|(6<<4)|6;}
-static void sfx_hurt(void){REG_SND1SWEEP=(3<<4)|(1<<3)|2;REG_SND1CNT=(0xC<<12)|(2<<8)|(2<<6);REG_SND1FREQ=0x8000|1200;}
-static void sfx_whoosh(void){REG_SND1SWEEP=(2<<4)|2;REG_SND1CNT=(0x9<<12)|(3<<8)|(1<<6);REG_SND1FREQ=0x8000|1300;}
-static void sfx_menu(void){if(musPos>=0)return;REG_SND2CNT=(0x8<<12)|(1<<8)|(1<<6)|50;REG_SND2FREQ=0xC000|1750;}
-static void sfx_ok(void){REG_SND1SWEEP=(2<<4)|3;REG_SND1CNT=(0xA<<12)|(2<<8)|(2<<6);REG_SND1FREQ=0x8000|1600;}
-static void music_start(const u16*d,int len,int rate){musData=d;musLen=len;musPos=0;musT=0;musRate=rate;}
-static void music_stop(void){musPos=-1;REG_SND2CNT=0;}
-static void music_tick(void){if(musPos<0)return;if(musT--)return;musT=musRate-1;u16 n=musData[musPos];
- if(n){REG_SND2CNT=(0x9<<12)|(3<<8)|(2<<6);REG_SND2FREQ=0x8000|n;}
- if(++musPos>=musLen){if(musData==title_song)musPos=0;else musPos=-1;}}
-
+// v1.1: VBlank-IRQ driven 4-voice PSG sequencer (ch2 lead, ch1 harmony, ch3 wave bass, ch4 noise drums).
+// SFX share ch1/ch2/ch4 and "lock" the channel for a few frames so effects always win.
+typedef struct{u8 track,musVol,sfxVol,shake,diff,hints;}Settings;
+static Settings SET={0,8,10,1,1,1};
+#define REG_SND3SEL REG16(0x4000070)
+#define REG_SND3CNT REG16(0x4000072)
+#define REG_SND3FREQ REG16(0x4000074)
+#define WAVE_RAM ((volatile u16*)0x4000090)
+#define REG_IE REG16(0x4000200)
+#define REG_IF REG16(0x4000202)
+#define REG_IME REG16(0x4000208)
+#define REG_DISPSTAT REG16(0x4000004)
+#define MUSDBG ((volatile u16*)0x0203FFE0)
+static volatile int musOn=0,musTrk=-1,musStep,musCnt;static const u8*musD;static const u8*musM;
+static volatile u8 lock1,lock2,lock4;static int shakeT;
+static int sv(int v){v=v*SET.sfxVol/10;return v>15?15:v;}
+static int mv(int v){v=v*SET.musVol/8;return v>15?15:v;}
+static void wave_load(int w){REG_SND3SEL=0x40;const u8*p=wave_shapes+w*16;for(int i=0;i<8;i++)WAVE_RAM[i]=p[2*i]|(p[2*i+1]<<8);REG_SND3SEL=0x80;}
+static void snd_init(void){REG_SOUNDCNT_X=0x80;REG_SOUNDCNT_L=0xFF77;REG_SOUNDCNT_H=2;wave_load(0);REG_SND3CNT=0;}
+static void sfx_shot(int heavy){if(!SET.sfxVol)return;lock4=heavy?14:6;REG_SND4CNT=(sv(heavy?0xF:0xA)<<12)|((heavy?3:1)<<8);REG_SND4FREQ=0x8000|(heavy?(5<<4)|4:(2<<4)|1);}
+static void sfx1(int sweep,int vol,int env,int duty,int fr,int lk){if(!SET.sfxVol)return;lock1=lk;REG_SND1SWEEP=sweep;REG_SND1CNT=(sv(vol)<<12)|(env<<8)|(duty<<6);REG_SND1FREQ=0x8000|fr;}
+static void sfx_laser(void){sfx1((1<<4)|(1<<3)|3,0xB,1,2,1900,10);}
+static void shake(int n){if(SET.shake&&shakeT<n)shakeT=n;}
+static void sfx_boom(void){if(!SET.sfxVol)return;lock4=40;REG_SND4CNT=(sv(0xF)<<12)|(5<<8);REG_SND4FREQ=0x8000|(6<<4)|6;}
+static void sfx_hurt(void){shake(5);sfx1((3<<4)|(1<<3)|2,0xC,2,2,1200,16);}
+static void sfx_whoosh(void){sfx1((2<<4)|2,0x9,3,1,1300,22);}
+static void sfx_menu(void){sfx1(0x08,0x8,1,1,1750,8);}
+static void sfx_ok(void){sfx1((2<<4)|3,0xA,2,2,1600,16);}
+static void mus_silence(void){if(!lock2){REG_SND2CNT=0;REG_SND2FREQ=0x8000;}if(!lock1){REG_SND1CNT=0;REG_SND1FREQ=0x8000;}REG_SND3CNT=0;}
+static void music_stop(void){musOn=0;musTrk=-1;mus_silence();}
+static void music_play(int t){if(t<0||t>=NTRK){music_stop();return;}if(musOn&&musTrk==t)return;
+ musOn=0;musD=trk_data[t];musM=trk_meta+t*12;musStep=0;musCnt=0;wave_load(musM[7]);musTrk=t;musOn=1;}
+static const u8 B3VOL[11]={0,3,3,3,2,2,2,4,4,1,1}; // ch3 volume code by music volume (25/50/75/100%)
+static void mus_step(void){const u8*m=musM;const u8*d=musD+musStep*4;
+ int ld=d[0],bs=d[1],hm=d[2],dr=d[3];
+ if(!lock2){if(ld>=2){REG_SND2CNT=(mv(m[8])<<12)|(m[4]<<8)|(m[3]<<6);REG_SND2FREQ=0x8000|sq_freq[ld];}else if(ld==1){REG_SND2CNT=0;REG_SND2FREQ=0x8000;}}
+ if(!lock1){if(hm>=2){REG_SND1SWEEP=0x08;REG_SND1CNT=(mv(m[9])<<12)|(m[6]<<8)|(m[5]<<6);REG_SND1FREQ=0x8000|sq_freq[hm];}else if(hm==1){REG_SND1CNT=0;REG_SND1FREQ=0x8000;}}
+ if(bs>=2){int vc=SET.musVol>10?1:B3VOL[SET.musVol];if(m[10]==3&&vc==1)vc=4;REG_SND3CNT=vc==4?0x8000:(vc<<13);REG_SND3FREQ=0x8000|wv_freq[bs];}else if(bs==1)REG_SND3CNT=0;
+ if(dr&&!lock4&&SET.musVol){int v;switch(dr){
+   case 1:v=mv(12);REG_SND4CNT=(v<<12)|(1<<8);REG_SND4FREQ=0x8000|(6<<4)|3;break;          // kick
+   case 2:case 4:v=mv(dr==2?10:7);REG_SND4CNT=(v<<12)|(1<<8);REG_SND4FREQ=0x8000|(2<<4)|2;break; // snare / roll
+   case 3:v=mv(5);REG_SND4CNT=(v<<12)|(1<<8)|40;REG_SND4FREQ=0xC000|(1<<4)|8|0;break;          // hat (short, metallic)
+   case 5:v=mv(10);REG_SND4CNT=(v<<12)|(2<<8);REG_SND4FREQ=0x8000|(5<<4)|5;break;           // tom
+   default:v=mv(4);REG_SND4CNT=(v<<12)|(3<<8);REG_SND4FREQ=0x8000|(1<<4)|8|1;}}             // cymbal shimmer
+}
+void mus_isr(void){ // called from the ARM IRQ stub on every VBlank
+ u16 f=REG_IF;
+ if(lock1)lock1--;if(lock2)lock2--;if(lock4)lock4--;
+ if(musOn){if(musCnt==0){mus_step();musCnt=musM[1];
+    if(++musStep>=musM[0]){if(musM[2])musStep=0;else{musOn=0;mus_silence();}}}
+  else{musCnt--;if(musD[((musStep+musM[0]-1)%musM[0])*4+3]==4&&musCnt==(musM[1]>>1)&&!lock4){REG_SND4CNT=(mv(7)<<12)|(1<<8);REG_SND4FREQ=0x8000|(2<<4)|2;}}}
+ MUSDBG[0]=musOn;MUSDBG[1]=musTrk;MUSDBG[2]=musStep;
+ REG_IF=f;*(volatile u16*)0x03007FF8|=f;}
+extern void isr_stub(void);
+static void irq_init(void){*(volatile u32*)0x03007FFC=(u32)isr_stub;REG_DISPSTAT|=0x08;REG_IE=1;REG_IME=1;}
+static const u8 DIFF_PCT[3]={65,100,135};static int diffd(int d){return d*DIFF_PCT[SET.diff]/100;}
+// era/mode default tracks
+enum{TR_BUGLE,TR_OMAHA,TR_MARCH,TR_SWING,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE,TR_THEME,TR_VICTORY};
+static const char*const TRK_DESC[NTRK]={"WW2 BUGLE CALL - MENUS","WW2 SOMBER - OMAHA CAMPAIGN","WW2 1940S MILITARY MARCH","WW2 BIG-BAND SWING - DOGFIGHT","COLD WAR SPY SYNTH","MODERN DRIVING ACTION","FUTURISTIC SYNTH ARPS","SPACE AMBIENT DRIFT","TITLE THEME","VICTORY FANFARE"};
+static const char*const TRK_NAME[NTRK]={"BUGLE CALL","DOG GREEN","HEDGEROW MARCH","SWING SQUADRON","IRON CURTAIN","TASK FORCE","NEON PROTOCOL","VOID DRIFT","ARSENAL THEME","VICTORY"};
+// ctx: 0 title, 1 menus, 2 ground battle, 3 air battle, 4 campaign/sombre
+static void bgm(int ctx,int era){if(SET.track==NTRK-1+1){music_stop();return;} // last option = OFF
+ int t;if(SET.track>0)t=SET.track-1;
+ else if(ctx==0)t=TR_THEME;else if(ctx==1)t=TR_BUGLE;else if(ctx==4)t=TR_OMAHA;
+ else{static const u8 G[5]={TR_MARCH,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE};t=(ctx==3&&era==0)?TR_SWING:G[era];}
+ music_play(t);}
+static void music_victory(void){if(SET.musVol){musOn=0;musTrk=-1;music_play(TR_VICTORY);}}
 // ---------------------------------------------------------------- frame
 static void beat_common(int scr){BEAT->magic=0xA0E5;BEAT->screen=scr;}
-static void next_frame(void){vsync();frame++;BEAT->frame=frame;poll();music_tick();}
+static void next_frame(void){vsync();frame++;BEAT->frame=frame;poll();}
 
 // ---------------------------------------------------------------- mode 3 drawing
 static u16 fb[240*160] EWRAM;
@@ -110,7 +162,7 @@ static void spr_aff(int cx,int cy,int tile,int sz,int pal,int ang,int sx,int pri
 // ---------------------------------------------------------------- tile world (BG1 SB30 cb1, clouds BG2 SB29)
 #define MAXW 64
 static u8 map[64*64] EWRAM;static u8 cmap[64*64] EWRAM;static u16 bgw[1024] EWRAM,bgc[1024] EWRAM;
-static int mapW,mapH,mapWrap,camX,camY,borderTile;static u8 tflag[32];
+static int mapW,mapH,mapWrap,camX,camY,borderTile;static u8 tflag[32];static u8 mtBank[32];
 enum{TF_SOLID=1,TF_SHOT=2,TF_SLOW=4};
 static inline int cell(int cx,int cy){if(mapWrap){cx&=mapW-1;cy&=mapH-1;}else if(cx<0||cy<0||cx>=mapW||cy>=mapH)return borderTile;return map[cy*MAXW+cx];}
 static inline int flag_at(int px,int py){return tflag[cell(px>>4,py>>4)];}
@@ -118,14 +170,22 @@ static void draw_layer(const u8*m,u16*buf,int cx0,int cy0,int bank,int wrap){
  int tx0=cx0>>4,ty0=cy0>>4;
  for(int cy=ty0;cy<ty0+11;cy++)for(int cx=tx0;cx<tx0+16;cx++){int t;
   if(wrap)t=m[(cy&(mapH-1))*MAXW+(cx&(mapW-1))];else t=(cx<0||cy<0||cx>=mapW||cy>=mapH)?borderTile:m[cy*MAXW+cx];
-  u16 b=(t*4)|(bank<<12);int X=(cx*2)&31,Y=(cy*2)&31;
+  u16 b=(t*4)|((bank+mtBank[t&31])<<12);int X=(cx*2)&31,Y=(cy*2)&31;
   buf[Y*32+X]=b;buf[Y*32+X+1]=b+1;buf[(Y+1)*32+X]=b+2;buf[(Y+1)*32+X+1]=b+3;}}
-static void present(int clouds,int ccx,int ccy){
+// map themes: 0 normal, 1 snow, 2 desert, 3 night, 4 dusk
+static u16 tint_c(u16 c,int th){if(!th)return c;int r=c&31,g=(c>>5)&31,b=(c>>10)&31;
+  if(th==1){int l=(r+g+b)/3;r=(l+r)/2+12;g=(l+g)/2+12;b=(l+b)/2+14;}else if(th==2){r=(r*3+26)/4;g=(g*3+21)/4;b=(b*3+13)/4;}
+  else if(th==3){r=r*9/20;g=g*9/20;b=b*9/20+3;}else{r=(r*3+28)/4;g=g*2/3+3;b=b*2/3+4;}
+  if(r>31)r=31;if(g>31)g=31;if(b>31)b=31;return r|(g<<5)|(b<<10);}
+static void tint_bg(int th,int banks){if(!th)return;for(int i=0;i<16*banks;i++){if((i&15)==0&&i)continue;PAL_BG[i]=tint_c(PAL_BG[i],th);}}
+static void present(int clouds,int ccx,int ccy){int kx=0,ky=0;
+ if(shakeT>0){shakeT--;if(SET.shake){kx=((frame*7)&3)-1;ky=((frame*5)&3)-1;if(shakeT>4){kx*=2;ky*=2;}
+  for(int i=0;i<noam;i++){u16*o=&oam[i*4];if((o[0]&0x300)==0x200)continue;o[0]=(o[0]&0xFF00)|((o[0]-ky)&0xFF);o[1]=(o[1]&0xFE00)|((o[1]-kx)&0x1FF);}}}
  vsync();
  dma32(oam,OAM,256);dma32(hud,SCREENBLOCK(28),512);dma32(bgw,SCREENBLOCK(30),512);
- REG_BGHOFS(1)=camX;REG_BGVOFS(1)=camY;
- if(clouds){dma32(bgc,SCREENBLOCK(29),512);REG_BGHOFS(2)=ccx;REG_BGVOFS(2)=ccy;}
- frame++;BEAT->frame=frame;poll();music_tick();}
+ REG_BGHOFS(1)=camX+kx;REG_BGVOFS(1)=camY+ky;REG_BGHOFS(0)=kx;REG_BGVOFS(0)=ky;
+ if(clouds){dma32(bgc,SCREENBLOCK(29),512);REG_BGHOFS(2)=ccx+kx;REG_BGVOFS(2)=ccy+ky;}
+ frame++;BEAT->frame=frame;poll();}
 static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int clouds){
  vsync();REG_DISPCNT=0x80; // forced blank while loading
  dma32(hud_tiles,CHARBLOCK(0),sizeof(hud_tiles)/4);
@@ -133,7 +193,7 @@ static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int
  dma32(tiles,CHARBLOCK(1),ntilewords);for(int i=0;i<16;i++)PAL_BG[i]=pal[i];
  dma32(fx_tiles,OBJ_TILES,sizeof(fx_tiles)/4);
  const u32*es=era==0?era_spr_0:era==1?era_spr_1:era==2?era_spr_2:era==3?era_spr_3:era_spr_4;
- dma32(es,OBJ_TILES+64*8,ES_NTILES*8);
+ dma32(es,OBJ_TILES+64*8,(era==0?ES_N0:ES_N1)*8);
  dma32(obj_team_pal+era*48,PAL_OBJ,24);dma32(fx_pal,PAL_OBJ+3*16,8);
  for(int i=0;i<16;i++)PAL_OBJ[4*16+i]=RGB(8,8,16);
  REG_BGCNT(0)=0|(0<<2)|(28<<8);REG_BGCNT(1)=3|(1<<2)|(30<<8);REG_BGCNT(2)=2|(1<<2)|(29<<8);
@@ -148,7 +208,7 @@ static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int
 
 // ---------------------------------------------------------------- shared entities
 typedef struct{s32 x,y;s16 vel;u16 ang,tur;s16 hp,maxhp;u8 team,alive,isp,wpn;
- s16 cd,cd2,resp,inv,hurt,anim,roll,rollcd,ammo,gren,kills,deaths,think,tgt,stuck,wander,wang,evade,regen,mode,mag[2],rl,stun,tact,veh;s32 lx,ly,gx,gy;}Unit;
+ s16 cd,cd2,resp,inv,hurt,anim,roll,rollcd,ammo,gren,kills,deaths,think,tgt,stuck,wander,wang,evade,regen,mode,mag[3],rl,stun,tact,veh;s32 lx,ly,gx,gy;}Unit;
 #define NU 12
 static Unit U[NU];
 enum{K_BUL,K_LASER,K_PLASMA,K_SHELL,K_GREN,K_MISSILE,K_ROCKET};
