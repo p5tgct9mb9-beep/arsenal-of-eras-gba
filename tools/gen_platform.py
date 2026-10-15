@@ -317,6 +317,13 @@ U=[
  ("SHAYETET 13","ISRAEL","S13","cap",(30,36,50),((40,46,60),(70,78,94),(108,116,130)),3,((40,90,200),(240,240,250)),(220,176,134)),
  ("UNIT 669","ISRAEL","UNIT 669","helmet",(120,110,76),((104,100,70),(146,140,100),(186,176,134)),0,((40,90,200),(240,240,250)),(236,194,150)),
  ("MOSSAD OPERATIVE","ISRAEL","MOSSAD","cap",(50,50,56),((60,62,70),(96,98,108),(140,142,150)),8,((40,90,200),(240,240,250)),(230,188,146)),
+ # ---- HISTORIC tab (v1.3): weapon kinds 9 musket, 10 longbow, 11 longsword+shield, 12 katana, 13 shuriken
+ ("MINUTEMAN RIFLEMAN","CONTINENTAL","MINUTEMAN","tricorn",(44,40,40),((104,80,54),(146,116,78),(196,176,138)),9,((40,60,150),(240,240,240)),(232,188,146)),
+ ("CONTINENTAL MARINE","CONTINENTAL","C.MARINE","tricorn",(36,36,40),((28,66,48),(46,96,66),(220,210,180)),9,((40,60,150),(240,240,240)),(214,166,124)),
+ ("MEDIEVAL KNIGHT","MEDIEVAL","KNIGHT","greathelm",(176,180,190),((116,120,132),(166,172,184),(210,214,222)),11,((200,40,40),(240,210,70)),(226,184,150)),
+ ("LONGBOW ARCHER","MEDIEVAL","ARCHER","hood",(66,96,52),((62,92,50),(92,122,70),(150,128,90)),10,((200,40,40),(240,210,70)),(236,196,156)),
+ ("SAMURAI","FEUDAL JAPAN","SAMURAI","kabuto",(44,40,52),((120,30,30),(162,50,40),(206,172,96)),12,((240,240,240),(200,30,40)),(230,190,150)),
+ ("SHINOBI","FEUDAL JAPAN","SHINOBI","balaclava",(30,30,40),((22,22,32),(40,40,56),(72,72,92)),13,((240,240,240),(200,30,40)),(226,186,146)),
 ]
 def hgdraw(g,hg,x0,dy,swim=False):
     o=0 if not swim else 5
@@ -334,6 +341,10 @@ def hgdraw(g,hg,x0,dy,swim=False):
     elif hg=='scarf':E(g,3+o,-1+dy,12+o,5+dy,7);R(g,8+o,5+dy,12+o,7+dy,8);R(g,3+o,4+dy,5+o,8+dy,7);P(g,10+o,4+dy,1)
     elif hg=='bandana':R(g,4+o,0+dy,11+o,2+dy,7);R(g,3+o,2+dy,4+o,4+dy,7);P(g,8+o,1+dy,8);R(g,8+o,6+dy,12+o,7+dy,8)
     elif hg=='softcap':R(g,4+o,0+dy,11+o,3+dy,7);R(g,11+o,3+dy,14+o,3+dy,8);R(g,5+o,0+dy,10+o,0+dy,8)
+    elif hg=='tricorn':R(g,3+o,1+dy,12+o,2+dy,7);E(g,5+o,-1+dy,10+o,2+dy,7);P(g,3+o,3+dy,7);P(g,12+o,3+dy,7);R(g,4+o,1+dy,11+o,1+dy,8)
+    elif hg=='greathelm':R(g,4+o,0+dy,12+o,8+dy,8);R(g,4+o,0+dy,12+o,0+dy,7);R(g,9+o,3+dy,12+o,3+dy,1);P(g,10+o,6+dy,7);P(g,11+o,6+dy,7);R(g,4+o,1+dy,4+o,8+dy,7)
+    elif hg=='hood':E(g,3+o,-1+dy,12+o,8+dy,7);E(g,8+o,2+dy,12+o,7+dy,2);P(g,10+o,4+dy,1);R(g,3+o,6+dy,5+o,9+dy,7)
+    elif hg=='kabuto':E(g,3+o,-1+dy,12+o,4+dy,7);R(g,2+o,3+dy,13+o,4+dy,7);R(g,2+o,4+dy,4+o,7+dy,7);P(g,6+o,0+dy,8);P(g,10+o,0+dy,8);P(g,8+o,1+dy,8)
     elif hg=='ijacap':R(g,4+o,0+dy,11+o,3+dy,7);R(g,11+o,3+dy,14+o,3+dy,7);R(g,3+o,3+dy,4+o,8+dy,8);P(g,7+o,1+dy,13)
 def person(f,hg,camo_seed,wk):
     g=G(16,16)
@@ -359,8 +370,13 @@ def person(f,hg,camo_seed,wk):
     hgdraw(g,hg,4,dy)
     if pose=='climb':R(g,3,5+dy,4,8+dy,2);R(g,10,4+dy,11,8+dy,2);R(g,3,9+dy,3,12+dy,10)
     else:
-        Lx=[13,14,15,15,15,15,15,15,13][wk]
-        R(g,7,10+dy,Lx,10+dy,10);P(g,Lx,9+dy,10)
+        Lx=[13,14,15,15,15,15,15,15,13,15,0,0,0,0][wk]
+        if Lx:R(g,7,10+dy,Lx,10+dy,10);P(g,Lx,9+dy,10)
+        if wk==9:R(g,4,10+dy,8,11+dy,9);R(g,14,9+dy,15,9+dy,11)
+        if wk==10:L(g,11,3+dy,13,7+dy,9);L(g,13,7+dy,11,12+dy,9);L(g,11,3+dy,11,12+dy,14);R(g,7,10+dy,10,10+dy,2)
+        if wk==11:L(g,10,10+dy,15,4+dy,11);R(g,9,9+dy,11,11+dy,10);R(g,2,8+dy,5,13+dy,12);R(g,3,9+dy,4,12+dy,13)
+        if wk==12:L(g,9,10+dy,15,7+dy,11);R(g,7,10+dy,9,10+dy,1);P(g,9,9+dy,13)
+        if wk==13:R(g,7,10+dy,11,10+dy,2);P(g,13,9+dy,11);P(g,12,9+dy,10);P(g,14,9+dy,10);P(g,13,8+dy,10);P(g,13,10+dy,10)
         if wk==2:R(g,9,11+dy,11,12+dy,10);R(g,7,9+dy,12,9+dy,11)
         if wk==3:R(g,13,10+dy,15,10+dy,1)
         if wk==4:L(g,9,9+dy,12,9+dy,11)

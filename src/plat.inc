@@ -39,18 +39,19 @@ static int world_open(int w){return PS.allun||w==0||cs_clear(w-1,PF_NS[w-1]-1);}
 static int total_clear(void){int n=0;for(int w=0;w<PF_NW;w++)for(int s=0;s<PF_NS[w];s++)n+=cs_clear(w,s);return n;}
 static int total_intel(void){int n=0;for(int w=0;w<PF_NW;w++)n+=world_intel(w);return n;}
 // ---------------------------------------------------------------- units / abilities
-enum{AB_GLIDE,AB_HIJUMP,AB_MEDIC,AB_AIR,AB_SPRINT,AB_STEALTH,AB_ROCKET,AB_NVG,AB_GRAPPLE,AB_SNIPER,AB_FLASH,AB_WALL,AB_DRONE,AB_MELEE,AB_FOCUS,AB_BARRAGE,AB_AMPHIB,AB_BREACH,AB_DIVER,AB_DEMO,AB_HEAVY,AB_RECON,AB_S13,AB_RESCUE,AB_SPY};
+enum{AB_GLIDE,AB_HIJUMP,AB_MEDIC,AB_AIR,AB_SPRINT,AB_STEALTH,AB_ROCKET,AB_NVG,AB_GRAPPLE,AB_SNIPER,AB_FLASH,AB_WALL,AB_DRONE,AB_MELEE,AB_FOCUS,AB_BARRAGE,AB_AMPHIB,AB_BREACH,AB_DIVER,AB_DEMO,AB_HEAVY,AB_RECON,AB_S13,AB_RESCUE,AB_SPY,AB_VOLLEY,AB_BAYONET,AB_SHIELD,AB_ARCHER,AB_KATANA,AB_NINJA};
 static const char*const AB_N[PF_NU]={"GLIDE CHUTE","HIGH JUMP + CHUTE","MEDIC / REVIVE","CALL AIRSTRIKE","SPRINT + FAST CLIMB","STEALTH + SWIM","ROCKET LAUNCHER","NIGHT VISION",
- "GRAPPLE + HACK","SNIPER SHOT","FLASHBANG BREACH","WALL JUMP + SWIM","FPV DRONE STRIKE","BLADE + DOUBLE JUMP","MARKSMAN FOCUS","GRENADE BARRAGE","AMPHIBIOUS DASH","FAST-ROPE + BREACH","COMBAT DIVER","DEMOLITIONS","HEAVY WEAPONS","STEALTH RECON","NAVAL COMMANDO","AIRBORNE RESCUE","DISGUISE + LOCKPICK"};
+ "GRAPPLE + HACK","SNIPER SHOT","FLASHBANG BREACH","WALL JUMP + SWIM","FPV DRONE STRIKE","BLADE + DOUBLE JUMP","MARKSMAN FOCUS","GRENADE BARRAGE","AMPHIBIOUS DASH","FAST-ROPE + BREACH","COMBAT DIVER","DEMOLITIONS","HEAVY WEAPONS","STEALTH RECON","NAVAL COMMANDO","AIRBORNE RESCUE","DISGUISE + LOCKPICK","MUSKET VOLLEY","BAYONET CHARGE","SHIELD BLOCK + CHARGE","ARROW RAIN","KATANA DASH + PARRY","SMOKE VANISH + 2X JUMP"};
 static const char*const AB_D[PF_NU]={"PARADROP START. HOLD A TO GLIDE","JUMPS HIGHER. R: PARACHUTE","MEDKITS +2. R: HEAL. 1 REVIVE","R: BOMBING RUN ON SCREEN",
  "R: SPRINT. CLIMBS 2X FASTER","R: STEALTH. FAST SWIM, NO AIR","STARTS WITH LMG. R: ROCKET","R: NVG REVEALS HIDDEN BLOCKS","R: GRAPPLE HOOK. HACKS DOORS",
  "MARKSMAN RIFLE. R: HEAVY SHOT","R: FLASHBANG STUNS + BREACHES","WALL JUMP. FAST SWIM, NO AIR","R: FPV DRONE HOMES ON TARGET","DOUBLE JUMP. R: BLADE STRIKE",
- "PRECISION RIFLE. R: SLOW TIME","+3 GRENADES. R: 3-GRENADE FAN","FAST SWIM, NO AIR. R: DASH","FAST-ROPE IN. R: BREACH CHARGE","FAST SWIM, NO AIR. R: LIMPET MINE","PARADROP. R: CHUTE / DEMO CHARGE","LMG. R: PLANT HEAVY MG (2X FIRE)","TAVOR X95. R: STEALTH, 2X DMG","SWIM/NO AIR. R: DPV DASH / LIMPET","PARADROP, +3 LIVES. R: CHUTE/HEAL","PISTOL. R: DISGUISE. PICKS LOCKS"};
-static const char*const WPN_N[9]={"CARBINE","SMG","LMG","SUPPRESSED","MARKSMAN","CARBINE","CARBINE","CARBINE","SUPPR. PISTOL"};
-static const u8 WPN_RATE[9]={10,6,5,9,24,10,10,10,13},WPN_DMG[9]={1,1,1,1,3,1,1,1,1};
+ "PRECISION RIFLE. R: SLOW TIME","+3 GRENADES. R: 3-GRENADE FAN","FAST SWIM, NO AIR. R: DASH","FAST-ROPE IN. R: BREACH CHARGE","FAST SWIM, NO AIR. R: LIMPET MINE","PARADROP. R: CHUTE / DEMO CHARGE","LMG. R: PLANT HEAVY MG (2X FIRE)","TAVOR X95. R: STEALTH, 2X DMG","SWIM/NO AIR. R: DPV DASH / LIMPET","PARADROP, +3 LIVES. R: CHUTE/HEAL","PISTOL. R: DISGUISE. PICKS LOCKS","LONG RIFLE. R: 3-BALL VOLLEY","MUSKET. R: BAYONET CHARGE","SWORD. R: SHIELD UP / CHARGE","LONGBOW. R: ARROW RAIN AHEAD","KATANA. R: DASH, PARRIES SHOTS","SHURIKEN. 2X JUMP. R: SMOKE"};
+static const char*const WPN_N[14]={"CARBINE","SMG","LMG","SUPPRESSED","MARKSMAN","CARBINE","CARBINE","CARBINE","SUPPR. PISTOL","FLINTLOCK MUSKET","LONGBOW","LONGSWORD","KATANA","SHURIKEN"};
+static const u8 WPN_RATE[14]={10,6,5,9,24,10,10,10,13,42,22,16,10,9},WPN_DMG[14]={1,1,1,1,3,1,1,1,1,4,2,3,2,1};
+#include "specload.inc"
 static int is_swimmer(int u){return u==5||u==11||u==16||u==AB_DIVER||u==AB_S13;}
 // ---------------------------------------------------------------- runtime state
-typedef struct{s32 x,y,vx,vy;s16 hp,maxhp,armor,inv,cd,gcd,abcd,abT,gren,rapidT,jetT,swT,air,lives,anim,face,on,crouch,climb,swim,jumps,chute,dead,deadT,revived,dashT,hookT,hx,hy,nvg,wallT,spaceW,stand;}PPl;
+typedef struct{s32 x,y,vx,vy;s16 hp,maxhp,armor,inv,cd,gcd,abcd,abT,gren,rapidT,jetT,swT,air,lives,anim,face,on,crouch,climb,swim,jumps,chute,dead,deadT,revived,dashT,hookT,hx,hy,nvg,wallT,spaceW,stand,eq1n,medUsed;}PPl;
 static PPl P;
 typedef struct{s32 x,y,vx,vy;s16 hp,t,cd,a,b,c,stun;u8 k,p,face,alive,on,st;s16 x0,y0;}PEnt;
 #define NPE 96
@@ -141,8 +142,8 @@ static void pl_respawn(int fromChk){
  if(!fromChk&&(pFl&SF_B)){sx=56;}
  for(int y=0;y<PH;y++){if(!(TFL[ptile(sx>>4,y)]&(F_SOL))&&(TFL[ptile(sx>>4,y+1)]&(F_SOL|F_ONE))){sy=y*16+16;break;}}
  if(sy<0)sy=9*16;
- int keepHp=P.maxhp?P.maxhp:3;int lives=P.lives,gr=P.gren;
- memset(&P,0,sizeof P);P.lives=lives;P.maxhp=keepHp;P.hp=P.maxhp;P.gren=gr<3?3+(PS.unit==AB_BARRAGE?3:0):gr;
+ int keepHp=P.maxhp?P.maxhp:3;int lives=P.lives,gr=P.gren,e1=P.eq1n,mu=P.medUsed;int g0=EQ_CNT[SOL[PS.unit].eq0]+(PS.unit==AB_BARRAGE&&SOL[PS.unit].eq0==EQ_FRAG?3:0);
+ memset(&P,0,sizeof P);P.lives=lives;P.maxhp=keepHp;P.hp=P.maxhp;P.gren=gr<g0?g0:gr;P.eq1n=e1<EQ_CNT[SOL[PS.unit].eq1]?EQ_CNT[SOL[PS.unit].eq1]:e1;P.medUsed=mu;
  P.x=sx<<8;P.y=sy<<8;P.face=1;P.air=600;P.inv=60;
  if(!fromChk&&((pFl&SF_C)||PS.unit==AB_GLIDE||PS.unit==AB_DEMO||PS.unit==AB_RESCUE)&&!(pFl&(SF_T|SF_B|SF_A))){P.y=-8<<8;P.chute=1;}
  memset(&B,0,sizeof B);pBossOn=0;
@@ -150,7 +151,8 @@ static void pl_respawn(int fromChk){
  pTide=0;pWindOn=0;pWindT=0;pRaft=-1;
  for(int i=0;i<nPE;i++)if(PE[i].alive&&PE[i].k==35){pRaft=i;PE[i].x=(sx-16)<<8;PE[i].y=(9*16+2)<<8;}}
 static void pl_start(int w,int s){pw=w;ps_=s;const PfStage*S=&PF_ST[w][s];pTheme=S->th;pFl=S->fl;pIntel=0;pTags=0;pSecret=0;pDone=0;pT=0;pChkX=0;
- memset(&P,0,sizeof P);P.lives=PS.unit==AB_RESCUE?8:5;P.maxhp=3;P.gren=3+(PS.unit==AB_BARRAGE?3:0);
+ memset(&P,0,sizeof P);P.lives=PS.unit==AB_RESCUE?8:5;P.maxhp=3;{const SoLo*l=&SOL[PS.unit];P.gren=EQ_CNT[l->eq0]+(PS.unit==AB_BARRAGE&&l->eq0==EQ_FRAG?3:0);P.eq1n=EQ_CNT[l->eq1];}
+ so_calc(PS.unit,0,&SW[0]);so_calc(PS.unit,1,&SW[1]);pWsel=0;
  pl_load_gfx();pl_respawn(0);}
 // ---------------------------------------------------------------- collision helpers
 static int solid_at(int px,int py){int f=pflag(px,py);return f&F_SOL;}
@@ -160,7 +162,7 @@ static int box_hit(s32 x,s32 y,int hw,int hh){int px=x>>8,py=y>>8;
 static void bump_tile(int cx,int cy);
 static void break_tile(int cx,int cy){int t=ptile(cx,cy);if(t==T_BRICK||t==T_DOOR){pm[PMI(cx,cy)]=T_AIR;fx_add(cx*16+8,cy*16+8,FXK_SMALL);for(int i=0;i<3;i++)fx_add(cx*16+4+i*4,cy*16+4,FXK_SPARK);}}
 static void blast(int x,int y,int r,int dmg,int team);
-static int pKills,pToastT,pNextTag;static const char*pToast1;static char pToastB[32];static u16 dprev;
+static int pSmokeT;static int pKills,pToastT,pNextTag;static const char*pToast1;static char pToastB[32];static u16 dprev;
 static void ptoast(const char*s){int k=0;while(*s&&k<30)pToastB[k++]=*s++;pToastB[k]=0;pToast1=pToastB;pToastT=120;}
 static void sprf(int x,int y,int tile,int shape,int size,int pal,int prio,int hf){
  if(noam>=128||x<=-64||x>=240||y<=-64||y>=160)return;u16*o=&oam[noam*4];
@@ -169,6 +171,7 @@ static void pl_die(int pit){if(P.dead)return;
  if(!pit&&PS.unit==AB_MEDIC&&!P.revived){P.revived=1;P.hp=2;P.inv=150;ptoast("PJ REVIVE!");sfx_ok();return;}
  P.dead=1;P.deadT=0;P.vy=-0x500;P.vx=0;sfx_boom();shake(10);}
 static void pl_hurt(int n){if(P.inv>0||P.dead||P.dashT>0)return;
+ if((PS.unit==AB_SHIELD||PS.unit==AB_KATANA)&&P.abT>0){P.inv=20;fx_add(P.x>>8,(P.y>>8)-10,FXK_SPARK);sfx1(0x08,0xA,1,2,1800,4);return;}
  if(pDemo){P.inv=30;return;}
  if(P.armor>0)P.armor--;else P.hp-=n;P.inv=90;sfx_hurt();if(P.hp<=0)pl_die(0);else{P.vy=-0x300;P.vx=-P.face*0x180;}}
 static PB*pb_new(int k,int team,s32 x,s32 y,s32 vx,s32 vy,int life,int dmg){for(int i=0;i<NPB;i++)if(PBs[i].life<=0){PB*b=&PBs[i];b->x=x;b->y=y;b->vx=vx;b->vy=vy;b->k=k;b->team=team;b->life=life;b->dmg=dmg;b->pierce=0;return b;}return 0;}
@@ -222,6 +225,12 @@ static void pl_ability(void){int u=PS.unit;if(P.abcd>0)return;
   case AB_S13:if(P.swim){P.dashT=18;P.abcd=60;sfx_whoosh();}else{pb_new(PK_GREN,0,P.x+P.face*(6<<8),P.y-(6<<8),P.face*0x80,0,70,8);P.abcd=200;ptoast("LIMPET MINE");sfx_menu();}break;
   case AB_RESCUE:if(!P.on){P.chute^=1;sfx_whoosh();}else if(P.hp<P.maxhp){P.hp++;P.abcd=700;sfx_ok();ptoast("CASEVAC KIT +1");}break;
   case AB_SPY:P.abT=240;P.abcd=600;ptoast("DISGUISED - DON'T SHOOT");sfx_menu();break;
+  case AB_VOLLEY:for(int k=-1;k<=1;k++){PB*b=pb_new(PK_BUL,0,P.x+P.face*(9<<8),P.y-(9<<8),P.face*0x780,k*0x60,44,4);if(b)b->pierce=1;}fx_add((P.x>>8)+P.face*12,(P.y>>8)-9,FXK_SMOKE);fx_add((P.x>>8)+P.face*12,(P.y>>8)-9,FXK_FLASH);P.abcd=300;sfx_shot(1);shake(3);ptoast("VOLLEY - FIRE!");break;
+  case AB_BAYONET:P.dashT=22;P.abcd=150;sfx_whoosh();ptoast("BAYONET CHARGE!");break;
+  case AB_SHIELD:if(P.abT>0&&(keys&(K_LEFT|K_RIGHT))){P.dashT=16;P.abT=0;P.abcd=120;ptoast("SHIELD CHARGE");sfx_whoosh();}else{P.abT=200;P.abcd=20;ptoast("SHIELD UP");sfx_menu();}break;
+  case AB_ARCHER:for(int k=0;k<6;k++){PB*b=pb_new(PK_BUL,0,(P.x>>8)+P.face*(40+k*22)<<8,(camY-6-k*8)<<8,P.face*0x80,0x600,70,3);if(b)b->pierce=1;}P.abcd=360;sfx_whoosh();ptoast("ARROW RAIN");break;
+  case AB_KATANA:P.dashT=16;P.abT=24;P.abcd=80;fx_add(P.x>>8,(P.y>>8)-8,FXK_SPARK);sfx1(0x08,0xA,1,2,1500,6);break;
+  case AB_NINJA:P.abT=240;P.abcd=600;fx_add(P.x>>8,(P.y>>8)-8,FXK_SMOKE);fx_add((P.x>>8)+6,(P.y>>8)-4,FXK_SMOKE);ptoast("SMOKE VANISH");sfx_whoosh();break;
   case AB_HEAVY:P.abT=300;P.abcd=600;ptoast("HEAVY MG PLANTED");sfx_menu();break;
   case AB_DRONE:{PB*b=pb_new(PK_FPV,0,P.x,P.y-(20<<8),P.face*0x200,-0x100,240,8);(void)b;P.abcd=360;sfx_whoosh();ptoast("FPV DRONE AWAY");}break;
   case AB_MELEE:{int x=(P.x>>8)+P.face*14,y=(P.y>>8)-8;fx_add(x,y,FXK_SPARK);fx_add(x+P.face*6,y-4,FXK_SPARK);
@@ -232,7 +241,7 @@ static void pl_ability(void){int u=PS.unit;if(P.abcd>0)return;
 static void pl_update(void){
  if(P.dead){P.deadT++;P.vy+=60;P.y+=P.vy;return;}
  int u=PS.unit;
- if(P.inv>0)P.inv--;if(P.cd>0)P.cd--;if(P.gcd>0)P.gcd--;if(P.abcd>0)P.abcd--;if(P.abT>0)P.abT--;if(P.rapidT>0)P.rapidT--;if(P.jetT>0)P.jetT--;if(P.dashT>0)P.dashT--;if(pSlow>0)pSlow--;
+ if(P.inv>0)P.inv--;if(P.cd>0)P.cd--;if(P.gcd>0)P.gcd--;if(P.abcd>0)P.abcd--;if(P.abT>0)P.abT--;if(P.rapidT>0)P.rapidT--;if(P.jetT>0)P.jetT--;if(P.dashT>0)P.dashT--;if(pSlow>0)pSlow--;if(pSmokeT>0)pSmokeT--;
  if(u==AB_AIR&&P.abT==1){for(int k=0;k<6;k++)pb_new(PK_BOMB,0,(camX+30+k*36)<<8,(camY-8-k*10)<<8,0x40,0x100,200,5);}
  int left=keys&K_LEFT,right=keys&K_RIGHT,down=keys&K_DOWN,up=keys&K_UP,jp=pressed&K_A,jh=keys&K_A;
  int lowg=pFl&SF_L,zg=pFl&SF_Z,ice=pFl&SF_I;
@@ -248,7 +257,7 @@ static void pl_update(void){
  if((midF&F_CLB)&&(up||down)&&!P.swim){P.climb=1;P.chute=0;}
  if(P.climb&&!(midF&F_CLB)&&!(TFL[ptile(cx,(P.y>>8)>>4)]&F_CLB))P.climb=0;
  P.crouch=down&&P.on&&!P.climb&&!P.swim;
- int maxv=0x1C0;if(u==AB_SPRINT&&P.abT>0)maxv=0x2E0;if(P.swim)maxv=is_swimmer(u)?0x1A0:0xE0;if(P.crouch||(u==AB_HEAVY&&P.abT>0))maxv=0;
+ int maxv=0x1C0;if(u==AB_SPRINT&&P.abT>0)maxv=0x2E0;if(P.swim)maxv=is_swimmer(u)?0x1A0:0xE0;if(P.crouch||(u==AB_HEAVY&&P.abT>0))maxv=0;if(u==AB_SHIELD&&P.abT>0)maxv=maxv*2/3;maxv=maxv*clampi(SW[pWsel].melee?100:SW[pWsel].move,80,112)/100;
  int acc=P.on?(ice?0x0C:0x30):0x22,fr=P.on?(ice?0x05:0x30):0x0A;
  if(P.hookT>0){P.hookT--;int dx=P.hx-(P.x>>8),dy=P.hy-(P.y>>8);int d=idist(dx,dy);if(d<10){P.hookT=0;P.vy=-0x200;}else{P.vx=dx*0x600/d;P.vy=dy*0x600/d;}}
  else if(P.dashT>0){P.vx=P.face*0x420;}
@@ -266,7 +275,7 @@ static void pl_update(void){
  else{
   if(jp){
    if(P.on||P.wallT>0){P.vy=(u==AB_HIJUMP)?-0x600:-0x540;P.jumps=1;P.on=0;P.stand=0;P.chute=0;sfx1(0x16,0x7,1,2,1500,6);}
-   else if(u==AB_MELEE&&P.jumps<2){P.vy=-0x4A0;P.jumps=2;fx_add(P.x>>8,P.y>>8,FXK_SMOKE);}
+   else if((u==AB_MELEE||u==AB_NINJA)&&P.jumps<2){P.vy=-0x4A0;P.jumps=2;fx_add(P.x>>8,P.y>>8,FXK_SMOKE);}
    else if(u==AB_WALL&&(box_hit(P.x+0x300,P.y,5,14)||box_hit(P.x-0x300,P.y,5,14))){int dir=box_hit(P.x+0x300,P.y,5,14)?-1:1;P.vy=-0x4C0;P.vx=dir*0x240;P.face=dir;sfx1(0x16,0x7,1,2,1500,6);}
   }
   int gh=46,gn=108,mf=0x600;if(lowg){gh=18;gn=44;mf=0x380;}if(zg){gh=8;gn=16;mf=0x160;}
@@ -311,19 +320,43 @@ static void pl_update(void){
  if(P.x<(8<<8))P.x=8<<8;if(P.x>((pW*16-8)<<8))P.x=(pW*16-8)<<8;
  if(pAuto&&!pBossOn){int mn=(camX+10)<<8;if(P.x<mn){P.x=mn;if(box_hit(P.x,P.y,5,hh))pl_die(1);}int mx=(camX+232)<<8;if(P.x>mx)P.x=mx;}
  if(pBossOn){int mn=(pArenaX+8)<<8;if(P.x<mn)P.x=mn;}
- // weapons
- int rate=WPN_RATE[PF_UW[u]];int dmg=WPN_DMG[PF_UW[u]];if(u==AB_RECON&&P.abT>0)dmg*=2;int k=PK_BUL;
+ // weapons (v1.3: stats from the Spec Ops loadout; SELECT swaps primary/secondary; melee auto at close range)
+ if((pressed&K_SEL)&&SW[1].n){pWsel^=1;ptoast(SW[pWsel].n);sfx_menu();}
+ const SoW*W=&SW[pWsel];int rate=W->rate;int dmg=(W->dmg+50)/100;if(u==AB_RECON&&P.abT>0)dmg*=2;int k=PK_BUL;
  if(P.spaceW==1){rate=6;dmg=2;k=PK_PLASMA;}else if(P.spaceW==2){rate=14;dmg=4;}
  if(P.rapidT>0||((u==AB_AMPHIB||u==AB_DIVER)&&pRaft>=0&&P.stand==pRaft+1))rate=(rate+1)/2;
  if(u==AB_HEAVY&&P.abT>0){rate=(rate+1)/2;dmg++;}
- if((keys&K_B)&&P.cd<=0&&!P.climb){P.cd=rate;int upA=up&&!P.swim;
+ if((keys&K_B)&&P.cd<=0&&!P.climb){int upA=up&&!P.swim;const Mel*M=&MEL[SOL[u].mel];
+  int mx=(P.x>>8)+P.face*10,my=(P.y>>8)-8,close=0;
+  for(int i=0;i<nPE&&!close;i++){PEnt*e=&PE[i];if(e->alive&&e->k<10&&iabs((e->x>>8)-mx)<M->reach&&iabs((e->y>>8)-8-my)<14&&((e->x>>8)-(P.x>>8))*P.face>=0)close=1;}
+  if(!P.spaceW&&(W->melee||close)&&!upA){P.cd=M->rate;int x=(P.x>>8)+P.face*(M->reach/2+4),y=my;fx_add(x,y,FXK_SPARK);fx_add(x+P.face*6,y-4,FXK_SPARK);
+   for(int i=0;i<nPE;i++){PEnt*e=&PE[i];if(e->alive&&e->k<10&&iabs((e->x>>8)-x)<M->reach&&iabs((e->y>>8)-8-y)<16)ent_dmg(e,M->dmg);}
+   if(boss_hit(x,y))boss_dmg(M->dmg-1>0?M->dmg-1:1);
+   if(u==AB_KATANA||u==AB_SHIELD)for(int i=0;i<NPB;i++){PB*b=&PBs[i];if(b->life>0&&b->team==1&&b->k==PK_EBUL&&iabs((b->x>>8)-x)<16&&iabs((b->y>>8)-y)<14){b->team=0;b->k=PK_BUL;b->vx=-b->vx*2;b->vy=0;b->dmg=2;}}
+   sfx1(0x08,0xA,1,2,1500,6);}
+  else{P.cd=rate;
   s32 bx=P.x+(upA?0:P.face*(9<<8)),by=P.y-((P.crouch?6:9)<<8)-(upA?(6<<8):0);
-  s32 vx=upA?0:P.face*0x700,vy=upA?-0x700:0;
-  if(PF_UW[u]==2&&!upA)vy=((frame*37)%5-2)*0x20;
-  PB*b=pb_new(k,0,bx,by,vx,vy,40,dmg);if(b&&(PF_UW[u]==4||P.spaceW==2))b->pierce=1;
+  int sp=P.spaceW?0x700:W->spd;s32 vx=upA?0:P.face*sp,vy=upA?-sp:0;
+  if(W->wk==2&&!upA)vy=((frame*37)%5-2)*0x20;
+  for(int q=0;q<W->pel;q++){s32 qv=vy;if(W->pel>1)qv+=(q-(W->pel-1)/2)*0x90;else if(W->spr>0&&!upA)qv+=((int)((frame*53+q*17)%(2*W->spr+1))-W->spr)*0x28;
+   PB*b=pb_new(k,0,bx,by,vx,qv,W->life,dmg);if(b&&(W->pierce||P.spaceW==2))b->pierce=1;}
   if(u==AB_SPY&&P.abT>0){P.abT=0;ptoast("COVER BLOWN");}
-  if(PF_UW[u]!=3&&PF_UW[u]!=8)fx_add((bx>>8)+P.face*2,by>>8,FXK_FLASH);sfx_shot(PF_UW[u]==4);}
- if((pressed&K_L)&&P.gren>0&&P.gcd<=0){P.gren--;P.gcd=30;pb_new(PK_GREN,0,P.x,P.y-(10<<8),P.face*0x260+P.vx/2,-0x380,90,4);sfx_whoosh();}
+  if(W->wk==9)fx_add((bx>>8)+P.face*4,by>>8,FXK_SMOKE);
+  if(!W->sup&&W->wk!=10&&W->wk!=13)fx_add((bx>>8)+P.face*2,by>>8,FXK_FLASH);if(W->wk==10||W->wk==13)sfx_whoosh();else sfx_shot(W->wk==4||W->wk==9);}}
+ if((pressed&K_L)&&P.gcd<=0){int sl=(keys&K_DOWN)?1:0;int eq=sl?SOL[u].eq1:SOL[u].eq0;s16*cnt=sl?&P.eq1n:&P.gren;
+  if(eq&&*cnt>0){(*cnt)--;P.gcd=30;s32 gx=P.x,gy=P.y-(10<<8);
+   switch(eq){case EQ_FRAG:pb_new(PK_GREN,0,gx,gy,P.face*0x260+P.vx/2,-0x380,90,4);break;
+    case EQ_SEMTEX:pb_new(PK_GREN,0,gx,gy,P.face*0x2A0+P.vx/2,-0x300,50,5);break;
+    case EQ_MOLOTOV:pb_new(PK_GREN,0,gx,gy,P.face*0x240+P.vx/2,-0x340,60,3);break;
+    case EQ_C4:pb_new(PK_GREN,0,P.x+P.face*(8<<8),P.y-(8<<8),P.face*0x100,-0x100,110,10);ptoast("C4 PLACED");break;
+    case EQ_CLAY:pb_new(PK_GREN,0,P.x+P.face*(10<<8),P.y-(6<<8),0,0,240,8);ptoast("CLAYMORE SET");break;
+    case EQ_KNIFE:{PB*b=pb_new(PK_BUL,0,P.x+P.face*(8<<8),P.y-(9<<8),P.face*0x800,0,40,3);if(b)b->pierce=1;}break;
+    case EQ_HAWK:pb_new(PK_ARC,0,gx,gy,P.face*0x300,-0x300,60,4);break;
+    case EQ_FLASH:{int x=(P.x>>8)+P.face*40,y=(P.y>>8)-10;fx_add(x,y,FXK_FLASH);sfx_boom();for(int i=0;i<nPE;i++){PEnt*e=&PE[i];if(e->alive&&e->k<10&&idist((e->x>>8)-x,(e->y>>8)-y)<100)e->stun=180;}}break;
+    case EQ_SMOKE:pSmokeT=180;for(int q=0;q<4;q++)fx_add((P.x>>8)-12+q*8,(P.y>>8)-8,FXK_SMOKE);ptoast("SMOKE");break;
+    case EQ_STIM:if(P.hp<P.maxhp)P.hp++;ptoast("STIM +1");sfx_ok();break;
+    case EQ_MED:P.hp+=2;if(P.hp>P.maxhp)P.hp=P.maxhp;ptoast("MED KIT +2");sfx_ok();break;}
+   if(eq<=EQ_HAWK)sfx_whoosh();}}
  if(pressed&K_R)pl_ability();
  P.anim++;}
 // ---------------------------------------------------------------- projectiles
@@ -362,13 +395,13 @@ static void e_fire(PEnt*e,int k,int spd,int life){int dx=(P.x>>8)-(e->x>>8),dy=(
  s32 vy=dy*spd/adx;if(vy>spd/2)vy=spd/2;if(vy<-spd/2)vy=-spd/2;int bj=BOTD[SET.bot].jit;vy+=((int)(rnd()%(bj*2+1))-bj)*6;
  pb_new(k,1,e->x+dir*(8<<8),e->y-(9<<8),dir*spd,k==PK_ARC?-0x380:vy,life,1);}
 static int tri(int t,int n){if(n<=0)return 0;t%=2*n;return t<n?t:2*n-t;}
-static void ents_update(void){int px=P.x>>8,py=P.y>>8;int stealth=(PS.unit==AB_STEALTH||PS.unit==AB_RECON||PS.unit==AB_SPY)&&P.abT>0;
+static void ents_update(void){int px=P.x>>8,py=P.y>>8;int stealth=((PS.unit==AB_STEALTH||PS.unit==AB_RECON||PS.unit==AB_SPY||PS.unit==AB_NINJA)&&P.abT>0)||pSmokeT>0;
  for(int i=0;i<nPE;i++){PEnt*e=&PE[i];if(!e->alive)continue;int ex=e->x>>8,ey=e->y>>8;int dx=px-ex;
   if(iabs(ex-(camX+120))>300&&e->k!=25&&e->k!=26)continue;
   if(e->c>0)e->c--;
   if(e->k<=7){if(pSlow&&(frame&1))continue;if(e->stun>0){e->stun--;continue;}
    e->face=dx<0?-1:1;e->t++;
-   int range=(PF_UW[PS.unit]==3||PF_UW[PS.unit]==8||(PS.unit==AB_SNIPER&&(PF_THSTY[pTheme]==3||PF_THSTY[pTheme]==7)))?120:170;
+   int range=(SW[pWsel].sup||(PS.unit==AB_SNIPER&&(PF_THSTY[pTheme]==3||PF_THSTY[pTheme]==7)))?120:170;
    int vis=iabs(dx)<range&&iabs(py-ey)<72&&!stealth&&!P.dead;
    if(e->cd>0)e->cd--;
    switch(e->k){
@@ -616,44 +649,55 @@ static const char*course_tags(int w,int s){int f=PF_ST[w][s].fl;
  if(f&SF_Z)return "ZERO-G";if(f&SF_L)return "LOW GRAVITY";if(f&SF_R)return "RISING TIDE";if(f&SF_N)return "WIND GUSTS";if(f&SF_I)return "ICE";
  if(f&SF_T)return "TUNNELS";if(f&SF_D)return "NIGHT - NVG HELPS";if(f&SF_J)return "JETPACK CHASMS";if(f&SF_C)return "PARADROP";if(f&SF_X)return "SECRET EXIT HIDDEN";return "";}
 // v1.3: unit select is a nation-grouped grid (one row per nation, flag-colour tag + portrait); all units free from the start
-#define NNAT 8
-static const char*const NAT_N[NNAT]={"USA","UK","UKRAINE","JAPAN","GERMANY","MEXICO","POLAND","ISRAEL"};
-static const char*const NAT_S[NNAT]={"US","UK","UA","JP","DE","MX","PL","IL"};
+#define NNAT 11
+#define NMODN 8 // nations 0..7 = MODERN tab, 8..10 = HISTORIC tab
+static const char*const NAT_N[NNAT]={"USA","UK","UKRAINE","JAPAN","GERMANY","MEXICO","POLAND","ISRAEL","CONTINENTAL","MEDIEVAL","FEUDAL JAPAN"};
+static const char*const NAT_D[3]={"REV. WAR","MEDIEVAL","SENGOKU"};
+static const char*const NAT_S[NNAT]={"US","UK","UA","JP","DE","MX","PL","IL","1776","1415","1600"};
 static int unit_nat(int u){const char*c=PF_UC[u];for(int n=0;n<NNAT;n++){const char*a=NAT_N[n];int k=0;while(a[k]&&a[k]==c[k])k++;if(!a[k]&&!c[k])return n;}return 0;}
 static void flag_tag(int x,int y,int n){ // generic flag-colour stripes, no emblems
  static const u16 F3[NNAT][3]={{RGB(200,40,50),RGB(240,240,240),RGB(40,60,140)},{RGB(30,50,130),RGB(240,240,240),RGB(200,30,40)},{RGB(40,100,210),RGB(40,100,210),RGB(250,210,40)},
   {RGB(245,245,245),RGB(245,245,245),RGB(245,245,245)},{RGB(20,20,20),RGB(210,20,30),RGB(250,200,40)},{RGB(0,120,70),RGB(245,245,245),RGB(200,30,40)},
-  {RGB(245,245,245),RGB(245,245,245),RGB(215,30,50)},{RGB(245,245,245),RGB(30,70,180),RGB(245,245,245)}};
+  {RGB(245,245,245),RGB(245,245,245),RGB(215,30,50)},{RGB(245,245,245),RGB(30,70,180),RGB(245,245,245)},
+  {RGB(40,60,150),RGB(220,200,150),RGB(40,60,150)},{RGB(200,40,40),RGB(240,210,70),RGB(200,40,40)},{RGB(245,245,245),RGB(245,245,245),RGB(245,245,245)}};
  if(n==1||n==2||n==4||n==6||n==7){for(int k=0;k<3;k++)m3_fill(x,y+k*3,12,3,F3[n][k]);}else for(int k=0;k<3;k++)m3_fill(x+k*4,y,4,9,F3[n][k]);
  if(n==0){m3_fill(x,y,12,9,RGB(240,240,240));for(int k=0;k<9;k+=2)m3_fill(x,y+k,12,1,RGB(200,40,50));m3_fill(x,y,5,5,RGB(40,60,140));}
- if(n==3)m3_fill(x+4,y+3,4,3,RGB(200,30,40));
+ if(n==3||n==10)m3_fill(x+4,y+3,4,3,RGB(200,30,40));
  if(n==1){m3_fill(x+5,y,2,9,RGB(200,30,40));}
  m3_px(x-1,y-1,0);}
+#include "specload_ui.inc"
 static int unit_select(void){int sel=PS.unit,redraw=1;if(sel>=PF_NU)sel=0;int rs[NNAT],rn[NNAT];
  for(int n=0;n<NNAT;n++){rs[n]=-1;rn[n]=0;}for(int u=0;u<PF_NU;u++){int n=unit_nat(u);if(rs[n]<0)rs[n]=u;rn[n]++;}
- for(;;){BEAT->screen=SCR_PUNIT;BEAT->menu=sel;BEAT->extra=PF_NU;int sn=unit_nat(sel),col=sel-rs[sn];
-  if(redraw){redraw=0;m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);m3_ctext(8,"SELECT UNIT - ALL 25 AVAILABLE",C_YEL,1);
-   for(int n=0;n<NNAT;n++){int y=19+n*13;flag_tag(10,y+3,n);m3_text(25,y+4,NAT_S[n],n==sn?C_YEL:C_GRAY,1);
-    for(int k=0;k<rn[n];k++){int u=rs[n]+k,x=40+k*18;if(u==sel){m3_fill(x-1,y-1,18,16,RGB(90,80,30));}m3_unit(u,x,y-2,1,0);}}
-   // big portrait for the current pick, over the free space right of the short rows
+ for(;;){BEAT->screen=SCR_PUNIT;BEAT->menu=sel;BEAT->extra=PF_NU;int sn=unit_nat(sel),col=sel-rs[sn],tab=sn>=NMODN,n0=tab?NMODN:0,n1=tab?NNAT:NMODN;BEAT->mode=tab;
+  if(redraw){redraw=0;m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);
+   // tabs
+   m3_fill(8,7,70,10,tab?RGB(30,36,70):RGB(90,80,30));m3_fill(80,7,70,10,tab?RGB(90,80,30):RGB(30,36,70));m3_text(18,9,"MODERN",tab?C_GRAY:C_YEL,1);m3_text(88,9,"HISTORIC",tab?C_YEL:C_GRAY,1);
+   m3_text(156,9,cat3("ALL ",itoa(PF_NU)," FREE"),C_GREEN,1);
+   for(int n=n0;n<n1;n++){int y=tab?24+(n-n0)*22:20+(n-n0)*12;flag_tag(10,y+3,n);m3_text(25,y+4,NAT_S[n],n==sn?C_YEL:C_GRAY,1);
+    for(int k=0;k<rn[n];k++){int u=rs[n]+k,x=(tab?50:40)+k*18;if(u==sel){m3_fill(x-1,y-1,18,16,RGB(90,80,30));}m3_unit(u,x,y-2,1,0);}
+    if(tab)m3_text(90,y+4,NAT_D[n-NMODN],n==sn?C_WHITE:C_GRAY,1);}
    m3_fill(150,44,80,76,RGB(20,30,70));m3_unit(sel,158,46,4,(frame>>3)%3==2?1:0);flag_tag(214,108,sn);
-   m3_text(10,125,PF_UN[sel],C_YEL,1);m3_text(160,125,NAT_N[sn],C_BLUE,1);m3_text(10,135,cat3(WPN_N[PF_UW[sel]]," / ",AB_N[sel]),C_WHITE,1);m3_text(10,145,AB_D[sel],C_GRAY,1);
+   m3_text(10,121,PF_UN[sel],C_YEL,1);m3_text(160,121,NAT_N[sn],C_BLUE,1);m3_text(10,130,cat3(SOL[sel].prim?so_pname(sel,0,SOL[sel].prim):WPN_N[PF_UW[sel]]," / ",AB_N[sel]),C_WHITE,1);m3_text(10,139,AB_D[sel],C_GRAY,1);
+   m3_text(10,148,"L/R:TAB  A:PICK  START:LOADOUT",C_GREEN,1);
    m3_present();}
   next_frame();
   if(pressed&K_RIGHT){sel=(sel+1)%PF_NU;redraw=1;sfx_menu();}
   if(pressed&K_LEFT){sel=(sel+PF_NU-1)%PF_NU;redraw=1;sfx_menu();}
-  if(pressed&(K_UP|K_DOWN)){int n=(sn+((pressed&K_UP)?NNAT-1:1))%NNAT;sel=rs[n]+clampi(col,0,rn[n]-1);redraw=1;sfx_menu();}
-  if(pressed&(K_A|K_START)){PS.unit=sel;ps_write();sfx_ok();return sel;}if(pressed&K_B){sfx_menu();return -1;}}}
+  if(pressed&(K_UP|K_DOWN)){int cnt=n1-n0;int n=n0+((sn-n0)+((pressed&K_UP)?cnt-1:1))%cnt;sel=rs[n]+clampi(col,0,rn[n]-1);redraw=1;sfx_menu();}
+  if(pressed&(K_L|K_R)){int n=tab?0:NMODN;sel=rs[n];redraw=1;sfx_menu();}
+  if(pressed&K_START){sfx_ok();so_menu(sel);redraw=1;pressed=0;}
+  if(pressed&K_A){PS.unit=sel;ps_write();sfx_ok();return sel;}if(pressed&K_B){sfx_menu();return -1;}}}
 // v1.3: quick confirm before every course
 static int deploy_prompt(int w,int s){int redraw=1;
  for(;;){BEAT->screen=47;BEAT->menu=PS.unit;BEAT->extra=0x100|PS.unit;
   if(redraw){redraw=0;m3_fill(20,46,200,66,C_PANEL);m3_box(20,46,200,66,2);m3_unit(PS.unit,30,58,2,0);flag_tag(32,94,unit_nat(PS.unit));
    {char tb[40];int k=0;const char*a[4]={itoa(w+1),"-",itoa(s+1)," "};for(int i=0;i<4;i++)for(const char*q=a[i];*q;q++)tb[k++]=*q;for(const char*q=PF_ST[w][s].n;*q&&k<27;q++)tb[k++]=*q;tb[k]=0;m3_text(70,54,tb,C_GRAY,1);}
    m3_text(70,66,"DEPLOY AS:",C_WHITE,1);m3_text(70,76,PF_UN[PS.unit],C_YEL,1);
-   m3_text(70,90,"A=GO  SELECT=CHANGE UNIT",C_GREEN,1);m3_text(70,99,"B=BACK",C_GRAY,1);m3_present();}
+   m3_text(70,86,"A=GO  SELECT=CHANGE UNIT",C_GREEN,1);m3_text(70,95,"R=LOADOUT",C_GREEN,1);m3_text(70,104,"B=BACK",C_GRAY,1);m3_text(118,104,trunc12(SOL[PS.unit].prim?so_pname(PS.unit,0,SOL[PS.unit].prim):WPN_N[PF_UW[PS.unit]]),C_GRAY,1);m3_present();}
   next_frame();
   if(pressed&(K_A|K_START)){sfx_ok();return 1;}
   if(pressed&K_SEL){unit_select();return 2;}
+  if(pressed&K_R){so_menu(PS.unit);redraw=1;m3_title(1);pressed=0;}
   if(pressed&K_B){sfx_menu();return 0;}}}
 static void pf_wmap_run(int w){bgm_t(TR_MAP);int sel=(PS.lastW==w)?PS.lastS:0,redraw=1;if(sel>=PF_NS[w])sel=0;
  for(;;){BEAT->screen=SCR_PMAP;BEAT->mode=w;BEAT->menu=sel;BEAT->extra=total_clear();
@@ -679,7 +723,7 @@ static void pf_wmap_run(int w){bgm_t(TR_MAP);int sel=(PS.lastW==w)?PS.lastS:0,re
   if(((pressed&K_A)||demo)&&course_open(w,sel)){sfx_ok();PS.lastW=w;PS.lastS=sel;pl_run(w,sel,demo);aff_reset();bgm_t(TR_MAP);redraw=1;
    if(cs_clear(w,sel)&&sel<PF_NS[w]-1&&!demo){int n=sel+1;if(is_bonus(w,n)&&!course_open(w,n)&&n<PF_NS[w]-1)n++;sel=n;}}
   if(pressed&K_B){sfx_menu();return;}}}
-static void spec_ops(void){ps_read();bgm_t(TR_MAP);if(unit_select()<0)return;int w=PS.lastW,redraw=1;
+static void spec_ops(void){ps_read();so_read();bgm_t(TR_MAP);if(unit_select()<0)return;int w=PS.lastW,redraw=1;
  for(;;){BEAT->screen=SCR_PGLOBE;BEAT->mode=w;BEAT->menu=keys;BEAT->extra=total_clear()|(total_intel()<<8);
   if(redraw){redraw=0;dma32(pf_globe,fb,240*160/2);m3_fill(0,0,240,16,RGB(20,24,52));m3_box(0,0,240,17,2);m3_ctext(5,"SPEC OPS - CAMPAIGN MAP",C_YEL,1);
    for(int i=0;i<PF_NW;i++){int x=PF_WPOS[i][0],y=PF_WPOS[i][1];int op=world_open(i);m3_text(x-(i==9?5:2),y-3,itoa(i+1),op?C_WHITE:C_GRAY,1);
