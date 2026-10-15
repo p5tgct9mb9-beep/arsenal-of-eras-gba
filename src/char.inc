@@ -11,7 +11,7 @@ static void ch_preview(int px,int py,int f,int sc){volatile u16*pal=PAL_OBJ+6*16
  for(int y=0;y<16;y++)for(int x=0;x<16;x++){int c=chpx[f][y][x];if(c)m3_fill(px+x*sc,py+y*sc,sc,sc,pal[c]);}}
 static void name_entry(void){static const char K[4][11]={"ABCDEFGHIJ","KLMNOPQRST","UVWXYZ0123","456789-. '"};int cx=0,cy=0,redraw=1;char nb[11];int n=slen(CH.name);memcpy(nb,CH.name,11);
  for(;;){BEAT->screen=SCR_LOADOUT;BEAT->menu=100+cy*10+cx;
-  if(redraw){m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);m3_ctext(10,"ENTER NAME (MAX 10)",C_YEL,1);
+  if(redraw){m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);m3_ctext(10,"ENTER NAME (MAX 10)",C_YEL,1);
    m3_fill(60,26,120,14,RGB(30,36,60));m3_ctext(29,n?nb:"_",C_WHITE,1);
    for(int r=0;r<4;r++)for(int c=0;c<10;c++){int x=30+c*18,y=52+r*16;char s[2]={K[r][c],0};if(s[0]==' ')s[0]='_';if(r==cy&&c==cx)m3_fill(x-3,y-3,12,13,RGB(80,80,20));m3_text(x,y,s,(r==cy&&c==cx)?C_YEL:C_WHITE,1);}
    {int y=120;m3_text(60,y,cy==4&&cx<5?"> DEL":"  DEL",cy==4&&cx<5?C_YEL:C_WHITE,1);m3_text(140,y,cy==4&&cx>=5?"> DONE":"  DONE",cy==4&&cx>=5?C_YEL:C_WHITE,1);}
@@ -29,7 +29,7 @@ static void char_creator(void){enum{C_NAME,C_SKIN,C_HAIR,C_HEAD,C_HAT,C_UNI,C_CA
  for(int t=0;;t++){BEAT->screen=SCR_LOADOUT;BEAT->menu=200+sel;BEAT->extra=CH.skin|(CH.hat<<4)|(CH.uni<<8)|(CH.camo<<12)|(CH.vest<<16);
   if(t%24==0){f^=1;if(!redraw)redraw=3;}
   if(redraw){if(redraw!=3){ch_build();ch_palette(6);
-    if(redraw==2)m3_title(1);m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);m3_ctext(8,"CHARACTER CREATOR",C_YEL,1);
+    if(redraw==2)m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);m3_ctext(8,"CHARACTER CREATOR",C_YEL,1);
     for(int k=0;k<C_N;k++){int y=22+k*11;u16 c=k==sel?C_YEL:C_WHITE;
      if(k==C_DONE){m3_text(10,y+2,k==sel?"> SAVE & BACK":"  SAVE & BACK",c,1);continue;}
      const char*v=k==C_NAME?CH.name:k==C_SKIN?CHS_SKIN[CH.skin]:k==C_HAIR?CHS_HAIR[CH.hair]:k==C_HEAD?CHS_HEAD[CH.head]:k==C_HAT?CHS_HAT[CH.hat]:k==C_UNI?CHS_UNI[CH.uni]:k==C_CAMO?CHS_CAMO[CH.camo]:k==C_VEST?CHS_VEST[CH.vest]:k==C_BODY?CHS_BODY[CH.body]:CH.use?"ON":"OFF (ERA SOLDIER)";
@@ -49,7 +49,7 @@ static void char_creator(void){enum{C_NAME,C_SKIN,C_HAIR,C_HEAD,C_HAT,C_UNI,C_CA
 static void loadout_hub(int*era){static int sel=0;static const char*const IT[4]={"CAMPAIGN KITS (BY ERA)","6V6 ARSENAL (ALL ERAS)","CHARACTER CREATOR","BACK"};
  static const char*const DS[4]={"WEAPONS + VEHICLES PER ERA FOR MISSIONS","ONE POOL: ANY WEAPON, TANK OR AIRCRAFT","BUILD YOUR SOLDIER - NAME, LOOK, GEAR",""};int redraw=1;
  for(;;){BEAT->screen=SCR_LOADOUT;BEAT->menu=300+sel;
-  if(redraw){m3_title(1);m3_fill(20,30,200,100,RGB(14,18,36));m3_box(20,30,200,100,2);m3_ctext(38,"LOADOUT",C_YEL,2);
+  if(redraw){m3_title(1);m3_fill(20,30,200,100,C_PANEL);m3_box(20,30,200,100,2);m3_ctext(38,"LOADOUT",C_YEL,2);
    for(int k=0;k<4;k++)m3_text(40,64+k*12,cat(k==sel?"> ":"  ",IT[k]),k==sel?C_YEL:C_WHITE,1);m3_ctext(118,DS[sel],C_GRAY,1);m3_present();redraw=0;}
   next_frame();
   if(pressed&K_UP){sel=(sel+3)%4;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%4;redraw=1;sfx_menu();}

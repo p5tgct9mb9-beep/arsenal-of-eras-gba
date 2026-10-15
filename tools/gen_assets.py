@@ -46,6 +46,17 @@ class Cv:
     def grid(s,outline=0):
         g=[[s.im.getpixel((x,y)) for x in range(s.w)] for y in range(s.h)]
         if outline:
+            def emp(x,y):return not(0<=x<s.w and 0<=y<s.h) or g[y][x]==0
+            c2=[r[:] for r in g]
+            for y in range(s.h):
+                for x in range(s.w):
+                    v=g[y][x]
+                    if v==3:
+                        if emp(x,y-1) or emp(x-1,y):c2[y][x]=4
+                        elif emp(x,y+1) or emp(x+1,y) or emp(x+1,y+1):c2[y][x]=2
+                    elif v==14 and (emp(x,y-1) or emp(x-1,y)):c2[y][x]=11
+                    elif v==5 and (emp(x,y-1) or emp(x-1,y)) and s.w<=16:c2[y][x]=4
+            g=c2
             o=[r[:] for r in g]
             for y in range(s.h):
                 for x in range(s.w):
@@ -144,10 +155,14 @@ define("HT_PANEL_FONT",96)
 def ptile(kind):
     t=[[3]*8 for _ in range(8)]
     for i in range(8):
-        if 'T' in kind:t[0][i]=4
-        if 'B' in kind:t[7][i]=4
-        if 'L' in kind:t[i][0]=4
-        if 'R' in kind:t[i][7]=4
+        if 'T' in kind:t[0][i]=2;t[1][i]=4;t[2][i]=12
+        if 'B' in kind:t[7][i]=2;t[6][i]=4;t[5][i]=12
+        if 'L' in kind:t[i][0]=2;t[i][1]=4;t[i][2]=12
+        if 'R' in kind:t[i][7]=2;t[i][6]=4;t[i][5]=12
+    if len(kind)==2:  # rounded gold corner with a gem stud
+        cy=0 if 'T' in kind else 7;cx=0 if 'L' in kind else 7
+        t[cy][cx]=0;t[abs(cy-1)][cx]=2;t[cy][abs(cx-1)]=2
+        gy=1 if 'T' in kind else 6;gx=1 if 'L' in kind else 6;t[gy][gx]=7
     return t
 for k in ['', 'T','B','L','R','TL','TR','BL','BR']:hud+=tiles4(ptile(k),8,8)
 define("HT_PANEL",192)
@@ -168,9 +183,23 @@ hud+=icon(["...#....","..###...","..###...","..###...","..###...",".#####..","#.
 hud+=icon(["........",".rr..rr.","rrrrrrrr","rrrrrrrr",".rrrrrr.","..rrrr..","...rr...","........"])
 hud+=icon(["...y....","...y....","yyyyyyy.",".yyyyy..","..yyy...",".yy.yy..","y.....y.","........"])
 hud+=icon(["........","..####..",".#gggg#.",".#gggg#.",".#gggg#.","..####..","........","........"])
-define("HT_ICON",210)
+def heart(kind):
+    rows=[".ss..ss.","s##ss##s","s#######s"[:8],"s######s",".s####s.","..s##s..","...ss...","........"]
+    out=[]
+    for y,r in enumerate(rows):
+        o=[]
+        for x,ch in enumerate(r):
+            if ch=='s':o.append(2)
+            elif ch=='#':
+                full=kind==0 or (kind==1 and x<4)
+                o.append((14 if (y==1 and x in (1,2)) else 13) if full else 3)
+            else:o.append(0)
+        out.append(o)
+    return tiles4(out,8,8)
+for k in range(3):hud+=heart(k)   # 215 full, 216 half, 217 empty
+define("HT_ICON",210);define("HT_HEART",215)
 emit("hud_tiles",hud,"unsigned int")
-HUDP=[(0,0,0),(248,248,248),(10,10,18),(20,26,48),(150,170,210),(90,220,110),(60,40,40),(255,214,64),(240,60,60),(90,180,255),(255,150,40),(160,160,170),(0,0,0),(0,0,0),(0,0,0),(0,0,0)]
+HUDP=[(0,0,0),(248,248,248),(28,20,36),(34,52,108),(236,196,92),(110,226,120),(60,40,40),(255,222,90),(240,64,64),(96,186,255),(255,150,40),(170,170,184),(150,100,40),(236,52,72),(255,176,190),(0,0,0)]
 banks=[]
 for col in [(248,248,248),(255,214,64),(255,90,80),(110,190,255),(110,230,120),(160,164,176)]:
     p=list(HUDP);p[1]=col;banks+=pal16(p)
@@ -196,146 +225,130 @@ def ground(cv,seed,base=(1,2,3),spk=4,sp=0.06):
 def block_shade(cv,x0,y0,x1,y1,d,m,l,o=14):
     cv.r(x0,y0,x1,y1,m);cv.l(x0,y0,x1,y0,l);cv.l(x0,y0,x0,y1,l);cv.l(x0,y1,x1,y1,d);cv.l(x1,y0,x1,y1,d)
 ARENA_PALS=[
- [(52,72,36),(58,80,40),(70,94,46),(86,112,56),(104,128,64),(112,92,60),(136,112,78),(64,64,60),(100,98,90),(140,136,124),(118,82,42),(160,118,64),(30,54,26),(52,88,38),(18,20,16),(196,190,160)],
- [(190,198,208),(176,184,196),(196,204,214),(214,220,230),(236,240,246),(132,132,130),(158,156,150),(84,88,96),(118,122,130),(158,162,170),(106,74,46),(176,52,44),(30,58,48),(50,88,68),(24,26,32),(255,255,255)],
- [(186,158,110),(170,142,98),(188,160,112),(204,178,128),(220,198,150),(72,72,74),(98,98,98),(118,106,82),(152,138,108),(188,174,142),(80,98,62),(204,124,40),(58,88,38),(98,130,52),(38,32,26),(244,232,204)],
- [(28,30,50),(22,24,40),(30,34,56),(40,46,72),(54,62,96),(60,24,80),(96,42,130),(40,46,70),(72,82,114),(112,126,164),(40,240,240),(255,64,200),(20,90,84),(40,170,130),(8,8,16),(210,255,255)],
- [(92,92,100),(70,70,78),(92,92,100),(114,114,122),(142,142,150),(60,66,82),(86,94,110),(90,98,116),(132,142,162),(182,192,212),(255,170,40),(80,200,255),(46,46,52),(66,64,72),(12,12,18),(232,238,252)],
+ [(0,0,0),(56,128,64),(88,168,72),(128,200,88),(248,120,152),(184,136,80),(224,184,112),(88,88,104),(136,136,152),(192,192,200),(136,80,48),(200,144,80),(32,96,56),(64,152,72),(32,24,40),(255,248,200)],
+ [(0,0,0),(168,184,216),(208,220,240),(240,248,255),(120,176,232),(152,136,120),(192,176,160),(80,88,112),(128,136,160),(184,192,212),(120,72,48),(176,120,72),(40,88,80),(72,128,104),(28,28,48),(255,255,255)],
+ [(0,0,0),(192,144,88),(224,184,120),(248,216,152),(120,168,72),(176,120,72),(208,160,104),(104,88,80),(152,136,120),(200,184,160),(128,80,48),(192,136,80),(64,112,56),(104,152,72),(40,28,24),(255,248,224)],
+ [(0,0,0),(64,72,120),(88,100,152),(120,136,184),(96,240,232),(112,96,160),(152,136,200),(56,56,88),(96,96,136),(152,152,192),(240,96,200),(255,200,96),(32,104,112),(64,168,152),(20,20,40),(220,255,255)],
+ [(0,0,0),(112,112,128),(144,144,160),(176,176,192),(120,200,255),(128,120,136),(168,160,176),(72,76,96),(112,120,144),(168,176,200),(255,176,64),(120,200,255),(64,64,80),(96,96,112),(16,16,28),(240,244,255)],
 ]
 ERA_NAMES=["WW2","COLD","MODERN","FUTURE","SPACE"]
-def arena_set(era):
+def arena_set(era):  # v1.2: GBA-adventure style (chunky outlines, 3-tone cel shading, tufts/flowers)
     out=[]
-    # 0..2 ground variants
-    for v in range(3):
-        cv=Cv(16,16);ground(cv,era*100+v,(1,2,3),4,0.03+0.03*v)
-        if v==2:
-            if era==0:  # grass tufts
-                for (x,y) in [(3,4),(10,9),(6,12)]:cv.px(x,y,13);cv.px(x+1,y-1,13);cv.px(x-1,y-1,12)
-            elif era==1:  # footprints in snow
-                for (x,y) in [(4,3),(7,7),(4,11)]:cv.r(x,y,x+1,y+2,1)
-            elif era==2:  # ripples
-                for y in (4,10):cv.l(1,y,7,y-1,4);cv.l(8,y-1,14,y,4)
-            elif era==3:  # glowing seam
-                cv.l(0,8,15,8,10);cv.l(8,0,8,15,4)
-            else:  # tiny crater
-                cv.e(4,4,11,11,1);cv.e(5,5,10,10,2);cv.l(5,5,9,5,4)
-        if era==3:  # floor panel grid
-            cv.l(0,0,15,0,1);cv.l(0,0,0,15,1)
-        out.append(cv.grid())
-    # 3 path
-    cv=Cv(16,16);ground(cv,era*100+5,(5,5,6),6,0.0)
-    if era==2:cv.l(7,0,7,15,15) if False else [cv.r(7,y,8,y+3,15) for y in (2,10)]
-    if era==3:cv.l(0,15,15,15,10)
-    if era==4:cv.r(0,0,15,0,7);cv.r(0,15,15,15,7);cv.px(3,7,11);cv.px(12,7,11)
-    out.append(cv.grid())
-    # 4 wall
-    cv=Cv(16,16)
-    if era==0:  # stone wall / hedgerow
-        cv.r(0,0,15,15,12)
-        for y in range(0,16,4):
-            off=4 if (y//4)%2 else 0
-            for x in range(-4,16,8):block_shade(cv,x+off,y,x+off+7,y+3,7,8,9)
-        for i in range(10):cv.px(int(H(1,i)*16),int(H(2,i)*3),13)
-    elif era==1:  # concrete barrier
-        block_shade(cv,0,0,15,15,7,8,9);cv.r(2,6,13,9,7);[cv.r(x,1,x+1,3,11) for x in (2,7,12)]
-    elif era==2:  # hesco
-        cv.r(0,0,15,15,8)
-        for x in (0,8):block_shade(cv,x,0,x+7,15,7,8,9);cv.l(x+3,0,x+3,15,7)
-        for y in (3,8,13):cv.l(0,y,15,y,9)
-    elif era==3:  # neon barrier
-        block_shade(cv,0,0,15,15,7,8,9);cv.r(2,2,13,13,7);cv.r(3,7,12,8,10);cv.px(3,3,11);cv.px(12,12,11)
-    else:  # bulkhead
-        block_shade(cv,0,0,15,15,7,8,9);cv.l(0,5,15,5,7);cv.l(0,10,15,10,7)
-        for x in (3,12):
-            for y in (2,7,13):cv.px(x,y,15)
-        cv.r(6,6,9,9,10)
-    out.append(cv.grid())
-    # 5 crate
-    cv=Cv(16,16);ground(cv,era*100+1,(1,2,3),4,0.03)
-    if era in (0,1):
-        block_shade(cv,1,1,14,14,10,11 if era==0 else 10,15);cv.l(1,1,14,14,10);cv.l(14,1,1,14,10);cv.r(1,1,14,1,15)
-        if era==1:cv.r(5,6,10,9,11)
-    elif era==2:  # container
-        block_shade(cv,0,1,15,14,7,10,9)
-        for x in range(2,15,3):cv.l(x,2,x,13,7)
-    elif era==3:
-        block_shade(cv,1,1,14,14,7,8,9);cv.r(4,4,11,11,7);cv.r(6,6,9,9,11);cv.l(1,7,14,7,10)
-    else:
-        cv.e(1,1,14,14,8);cv.e(3,3,12,12,9);cv.e(5,5,10,10,10);cv.px(7,7,15)
-    out.append(cv.grid())
-    # 6 sandbags / low cover
-    cv=Cv(16,16);ground(cv,era*100+2,(1,2,3),4,0.03)
-    bag=[ (6,7,15) , (7,8,9), (7,8,9), (7,8,10), (7,8,9)][era]
-    if era==0 or era==2:bag=(10,11,15) if era==0 else (7,9,15)
-    for row,y in enumerate((2,7,12)):
-        off=3 if row%2 else 0
-        for x in range(-3,16,6):cv.e(x+off,y-2,x+off+6,y+2,bag[1]);cv.l(x+off+1,y-2,x+off+5,y-2,bag[2]);cv.l(x+off+1,y+2,x+off+5,y+2,bag[0])
-    out.append(cv.grid())
-    # 7 tree / rock / pylon
-    cv=Cv(16,16);ground(cv,era*100+3,(1,2,3),4,0.03)
-    if era==0:
-        cv.e(0,0,15,15,12);cv.e(2,1,12,11,13);cv.e(4,2,9,6,4);[cv.px(int(H(9,i)*14)+1,int(H(8,i)*14)+1,12) for i in range(14)]
-    elif era==1:
-        for r,c in ((7,12),(5,13),(3,15)):cv.p([(8,8-r),(8+r,8+r//1),(8-r,8+r//1)],c)
-        cv.p([(8,0),(15,14),(1,14)],12);cv.p([(8,2),(12,10),(4,10)],13);cv.px(8,3,15);cv.px(6,9,15)
-    elif era==2:
-        for a in range(5):
-            ang=a*2*math.pi/5+0.3;cv.l(8,8,8+int(7.5*math.cos(ang)),8+int(7.5*math.sin(ang)),12,2)
-            cv.l(8,8,8+int(6*math.cos(ang+.2)),8+int(6*math.sin(ang+.2)),13)
-        cv.e(6,6,9,9,10)
-    elif era==3:
-        cv.e(2,2,13,13,7);cv.e(4,4,11,11,8);cv.e(6,6,9,9,11);cv.px(7,7,15)
-        for i in range(4):cv.px(2+i*4,1,10)
-    else:
-        cv.p([(3,2),(12,1),(15,8),(12,15),(2,13),(0,6)],13);cv.p([(4,3),(11,3),(13,8),(8,9),(3,8)],4);cv.px(9,11,12);cv.px(6,5,15)
-    out.append(cv.grid())
-    # 8 crater
-    cv=Cv(16,16);ground(cv,era*100+4,(1,2,3),4,0.03)
-    cv.e(1,2,14,14,1);cv.e(3,4,12,12,14 if era!=3 else 5);cv.e(4,5,11,11,1);cv.l(3,3,12,3,4)
-    out.append(cv.grid())
-    # 9 border
-    cv=Cv(16,16);block_shade(cv,0,0,15,15,14,7,8);cv.r(3,3,12,12,7)
-    for i in range(0,16,4):cv.l(i,0,i+3,15,14) if era in (1,4) else None
-    if era==3:cv.r(0,7,15,8,11)
-    out.append(cv.grid())
-    # 10 spawn pad
-    cv=Cv(16,16);ground(cv,era*100+5,(5,5,6),6,0.0);cv.r(0,0,15,0,15);cv.r(0,15,15,15,15)
-    cv.p([(8,3),(12,8),(10,8),(10,12),(6,12),(6,8),(4,8)],15)
-    out.append(cv.grid())
-    # 11 water / ford (uses BG palette bank 1: 1-5 water, 6-9 wood, 10 foam)
+    def grass(cv,seed,tufts=4,flowers=0,tall=0):
+        for y in range(16):
+            for x in range(16):cv.px(x,y,2 if H(seed,x//2,y//2)<.78 else (3 if H(seed+1,x,y)<.5 else 1))
+        for i in range(tufts):
+            x=1+int(H(seed,i,7)*12);y=2+int(H(seed,i,8)*12)
+            cv.px(x,y,3);cv.px(x+2,y,3);cv.px(x+1,y-1,3);cv.px(x,y+1,1);cv.px(x+1,y+1,1);cv.px(x+2,y+1,1)
+        for i in range(flowers):
+            x=2+int(H(seed,i,3)*11);y=2+int(H(seed,i,4)*11)
+            pc=4 if (i+era)%2==0 else (15 if era!=1 else 9)
+            for dx,dy in((0,-1),(-1,0),(1,0),(0,1)):cv.px(x+dx,y+dy,pc)
+            cv.px(x,y,6 if era!=1 else 4);cv.px(x+1,y+2,1)
+        for i in range(tall):
+            x=1+int(H(seed,i,5)*12);y=3+int(H(seed,i,6)*10)
+            cv.p([(x,y+3),(x+1,y-1),(x+2,y+3)],13);cv.p([(x+2,y+3),(x+4,y),(x+4,y+3)],12);cv.px(x+1,y,3);cv.l(x,y+4,x+4,y+4,1)
+    def outline_rect(cv,x0,y0,x1,y1,fill,hi,lo):
+        cv.r(x0,y0,x1,y1,14);cv.r(x0+1,y0+1,x1-1,y1-1,fill);cv.l(x0+1,y0+1,x1-1,y0+1,hi);cv.l(x0+1,y0+1,x0+1,y1-1,hi);cv.l(x0+1,y1-1,x1-1,y1-1,lo);cv.l(x1-1,y0+1,x1-1,y1-1,lo)
+    # 0..2 ground
+    cv=Cv(16,16);grass(cv,era*100,4);out.append(cv.grid())
+    cv=Cv(16,16);grass(cv,era*100+1,2,3 if era<3 else 1);out.append(cv.grid())
+    cv=Cv(16,16);grass(cv,era*100+2,1,0,3);out.append(cv.grid())
+    # 3 path (packed dirt with pebbles)
     cv=Cv(16,16)
     for y in range(16):
-        for x in range(16):
-            h=H(era*31+11,x,y);cv.px(x,y,2 if h<0.55 else 3 if h<0.85 else 1)
-    for (x,y) in [(2,3),(9,6),(4,11),(12,13)]:cv.l(x,y,x+3,y,4);cv.px(x+1,y-1,5)
+        for x in range(16):cv.px(x,y,5 if H(era,x//3,y//2,9)<.7 else 6)
+    for i in range(5):
+        x=int(H(era,i,11)*14);y=int(H(era,i,12)*14);cv.px(x,y,9);cv.px(x+1,y,8);cv.px(x,y+1,7)
     out.append(cv.grid())
-    # 12 bridge planks over water
-    cv=Cv(16,16);cv.r(0,0,15,15,2)
-    for y in range(1,15,3):cv.r(1,y,14,y+1,7);cv.l(1,y+1,14,y+1,6)
-    cv.l(0,0,0,15,8);cv.l(15,0,15,15,8);cv.l(1,0,1,15,9);cv.l(14,0,14,15,6)
+    # 4 wall: stone wall in 3/4 view (light top face, brick front, dark base)
+    cv=Cv(16,16);cv.r(0,0,15,15,14);cv.r(0,0,15,5,9);cv.l(0,0,15,0,15)
+    for x in (3,8,13):cv.l(x,1,x,5,8)
+    cv.r(0,6,15,14,8)
+    for row,y in enumerate((6,9,12)):
+        cv.l(0,y,15,y,7);off=0 if row%2==0 else 4
+        for x in range(off,16,8):cv.l(x,y,x,y+2,7)
+        cv.l(1,y+1,15,y+1,9) if row==0 else None
+    cv.l(0,15,15,15,14)
+    if era==1:cv.r(0,0,15,2,15);cv.px(4,3,15);cv.px(11,3,15)
+    if era==3:cv.l(0,10,15,10,4)
+    out.append(cv.grid())
+    # 5 crate on grass
+    cv=Cv(16,16);grass(cv,era*100+3,1)
+    if era<=2:
+        outline_rect(cv,1,1,14,14,11,15 if era!=2 else 6,10);cv.l(2,2,13,13,10);cv.l(13,2,2,13,10);cv.r(2,2,13,3,15 if era==1 else 6)
+    else:
+        outline_rect(cv,1,1,14,14,8,9,7);cv.r(5,5,10,10,4 if era==3 else 10);cv.px(6,6,15)
+    out.append(cv.grid())
+    # 6 sandbags
+    cv=Cv(16,16);grass(cv,era*100+4,1)
+    for row,y in enumerate((3,8,13)):
+        off=3 if row%2 else 0
+        for x in range(-3,16,6):cv.e(x+off,y-3,x+off+6,y+2,14);cv.e(x+off+1,y-2,x+off+5,y+1,6);cv.l(x+off+2,y-2,x+off+4,y-2,15);cv.l(x+off+2,y+1,x+off+4,y+1,5)
+    out.append(cv.grid())
+    # 7 tree (round chunky canopy) / snowy pine / palm / neon tree / boulder
+    cv=Cv(16,16);grass(cv,era*100+5,1)
+    if era in (0,):
+        cv.e(0,0,15,15,14);cv.e(1,1,14,14,12);cv.e(1,1,12,12,13);cv.e(3,2,8,6,3);cv.px(4,3,15);cv.e(9,9,12,12,12)
+    elif era==1:
+        cv.p([(8,0),(15,15),(0,15)],14);cv.p([(8,1),(14,14),(1,14)],12);cv.p([(8,2),(11,8),(5,8)],13);cv.p([(8,1),(10,5),(6,5)],15);cv.l(3,13,13,13,15);cv.l(5,9,11,9,15)
+    elif era==2:
+        for a in range(6):
+            ang=a*2*math.pi/6+0.4;cv.l(8,8,8+int(7.5*math.cos(ang)),8+int(7.5*math.sin(ang)),14,3)
+        for a in range(6):
+            ang=a*2*math.pi/6+0.4;cv.l(8,8,8+int(6.5*math.cos(ang)),8+int(6.5*math.sin(ang)),13,1)
+        cv.e(6,6,10,10,10);cv.px(7,7,11)
+    elif era==3:
+        cv.e(1,1,14,14,14);cv.e(2,2,13,13,12);cv.e(3,3,11,11,13);cv.e(5,4,8,7,4);cv.px(6,5,15)
+    else:
+        cv.p([(3,2),(12,1),(15,8),(12,15),(2,13),(0,6)],14);cv.p([(4,3),(11,2),(14,8),(11,14),(3,12),(1,6)],8);cv.p([(4,3),(10,3),(12,7),(5,8),(2,6)],9);cv.px(5,4,15);cv.e(8,9,12,12,7)
+    out.append(cv.grid())
+    # 8 crater
+    cv=Cv(16,16);grass(cv,era*100+6,1);cv.e(1,2,14,14,14);cv.e(2,3,13,13,6);cv.e(3,5,12,12,5);cv.e(5,7,10,11,7);cv.l(4,4,11,4,15)
+    out.append(cv.grid())
+    # 9 border: cliff with grassy ledge
+    cv=Cv(16,16);cv.r(0,0,15,4,2);cv.l(0,1,15,1,3);[cv.px(x,2,3) for x in range(1,16,4)];cv.l(0,5,15,5,14)
+    cv.r(0,6,15,15,8)
+    for x in (2,7,12):cv.l(x,6,x+1,15,7)
+    for x in (4,10):cv.l(x,7,x,12,9)
+    cv.l(0,15,15,15,14)
+    if era==1:cv.r(0,0,15,3,15)
+    out.append(cv.grid())
+    # 10 spawn pad
+    cv=Cv(16,16);grass(cv,era*100+7,1);cv.e(1,1,14,14,14);cv.e(2,2,13,13,9);cv.e(4,4,11,11,8);cv.p([(8,4),(11,8),(9,8),(9,11),(7,11),(7,8),(5,8)],15)
+    out.append(cv.grid())
+    # 11 water (bank 1: 1-5 water, 6-9 wood, 10 foam) - shimmer is palette-cycled at runtime
+    cv=Cv(16,16)
+    for y in range(16):
+        for x in range(16):cv.px(x,y,2 if H(era*31+11,x//3,y//2)<.7 else 1)
+    for (x,y) in [(1,3),(8,6),(3,11),(10,13)]:cv.l(x,y,x+4,y,3);cv.l(x+1,y-1,x+3,y-1,4);cv.px(x+2,y-1,5)
+    out.append(cv.grid())
+    # 12 bridge
+    cv=Cv(16,16);cv.r(0,0,15,15,8)
+    for y in range(0,16,4):cv.r(1,y,14,y+2,7);cv.l(1,y,14,y,9);cv.l(1,y+3,14,y+3,8)
+    cv.l(0,0,0,15,8);cv.l(15,0,15,15,8);cv.l(1,0,1,15,6);cv.l(14,0,14,15,6)
     out.append(cv.grid())
     tl=[]
     for g in out:tl+=meta_tiles(g)
     return tl
 WATER_PALS=[
- [(0,0,0),(40,70,96),(52,88,118),(62,102,134),(110,150,176),(170,200,214),(84,56,32),(118,84,50),(60,40,24),(150,112,70)],
- [(0,0,0),(70,100,130),(90,124,156),(106,140,170),(170,200,220),(230,240,250),(84,60,40),(120,90,60),(60,44,30),(150,118,84)],
- [(0,0,0),(28,78,96),(36,98,118),(46,116,134),(98,164,176),(170,210,214),(96,80,60),(130,110,84),(70,58,44),(160,138,104)],
- [(0,0,0),(10,30,60),(14,44,84),(20,60,110),(40,200,230),(160,255,255),(50,50,70),(80,80,110),(30,30,44),(255,60,200)],
- [(0,0,0),(8,8,14),(14,14,22),(20,20,30),(46,46,64),(90,90,120),(70,76,92),(100,108,126),(46,50,62),(140,150,170)],
+ [(0,0,0),(40,96,184),(64,136,216),(96,176,232),(160,216,248),(232,248,255),(112,72,40),(168,112,64),(72,48,32),(208,160,96),(255,255,255)],
+ [(0,0,0),(80,120,176),(112,152,208),(152,192,232),(200,228,248),(248,252,255),(104,72,48),(160,116,76),(64,44,32),(200,160,112),(255,255,255)],
+ [(0,0,0),(32,128,152),(48,160,176),(80,192,200),(152,224,224),(232,252,248),(120,88,56),(176,128,80),(80,56,36),(216,176,120),(255,255,255)],
+ [(0,0,0),(24,48,112),(32,72,152),(48,112,200),(80,220,240),(200,255,255),(64,64,96),(96,96,136),(40,40,64),(255,96,208),(255,255,255)],
+ [(0,0,0),(16,24,48),(24,40,72),(40,60,104),(80,110,160),(160,190,230),(88,96,112),(128,136,156),(56,60,76),(176,186,206),(255,255,255)],
 ]
-
 for e in range(5):
     emit(f"arena_tiles_{e}",arena_set(e),"unsigned int");emit(f"arena_pal_{e}",pal16(ARENA_PALS[e]));emit(f"water_pal_{e}",pal16(WATER_PALS[e]))
 Hh.append("enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_WATER,AM_BRIDGE,AM_N};")
 
 # dogfight terrain (seen from altitude) + clouds
 SKY_PALS=[
- [(24,58,108),(28,66,120),(34,78,136),(200,220,236),(196,180,120),(60,112,50),(76,128,60),(40,84,38),(52,98,44),(140,120,80),(170,160,140),(232,236,244),(150,160,176),(110,120,140),(16,30,60),(255,255,255)],
- [(34,52,84),(40,60,96),(48,72,110),(180,200,220),(206,218,232),(226,234,244),(150,160,170),(40,66,56),(56,84,70),(110,110,112),(150,40,36),(232,236,244),(150,160,176),(110,120,140),(20,30,50),(255,255,255)],
- [(190,160,108),(178,148,98),(204,176,122),(150,126,86),(120,100,70),(92,92,92),(130,128,124),(170,166,156),(220,210,190),(74,96,58),(40,60,100),(232,236,244),(150,160,176),(110,120,140),(60,48,36),(255,255,255)],
- [(14,14,30),(20,20,40),(28,28,54),(40,40,72),(56,60,96),(80,90,130),(40,240,240),(255,64,200),(255,200,60),(30,120,110),(60,60,90),(200,210,240),(120,130,170),(80,90,130),(4,4,10),(255,255,255)],
- [(4,4,12),(8,8,20),(30,10,44),(60,20,80),(100,40,120),(80,80,90),(120,118,126),(160,158,166),(200,200,210),(255,170,40),(80,200,255),(232,236,252),(150,160,176),(110,120,140),(0,0,0),(255,255,255)],
+ [(40,104,200),(52,124,214),(70,148,226),(220,240,252),(240,216,150),(96,184,84),(126,204,100),(48,128,60),(68,150,70),(200,128,96),(220,200,160),(250,250,255),(200,214,236),(150,168,200),(24,48,104),(255,255,255)],
+ [(56,96,152),(68,112,168),(86,132,184),(220,232,248),(236,244,252),(250,252,255),(176,192,210),(56,112,96),(80,136,112),(140,140,150),(200,80,72),(250,250,255),(200,214,236),(150,168,200),(28,40,72),(255,255,255)],
+ [(220,180,120),(208,168,108),(236,200,140),(176,140,96),(144,116,80),(112,112,120),(156,152,148),(196,192,180),(240,232,210),(96,136,72),(56,120,168),(250,250,255),(200,214,236),(150,168,200),(72,56,40),(255,255,255)],
+ [(24,24,56),(32,32,72),(44,44,96),(60,60,120),(80,88,150),(110,124,180),(60,250,240),(255,90,210),(255,210,80),(40,150,140),(80,80,120),(220,230,255),(150,160,200),(100,110,160),(8,8,20),(255,255,255)],
+ [(6,6,20),(12,12,32),(44,20,64),(80,32,108),(130,60,150),(104,104,120),(150,148,160),(196,194,206),(236,236,246),(255,190,60),(100,220,255),(240,244,255),(176,186,206),(130,140,170),(0,0,0),(255,255,255)],
 ]
 def sky_set(era):
     out=[]
@@ -411,7 +424,7 @@ for e in range(5):
     emit(f"sky_tiles_{e}",sky_set(e),"unsigned int");emit(f"sky_pal_{e}",pal16(SKY_PALS[e]))
 
 # campaign (Omaha 1944) tileset
-CPAL=[(26,48,76),(38,70,100),(150,184,204),(132,118,88),(180,162,116),(204,188,146),(48,50,52),(86,90,88),(132,136,128),(116,114,106),(160,158,146),(52,72,38),(78,100,52),(96,78,54),(18,18,20),(184,176,150)]
+CPAL=[(40,96,184),(64,136,216),(200,232,248),(184,160,112),(224,200,144),(248,228,180),(64,64,80),(112,116,132),(170,174,188),(140,132,120),(196,188,170),(72,148,64),(112,184,80),(140,100,60),(30,22,38),(240,232,200)]
 def camp_set():
     T={}
     def sand(seed,ripple=False):
@@ -539,9 +552,9 @@ emit("camp_tiles",camp_set(),"unsigned int");emit("camp_pal",pal16(CPAL))
 # 1 outline 2 uni dark 3 uni mid 4 uni light 5 helmet/armor 6 skin 7 black 8 metal/wood 9 TEAM marker
 # 10 glow 11 white 12 track dark 13 track light 14 gray 15 hot
 UNI={  # (dark, mid, light, helmet) per era per side
- 0:{'A':[(62,70,38),(92,100,58),(124,130,80),(84,96,54)],'E':[(66,70,72),(98,104,106),(130,136,138),(78,84,86)]},
- 1:{'A':[(56,74,44),(82,104,62),(112,134,84),(70,90,56)],'E':[(80,72,50),(118,108,76),(150,140,104),(96,90,66)]},
- 2:{'A':[(110,98,70),(150,136,100),(188,174,134),(124,112,84)],'E':[(54,62,58),(80,92,86),(112,126,118),(64,72,70)]},
+ 0:{'A':[(64,92,40),(100,136,56),(150,184,88),(92,124,56)],'E':[(72,84,96),(112,128,140),(164,180,190),(90,104,116)]},
+ 1:{'A':[(52,92,56),(84,136,84),(128,184,120),(72,120,72)],'E':[(104,88,56),(152,128,84),(204,180,124),(124,108,72)]},
+ 2:{'A':[(140,112,68),(196,160,104),(236,212,152),(160,132,88)],'E':[(56,76,72),(88,116,108),(136,168,152),(70,92,88)]},
  3:{'A':[(50,62,90),(76,94,132),(110,134,176),(140,160,200)],'E':[(70,40,52),(110,60,80),(150,90,110),(160,110,130)]},
  4:{'A':[(150,156,172),(196,202,214),(236,240,248),(220,226,238)],'E':[(40,40,48),(66,66,78),(96,96,110),(80,80,96)]},
 }
@@ -551,37 +564,33 @@ def obj_pal(era,side,player=False):
     team=(70,150,255) if side=='A' else (230,50,40)
     if player:team=(255,220,40)
     g=GLOW[era] if side=='A' else ((255,80,80) if era>=3 else GLOW[era])
-    return pal16([(0,0,0),(16,16,18),d,m,l,hlm,(222,176,136),(30,30,32),(120,90,56) if era<2 else (96,100,108),team,g,(240,240,240),(44,42,40),(84,80,72),(140,142,146),(255,200,60)])
+    return pal16([(0,0,0),(30,20,40),d,m,l,hlm,(248,196,150),(40,32,48),(170,120,72) if era<2 else (120,126,140),team,g,(248,248,240),(56,52,60),(104,100,96),(168,172,184),(255,208,72)])
 pals=[]
 for e in range(5):
     for side,pl in (('A',0),('E',0),('A',1)):pals+=pal16_list if False else obj_pal(e,side,pl)
 emit("obj_team_pal",pals)   # [era][3 banks]
 FXP=[(0,0,0),(16,16,18),(60,60,64),(110,110,116),(170,170,176),(250,250,250),(255,236,90),(255,150,40),(230,60,30),(130,30,20),(80,240,255),(60,120,255),(255,80,220),(90,230,110),(80,160,255),(255,70,60)]
 emit("fx_pal",pal16(FXP))
-def soldier(era,frame):
+def soldier(era,frame):  # v1.2 chunky big-head style (top-down)
     c=Cv(16,16)
     st=2 if frame else -2
-    c.e(5,9+st//2,7,12+st//2,7);c.e(9,9-st//2,11,12-st//2,7)            # boots
-    if era==4:c.r(5,10,10,13,14);c.r(6,10,9,12,13)                      # life support
-    elif era>=2:c.r(5,10,10,12,2)
-    else:c.r(5,10,10,12,8 if era==0 else 2)                            # pack / bedroll
-    c.e(3,5,12,11,3);c.l(4,6,11,6,4);c.e(3,8,12,11,2) if False else None
-    c.l(4,10,11,10,2)
-    c.px(3,8,9);c.px(12,8,9)                                              # team shoulder patches
-    if era==2:c.r(5,6,10,9,2)
-    if era==3:c.r(5,6,10,9,5)
-    # weapon held forward on right side
-    if era<=1:c.l(9,0,9,7,8);c.l(9,3,9,4,7)
-    elif era==2:c.l(9,1,9,7,7);c.px(9,4,14)
-    elif era==3:c.r(9,1,10,7,7);c.px(9,1,10);c.px(10,1,10)
-    else:c.r(9,1,10,7,14);c.px(9,0,10);c.px(10,0,10)
-    c.px(9,6,6 if era<4 else 4);c.px(7,5,6 if era<4 else 4)               # hands
-    # head/helmet
-    if era==0:c.e(4,4,11,10,5);c.l(5,5,7,5,4);c.px(8,4,9)
-    elif era==1:c.e(5,4,10,10,5);c.px(6,5,4)
-    elif era==2:c.e(5,4,10,10,5);c.r(7,3,8,4,7);c.px(6,5,4)
-    elif era==3:c.e(5,4,10,10,5);c.l(6,4,9,4,10)
-    else:c.e(4,3,11,10,11);c.l(5,3,10,3,10);c.l(6,4,9,4,10);c.px(5,6,4)
+    c.e(4,9+st//2,7,13+st//2,7);c.e(9,9-st//2,12,13-st//2,7)            # boots
+    c.e(2,7,13,14,3)                                                      # shoulders / body
+    if era==4:c.r(5,11,10,14,14)                                         # life support
+    elif era>=2:c.r(4,11,11,13,2)
+    else:c.r(4,11,11,13,8 if era==0 else 2)                              # pack / bedroll
+    c.px(2,10,9);c.px(13,10,9)                                            # team patches
+    if era<=1:c.l(11,0,11,7,8);c.px(11,2,7)
+    elif era==2:c.l(11,0,11,7,7);c.px(11,3,14)
+    elif era==3:c.r(11,0,12,7,7);c.px(11,0,10)
+    else:c.r(11,0,12,7,14);c.px(11,0,10);c.px(12,0,10)
+    c.px(11,7,6);c.px(4,8,6)                                              # hands
+    # big head / helmet (about half the sprite)
+    if era==0:c.e(3,1,12,11,5);c.e(4,2,8,5,4);c.px(8,1,9)
+    elif era==1:c.e(4,1,11,11,5);c.e(5,2,8,5,4)
+    elif era==2:c.e(4,1,11,11,5);c.r(6,0,9,2,7);c.e(5,3,7,5,4)
+    elif era==3:c.e(4,1,11,11,5);c.l(5,3,10,3,10);c.l(5,4,10,4,10)
+    else:c.e(3,1,12,11,11);c.e(5,2,10,6,10);c.px(5,3,15)
     return c.grid(1)
 def tank(era,part):
     c=Cv(32,32)
@@ -994,6 +1003,101 @@ B=voice("C3:6 G2:4 C3:10 .:4",24)
 Hm=voice("E4:6 E4:4 G4:10 .:4",24)
 D=drums("RRRRRRK...K.....R.R.K...",24)
 track("VICTORY",7,0,L,B,Hm,D,duty=2,lenv=0,lvol=13)
+
+# ======================= v1.2 additional PSG music (original compositions) =======================
+def R8(s):return s.replace('|',' ')
+def chordb(pat,roots):return bars(pat,roots,16)
+# 10 DMZ PATROL - Spec Ops W1 forest / W5 city, G minor
+L=voice(R8("G4:4 A#4:2 C5:2 D5:4 C5:2 A#4:2 | A4:4 F4:4 G4:8 | D5:4 F5:2 D5:2 C5:4 A#4:4 | A4:6 A#4:2 C5:8 | G4:4 A#4:2 C5:2 D5:4 G5:4 | F5:2 D#5:2 D5:4 C5:8 | A#4:4 C5:2 D5:2 D#5:4 D5:2 C5:2 | D5:16"),128)
+B=chordb("R:2 .:1 R:1 F:2 .:2 R:2 .:1 R:1 O:2 .:2",["G2","F2","D#2","F2","G2","D#2","C2","D2"])
+Hm=voice("D4:16 C4:16 A#3:16 C4:16 D4:16 A#3:16 G3:16 F#3:16",128)
+track("DMZ PATROL",7,1,L,B,Hm,drums("K...S..KK...S..H",128),duty=2,hduty=1,lvol=11,hvol=5)
+# 11 PERMAFROST - arctic, E minor, sparse
+L=voice(R8("B4:8 E5:8 | D5:4 B4:4 A4:8 | G4:8 A4:4 B4:4 | F#4:16 | B4:8 E5:4 F#5:4 | G5:8 F#5:4 E5:4 | D5:8 B4:8 | E5:16"),128)
+B=voice("E2:16 G2:16 C2:16 B1:16 E2:16 C2:16 D2:16 E2:16",128)
+Hm=voice(" ".join(f"{n}:4" for n in "E4 G4 B4 G4 G4 B4 D5 B4 C4 E4 G4 E4 B3 D#4 F#4 D#4 E4 G4 B4 G4 C4 E4 G4 E4 D4 F#4 A4 F#4 E4 G4 B4 E5".split()),128)
+track("PERMAFROST",10,1,L,B,Hm,drums("........H.......",128),duty=2,lenv=0,hduty=0,henv=2,lvol=9,hvol=6,bvol=3)
+# 12 DUNE RAIDERS - canyon desert, D phrygian-dominant, driving
+L=voice(R8("D5:2 D#5:2 F#5:4 G5:2 F#5:2 D#5:4 | D5:4 C5:2 A#4:2 A4:8 | A4:2 A#4:2 C5:2 D5:2 D#5:4 D5:4 | F#5:8 D5:8 | G5:4 F#5:2 D#5:2 D5:4 C5:4 | A#4:2 C5:2 D5:4 D#5:8 | D5:2 D#5:2 D5:2 C5:2 A#4:2 A4:2 G4:4 | A4:4 D#5:4 D5:8"),128)
+B=chordb("R:2 R:1 R:1 .:2 R:2 F:2 R:1 R:1 .:2 O:2",["D2","D2","G2","D2","G2","D#2","C2","D2"])
+Hm=voice("A4:16 G4:16 A#4:16 A4:16 A#4:16 G4:16 F#4:16 F#4:16",128)
+track("DUNE RAIDERS",6,1,L,B,Hm,drums("K.TTK.S.K.TTKSS.",128),duty=1,hduty=2,lvol=11,hvol=5,wave=1)
+# 13 JUNGLE RIVER - pentatonic A minor, toms
+L=voice(R8("A4:2 C5:2 D5:2 E5:4 G5:2 E5:4 | D5:2 C5:2 A4:4 G4:4 A4:4 | C5:2 D5:2 E5:2 G5:2 A5:4 G5:4 | E5:12 .:4 | A5:2 G5:2 E5:2 D5:2 E5:4 G5:4 | A5:4 G5:2 E5:2 D5:8 | C5:2 D5:2 E5:4 D5:2 C5:2 A4:4 | A4:12 .:4"),128)
+B=chordb("R:3 R:1 .:2 F:2 R:3 R:1 .:2 O:2",["A1","A1","C2","E2","A1","G1","F1","E2"])
+Hm=voice("E4:8 G4:8 E4:8 C4:8 G4:8 A4:8 G4:16 E4:8 D4:8 E4:16 C4:8 D4:8 E4:16",128)
+track("JUNGLE RIVER",6,1,L,B,Hm,drums("T..T..K.T.T.K.S.",128),duty=0,lenv=1,hduty=2,lvol=11,hvol=5)
+# 14 ISLAND FORTRESS - heroic D major march
+L=voice(R8("D5:4 A4:2 D5:2 F#5:4 E5:2 D5:2 | E5:4 C#5:4 A4:8 | B4:4 D5:2 E5:2 F#5:4 G5:4 | A5:12 .:4 | B5:4 A5:2 G5:2 F#5:4 E5:4 | D5:2 E5:2 F#5:4 E5:8 | G5:4 F#5:2 E5:2 D5:4 C#5:4 | D5:12 .:4"),128)
+B=chordb("R:2 .:2 F:2 .:2 R:2 .:2 F:2 O:2",["D2","A1","G1","D2","G1","D2","A1","D2"])
+Hm=voice("F#4:16 E4:16 D4:16 F#4:16 G4:16 F#4:16 E4:16 F#4:16",128)
+track("ISLAND FORTRESS",7,1,L,B,Hm,drums("K.S.K.SSK.S.KRRR",128),duty=2,hduty=1,lvol=12,hvol=6)
+# 15 SAND AIRSTRIP - Wagner desert airbase (World 7), B minor menace
+L=voice(R8("B4:6 C#5:2 D5:4 C#5:4 | B4:4 F#4:4 B4:8 | D5:6 E5:2 F#5:4 E5:4 | D5:4 C#5:4 A4:8 | B4:6 C#5:2 D5:4 F#5:4 | G5:4 F#5:4 E5:8 | D5:4 C#5:4 B4:4 A#4:4 | B4:16"),128)
+B=chordb("R:1 R:1 .:2 R:1 R:1 .:2 R:1 R:1 F:2 R:2 O:2",["B1","B1","G1","A1","B1","E2","F#1","B1"])
+Hm=voice(".:8 F#4:8 .:8 F#4:8 .:8 D4:8 .:8 E4:8 .:8 F#4:8 .:8 G4:8 .:8 F#4:8 .:8 F#4:8",128)
+track("SAND AIRSTRIP",6,1,L,B,Hm,drums("K..HK.S.K.KHS.HH",128),duty=1,hduty=2,lvol=10,hvol=6,wave=1)
+# 16 PADDY FIELDS - Vietnam / Cold War (World 8), E minor 60s rock feel
+L=voice(R8("E5:3 E5:1 D5:2 B4:2 A4:4 B4:4 | G4:2 A4:2 B4:4 E4:8 | E5:3 E5:1 G5:2 E5:2 D5:4 B4:4 | A4:16 | C5:4 B4:2 A4:2 G4:4 A4:4 | B4:4 D5:4 E5:8 | G5:2 F#5:2 E5:2 D5:2 B4:4 A4:4 | B4:12 .:4"),128)
+B=chordb("R:2 R:2 F:2 R:2 O:2 R:2 F:2 R:2",["E2","E2","E2","A1","C2","G1","D2","E2"])
+Hm=voice("B3:16 G3:16 B3:16 C#4:16 E4:16 D4:16 B3:16 B3:16",128)
+track("PADDY FIELDS",6,1,L,B,Hm,drums("K.H.S.H.K.KHS.HH",128),duty=2,lenv=0,hduty=0,lvol=11,hvol=5)
+# 17 OLD CONTINENT - WW2 Europe (World 9), F minor somber march
+L=voice(R8("C5:4 C5:3 C5:1 F5:4 G#5:4 | G5:4 F5:4 E5:8 | F5:4 G5:2 G#5:2 A#5:4 G#5:4 | G5:12 .:4 | G#5:4 G5:2 F5:2 D#5:4 C#5:4 | C5:4 A#4:4 C5:8 | C#5:4 C5:2 A#4:2 G4:4 E4:4 | F4:12 .:4"),128)
+B=chordb("R:4 F:4 R:4 F:4",["F2","C2","A#1","C2","C#2","F2","A#1","F2"])
+Hm=voice("G#4:16 G4:16 F4:16 E4:16 F4:16 F4:16 E4:16 C4:16",128)
+track("OLD CONTINENT",8,1,L,B,Hm,drums("K.S.K.SRK.S.KRRR",128),duty=2,hduty=1,lvol=11,hvol=6,bvol=3)
+# 18 XENO SIGNAL - alien worlds (World 10), whole-tone arps
+L=voice(" ".join(arp(a) for a in [["C5","E5","F#5","A#5"],["D5","F#5","G#5","C6"],["C5","E5","F#5","A#5"],["A#4","D5","E5","G#5"],
+                                  ["G#4","C5","D5","F#5"],["A#4","D5","E5","G#5"],["C5","E5","F#5","A#5"],["D5","F#5","G#5","C6"]]),128)
+B=voice("C2:16 D2:16 C2:16 A#1:16 G#1:16 A#1:16 C2:16 C2:16",128)
+Hm=voice("E4:32 F#4:32 G#4:32 E4:32",128)
+track("XENO SIGNAL",8,1,L,B,Hm,drums("K.......K.C.....",128),duty=0,lenv=1,hduty=2,henv=2,lvol=9,hvol=7,wave=1)
+# 19 BOSS BATTLE - fast C minor
+L=voice(R8("C5:2 C5:2 D#5:2 C5:2 G5:4 F#5:4 | F5:2 D#5:2 D5:2 D#5:2 C5:8 | C5:2 C5:2 D#5:2 F5:2 G5:2 G#5:2 G5:4 | B4:8 D5:8 | C6:4 A#5:2 G#5:2 G5:4 F5:4 | D#5:2 F5:2 G5:4 C5:8 | G#5:4 G5:2 F5:2 D#5:4 D5:4 | C5:8 B4:8"),128)
+B=chordb("R:1 R:1 O:1 R:1 R:1 R:1 O:1 R:1 R:1 R:1 O:1 R:1 F:1 F:1 O:1 F:1",["C2","C2","C2","G1","G#1","G#1","F1","G1"])
+Hm=voice("G4:8 G4:8 G#4:8 G4:8 G4:8 G4:8 D4:16 D#4:8 C4:8 D#4:8 G4:8 F4:16 D4:16",128)
+track("BOSS BATTLE",5,1,L,B,Hm,drums("K.HSK.HSKKHSK.SS",128),duty=2,hduty=1,lvol=12,hvol=6)
+# 20 FORTRESS - ominous chromatic, D minor
+L=voice(R8("D5:4 C#5:4 D5:4 F5:4 | E5:4 D5:4 C#5:8 | D5:4 C#5:4 D5:4 G5:4 | F5:4 E5:4 D5:8 | A#5:4 A5:4 G5:4 F5:4 | E5:4 F5:4 G5:8 | F5:4 E5:4 D5:4 C#5:4 | D5:16"),128)
+B=voice("D2:16 A1:16 D2:16 A#1:16 G1:16 A1:16 A#1:16 D2:16",128)
+Hm=voice("A4:16 A4:16 A#4:16 A4:16 D5:16 C#5:16 A4:16 F4:16",128)
+track("FORTRESS",8,1,L,B,Hm,drums("K.......K...S...",128),duty=1,hduty=0,lvol=10,hvol=5,bvol=3,wave=1)
+# 21 WORLD MAP - bouncy C major
+L=voice(R8("C5:2 E5:2 G5:2 E5:2 F5:4 D5:4 | E5:2 C5:2 D5:2 B4:2 C5:8 | A4:2 C5:2 F5:2 A5:2 G5:4 E5:4 | D5:12 .:4 | C5:2 E5:2 G5:2 C6:2 B5:4 G5:4 | A5:2 G5:2 F5:2 E5:2 D5:8 | F5:2 E5:2 D5:2 C5:2 B4:4 D5:4 | C5:12 .:4"),128)
+B=chordb("R:2 F:2 O:2 F:2 R:2 F:2 O:2 F:2",["C2","G1","F1","G1","C2","F1","G1","C2"])
+Hm=voice("E4:8 G4:8 D4:8 E4:8 F4:8 A4:8 B3:16 E4:8 G4:8 F4:8 A4:8 D4:8 F4:8 E4:16",128)
+track("WORLD MAP",7,1,L,B,Hm,drums("K.H.S.H.K.H.S.HH",128),duty=2,lenv=1,hduty=1,lvol=11,hvol=5)
+# 22 ASCENT - launch countdown pulses then a soaring climb (X-15 / rocket launch)
+L=voice(R8("A4:4 .:4 A4:4 .:4 | A4:4 .:4 A4:4 .:4 | E5:8 A5:8 | G#5:8 E5:8 | F#5:8 A5:8 | B5:8 C#6:8 | D6:8 C#6:4 B5:4 | A5:16"),128)
+B=voice("A1:4 .:4 A1:4 .:4 A1:4 .:4 A1:4 .:4 A1:16 E2:16 D2:16 E2:16 D2:16 A1:16",128)
+Hm=voice("E4:4 .:4 E4:4 .:4 E4:4 .:4 E4:4 .:4 C#5:16 B4:16 A4:16 G#4:16 F#4:16 E4:16",128)
+D=drums("K"+"."*15+"K"+"."*15+("K"+"."*7)*2+"K"+"R"*7+"K"+"R"*7+("C"+"."*7)*2+"K...S..."*2+"K.S."*8,128)
+track("ASCENT",9,1,L,B,Hm,D,duty=2,lenv=0,hduty=0,henv=0,lvol=12,hvol=6)
+# 23 CRUISE - World Flight cruising, relaxed F major
+L=voice(R8("A4:4 C5:4 F5:6 E5:2 | D5:4 C5:4 A4:8 | A#4:4 D5:4 F5:4 A5:4 | G5:12 .:4 | A5:4 G5:4 F5:4 D5:4 | C5:4 D5:4 F5:8 | G5:4 F5:2 E5:2 D5:4 E5:4 | F5:16"),128)
+B=chordb("R:4 F:4 O:4 F:4",["F2","D2","A#1","C2","D2","A#1","C2","F2"])
+Hm=voice("C4:16 A3:16 D4:16 E4:16 F4:16 F4:16 E4:16 A4:16",128)
+track("CRUISE",9,1,L,B,Hm,drums("K...H...S...H...",128),duty=2,lenv=0,hduty=1,henv=2,lvol=10,hvol=6)
+# 24 BROADSIDE - naval battle, G minor 6/8 (12-step bars)
+L=voice(R8("G4:3 A#4:3 D5:3 D5:3 | C5:3 A#4:3 A4:6 | A#4:3 C5:3 D5:3 G5:3 | F5:6 D5:6 | D#5:3 D5:3 C5:3 A#4:3 | A4:3 F#4:3 G4:6 | D5:3 D5:3 G5:3 F5:3 | D5:6 G4:6"),96)
+B=voice("G2:6 D2:6 G2:6 D2:6 G2:6 C2:6 F2:6 A#1:6 C2:6 D2:6 G2:6 D2:6 G2:6 F2:6 G2:6 G2:6",96)
+Hm=voice("A#3:12 A3:12 A#3:12 A3:12 G3:12 A3:12 A#3:12 A#3:12",96)
+track("BROADSIDE",7,1,L,B,Hm,drums("K..S..K.KS..",96),duty=2,hduty=1,lvol=12,hvol=6)
+# 25 LOITER - Drone Ops tension, A minor pulse
+L=voice(R8(".:8 E5:4 F5:4 | E5:16 | .:8 E5:4 G5:4 | F5:12 E5:4 | .:8 C5:4 D5:4 | E5:8 B4:8 | .:8 A4:4 B4:4 | C5:8 B4:8"),128)
+B=chordb("R:1 .:1 R:1 .:1 R:1 .:1 R:1 .:1 R:1 .:1 R:1 .:1 R:1 .:1 R:1 .:1",["A1","A1","A1","A1","F1","F1","E1","E1"])
+Hm=voice("A3:32 C4:32 A3:32 G#3:32",128)
+track("LOITER",7,1,L,B,Hm,drums("K.......S......H",128),duty=1,lenv=0,hduty=0,henv=2,lvol=9,hvol=5,wave=1)
+# 26 KC'S BOOT CAMP - cheerful tutorial theme, G major
+L=voice(R8("G4:2 B4:2 D5:2 B4:2 G5:4 D5:4 | E5:2 D5:2 C5:2 A4:2 B4:8 | C5:2 E5:2 G5:2 E5:2 D5:2 B4:2 G4:4 | A4:4 B4:2 C5:2 D5:8 | G5:2 F#5:2 E5:2 D5:2 E5:4 C5:4 | D5:2 C5:2 B4:2 A4:2 G4:8 | A4:2 B4:2 C5:2 D5:2 E5:2 F#5:2 G5:4 | G5:4 D5:4 G4:8"),128)
+B=chordb("R:2 F:2 O:2 F:2 R:2 F:2 O:2 F:2",["G2","C2","C2","D2","C2","G2","D2","G2"])
+Hm=voice("B3:16 G3:16 E4:16 F#4:16 G4:16 D4:16 F#4:16 B3:16",128)
+track("KC'S BOOT CAMP",6,1,L,B,Hm,drums("K.H.S.HKK.H.S.H.",128),duty=2,lenv=1,hduty=1,lvol=11,hvol=5)
+# 27 DEFEAT (one-shot)
+track("DEFEAT",8,0,voice("G4:4 F#4:4 F4:4 E4:12 .:8",32),voice("C3:4 B2:4 A#2:4 A2:12 .:8",32),voice("E4:4 D#4:4 D4:4 C#4:12 .:8",32),drums("K...K...K...C...................",32),duty=1,lvol=11)
+# 28 MISSION CLEAR (one-shot)
+track("MISSION CLEAR",6,0,voice("C5:2 D5:2 E5:2 G5:2 E5:2 G5:2 C6:8 .:12",32),voice("C3:8 G2:4 C3:8 .:12",32),voice("E4:8 B4:4 E5:8 .:12",32),drums("K.S.K.S.RRRRK...................",32),duty=2,lvol=13)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)
 emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])
@@ -1010,6 +1114,11 @@ tri=[int(round(7.5+7.5*(1-abs((i/16.0)-1)*2))) for i in range(32)]
 org=[min(15,int(7.5+5*math.sin(2*math.pi*i/32)+2.5*math.sin(4*math.pi*i/32))) for i in range(32)]
 def pack(w):return [(w[2*i]<<4)|w[2*i+1] for i in range(16)]
 emit("wave_shapes",pack(tri)+pack(org),"unsigned char")
+exec(open(os.path.join(ROOT,'tools','gen_vehicles.py')).read())
+exec(open(os.path.join(ROOT,'tools','gen_world.py')).read())
+exec(open(os.path.join(ROOT,'tools','gen_platform.py')).read())
+exec(open(os.path.join(ROOT,'tools','gen_levels.py')).read())
+exec(open(os.path.join(ROOT,'tools','gen_kc.py')).read())
 open(os.path.join(ROOT,'src','assets.h'),'w').write("#pragma once\n"+"\n".join(Hh)+"\n")
 open(os.path.join(ROOT,'src','assets.c'),'w').write('#include "assets.h"\n'+"\n".join(C)+"\n")
 print("assets ok", len(C),"arrays")

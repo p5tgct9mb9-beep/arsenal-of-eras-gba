@@ -19,43 +19,46 @@ static void title_screen(void){
 
 static void set_preview(void){if(SET.track==NTRK)music_stop();else if(SET.track==0)bgm(1,0);else music_play(SET.track-1);}
 static void settings_menu(void){
- static const char*const LAB[8]={"MUSIC TRACK","MUSIC VOLUME","SFX VOLUME","SCREEN SHAKE","DIFFICULTY","CONTROL HINTS","RUMBLE",""};
- static const char*const DN[3]={"EASY","NORMAL","HARD"};
+ static const char*const LAB[9]={"MUSIC TRACK","MUSIC VOLUME","SFX VOLUME","SCREEN SHAKE","DAMAGE TAKEN","BOT DIFFICULTY","CONTROL HINTS","RUMBLE",""};
+ static const char*const DN[3]={"LOW (EASY)","NORMAL","HIGH (HARD)"};
  int sel=0,redraw=2;
- for(;;){BEAT->screen=SCR_SETTINGS;BEAT->menu=sel;BEAT->extra=SET.track|(SET.musVol<<8)|(SET.sfxVol<<12)|(SET.diff<<16)|(SET.shake<<18)|(SET.hints<<19);
+ for(;;){BEAT->screen=SCR_SETTINGS;BEAT->menu=sel;BEAT->extra=SET.track|(SET.musVol<<8)|(SET.sfxVol<<12)|(SET.diff<<16)|(SET.shake<<18)|(SET.hints<<19)|(SET.bot<<20);
   if(redraw){if(redraw==2)m3_title(1);redraw=0;
-   m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);m3_ctext(9,"SETTINGS",C_YEL,2);
-   for(int k=0;k<8;k++){int y=34+k*12+(k==7?4:0);u16 c=k==sel?C_YEL:(k==6?C_GRAY:C_WHITE);
-    if(k==7){m3_text(14,y,k==sel?"> SAVE & BACK":"  SAVE & BACK",c,1);continue;}
+   m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);m3_ctext(9,"SETTINGS",C_YEL,2);
+   for(int k=0;k<9;k++){int y=30+k*11+(k==8?4:0);u16 c=k==sel?C_YEL:(k==7?C_GRAY:C_WHITE);
+    if(k==8){m3_text(14,y,k==sel?"> SAVE & BACK":"  SAVE & BACK",c,1);continue;}
     m3_text(14,y,LAB[k],k==sel?C_YEL:C_GRAY,1);const char*v="";
     switch(k){case 0:v=SET.track==0?"AUTO (BY ERA)":SET.track==NTRK?"OFF":TRK_NAME[SET.track-1];break;
-     case 1:case 2:{int n=k==1?SET.musVol:SET.sfxVol;m3_fill(100,y,102,7,RGB(40,44,70));if(n)m3_fill(100,y,n*102/10,7,k==1?C_BLUE:C_GREEN);v=itoa(n);m3_text(208,y,v,c,1);v=0;break;}
-     case 3:v=SET.shake?"ON":"OFF";break;case 4:v=DN[SET.diff];break;case 5:v=SET.hints?"ON":"OFF";break;case 6:v="N/A (NO RUMBLE HW)";break;}
-    if(v){m3_text(100,y,v,c,1);if(k==sel&&k!=6){m3_text(94,y,"<",C_YEL,1);m3_text(100+slen(v)*6+1,y,">",C_YEL,1);}}}
+     case 1:case 2:{int n=k==1?SET.musVol:SET.sfxVol;m3_fill(110,y,92,7,RGB(40,44,70));if(n)m3_fill(110,y,n*92/10,7,k==1?C_BLUE:C_GREEN);v=itoa(n);m3_text(208,y,v,c,1);v=0;break;}
+     case 3:v=SET.shake?"ON":"OFF";break;case 4:v=DN[SET.diff];break;case 5:v=BOTN[SET.bot];break;case 6:v=SET.hints?"ON":"OFF";break;case 7:v="N/A (NO RUMBLE HW)";break;}
+    if(v){m3_text(110,y,v,c,1);if(k==sel&&k!=7){m3_text(104,y,"<",C_YEL,1);m3_text(110+slen(v)*6+1,y,">",C_YEL,1);}}}
+   static const char*const BDD[4]={"SLOW AIM, LOW HP, TIMID BOTS","STANDARD ENEMY BOTS","SHARPER AIM, MORE HP, PUSHY","FAST, ACCURATE, TOUGH, AGGRESSIVE"};
    const char*d=sel==0?(SET.track==0?"ERA-APPROPRIATE TRACK FOR EACH MODE":SET.track==NTRK?"NO MUSIC":TRK_DESC[SET.track-1]):sel==1?"PSG MUSIC LEVEL (0 = MUTE)":sel==2?"GUNFIRE / EXPLOSION / UI SOUND LEVEL":
-    sel==3?"SHAKE ON EXPLOSIONS, HITS, TANK FIRE":sel==4?"ENEMY DAMAGE TO YOU AND FIRE RATE":sel==5?"SHOW BUTTON HINTS AT MATCH START":sel==6?"GBA EMULATORS: NO RUMBLE MOTOR":"SAVES TO SRAM";
-   m3_ctext(140,d,C_GRAY,1);m3_present();}
+    sel==3?"SHAKE ON EXPLOSIONS, HITS, TANK FIRE":sel==4?"HOW MUCH DAMAGE YOU TAKE":sel==5?BDD[SET.bot]:sel==6?"SHOW BUTTON HINTS AT MATCH START":sel==7?"GBA EMULATORS: NO RUMBLE MOTOR":"SAVES TO SRAM";
+   m3_ctext(136,d,C_GRAY,1);if(sel==5)m3_ctext(146,"6V6, CAMPAIGN ENEMIES, DRONE AA",C_GRAY,1);m3_present();}
   next_frame();
-  if(pressed&K_UP){sel=(sel+7)%8;if(sel==6)sel=5;redraw=1;sfx_menu();}
-  if(pressed&K_DOWN){sel=(sel+1)%8;if(sel==6)sel=7;redraw=1;sfx_menu();}
-  int dir=(pressed&K_RIGHT)?1:(pressed&K_LEFT)?-1:0;if((pressed&K_A)&&sel<7)dir=1;
+  if(pressed&K_UP){sel=(sel+8)%9;if(sel==7)sel=6;redraw=1;sfx_menu();}
+  if(pressed&K_DOWN){sel=(sel+1)%9;if(sel==7)sel=8;redraw=1;sfx_menu();}
+  int dir=(pressed&K_RIGHT)?1:(pressed&K_LEFT)?-1:0;if((pressed&K_A)&&sel<8)dir=1;
   if(dir){switch(sel){case 0:SET.track=(SET.track+NTRK+1+dir)%(NTRK+1);set_preview();break;
     case 1:SET.musVol=clampi(SET.musVol+dir,0,10);if(!SET.musVol)mus_silence();break;
     case 2:SET.sfxVol=clampi(SET.sfxVol+dir,0,10);sfx_shot(0);break;
-    case 3:SET.shake^=1;shake(10);break;case 4:SET.diff=(SET.diff+3+dir)%3;break;case 5:SET.hints^=1;break;}
+    case 3:SET.shake^=1;shake(10);break;case 4:SET.diff=(SET.diff+3+dir)%3;break;case 5:SET.bot=(SET.bot+4+dir)%4;break;case 6:SET.hints^=1;break;}
    redraw=1;if(sel!=2)sfx_menu();}
-  if(((pressed&K_A)&&sel==7)||(pressed&(K_B|K_START))){save_write();sfx_ok();return;}}}
+  if(((pressed&K_A)&&sel==8)||(pressed&(K_B|K_START))){save_write();sfx_ok();return;}}}
+#define NMM 11
 static int main_menu(int sel){
- static const char*const items[7]={"CAMPAIGN","6V6 INFANTRY","6V6 TANKS","6V6 DOGFIGHT","DRONE OPS","LOADOUT","SETTINGS"};
- static const char*const desc[7]={"MISSIONS: WW2, COLD WAR, MODERN","PICK A FACTION, ANY-ERA ARSENAL","ARMOR BATTLE - HULL + TURRET","AIR SUPERIORITY - GUNS + MISSILES","MODERN UAV STRIKES - MQ-9, TB2, TRITON","ERA KITS, 6V6 ARSENAL, CHARACTER","MUSIC, VOLUME, SHAKE, DIFFICULTY"};
+ static const char*const items[NMM]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","DRONE OPS","WORLD FLIGHT","SPEC OPS","LOADOUT","SETTINGS","TUTORIAL"};
+ static const char*const desc[NMM]={"MISSIONS: WW2, COLD WAR, MODERN","PICK A FACTION, ANY-ERA ARSENAL","TANKS, TDS, IFVS, HALFTRACKS, JEEPS","AIR SUPERIORITY - GUNS + MISSILES","BATTLESHIPS, CARRIERS, DESTROYERS","MODERN UAV STRIKES - MQ-9, TB2, TRITON","FREE ROAM IN THE X-15, LANDMARKS","PLATFORMER: 10 WORLDS, 90 COURSES","ERA KITS, 6V6 ARSENAL, CHARACTER","MUSIC, VOLUME, BOT DIFFICULTY","BOOT CAMP WITH KC - CONTROLS + MODES"};
  int redraw=1;
  for(;;){BEAT->screen=SCR_MENU;BEAT->menu=sel;
-  if(redraw){m3_title(0);m3_fill(30,82,180,76,RGB(14,18,36));m3_box(30,82,180,76,2);
-   for(int k=0;k<7;k++)m3_text(56,84+k*9,cat(k==sel?"> ":"  ",items[k]),k==sel?C_YEL:C_WHITE,1);
+  if(redraw){m3_title(0);m3_fill(24,74,192,84,C_PANEL);m3_box(24,74,192,84,2);
+   for(int k=0;k<NMM;k++){int col=k<5?0:k<10?1:0,row=k<10?k%5:5,xo=k==10?46:0;m3_text(30+col*92+xo,78+row*11,k==sel?">":" ",C_YEL,1);m3_text(36+col*92+xo,78+row*11,trunc12(items[k]),k==sel?C_YEL:C_WHITE,1);}
    m3_ctext(147,desc[sel],C_GRAY,1);redraw=0;m3_present();}
   next_frame();
-  if(pressed&K_UP){sel=(sel+6)%7;redraw=1;sfx_menu();}
-  if(pressed&K_DOWN){sel=(sel+1)%7;redraw=1;sfx_menu();}
+  if(pressed&K_UP){sel=(sel+NMM-1)%NMM;redraw=1;sfx_menu();}
+  if(pressed&K_DOWN){sel=(sel+1)%NMM;redraw=1;sfx_menu();}
+  if(pressed&(K_LEFT|K_RIGHT)){sel=sel==10?10:sel<5?sel+5:sel-5;redraw=1;sfx_menu();}
   if(pressed&(K_A|K_START)){sfx_ok();return sel;}
   if(pressed&K_B)return -1;}}
 static int era_select(int mode,int *era){
@@ -64,7 +67,7 @@ static int era_select(int mode,int *era){
  static const u16 EC[5]={RGB(150,170,100),RGB(200,214,232),RGB(220,190,130),RGB(80,240,255),RGB(200,170,255)};
  int e=*era,redraw=1;
  for(;;){BEAT->screen=SCR_ERA;BEAT->era=e;BEAT->mode=mode;
-  if(redraw){m3_title(1);m3_fill(12,8,216,146,RGB(14,18,36));m3_box(12,8,216,146,2);m3_ctext(14,MN[mode],C_YEL,2);m3_ctext(32,"SELECT ERA",C_GRAY,1);
+  if(redraw){m3_title(1);m3_fill(12,8,216,146,C_PANEL);m3_box(12,8,216,146,2);m3_ctext(14,MN[mode],C_YEL,2);m3_ctext(32,"SELECT ERA",C_GRAY,1);
    for(int k=0;k<5;k++)m3_text(30,46+k*12,cat(k==e?"> ":"  ",ERA_NAME[k]),k==e?EC[k]:C_WHITE,1);
    m3_text(130,46+e*12,TEAMN[e][0],C_BLUE,1);m3_text(172,46+e*12,TEAMN[e][1],C_RED,1);
    m3_ctext(110,ED[e],EC[e],1);
@@ -101,36 +104,36 @@ static int drone_hangar(int*mis){int sel=0,redraw=2;static const char*const RL[4
   if((pressed&(K_A|K_START))&&(sel==3||(pressed&K_START))){save_write();sfx_ok();return 1;}
   if(pressed&K_B){save_write();sfx_menu();return 0;}}}
 static int map_select(int mode,int*era){ // all maps of the mode across every era (+ RANDOM); returns map index, *era = map's era
- static int last=0;int N=5*NMAPS;int sel=last,redraw=2,top=0;
+ static int lastm[5];int last=lastm[mode];int N=(mode==MM_SEA?3:5)*NMAPS;int sel=last,redraw=2,top=0;
  for(;;){BEAT->screen=SCR_MAPSEL;BEAT->menu=sel;BEAT->mode=mode;
   if(sel<top)top=sel;if(sel>top+7)top=sel-7;
-  if(redraw){m3_title(1);m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);
+  if(redraw){m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);
    m3_ctext(8,"SELECT MAP - ANY ERA",C_YEL,1);
    for(int k=top;k<=N&&k<top+8;k++){int y=22+(k-top)*11;const char*n=k<N?map_def(mode,k/NMAPS,k%NMAPS)->n:"RANDOM";m3_text(8,y,k==sel?">":" ",C_YEL,1);m3_text(15,y,trunc12(n),k==sel?C_YEL:C_WHITE,1);
     if(k<N)m3_text(92,y,ERA_TAG[k/NMAPS],C_GRAY,1);}
    if(sel<N){int e=sel/NMAPS,mi=sel%NMAPS;const MapDef*md=map_def(mode,e,mi);gen_map(mode,e,mi);
-    const u32*tl=mode==MM_AIR?sky_t(e):arena_t(e);const u16*pl=mode==MM_AIR?sky_p(e):arena_p(e);const u16*wp=water_p(e);
+    int ts=mode==MM_SEA?(md->theme==TH_SNOW?1:0):e;const u32*tl=mode>=MM_AIR?sky_t(ts):arena_t(e);const u16*pl=mode>=MM_AIR?sky_p(ts):arena_p(e);const u16*wp=water_p(e);
     int PX=146,PY=22,PS=84;m3_fill(PX-2,PY-2,PS+4,PS+4,RGB(0,0,0));
     for(int y=0;y<PS;y++)for(int x=0;x<PS;x++){int t=map[(y*mapH/PS)*MAXW+(x*mapW/PS)];u32 w=tl[(t*4+3)*8+((x+y)&3)];int ci=(w>>(((x>>1)&7)*4))&15;
-     u16 c=(mode!=MM_AIR&&mtBank[t])?wp[ci?ci:2]:pl[ci?ci:1];M3[(PY+y)*240+PX+x]=tint_c(c,md->theme);}
+     u16 c=(mode<MM_AIR&&mtBank[t])?wp[ci?ci:2]:pl[ci?ci:1];M3[(PY+y)*240+PX+x]=tint_c(c,mode==MM_SEA&&md->theme==TH_SNOW?0:md->theme);}
     m3_text(8,114,md->n,C_WHITE,1);m3_text(8,124,md->d,C_GRAY,1);
-    static const char*const LN[4]={"OPEN FIELD","TOWN BLOCKS","RIVER CROSSING","FOREST / RUINS"};static const char*const SN[4]={"COAST + TERRAIN","OCEAN + ISLANDS","MOUNTAINS","DEBRIS FIELD"};
+    static const char*const LN[4]={"OPEN FIELD","TOWN BLOCKS","RIVER CROSSING","FOREST / RUINS"};static const char*const SN[4]={"COAST + TERRAIN","OCEAN + ISLANDS","MOUNTAINS","DEBRIS FIELD"};static const char*const WN[4]={"OPEN OCEAN","ISLAND GROUP","NARROW STRAIT","FJORD / ICE"};
     static const char*const TN[5]={"","  SNOW","  DESERT","  NIGHT","  DUSK"};
-    m3_text(8,134,cat3(ERA_NAME[e]," - ",cat(mode==MM_AIR?SN[md->layout]:LN[md->layout],TN[md->theme])),C_BLUE,1);}
+    m3_text(8,134,cat3(ERA_NAME[e]," - ",cat(mode==MM_SEA?WN[md->layout]:mode==MM_AIR?SN[md->layout]:LN[md->layout],TN[md->theme])),C_BLUE,1);}
    else{m3_text(160,56,"???",C_YEL,2);m3_text(8,114,"RANDOM",C_WHITE,1);m3_text(8,124,"ANY MAP FROM ANY ERA",C_GRAY,1);}
    m3_ctext(146,cat3(itoa(N)," MAPS   A: DEPLOY   B: BACK",""),C_GRAY,1);redraw=0;m3_present();}
   next_frame();
   if(pressed&K_UP){sel=(sel+N)%(N+1);redraw=1;sfx_menu();}
   if(pressed&K_DOWN){sel=(sel+1)%(N+1);redraw=1;sfx_menu();}
-  if(pressed&K_L){sel=sel>=NMAPS?sel-NMAPS:N;redraw=1;sfx_menu();}
+  last=sel;if(pressed&K_L){sel=sel>=NMAPS?sel-NMAPS:N;redraw=1;sfx_menu();}
   if(pressed&K_R){sel=sel+NMAPS<=N?sel+NMAPS:0;redraw=1;sfx_menu();}
-  if(pressed&(K_A|K_START)){sfx_ok();last=sel;int k=sel<N?sel:rr(N);*era=k/NMAPS;return k%NMAPS;}
+  if(pressed&(K_A|K_START)){sfx_ok();lastm[mode]=sel;int k=sel<N?sel:rr(N);*era=k/NMAPS;return k%NMAPS;}
   if(pressed&K_B){sfx_menu();return -1;}}}
 static void swatch(int x,int y,int f){const Fac*F=&FAC[f];m3_fill(x,y,8,8,fac_c(F->m,1,1));m3_fill(x+8,y,4,8,fac_c(F->t,1,1));}
 static int faction_select(int mode){int col=0,redraw=2;
  for(;;){BEAT->screen=SCR_ERA;BEAT->mode=mode;BEAT->menu=col;BEAT->extra=g6.fac0|(g6.fac1<<8);
-  if(redraw){m3_title(1);m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);
-   m3_ctext(8,mode==MM_INF?"6V6 INFANTRY - CHOOSE SIDE":mode==MM_TANK?"6V6 TANKS - CHOOSE SIDE":"6V6 DOGFIGHT - CHOOSE SIDE",C_YEL,1);
+  if(redraw){m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);
+   m3_ctext(8,mode==MM_INF?"6V6 INFANTRY - CHOOSE SIDE":mode==MM_TANK?"6V6 ARMOR - CHOOSE SIDE":mode==MM_SEA?"6V6 NAVAL - CHOOSE SIDE":"6V6 DOGFIGHT - CHOOSE SIDE",C_YEL,1);
    m3_text(20,22,"YOUR FACTION",col==0?C_YEL:C_GRAY,1);m3_text(132,22,"ENEMY FACTION",col==1?C_YEL:C_GRAY,1);
    for(int k=0;k<NFAC;k++){int y=34+k*9;
     m3_text(14,y,k==g6.fac0?">":" ",col==0?C_YEL:C_BLUE,1);swatch(22,y,k);m3_text(38,y,FAC[k].n,k==g6.fac0?C_BLUE:C_WHITE,1);
@@ -146,15 +149,22 @@ static int faction_select(int mode){int col=0,redraw=2;
 static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present();next_frame();}
 #include "camp2.inc"
 #include "char.inc"
+#include "world.inc"
+#include "plat.inc"
+#include "kc.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
  for(;;){
   title_screen();
+  if(!kc_done()){ps_read();tutorial(1);}
   int sel=0,era=0;
   for(;;){bgm(1,0);sel=main_menu(sel);if(sel<0)break;
-   if(sel==6){settings_menu();}
-   else if(sel==5){loadout_hub(&era);}
-   else if(sel==4){static int dm=0;if(drone_hangar(&dm)){loading(cat("LAUNCHING: ",DRN[droneSel].n));drone_run(dm);}}
+   if(sel==10){tutorial(0);}
+   else if(sel==9){settings_menu();}
+   else if(sel==8){loadout_hub(&era);}
+   else if(sel==7){spec_ops();}
+   else if(sel==6){flight_menu();}
+   else if(sel==5){static int dm=0;if(drone_hangar(&dm)){loading(cat("LAUNCHING: ",DRN[droneSel].n));drone_run(dm);}}
    else if(sel==0){mission_select();}
    else if(faction_select(sel)){if(arsenal_menu(sel)){int me=0;int mi=map_select(sel,&me);if(mi>=0){loading(cat("DEPLOYING: ",map_def(sel,me,mi)->n));mpMixed=1;mp_run(sel,me,mi);mpMixed=0;}}}
    }

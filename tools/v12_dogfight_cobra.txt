@@ -1,0 +1,94 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+shot v12_dogfight_cobra_era
+tap A
+wait 12
+tap R
+wait 4
+tap R
+wait 4
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+wait 6
+shot v12_dogfight_cobra_select
+tap START
+wait 40
+shot v12_dogfight_cobra_map
+tap A
+wait 60
+shot v12_dogfight_cobra_spawn
+hold A+UP 50
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f00
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f01
+hold A+UP 50
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f02
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f03
+hold A+UP 50
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f04
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f05
+hold A+UP 50
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f06
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f07
+hold A+UP 50
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f08
+hold A+RIGHT 40
+press B
+wait 3
+release B
+shot v12_dogfight_cobra_f09
+beat end

@@ -35,7 +35,9 @@ static const Msg RADIO[]={
 };
 static int radioId=-1,radioT;
 static void radio(int id){radioId=id;radioT=230;}
-static void draw_msg(const Msg*m){hpanel(0,15,30,5);hptxt(1,15,m->who,HB_YEL);for(int i=0;i<3;i++)hptxt(1,16+i,m->l[i],HB_WHITE);}
+static void draw_msg(const Msg*m){hpanel(0,15,30,5);hpanel(0,10,5,5);hptxt(5,14,m->who,HB_YEL);
+ spr_aff(20,100,(CH.use&&m->who[0]=='Y')?CH_TILE:OT_ERA+ES_SOLDIER,1,(CH.use&&m->who[0]=='Y')?6:m->who[0]=='Y'?2:0,0,0x80,0,0); // speaker portrait in a framed box
+ for(int i=0;i<3;i++)hptxt(1,16+i,m->l[i],HB_WHITE);}
 static void camp_complete(int t,int kills,int downs,int grenades);
 #define NEN 6
 static int campKills,campWon;
@@ -56,8 +58,8 @@ static void campaign(void){
  bgm(4,0);Unit*P=&U[0];
  int cpx[3]={7*16+8,7*16+8,7*16+8},cpy[3]={45*16+4,20*16+8,15*16+8};int cp=0;
  mpMode=MM_INF;mpEra=0;load_player(0);pSpeed=280;
- xdmg=camp_xdmg;memset(smT,0,sizeof smT);campKills=0;
- P->x=cpx[0]<<8;P->y=cpy[0]<<8;P->alive=1;P->hp=P->maxhp=pPerk==4?130:100;P->isp=1;P->ang=0;P->gren=4;refill(P);P->tact=pTact==0?2:1;P->wpn=0;
+ xdmg=camp_xdmg;memset(smT,0,sizeof smT);memset(zn,0,sizeof zn);pMark=0;campKills=0;
+ P->x=cpx[0]<<8;P->y=cpy[0]<<8;P->alive=1;P->hp=P->maxhp=(pPerk==4?130:100)+pArmHP;P->isp=1;P->ang=0;P->gren=4+(PF_(AF_UGL)||PF_(AF_RGREN)?2:0);refill(P);P->tact=pTact==0?2:1;P->wpn=0;
  for(int i=1;i<=4;i++){Unit*a=&U[i];a->alive=1;a->team=0;a->x=((i<=2?1+i:10+i-2)*16+8)<<8;a->y=(45*16+4)<<8;a->ang=0;a->think=rr(60);a->gx=a->x;a->gy=(20*16+10)<<8;a->hp=100;}
  static const u8 ecol[NEN]={1,4,7,10,13,7};static const u8 erow[NEN]={9,9,9,9,9,6};
  for(int i=0;i<NEN;i++){Unit*e=&U[5+i];e->alive=1;e->team=1;e->x=(ecol[i]*16+8)<<8;e->y=(erow[i]*16+8)<<8;e->ang=128;e->hp=60;e->cd=60+rr(90);}
@@ -122,13 +124,14 @@ static void campaign(void){
   // ---- enemy riflemen
   for(int k=5;k<5+NEN;k++){Unit*e=&U[k];if(!e->alive||brief)continue;if(e->stun>0){e->stun--;continue;}int dx=(P->x-e->x)>>8,dy=(P->y-e->y)>>8;
    if(P->alive&&idist(dx,dy)<190){e->ang=atan2i(dx,dy)<<8;if(--e->cd<=0){e->cd=70+rr(60);
-     if(los(e->x>>8,e->y>>8,P->x>>8,P->y>>8)&&!(stealth&&idist(dx,dy)>130)){Shot*s=shot_new();if(s){int an=(e->ang>>8)+rr(11)-5;s->x=e->x;s->y=e->y;s->vx=SIN(an)*4;s->vy=-COS(an)*4;s->life=60;s->dmg=15;s->team=1;s->kind=K_BUL;sfx_shot(0);fx_add((e->x>>8)+(SIN(an)*9>>8),(e->y>>8)-(COS(an)*9>>8),FXK_FLASH);}}}}}
+     if(los(e->x>>8,e->y>>8,P->x>>8,P->y>>8)&&!(stealth&&idist(dx,dy)>stealthR)){Shot*s=shot_new();if(s){int an=(e->ang>>8)+rr(11)-5;s->x=e->x;s->y=e->y;s->vx=SIN(an)*4;s->vy=-COS(an)*4;s->life=60;s->dmg=15;s->team=1;s->kind=K_BUL;sfx_shot(0);fx_add((e->x>>8)+(SIN(an)*9>>8),(e->y>>8)-(COS(an)*9>>8),FXK_FLASH);}}}}}
   // ---- shots
   for(int i=0;i<NS;i++){Shot*s=&S[i];if(s->life<=0)continue;s->life--;
    if(s->kind==K_GREN){s->x+=s->vx;s->y+=s->vy;if(s->sub<20){s->vx=s->vx*15/16;s->vy=s->vy*15/16;}int gx=s->x>>8,gy=s->y>>8;int c=cell(gx>>4,gy>>4);
     int hitBunker=(c>=CM_BK_TL&&c<=CM_BK_BR);
-    if(s->sub==20||s->sub==4){if(gy<0||(flag_at(gx,gy)&TF_SOLID))s->life=0;for(int k=5;k<5+NEN;k++)if(U[k].alive&&idist(gx-(U[k].x>>8),gy-(U[k].y>>8))<9)s->life=0;if(s->sub==20&&(s->life&3)==0)fx_add(gx,gy,FXK_SMOKE);}
-    if(s->sub==1&&(flag_at(gx+(s->vx>>6),gy+(s->vy>>6))&TF_SOLID))s->vx=s->vy=0;
+    if(s->sub==5&&s->life<880){for(int k=5;k<5+NEN;k++)if(U[k].alive&&idist(gx-(U[k].x>>8),gy-(U[k].y>>8))<26)s->life=0;}
+    if(s->sub==20||s->sub==4||s->sub==8||s->sub==9){if(gy<0||(flag_at(gx,gy)&TF_SOLID))s->life=0;for(int k=5;k<5+NEN;k++)if(U[k].alive&&idist(gx-(U[k].x>>8),gy-(U[k].y>>8))<9)s->life=0;if(s->sub==20&&(s->life&3)==0)fx_add(gx,gy,FXK_SMOKE);}
+    if((s->sub==1||s->sub==6||s->sub==7)&&(flag_at(gx+(s->vx>>6),gy+(s->vy>>6))&TF_SOLID))s->vx=s->vy=0;
     if(s->life<=0||hitBunker){s->life=0;det_explosive(s);
      if((s->sub<10||s->sub==20)&&mgOn&&idist(gx-ex,gy-ey)<(s->sub==2||s->sub==4?40:30)){bunkerHP--;BEAT->extra=bunkerHP;
       if(bunkerHP<=0){mgOn=0;phase=3;radio(5);endT=200;for(int yy=3;yy<=4;yy++)for(int xx=6;xx<=8;xx++){map[yy*MAXW+xx]=CM_RUBBLE;fx_add(xx*16+8,yy*16+8,FXK_BIG);fx_add(xx*16+8,yy*16,FXK_SMOKE);}
@@ -149,7 +152,7 @@ static void campaign(void){
   // HUD
   static const char*const OBJ[4]={"OBJ: REACH THE SEAWALL","OBJ: BLOW THE WIRE","OBJ: GRENADE THE BUNKER","BUNKER DESTROYED!"};
   htxt(0,0,OBJ[phase],phase==3?HB_GREEN:HB_YEL);
-  hput(0,19,HT_ICON+4,15);hbar(1,19,5,P->hp,P->maxhp);inf_hud(P);
+  hearts(0,19,6,P->hp,P->maxhp);inf_hud(P);
   if(phase>=2&&mgOn){htxt(20,1,"BUNKER",HB_RED);for(int i=0;i<3;i++)hput(27+i,1,i<bunkerHP?HT_ICON+2:0,15);}
   if(!P->alive)hctxt(9,"HALE IS DOWN!",HB_RED,0);
   if(P->alive&&!planted&&phase>=1&&idist((P->x>>8)-(7*16+8),(P->y>>8)-(17*16+8))<20)hctxt(12,"A: PLACE BANGALORE",HB_YEL,0);
@@ -161,7 +164,7 @@ static void campaign(void){
   spr(2*16,20*16-camY,OT_FX+FX_CRATE,0,1,3,2);spr(12*16,14*16-camY,OT_FX+FX_CRATE,0,1,3,2);
   for(int i=0;i<NS;i++){Shot*s=&S[i];if(s->life<=0)continue;int x=(s->x>>8)-camX,y=(s->y>>8)-camY;
    if(s->kind==K_GREN&&s->sub==20)spr_aff(x,y,OT_FX+FX_ROCKET,0,3,atan2i(s->vx,s->vy),0x100,1,0);else spr(x-4,y-4,OT_FX+(s->kind==K_GREN?FX_GRENADE:FX_BULLET),0,0,3,1);}
-  fx_update_draw();smoke_tick_draw();
+  fx_update_draw();smoke_tick_draw();zones_tick();
   if(P->alive&&!((P->inv>>2)&1))spr_aff((P->x>>8)-camX,(P->y>>8)-camY,CH.use?CH_TILE+((P->anim>>3)&1)*4:OT_ERA+ES_SOLDIER+((P->anim>>3)&1)*4,1,CH.use?6:2,P->tur>>8,0x100,1,0);
   for(int i=1;i<5+NEN;i++){Unit*u=&U[i];if(!u->alive)continue;spr_aff((u->x>>8)-camX,(u->y>>8)-camY,OT_ERA+ES_SOLDIER+((u->anim>>3)&1)*4,1,u->team?1:0,u->ang>>8,0x100,1,0);}
   if(P->hurt>0){P->hurt--;}

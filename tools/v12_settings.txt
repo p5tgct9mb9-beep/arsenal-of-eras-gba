@@ -1,0 +1,53 @@
+wait 60
+peek 0203FFE0 3
+audio v11_music_title_theme 600
+tap START
+wait 20
+peek 0203FFE0 3
+audio v11_music_bugle_menu 600
+tap RIGHT
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 10
+tap A
+wait 12
+shot v11_settings_default
+tap RIGHT
+wait 4
+tap RIGHT
+wait 4
+tap RIGHT
+wait 6
+shot v11_settings_track_march
+audio v11_music_hedgerow_march 700
+tap RIGHT
+wait 6
+audio v11_music_swing_squadron 700
+tap LEFT
+tap LEFT
+tap LEFT
+tap LEFT
+wait 6
+shot v11_settings_track_auto
+tap DOWN
+tap LEFT
+tap LEFT
+tap DOWN
+tap LEFT
+tap DOWN
+tap DOWN
+tap RIGHT
+wait 6
+shot v11_settings_changed
+tap DOWN
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+shot v11_settings_save_row
+tap A
+wait 10
+sram64
+beat end

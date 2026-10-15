@@ -99,8 +99,8 @@ static void d_update(void){int W=mapW*16,H=mapH*16;const DroneS*Dr=&DRN[droneSel
    case DT_BOAT:case DT_FISH:case DT_SUB:{if(--d->cd<=0){d->cd=120+rr(120);d->ang+=rr(80)-40;}d->x=(d->x+(SIN(d->ang)*d->vx>>8))&((W<<8)-1);d->y=(d->y-(COS(d->ang)*d->vx>>8))&((H<<8)-1);
     if(d->type==DT_SUB){if(d->t>360)d->t=0;}break;}
    case DT_SAM:case DT_AAA:case DT_ARTY:{int dd=ddist(d,dX,dY);
-    if(d->type==DT_SAM){int R=190-22*Dr->alt;if(dd<R&&--d->cd<=0){d->cd=200+rr(60);Shot*s=shot_new();if(s){s->x=d->x;s->y=d->y;s->kind=K_MISSILE;s->team=1;s->owner=-1;s->life=80;s->dmg=diffd(52-8*Dr->alt);s->dist=520;s->tgt=-2;s->ang=atan2i(dwrap((dX-d->x)>>8,W),dwrap((dY-d->y)>>8,H))<<8;}feed("SAM LAUNCH! EVADE",HB_RED);sfx_whoosh();}}
-    else if(d->type==DT_AAA){int R=130-18*Dr->alt;if(dd<R&&--d->cd<=0){d->cd=24+rr(20);int fx=(dX>>8)+rr(50)-25,fy=(dY>>8)+rr(40)-20;fx_add(fx,fy,FXK_SMALL);if(idist(fx-(dX>>8),fy-(dY>>8))<16){dHP-=diffd(9-Dr->alt);sfx_hurt();}}}
+    if(d->type==DT_SAM){int R=(190-22*Dr->alt)*BOTD[SET.bot].eng/100;if(dd<R&&--d->cd<=0){d->cd=(200+rr(60))*100/BOTD[SET.bot].aa;Shot*s=shot_new();if(s){s->x=d->x;s->y=d->y;s->kind=K_MISSILE;s->team=1;s->owner=-1;s->life=80;s->dmg=diffd(52-8*Dr->alt)*BOTD[SET.bot].aa/100;s->dist=520;s->tgt=-2;s->ang=atan2i(dwrap((dX-d->x)>>8,W),dwrap((dY-d->y)>>8,H))<<8;}feed("SAM LAUNCH! EVADE",HB_RED);sfx_whoosh();}}
+    else if(d->type==DT_AAA){int R=(130-18*Dr->alt)*BOTD[SET.bot].eng/100;if(dd<R&&--d->cd<=0){d->cd=(24+rr(20))*100/BOTD[SET.bot].aa;int sp=BOTD[SET.bot].jit*4+9;int fx=(dX>>8)+rr(sp*2)-sp,fy=(dY>>8)+rr(sp*8/5)-sp*4/5;fx_add(fx,fy,FXK_SMALL);if(idist(fx-(dX>>8),fy-(dY>>8))<16){dHP-=diffd(9-Dr->alt);sfx_hurt();}}}
     else if(--d->cd<=0){d->cd=300;for(int k=0;k<nD;k++)if(D[k].alive&&D[k].type==DT_FRND){fx_add(D[k].x>>8,(D[k].y>>8)+rr(30)-15,FXK_BIG);break;}}
     break;}}}
  // SAM missiles chase the drone (screen centre)
@@ -138,7 +138,7 @@ static void d_draw(void){int W=mapW*16;const DroneS*Dr=&DRN[droneSel];
 static void d_hud(void){const DroneS*Dr=&DRN[droneSel];hud_clear();
  htxt(0,0,Dr->n,HB_GREEN);htxt(18,0,dVis==0?"WHOT":dVis==1?"BHOT":"TV",HB_GREEN);htxt(23,0,cat3("ALT",itoa(Dr->alt*5),"K"),HB_GREEN);
  hctxt(1,d_obj_text(),HB_YEL,0);
- hput(0,19,HT_ICON+4,15);hbar(1,19,4,dHP,Dr->hp);
+ hearts(0,19,5,dHP,Dr->hp);
  const DWpn*w=&DWP[dW[dSel]];htxt(6,19,w->n,dCd[dSel]?HB_GRAY:HB_WHITE);htxt(25,19,cat("X",itoa(dAmmo[dSel])),dAmmo[dSel]?HB_WHITE:HB_RED);
  htxt(0,18,cat("FUEL ",mmss(dLoiter)),dLoiter<60*30?HB_RED:HB_GREEN);htxt(13,18,cat("SCORE ",itoa(dScore)),HB_WHITE);
  if(dCd[dSel])hbar(25,18,4,w->cd-dCd[dSel],w->cd);else htxt(25,18,"RDY",HB_GREEN);
@@ -157,7 +157,7 @@ static void d_load(void){ // (re)load graphics for current mission
  if(dMis==DM_COAST)setup_mode0(sky_t(0),32*4*8,sky_p(0),2,0);
  else{setup_mode0(arena_t(2),AM_N*4*8,arena_p(2),2,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(2)[i];}
  d_palette();}
-static void d_result(void){int win=!dFail;if(win)music_victory();else music_stop();
+static void d_result(void){int win=!dFail;if(win)music_victory();else music_defeat();
  int stars=win?1+(dCiv==0&&dFr==0)+(dHP>DRN[droneSel].hp/2):0;
  for(int i=0;;i++){hud_clear();hpanel(2,2,26,16);hctxt(3,win?"MISSION COMPLETE":"MISSION FAILED",win?HB_GREEN:HB_RED,1);hctxt(5,DMN[dMis],HB_YEL,1);
   hptxt(4,7,"DRONE",HB_GRAY);hptxt(13,7,DRN[droneSel].n,HB_WHITE);
@@ -170,8 +170,8 @@ static void d_result(void){int win=!dFail;if(win)music_victory();else music_stop
   oam_begin();present(0,0,0);if(i>40&&(pressed&(K_A|K_START)))break;}
  music_stop();}
 static void drone_run(int mis){
- mpMode=MM_INF;mpEra=2;BEAT->mode=4;BEAT->era=2;bgm(2,2);const DroneS*Dr=&DRN[droneSel];
- memset(U,0,sizeof U);memset(S,0,sizeof S);memset(FXs,0,sizeof FXs);memset(smT,0,sizeof smT);score[0]=score[1]=0;msgT=0;hintT=300;
+ mpMode=MM_INF;mpEra=2;BEAT->mode=4;BEAT->era=2;bgm_t(TR_LOITER);const DroneS*Dr=&DRN[droneSel];
+ memset(U,0,sizeof U);memset(S,0,sizeof S);memset(FXs,0,sizeof FXs);memset(smT,0,sizeof smT);memset(zn,0,sizeof zn);score[0]=score[1]=0;msgT=0;hintT=300;
  static const MapDef DMAP[DM_N]={{"","",LY_FIELD,TH_DESERT,61},{"","",LY_FOREST,0,62},{"","",LY_TOWN,0,63},{"","",1,0,64},{"","",LY_FIELD,0,65},{"","",LY_TOWN,0,66}};
  curMap=&DMAP[mis];if(mis==DM_COAST){mpEra=0;gen_sky();mpEra=2;}else if(mis==DM_SUPPORT)gen_arena(40,40,0);else gen_arena(56,56,0);
  dMis=mis;dVis=0;d_load();

@@ -73,7 +73,7 @@ static void ms_place_extras(void){int W=worldPx(),Hp=mapH*16;(void)W;
    case R_STATIC:u->team=1;u->hp=u->maxhp=u->kind==ST_CARRIER?210:u->kind==ST_PILL?200:u->kind==ST_BLOCK?140:110;
     if(mpMode==MM_AIR){u->x=((W/2-220+(i-msX0)*440+rr(60))&(W-1))<<8;u->y=(160+rr(80))<<8;u->ang=0x4000*(rr(2)?1:3);u->vel=0;}
     else ms_free_pos(u,4*16,Hp/2);break;
-   case R_PARA:u->team=0;u->hp=u->maxhp=100;ms_free_pos(u,Hp/4,Hp-6*16);u->wpn=ALLY_PRIM[rr(11)];break;
+   case R_PARA:u->team=0;u->hp=u->maxhp=100;ms_free_pos(u,Hp/4,Hp-6*16);u->wpn=ALLY_PRIM[rr(21)];break;
    case R_SNIPER:u->team=1;u->hp=u->maxhp=60;ms_free_pos(u,4*16,Hp/3);break;
    case R_CIV:u->team=2;u->hp=u->maxhp=60;u->mode=0;
     if(cm->flags&MF_CIVESC){if(i==msX0||!ms_free_pos(u,(U[msX0].y>>8)-24,(U[msX0].y>>8)+24))ms_free_pos(u,Hp/4,Hp/2);}
@@ -85,9 +85,9 @@ static void ms_init_fn(void){Unit*P=&U[0];int ne=cm->nEnemy,na=cm->nAlly;
  for(int i=1;i<msX0;i++){Unit*u=&U[i];u->team=i<msE0?0:1;u->role=0;u->think=i;
   if(mpMode==MM_TANK)u->veh=(u->team^msAlt)?1:0;
   else if(mpMode==MM_AIR)u->veh=msAlt?(u->team?((i&1)?13:2):11):(u->team?11:2);
-  else if(mpEra==0&&msAlt)u->wpn=u->team?ALLY_PRIM[rr(11)]:AXIS_PRIM[rr(4)];
-  else if(mpEra==0)u->wpn=u->team?AXIS_PRIM[rr(4)]:ALLY_PRIM[rr(11)];
-  else u->wpn=mpEra==0?(u->team?AXIS_PRIM[rr(4)]:ALLY_PRIM[rr(11)]):rr(NPRIM[mpEra]);
+  else if(mpEra==0&&msAlt)u->wpn=u->team?ALLY_PRIM[rr(21)]:AXIS_PRIM[rr(11)];
+  else if(mpEra==0)u->wpn=u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];
+  else u->wpn=mpEra==0?(u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM[mpEra]);
   spawn(u,i);}
  for(int i=msX0;i<MAXU;i++)memset(&U[i],0,sizeof(Unit));
  for(int k=0;k<msNob;k++){int o=cm->ob[k],a=cm->arg[k];
@@ -276,7 +276,7 @@ static void mission_run(int i,int side){cmIdx=i;cm=mis_for(i,side);msAlt=side;ca
 static void mission_select(void){static int sel=0;int redraw=2,top=0;bgm(1,0);
  for(;;){BEAT->screen=SCR_MSEL;BEAT->menu=sel;BEAT->extra=campUnlock;
   if(sel<top)top=sel;if(sel>top+7)top=sel-7;
-  if(redraw){m3_title(1);m3_fill(4,4,232,152,RGB(14,18,36));m3_box(4,4,232,152,2);m3_ctext(8,"CAMPAIGN - MISSION SELECT",C_YEL,1);
+  if(redraw){m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);m3_ctext(8,"CAMPAIGN - MISSION SELECT",C_YEL,1);
    int y=22;for(int k=top;k<NCM&&k<top+8;k++){int un=(campUnlock>>k)&1;
     if(k==top||CM[k].grp!=CM[k-1].grp){m3_text(150,y,GRPN[CM[k].grp],C_BLUE,1);}
     m3_text(10,y,k==sel?">":" ",C_YEL,1);m3_text(18,y,cat3(itoa(k+1),". ",un?CM[k].name:"LOCKED"),k==sel?C_YEL:un?C_WHITE:C_GRAY,1);y+=11;}

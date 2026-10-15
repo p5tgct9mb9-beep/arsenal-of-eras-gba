@@ -54,6 +54,7 @@ int main(int argc,char**argv){
    P32(4,36+bytes);memcpy(H_+8,"WAVEfmt ",8);P32(16,16);H_[20]=1;H_[21]=0;H_[22]=1;H_[23]=0;P32(24,sr);P32(28,sr*2);H_[32]=2;H_[33]=0;H_[34]=16;H_[35]=0;memcpy(H_+36,"data",4);P32(40,bytes);
    fwrite(H_,1,44,wav);fclose(wav);wav=0;printf("[audio %s] samples=%ld\n",a,wavN);}
   else if(!strcmp(c,"sram64")){printf("[sram64]");for(int i=0;i<64;i++)printf(" %02x",core->busRead8(core,0x0E000000+i));printf("\n");}
+  else if(!strcmp(c,"savedump")){FILE*o=fopen(a,"wb");for(int i=0;i<32768;i++)fputc(core->busRead8(core,0x0E000000+i),o);fclose(o);printf("[savedump %s]\n",a);}
   else if(!strcmp(c,"sram")){printf("[sram]");for(int i=0;i<16;i++)printf(" %02x",core->busRead8(core,0x0E000000+i));printf("\n");}
   else if(!strcmp(c,"runright")){int N=atoi(a);int k=0;
    // simple bot: run right, jump periodically, shoot

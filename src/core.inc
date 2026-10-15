@@ -1,3 +1,5 @@
+#define RGB(r,g,b) (((r)>>3)|(((g)>>3)<<5)|(((b)>>3)<<10))
+#define C_PANEL RGB(30,46,96)
 // ===================================================================== core
 void *memcpy(void *d,const void *s,unsigned n){u8*a=d;const u8*b=s;while(n--)*a++=*b++;return d;}
 void *memset(void *d,int v,unsigned n){u8*a=d;while(n--)*a++=(u8)v;return d;}
@@ -10,7 +12,7 @@ static inline int clampi(int v,int a,int b){return v<a?a:v>b?b:v;}
 static inline int angd(int a,int b){return ((a-b+128)&255)-128;}   // signed diff in 256-units
 typedef struct{u32 magic,frame,screen,mode,era,hp,scoreA,scoreB,timer,phase,kills,deaths,menu,x,y,extra;}Beat;
 #define BEAT ((volatile Beat*)0x0203FF00)
-enum{SCR_TITLE=1,SCR_MENU,SCR_ERA,SCR_CAMP,SCR_INF,SCR_TANK,SCR_AIR,SCR_RESULT,SCR_PAUSE,SCR_DONE,SCR_LOADOUT,SCR_SETTINGS,SCR_MAPSEL,SCR_MSEL,SCR_MISSION,SCR_MBRIEF,SCR_DRONE,SCR_HANGAR};
+enum{SCR_TITLE=1,SCR_MENU,SCR_ERA,SCR_CAMP,SCR_INF,SCR_TANK,SCR_AIR,SCR_RESULT,SCR_PAUSE,SCR_DONE,SCR_LOADOUT,SCR_SETTINGS,SCR_MAPSEL,SCR_MSEL,SCR_MISSION,SCR_MBRIEF,SCR_DRONE,SCR_HANGAR,SCR_SEA,SCR_LAUNCH,SCR_WMENU,SCR_WORLD,SCR_WMAP,SCR_WLOG};
 static u16 keys,prevk,pressed;static u32 frame;
 static void poll(void){prevk=keys;keys=~REG_KEYINPUT&0x3FF;pressed=keys&~prevk;}
 static void vsync(void){while(REG_VCOUNT>=160);while(REG_VCOUNT<160);}
@@ -28,8 +30,13 @@ static int idist(int dx,int dy){dx=iabs(dx);dy=iabs(dy);return dx>dy?dx+dy*3/8:d
 // ---------------------------------------------------------------- sound
 // v1.1: VBlank-IRQ driven 4-voice PSG sequencer (ch2 lead, ch1 harmony, ch3 wave bass, ch4 noise drums).
 // SFX share ch1/ch2/ch4 and "lock" the channel for a few frames so effects always win.
-typedef struct{u8 track,musVol,sfxVol,shake,diff,hints;}Settings;
-static Settings SET={0,8,10,1,1,1};
+typedef struct{u8 track,musVol,sfxVol,shake,diff,hints,bot;}Settings;
+static Settings SET={0,8,10,1,1,1,1};
+// v1.2 bot difficulty: aim jitter, extra fire delay, think interval, engage range %, HP %, AA strength %
+typedef struct{s8 jit,cd,think;u8 eng,hp,aa;}BotD;
+static const BotD BOTD[4]={{9,12,16,75,75,60},{4,4,8,100,100,100},{2,0,6,115,115,125},{1,-3,4,130,135,150}};
+static const char*const BOTN[4]={"RECRUIT","REGULAR","VETERAN","ELITE"};
+#define BD(u) (&BOTD[(u)->team==1?SET.bot:1])  // enemy bots follow the setting, allied bots stay Regular
 #define REG_SND3SEL REG16(0x4000070)
 #define REG_SND3CNT REG16(0x4000072)
 #define REG_SND3FREQ REG16(0x4000074)
@@ -83,19 +90,30 @@ extern void isr_stub(void);
 static void irq_init(void){*(volatile u32*)0x03007FFC=(u32)isr_stub;REG_DISPSTAT|=0x08;REG_IE=1;REG_IME=1;}
 static const u8 DIFF_PCT[3]={65,100,135};static int diffd(int d){return d*DIFF_PCT[SET.diff]/100;}
 // era/mode default tracks
-enum{TR_BUGLE,TR_OMAHA,TR_MARCH,TR_SWING,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE,TR_THEME,TR_VICTORY};
-static const char*const TRK_DESC[NTRK]={"WW2 BUGLE CALL - MENUS","WW2 SOMBER - OMAHA CAMPAIGN","WW2 1940S MILITARY MARCH","WW2 BIG-BAND SWING - DOGFIGHT","COLD WAR SPY SYNTH","MODERN DRIVING ACTION","FUTURISTIC SYNTH ARPS","SPACE AMBIENT DRIFT","TITLE THEME","VICTORY FANFARE"};
-static const char*const TRK_NAME[NTRK]={"BUGLE CALL","DOG GREEN","HEDGEROW MARCH","SWING SQUADRON","IRON CURTAIN","TASK FORCE","NEON PROTOCOL","VOID DRIFT","ARSENAL THEME","VICTORY"};
+enum{TR_BUGLE,TR_OMAHA,TR_MARCH,TR_SWING,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE,TR_THEME,TR_VICTORY,
+ TR_DMZ,TR_FROST,TR_DUNE,TR_JUNGLE,TR_ISLAND,TR_SAND,TR_PADDY,TR_OLDC,TR_XENO,TR_BOSS,TR_FORT,TR_MAP,TR_ASCENT,TR_CRUISE,TR_NAVAL,TR_LOITER,TR_KC,TR_DEFEAT,TR_CLEAR};
+static const char*const TRK_DESC[NTRK]={"WW2 BUGLE CALL - MENUS","WW2 SOMBER - OMAHA CAMPAIGN","WW2 1940S MILITARY MARCH","WW2 BIG-BAND SWING - DOGFIGHT","COLD WAR SPY SYNTH","MODERN DRIVING ACTION","FUTURISTIC SYNTH ARPS","SPACE AMBIENT DRIFT","TITLE THEME","VICTORY FANFARE",
+ "SPEC OPS W1 FOREST / DMZ","SPEC OPS W2 ARCTIC","SPEC OPS W3 CANYON DESERT","SPEC OPS W4 JUNGLE RIVER","SPEC OPS W6 ISLAND FORTRESS","SPEC OPS W7 DESERT AIRBASE","SPEC OPS W8 VIETNAM / COLD WAR","SPEC OPS W9 WW2 EUROPE","SPEC OPS W10 ALIEN WORLDS",
+ "BOSS BATTLE THEME","AIRSHIP / FORTRESS COURSES","SPEC OPS WORLD MAP","X-15 / ROCKET LAUNCH ASCENT","WORLD FLIGHT CRUISING","6V6 NAVAL BATTLE","DRONE OPS - TENSE","KC TUTORIAL - CHEERFUL","DEFEAT JINGLE","MISSION CLEAR JINGLE"};
+static const char*const TRK_NAME[NTRK]={"BUGLE CALL","DOG GREEN","HEDGEROW MARCH","SWING SQUADRON","IRON CURTAIN","TASK FORCE","NEON PROTOCOL","VOID DRIFT","ARSENAL THEME","VICTORY",
+ "DMZ PATROL","PERMAFROST","DUNE RAIDERS","JUNGLE RIVER","ISLAND FORTRESS","SAND AIRSTRIP","PADDY FIELDS","OLD CONTINENT","XENO SIGNAL",
+ "BOSS BATTLE","FORTRESS","WORLD MAP","ASCENT","CRUISE","BROADSIDE","LOITER","KC'S BOOT CAMP","DEFEAT","MISSION CLEAR"};
 // ctx: 0 title, 1 menus, 2 ground battle, 3 air battle, 4 campaign/sombre
 static void bgm(int ctx,int era){if(SET.track==NTRK-1+1){music_stop();return;} // last option = OFF
  int t;if(SET.track>0)t=SET.track-1;
  else if(ctx==0)t=TR_THEME;else if(ctx==1)t=TR_BUGLE;else if(ctx==4)t=TR_OMAHA;
  else{static const u8 G[5]={TR_MARCH,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE};t=(ctx==3&&era==0)?TR_SWING:G[era];}
  music_play(t);}
+static void bgm_t(int t){if(SET.track==NTRK){music_stop();return;}music_play(SET.track>0?SET.track-1:t);}
+static void music_jingle(int t){if(SET.musVol&&SET.track!=NTRK){musOn=0;musTrk=-1;music_play(t);}}
+static void music_defeat(void){music_jingle(TR_DEFEAT);}
 static void music_victory(void){if(SET.musVol){musOn=0;musTrk=-1;music_play(TR_VICTORY);}}
 // ---------------------------------------------------------------- frame
 static void beat_common(int scr){BEAT->magic=0xA0E5;BEAT->screen=scr;}
-static void next_frame(void){vsync();frame++;BEAT->frame=frame;poll();}
+static int shimmer; // v1.2 animated water: 1 = arena water bank rotate, 2 = open-sea swap
+static void next_frame(void){vsync();frame++;BEAT->frame=frame;poll();
+ if(shimmer==1&&(frame&15)==0){u16 t=PAL_BG[18];PAL_BG[18]=PAL_BG[19];PAL_BG[19]=PAL_BG[20];PAL_BG[20]=t;}
+ else if(shimmer==2&&(frame%24)==0){u16 t=PAL_BG[1];PAL_BG[1]=PAL_BG[2];PAL_BG[2]=t;}}
 
 // ---------------------------------------------------------------- mode 3 drawing
 static u16 fb[240*160] EWRAM;
@@ -103,17 +121,23 @@ static u16 fb[240*160] EWRAM;
 static void m3_present(void){vsync();dma32(fb,(void*)0x06000000,240*160/2);REG_DISPCNT=3|(1<<10);}
 static u16 dimc(u16 c){return (c>>1)&0x3DEF;}
 static void m3_title(int dim){dma32(dim?title_dim:title_bmp,fb,240*160/2);}
-static void m3_box(int x0,int y0,int w,int h,int mode){ // mode 0: darken, 1: solid navy
- if(mode<2)for(int y=y0;y<y0+h&&y<160;y++)for(int x=x0;x<x0+w&&x<240;x++){u16*p=&M3[y*240+x];*p=mode?0x1C42:dimc(dimc(*p));}
- for(int x=x0;x<x0+w;x++){M3[y0*240+x]=0x6B5A;M3[(y0+h-1)*240+x]=0x6B5A;}
- for(int y=y0;y<y0+h;y++){M3[y*240+x0]=0x6B5A;M3[y*240+x0+w-1]=0x6B5A;}}
+static void m3_px(int x,int y,u16 c){if((unsigned)x<240&&(unsigned)y<160)M3[y*240+x]=c;}
+static void m3_box(int x0,int y0,int w,int h,int mode){ // v1.2 adventure-style frame: dark rim, gold double line, rounded gem corners
+ if(mode<2)for(int y=y0;y<y0+h&&y<160;y++)for(int x=x0;x<x0+w&&x<240;x++){u16*p=&M3[y*240+x];*p=mode?C_PANEL:dimc(dimc(*p));}
+ static const u16 RING[4]={RGB(28,20,36),RGB(236,196,92),RGB(255,236,160),RGB(150,100,40)};
+ for(int r=0;r<4;r++){u16 c=RING[r];int a=x0+r,b=y0+r,ww=w-2*r,hh=h-2*r;if(ww<=2||hh<=2)break;
+  for(int x=a+2;x<a+ww-2;x++){m3_px(x,b,r==2?RING[1]:c);m3_px(x,b+hh-1,c);}
+  for(int y=b+2;y<b+hh-2;y++){m3_px(a,y,r==2?RING[1]:c);m3_px(a+ww-1,y,c);}
+  m3_px(a+1,b+1,c);m3_px(a+ww-2,b+1,c);m3_px(a+1,b+hh-2,c);m3_px(a+ww-2,b+hh-2,c);}
+ if(y0>0&&x0>0)m3_px(x0-1+1,y0,0);
+ static const int CX[4]={0,1,0,1},CY[4]={0,0,1,1};
+ for(int k=0;k<4;k++){int cx=CX[k]?x0+w-5:x0+4,cy=CY[k]?y0+h-5:y0+4;m3_px(cx,cy,RGB(120,220,255));m3_px(cx-1,cy,RGB(40,90,200));m3_px(cx+1,cy,RGB(40,90,200));m3_px(cx,cy-1,RGB(200,250,255));m3_px(cx,cy+1,RGB(40,90,200));}}
 static int slen(const char*s){int n=0;while(s[n])n++;return n;}
 static void m3_text(int x,int y,const char*s,u16 col,int sc){
  for(;*s;s++,x+=6*sc){int c=*s;if(c>='a'&&c<='z')c-=32;if(c<32||c>127)c='?';const u8*g=&font_bits[(c-32)*7];
   for(int pass=0;pass<2;pass++)for(int gy=0;gy<7;gy++)for(int gx=0;gx<5;gx++)if(g[gy]&(1<<gx))
    for(int oy=0;oy<sc;oy++)for(int ox=0;ox<sc;ox++){int X=x+gx*sc+ox+(pass?0:1),Y=y+gy*sc+oy+(pass?0:1);if(X>=0&&X<240&&Y>=0&&Y<160)M3[Y*240+X]=pass?col:0x0421;}}}
 static void m3_ctext(int y,const char*s,u16 col,int sc){m3_text(120-(slen(s)*6*sc-sc)/2,y,s,col,sc);}
-#define RGB(r,g,b) (((r)>>3)|(((g)>>3)<<5)|(((b)>>3)<<10))
 #define C_WHITE RGB(248,248,248)
 #define C_YEL RGB(255,214,64)
 #define C_GRAY RGB(160,164,176)
@@ -133,6 +157,7 @@ static void hpanel(int x,int y,int w,int h){for(int j=0;j<h;j++)for(int i=0;i<w;
  int T=j==0,B=j==h-1,L=i==0,R=i==w-1;
  if(T&&L)t=5;else if(T&&R)t=6;else if(B&&L)t=7;else if(B&&R)t=8;else if(T)t=1;else if(B)t=2;else if(L)t=3;else if(R)t=4;
  hput(x+i,y+j,HT_PANEL+t,15);}}
+static void hearts(int x,int y,int n,int v,int max){int h=max>0?(v*n*2+max-1)/max:0;if(v<=0)h=0;for(int i=0;i<n;i++){int q=h-i*2;hput(x+i,y,HT_HEART+(q>=2?0:q==1?1:2),15);}}
 static void hbar(int x,int y,int cells,int v,int max){int f=max>0?v*cells*8/max:0;if(v>0&&f==0)f=1;for(int i=0;i<cells;i++){int n=f-i*8;n=n<0?0:n>8?8:n;hput(x+i,y,HT_BAR+n,15);}}
 static char nb[4][12];static int nbi;
 static const char*itoa(int v){char*o=nb[nbi++&3];char t[12];int n=0,neg=v<0;if(neg)v=-v;do{t[n++]='0'+v%10;v/=10;}while(v);int k=0;if(neg)o[k++]='-';while(n)o[k++]=t[--n];o[k]=0;return o;}
@@ -148,15 +173,16 @@ static void spr(int x,int y,int tile,int shape,int size,int pal,int prio){
  if(noam>=128||x<=-64||x>=240||y<=-64||y>=160)return;u16*o=&oam[noam*4];
  o[0]=(y&255)|(shape<<14);o[1]=(x&511)|(size<<14);o[2]=tile|(prio<<10)|(pal<<12);noam++;}
 static int aff_get(int ang,int sx){ // sx: x-scale 8.8 (roll); 0x100 normal; 0x80 double
- u16 key=(ang&255)|((sx>>3)<<8);for(int i=0;i<naff;i++)if(affkey[i]==key)return i;
+ u16 key=(ang&255)|((sx==0x81?63:(sx>>3))<<8);for(int i=0;i<naff;i++)if(affkey[i]==key)return i;
  if(naff>=32){int best=0,bd=999;for(int i=0;i<32;i++){int d=iabs(angd(affkey[i]&255,ang));if((affkey[i]>>8)==(key>>8)&&d<bd){bd=d;best=i;}}return best;}
  int k=naff++;affkey[k]=key;int c=COS(ang),s=SIN(ang);int kx=sx>=0x100?256:(256*256/(sx<16?16:sx));
+ if(sx==0x81){oam[(k*4+0)*4+3]=(u16)(s16)(c/2);oam[(k*4+1)*4+3]=(u16)(s16)(s/2);oam[(k*4+2)*4+3]=(u16)(s16)(-s/2);oam[(k*4+3)*4+3]=(u16)(s16)(c/2);return k;}
  if(sx==0x80){c*=2;s*=2;kx=256;}  // 2x enlarge (double-size)
  if(sx==0x80){oam[(k*4+0)*4+3]=(u16)(c/2>0?128:128);oam[(k*4+1)*4+3]=0;oam[(k*4+2)*4+3]=0;oam[(k*4+3)*4+3]=128;return k;}
  oam[(k*4+0)*4+3]=(u16)(s16)(c*kx/256);oam[(k*4+1)*4+3]=(u16)(s16)(s*kx/256);oam[(k*4+2)*4+3]=(u16)(s16)(-s);oam[(k*4+3)*4+3]=(u16)(s16)c;return k;}
 // affine sprite centred at (cx,cy); sz 0=8,1=16,2=32
 static void spr_aff(int cx,int cy,int tile,int sz,int pal,int ang,int sx,int prio,int semi){
- int w=8<<sz;if(noam>=128||cx<-w||cx>240+w||cy<-w||cy>160+w)return;int m=aff_get(ang,sx);int dbl=sx==0x80;
+ int w=8<<sz;if(noam>=128||cx<-w||cx>240+w||cy<-w||cy>160+w)return;int m=aff_get(ang,sx);int dbl=sx==0x80||sx==0x81;
  int x=cx-(dbl?w:w/2),y=cy-(dbl?w:w/2);u16*o=&oam[noam*4];
  o[0]=(y&255)|(1<<8)|(dbl<<9)|(semi?1<<10:0);o[1]=(x&511)|(m<<9)|(sz<<14);o[2]=tile|(prio<<10)|(pal<<12);noam++;}
 
@@ -187,9 +213,7 @@ static void present(int clouds,int ccx,int ccy){int kx=0,ky=0;
  REG_BGHOFS(1)=camX+kx;REG_BGVOFS(1)=camY+ky;REG_BGHOFS(0)=kx;REG_BGVOFS(0)=ky;
  if(clouds){dma32(bgc,SCREENBLOCK(29),512);REG_BGHOFS(2)=ccx+kx;REG_BGVOFS(2)=ccy+ky;}
  frame++;BEAT->frame=frame;poll();}
-#define VT_BASE 384
-#define VP_BASE0 544
-#define VP_BASE1 768
+#define VS_BASE 384  // v1.2: per-match vehicle sprite slots 384..895 (allocated on demand)
 #define CH_TILE 896
 // ---------------------------------------------------------------- character creator data (sprite built at runtime)
 typedef struct{char name[11];u8 skin,hair,head,hat,uni,camo,vest,body,use;}Chr;
@@ -221,15 +245,20 @@ static void ch_build(void){
   chpx[f][8][CH.body?4:3]=9;chpx[f][8][CH.body?11:12]=9;
   for(int y=0;y<=7;y++)chpx[f][y][9]=7;chpx[f][3][9]=14;chpx[f][4][9]=14;chpx[f][6][9]=6;chpx[f][5][7]=6;
   // head
-  int hx0=5,hx1=10;ch_e(f,hx0,4,hx1,10,11);if(CH.head==1)ch_e(f,6,5,9,9,12);
+  int hx0=4,hx1=11;ch_e(f,hx0,2,hx1,11,11);if(CH.head==1)ch_e(f,5,3,10,10,12);
   chpx[f][4][7]=6;chpx[f][4][8]=6;if(CH.head==2){chpx[f][3][7]=11;chpx[f][3][8]=11;chpx[f][4][6]=11;chpx[f][4][9]=11;}
   switch(CH.hat){
-   case 0:ch_e(f,4,4,11,10,5);chpx[f][5][5]=15;chpx[f][5][6]=15;chpx[f][5][7]=15;chpx[f][9][7]=10;chpx[f][9][8]=10;break;
-   case 1:ch_e(f,5,5,10,10,5);ch_e(f,4,6,7,9,5);chpx[f][6][9]=10;break;
-   case 2:ch_e(f,5,5,10,10,5);ch_r(f,6,3,9,4,10);break;
-   case 3:ch_e(f,3,3,12,11,10);ch_e(f,5,5,10,9,5);break;}}}
+   case 0:ch_e(f,3,1,12,11,5);chpx[f][3][5]=15;chpx[f][3][6]=15;chpx[f][4][5]=15;chpx[f][10][7]=10;chpx[f][10][8]=10;break;
+   case 1:ch_e(f,4,2,11,10,5);ch_e(f,3,4,7,9,5);chpx[f][4][10]=10;break;
+   case 2:ch_e(f,4,2,11,11,5);ch_r(f,6,0,9,2,10);break;
+   case 3:ch_e(f,2,1,13,12,10);ch_e(f,4,3,11,10,5);break;}
+  // v1.2: 3-tone cel shade + dark outline (adventure style)
+  static u8 t[16][16];memcpy(t,chpx[f],256);
+  for(int y=0;y<16;y++)for(int x=0;x<16;x++){int v=t[y][x];int up=y==0||!t[y-1][x],lf=x==0||!t[y][x-1],dn=y==15||!t[y+1][x],rt=x==15||!t[y][x+1];
+   if(v==3){if(up||lf)chpx[f][y][x]=4;else if(dn||rt)chpx[f][y][x]=2;}
+   else if(!v&&((y>0&&t[y-1][x])||(y<15&&t[y+1][x])||(x>0&&t[y][x-1])||(x<15&&t[y][x+1])))chpx[f][y][x]=1;}}}
 static void ch_palette(int bank){u16*p=(u16*)PAL_OBJ+bank*16;const u8*u=CH_UNIC[CH.uni];
- p[1]=RGB(16,16,18);p[2]=RGB(u[0]*3/4,u[1]*3/4,u[2]*3/4);p[3]=RGB(u[0],u[1],u[2]);p[4]=RGB(clampi(u[0]*5/4,0,255),clampi(u[1]*5/4,0,255),clampi(u[2]*5/4,0,255));
+ p[1]=RGB(30,20,40);p[2]=RGB(u[0]*3/4,u[1]*3/4,u[2]*3/4);p[3]=RGB(u[0],u[1],u[2]);p[4]=RGB(clampi(u[0]*5/4,0,255),clampi(u[1]*5/4,0,255),clampi(u[2]*5/4,0,255));
  static const u8 HAT[5][3]={{70,82,48},{150,30,40},{60,70,44},{100,104,64},{0,0,0}};p[5]=CH.hat==0?RGB(u[0]*9/10,u[1]*9/10+8,u[2]*9/10):RGB(HAT[CH.hat][0],HAT[CH.hat][1],HAT[CH.hat][2]);
  p[10]=RGB(40,40,36);if(CH.hat==3)p[10]=RGB(u[0]*4/5,u[1]*4/5,u[2]*4/5);
  p[6]=CH_SKIN[CH.skin];{u16 s=CH_SKIN[CH.skin];p[12]=((s&31)*3/4)|((((s>>5)&31)*3/4)<<5)|((((s>>10)&31)*3/4)<<10);}
@@ -238,7 +267,7 @@ static void char_upload(void){ch_build();
  for(int f=0;f<2;f++)for(int t=0;t<4;t++){u32*d=(u32*)OBJ_TILES+(CH_TILE+f*4+t)*8;int ox=(t&1)*8,oy=(t>>1)*8;
   for(int y=0;y<8;y++){u32 w=0;for(int x=0;x<8;x++)w|=(u32)(chpx[f][oy+y][ox+x]&15)<<(x*4);d[y]=w;}}
  ch_palette(6);}
-static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int clouds){
+static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int clouds){shimmer=0;
  vsync();REG_DISPCNT=0x80; // forced blank while loading
  dma32(hud_tiles,CHARBLOCK(0),sizeof(hud_tiles)/4);
  for(int b=0;b<6;b++)dma32(hud_pal+b*16,PAL_BG+(15-b)*16,8);
@@ -246,9 +275,6 @@ static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int
  dma32(fx_tiles,OBJ_TILES,sizeof(fx_tiles)/4);
  const u32*es=era==0?era_spr_0:era==1?era_spr_1:era==2?era_spr_2:era==3?era_spr_3:era_spr_4;
  dma32(es,OBJ_TILES+64*8,(era==0?ES_N0:era==2?ES_N2:ES_N1)*8);
- for(int e=0;e<5;e++){const u32*s=e==0?era_spr_0:e==1?era_spr_1:e==2?era_spr_2:e==3?era_spr_3:era_spr_4; // all-era vehicle banks (6v6 arsenal)
-  dma32(s+ES_HULL*8,OBJ_TILES+(VT_BASE+e*32)*8,32*8);
-  if(e==0)dma32(s+ES_PLANE*8,OBJ_TILES+VP_BASE0*8,14*16*8);else dma32(s+ES_PLANE*8,OBJ_TILES+(VP_BASE1+(e-1)*32)*8,32*8);}
  char_upload();
  for(int i=0;i<48;i++)PAL_OBJ[i]=obj_team_pal[era*48+i];for(int i=0;i<16;i++)PAL_OBJ[48+i]=fx_pal[i];
  for(int i=0;i<16;i++)PAL_OBJ[4*16+i]=RGB(8,8,16);
@@ -264,7 +290,7 @@ static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int
 
 // ---------------------------------------------------------------- shared entities
 typedef struct{s32 x,y;s16 vel;u16 ang,tur;s16 hp,maxhp;u8 team,alive,isp,wpn;
- s16 cd,cd2,resp,inv,hurt,anim,roll,rollcd,ammo,gren,kills,deaths,think,tgt,stuck,wander,wang,evade,regen,mode,mag[3],rl,stun,tact,veh;s32 lx,ly,gx,gy;u8 role,kind,ve;}Unit;
+ s16 cd,cd2,resp,inv,hurt,anim,roll,rollcd,ammo,gren,kills,deaths,think,tgt,stuck,wander,wang,evade,regen,mode,mag[3],rl,stun,tact,veh;s32 lx,ly,gx,gy;u8 role,kind,ve;u16 vt;s16 fuel;}Unit;
 #define MAXU 24
 static Unit U[MAXU];static int nU=12;
 #define NU nU
