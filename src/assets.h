@@ -114,11 +114,15 @@ extern const unsigned char trk23[512];
 extern const unsigned char trk24[384];
 extern const unsigned char trk25[512];
 extern const unsigned char trk26[512];
-extern const unsigned char trk27[128];
-extern const unsigned char trk28[128];
-extern const unsigned char trk_meta[348];
-extern const unsigned char*const trk_data[29];
-#define NTRK 29
+extern const unsigned char trk27[512];
+extern const unsigned char trk28[512];
+extern const unsigned char trk29[512];
+extern const unsigned char trk30[512];
+extern const unsigned char trk31[128];
+extern const unsigned char trk32[128];
+extern const unsigned char trk_meta[396];
+extern const unsigned char*const trk_data[33];
+#define NTRK 33
 extern const unsigned char wave_shapes[32];
 extern const unsigned int tank_spr[26880];
 extern const unsigned int plane_spr[18176];

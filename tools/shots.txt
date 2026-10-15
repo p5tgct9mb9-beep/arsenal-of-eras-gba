@@ -3,9 +3,12 @@ wait 100
 shot 01_title
 tap START
 wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap RIGHT
 shot 02_menu
 # ---- loadout (main menu entry), customize WW2
-tap UP
 wait 10
 shot 02b_menu_loadout_sel
 tap A

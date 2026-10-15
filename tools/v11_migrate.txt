@@ -2,9 +2,10 @@ wait 100
 sram64
 tap START
 wait 15
-tap UP
-tap UP
-tap UP
+tap DOWN
+tap DOWN
+tap DOWN
+tap RIGHT
 wait 10
 tap A
 wait 12

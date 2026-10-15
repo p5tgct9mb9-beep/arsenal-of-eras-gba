@@ -14,13 +14,16 @@ static void ls_load(void){if(!(SRAM[LS_OFF]=='A'&&SRAM[LS_OFF+1]=='O'&&SRAM[LS_O
 static void ls_save(void){SRAM[LS_OFF]='A';SRAM[LS_OFF+1]='O';SRAM[LS_OFF+2]='E';SRAM[LS_OFF+3]='S';SRAM[LS_OFF+4]=1;
  for(int i=0;i<NRK;i++){SRAM[LS_OFF+8+i*2]=lbest[i]&255;SRAM[LS_OFF+9+i*2]=lbest[i]>>8;SRAM[LS_OFF+8+NRK*2+i]=lbonus[i];}}
 // ---------------------------------------------------------------- drawing helpers (clipped)
-static void lf(int x,int y,int w,int h,u16 c){if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>240)w=240-x;if(y+h>160)h=160-y;if(w<=0||h<=0)return;
- if(x==0&&w==240){fill32(&fb[y*240],c|(c<<16),120*h);return;}
- for(int j=0;j<h;j++){u16*p=&fb[(y+j)*240+x];int n=w;if(((u32)p)&2){*p++=c;n--;}if(n>=16){fill32(p,c|(c<<16),n>>1);p+=n&~1;n&=1;}while(n-->0)*p++=c;}}
-static void ltx(int x,int y,const char*s,u16 col){ // fast 1x text with drop shadow (only touches set pixels)
+static u16*lfb=0; // null = fb
+#define IWCODE __attribute__((section(".iwram.code"),target("arm"),noinline,long_call))
+IWCODE static void lf(int x,int y,int w,int h,u16 c){if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>240)w=240-x;if(y+h>160)h=160-y;if(w<=0||h<=0)return;
+ u32 cc=c|((u32)c<<16);u16*row=&(lfb?lfb:fb)[y*240+x];
+ for(int j=0;j<h;j++,row+=240){u16*p=row;int n=w;if(((u32)p)&2){*p++=c;n--;}u32*q=(u32*)p;int m=n>>1;
+  while(m>=4){q[0]=cc;q[1]=cc;q[2]=cc;q[3]=cc;q+=4;m-=4;}while(m-->0)*q++=cc;if(n&1)*(u16*)q=c;}}
+IWCODE static void ltx(int x,int y,const char*s,u16 col){ // fast 1x text with drop shadow (only touches set pixels)
  if(y<0||y>151)return;for(;*s;s++,x+=6){int c=*s;if(c>='a'&&c<='z')c-=32;if(c<=32||c>127)continue;if(x<0||x>233)continue;const u8*g=&font_bits[(c-32)*7];
-  u16*row=&fb[y*240+x];for(int gy=0;gy<7;gy++,row+=240){u32 b=g[gy];int gx=0;while(b){if(b&1){row[gx+241]=0x0421;row[gx]=col;}b>>=1;gx++;}}
-  row=&fb[y*240+x];for(int gy=0;gy<7;gy++,row+=240){u32 b=g[gy];int gx=0;while(b){if(b&1)row[gx]=col;b>>=1;gx++;}}}}
+  u16*B0=lfb?lfb:fb;u16*row=&B0[y*240+x];for(int gy=0;gy<7;gy++,row+=240){u32 b=g[gy];int gx=0;while(b){if(b&1){row[gx+241]=0x0421;row[gx]=col;}b>>=1;gx++;}}
+  row=&B0[y*240+x];for(int gy=0;gy<7;gy++,row+=240){u32 b=g[gy];int gx=0;while(b){if(b&1)row[gx]=col;b>>=1;gx++;}}}}
 static void ltc(int y,const char*s,u16 col){ltx(120-(slen(s)*6-1)/2,y,s,col);}
 static u16 lit(u16 c){int r=c&31,g=(c>>5)&31,b=(c>>10)&31;r=r+(31-r)/3;g=g+(31-g)/3;b=b+(31-b)/3;return r|(g<<5)|(b<<10);}
 static void body(int x,int y,int w,int h,u16 c){if(w<=0||h<=0)return;lf(x,y,w,h,c);lf(x,y,1,h,lit(c));if(w>3)lf(x+w-2,y,2,h,dimc(c));}

@@ -3,9 +3,13 @@ peek 0203FFE0 3
 audio v11_music_title_theme 600
 tap START
 wait 20
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap RIGHT
 peek 0203FFE0 3
 audio v11_music_bugle_menu 600
-tap UP
 wait 10
 tap A
 wait 12

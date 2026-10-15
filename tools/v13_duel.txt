@@ -1,0 +1,35 @@
+wait 100
+tap START
+wait 15
+tap UP
+wait 6
+shot v13_menu
+tap A
+wait 30
+shot v13_sword_select
+tap RIGHT
+wait 4
+tap DOWN
+tap RIGHT
+tap RIGHT
+wait 4
+tap DOWN
+tap RIGHT
+tap RIGHT
+wait 8
+shot v13_sword_select2
+tap A
+wait 60
+shot v13_sword_round
+hold RIGHT 40
+tap A
+wait 10
+shot v13_sword_clash
+hold B 30
+wait 200
+tap UP+A
+wait 12
+tap A
+wait 30
+shot v13_sword_fight
+beat end
