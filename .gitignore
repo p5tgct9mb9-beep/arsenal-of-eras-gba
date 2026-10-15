@@ -1,0 +1,4 @@
+build/
+tools/harness
+tools/gbafix
+*.zip

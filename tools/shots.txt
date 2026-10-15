@@ -1,0 +1,519 @@
+# ---- title / menu
+wait 100
+shot 01_title
+tap START
+wait 15
+shot 02_menu
+# ---- loadout (main menu entry), customize WW2
+tap UP
+wait 10
+shot 02b_menu_loadout_sel
+tap A
+wait 10
+shot 20_loadout_ww2_default
+tap DOWN
+tap RIGHT
+tap RIGHT
+tap RIGHT
+wait 4
+shot 21_loadout_ww2_kar98k
+tap DOWN
+tap DOWN
+tap RIGHT
+tap RIGHT
+wait 4
+shot 22_loadout_ww2_scope
+tap DOWN
+tap RIGHT
+wait 4
+shot 23_loadout_ww2_suppressor
+tap DOWN
+tap DOWN
+tap RIGHT
+wait 4
+shot 24_loadout_ww2_extmag
+tap DOWN
+tap DOWN
+tap RIGHT
+wait 4
+shot 25_loadout_ww2_smoke
+tap DOWN
+tap RIGHT
+tap RIGHT
+tap RIGHT
+wait 4
+shot 26_loadout_ww2_perk
+tap DOWN
+tap RIGHT
+wait 4
+shot 27_loadout_ww2_tank_tiger
+tap DOWN
+tap RIGHT
+wait 4
+shot 28_loadout_ww2_aircraft
+tap R
+tap R
+wait 4
+shot 29_loadout_modern_aircraft
+tap UP
+tap UP
+tap UP
+tap UP
+wait 4
+shot 29b_loadout_modern_tact
+tap R
+tap R
+tap UP
+tap UP
+tap UP
+tap UP
+tap UP
+tap UP
+tap UP
+tap UP
+wait 4
+shot 29c_loadout_space_primary
+tap B
+wait 10
+beat after_save
+sram
+# ---- persistence check: reset the console and re-open loadout
+corereset
+wait 100
+tap START
+wait 15
+tap UP
+tap A
+wait 10
+beat reloaded_ww2
+shot 30_loadout_after_reset
+tap B
+wait 10
+# ---- campaign (keeps scope/suppressor/smoke from above)
+tap DOWN
+tap A
+wait 10
+shot 40_campaign_loadout
+tap START
+wait 40
+shot 41_campaign_briefing
+tap A
+wait 6
+shot 41b_briefing2
+tap A
+tap A
+tap A
+wait 30
+shot 42_campaign_boat
+hold UP 120
+shot 43_campaign_beach
+hold UP+A 60
+hold LEFT 30
+hold UP 80
+shot 44_campaign_under_fire
+hold L+R+SELECT 2
+wait 30
+shot 45_campaign_seawall
+beat seawall
+hold L+R+SELECT 2
+wait 20
+shot 46_campaign_marker
+tap A
+wait 20
+shot 47_campaign_bangalore_planted
+hold LEFT 50
+wait 100
+shot 48_campaign_wire_blown
+beat wire
+hold L+R+SELECT 2
+wait 4
+tap SELECT
+wait 50
+shot 49_campaign_smoke_bunker
+hold UP 2
+tap B
+wait 50
+tap B
+wait 50
+shot 50_campaign_grenades
+tap B
+wait 60
+shot 51_campaign_bunker_destroyed
+beat bunker
+wait 260
+shot 52_mission_complete
+beat complete
+tap A
+wait 20
+# ---- infantry modern
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+wait 6
+shot 60_era_select_modern
+tap A
+wait 12
+shot 61_infantry_loadout_modern
+tap START
+wait 60
+shot 62_infantry_modern_spawn
+hold UP+A 90
+hold UP+LEFT 60
+hold UP+A 60
+shot 63_infantry_modern_fight
+tap SELECT
+wait 30
+shot 63b_infantry_modern_flashbang
+wait 900
+shot 64_infantry_modern_later
+tap START
+wait 4
+shot 65_pause
+tap START
+wait 4
+hold A 600
+beat inf_mid
+hold L+R+SELECT 2
+wait 150
+shot 68_infantry_result
+beat inf_result
+# ---- 66a_infantry_ww2
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap A
+wait 12
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP+A 120
+hold LEFT+A 80
+shot 66a_infantry_ww2
+beat 66a_infantry_ww2
+# ---- 66b_infantry_coldwar
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap A
+wait 12
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP+A 120
+hold LEFT+A 80
+shot 66b_infantry_coldwar
+beat 66b_infantry_coldwar
+# ---- 66c_infantry_futuristic
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP+A 120
+hold LEFT+A 80
+shot 66c_infantry_futuristic
+beat 66c_infantry_futuristic
+# ---- 66d_infantry_space
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP+A 120
+hold LEFT+A 80
+shot 66d_infantry_space
+beat 66d_infantry_space
+# ---- tanks ww2 tiger
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap A
+wait 12
+wait 6
+shot 70_tank_era_ww2
+tap A
+wait 12
+tap RIGHT
+wait 6
+shot 71_tank_vehicle_select_tiger
+tap START
+wait 60
+shot 72_tanks_ww2_tiger_spawn
+hold UP 80
+hold UP+L 30
+hold A 6
+wait 4
+shot 73_tanks_ww2_fire
+hold UP+RIGHT 60
+wait 600
+shot 74_tanks_ww2_battle
+beat tank_ww2
+hold L+R+SELECT 2
+wait 150
+shot 76_tanks_result
+# ---- 75a_tanks_coldwar
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP 100
+hold A+LEFT 60
+wait 200
+shot 75a_tanks_coldwar
+beat 75a_tanks_coldwar
+# ---- 75b_tanks_modern
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP 100
+hold A+LEFT 60
+wait 200
+shot 75b_tanks_modern
+beat 75b_tanks_modern
+# ---- 75c_tanks_futuristic
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP 100
+hold A+LEFT 60
+wait 200
+shot 75c_tanks_futuristic
+beat 75c_tanks_futuristic
+# ---- 75d_tanks_space
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold UP 100
+hold A+LEFT 60
+wait 200
+shot 75d_tanks_space
+beat 75d_tanks_space
+# ---- dogfight cold
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+wait 6
+tap A
+wait 12
+shot 80_air_vehicle_select
+tap START
+wait 60
+shot 81_dogfight_cold_spawn
+hold UP+A 120
+hold RIGHT+A 40
+tap B
+wait 30
+shot 82_dogfight_cold_missile
+wait 600
+shot 83_dogfight_cold_battle
+hold SELECT 4
+shot 83b_dogfight_scoreboard
+beat air_cold
+wait 4
+hold L+R+SELECT 2
+wait 150
+shot 87_dogfight_result
+# ---- 84_dogfight_ww2
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold A 150
+hold A+LEFT 150
+shot 84_dogfight_ww2
+beat 84_dogfight_ww2
+# ---- 85a_dogfight_modern
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold A 150
+hold A+LEFT 150
+shot 85a_dogfight_modern
+beat 85a_dogfight_modern
+# ---- 85b_dogfight_futuristic
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold A 150
+hold A+LEFT 150
+shot 85b_dogfight_futuristic
+beat 85b_dogfight_futuristic
+# ---- 86_dogfight_space
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 6
+tap A
+wait 12
+tap START
+wait 60
+hold A 150
+hold A+LEFT 150
+shot 86_dogfight_space
+beat 86_dogfight_space
+# ---- dogfight ww2 hellcat
+corereset
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+tap A
+wait 12
+tap A
+wait 12
+tap RIGHT
+wait 6
+shot 88_air_select_hellcat
+beat hellcat_sel
+tap START
+wait 60
+shot 89_dogfight_ww2_hellcat_spawn
+hold A+RIGHT 120
+hold A 100
+shot 89b_dogfight_ww2_hellcat_fight
+beat hellcat
+beat end
