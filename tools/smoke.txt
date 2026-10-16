@@ -2,9 +2,13 @@ wait 90
 shot 01_title
 tap START
 wait 20
-shot 02_menu
 tap DOWN
-wait 10
+wait 4
+tap A
+wait 25
+wait 4
+tap A
+wait 6
 tap A
 wait 20
 shot 03_era

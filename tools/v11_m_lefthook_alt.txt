@@ -2,6 +2,10 @@ wait 100
 tap START
 wait 15
 tap A
+wait 25
+tap A
+wait 6
+tap A
 wait 20
 hold L+R+SELECT 2
 wait 10

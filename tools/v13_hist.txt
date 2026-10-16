@@ -3,8 +3,11 @@ tap START
 wait 15
 tap DOWN
 tap DOWN
-tap RIGHT
 wait 4
+tap A
+wait 25
+tap A
+wait 6
 tap A
 wait 30
 shot v13_unit_select

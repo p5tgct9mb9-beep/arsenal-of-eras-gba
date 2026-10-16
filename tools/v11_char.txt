@@ -1,11 +1,9 @@
 wait 100
 tap START
 wait 15
-tap DOWN
-tap DOWN
-tap DOWN
 tap RIGHT
-wait 8
+tap DOWN
+wait 4
 tap A
 wait 12
 shot v11_loadout_hub

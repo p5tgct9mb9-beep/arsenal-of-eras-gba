@@ -2,8 +2,14 @@ wait 100
 tap START
 wait 15
 tap DOWN
+wait 4
+tap A
+wait 25
 tap DOWN
 tap DOWN
+wait 4
+tap A
+wait 6
 tap A
 wait 12
 shot v11_dogfight_p47_era

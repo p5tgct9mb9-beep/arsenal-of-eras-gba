@@ -5,12 +5,11 @@ tap START
 wait 20
 peek 0203FFE0 3
 audio v11_music_bugle_menu 600
+wait 10
 tap RIGHT
 tap DOWN
 tap DOWN
-tap DOWN
-tap DOWN
-wait 10
+wait 4
 tap A
 wait 12
 shot v11_settings_default

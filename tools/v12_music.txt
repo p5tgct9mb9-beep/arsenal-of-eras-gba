@@ -1,12 +1,11 @@
 wait 100
 tap START
 wait 20
+wait 10
 tap RIGHT
 tap DOWN
 tap DOWN
-tap DOWN
-tap DOWN
-wait 10
+wait 4
 tap A
 wait 12
 tap LEFT

@@ -4,7 +4,16 @@ wait 15
 tap DOWN
 tap DOWN
 tap DOWN
+wait 4
+tap A
+wait 25
 tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 6
 tap A
 wait 15
 shot v11_drone_hangar_0_mq9
