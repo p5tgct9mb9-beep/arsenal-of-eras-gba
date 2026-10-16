@@ -1239,6 +1239,44 @@ track("CORRIDORS",4,1,L,B,Hm,drums("KKS.KKS.KKS.KSSS",128),duty=2,hduty=1,lvol=1
 track("DEFEAT",8,0,voice("G4:4 F#4:4 F4:4 E4:12 .:8",32),voice("C3:4 B2:4 A#2:4 A2:12 .:8",32),voice("E4:4 D#4:4 D4:4 C#4:12 .:8",32),drums("K...K...K...C...................",32),duty=1,lvol=11)
 # 38 MISSION CLEAR (one-shot)
 track("MISSION CLEAR",6,0,voice("C5:2 D5:2 E5:2 G5:2 E5:2 G5:2 C6:8 .:12",32),voice("C3:8 G2:4 C3:8 .:12",32),voice("E4:8 B4:4 E5:8 .:12",32),drums("K.S.K.S.RRRRK...................",32),duty=2,lvol=13)
+# ======================= v1.3.1 COLD WAR PACK (original compositions, PSG only) =======================
+def arp4(chords):return " ".join(" ".join(f"{n}:1" for n in c*4) for c in chords)
+# 39 DEAD DROP - Overflight spy theme: A minor surf/spy bass, twangy lead, brushed snare
+L=voice(R8("E5:2 .:2 E5:1 F5:1 E5:2 C5:4 B4:4 | A4:2 C5:2 E5:4 D5:2 C5:2 B4:4 | C5:2 .:2 C5:1 D5:1 C5:2 A4:8 | G#4:4 B4:4 E5:8 | E5:2 .:2 E5:1 F5:1 E5:2 G5:4 F5:4 | E5:2 D5:2 C5:4 A4:8 | D5:2 F5:2 A5:4 G5:2 F5:2 E5:4 | E5:12 .:4"),128)
+B=chordb("R:2 .:1 R:1 3:2 F:2 O:2 F:1 .:1 3:2 R:2",["A2","A2","F2","E2","A2","A2","D2","E2"])
+Hm=voice("C4:16 C4:16 A3:16 G#3:16 C4:16 E4:16 F4:16 G#3:16",128)
+track("DEAD DROP",6,1,L,B,Hm,drums("K.H.SHH.K.H.SHHH",128),duty=2,lenv=1,hduty=1,henv=2,lvol=11,hvol=5,bvol=2)
+# 40 MACH 3 PULSE - SR-71: E minor 8th-note synth pulse + 16th arps
+L=voice(R8("E5:4 G5:4 B5:6 A5:2 | G5:4 F#5:4 E5:8 | C5:4 E5:4 G5:6 F#5:2 | F#5:8 D5:8 | E5:4 G5:4 B5:4 E6:4 | D6:4 B5:4 G5:8 | C6:4 B5:4 A5:4 G5:4 | F#5:16"),128)
+B=chordb("R:1 R:1 O:1 R:1 R:1 F:1 R:1 O:1 R:1 R:1 O:1 R:1 F:1 R:1 O:1 F:1",["E2","E2","C2","D2","E2","E2","C2","B1"])
+Hm=voice(arp4([["E4","G4","B4","G4"],["E4","G4","B4","G4"],["C4","E4","G4","E4"],["D4","F#4","A4","F#4"],["E4","G4","B4","G4"],["E4","G4","B4","G4"],["C4","E4","G4","E4"],["B3","D#4","F#4","D#4"]]),128)
+track("MACH 3 PULSE",5,1,L,B,Hm,drums("K...S...K.K.S...",128),duty=1,lenv=0,hduty=2,lvol=10,hvol=5,wave=1)
+# 41 THIN AIR - U-2: slow airy pads, D lydian colour
+L=voice(R8("A4:8 D5:8 | E5:8 F#5:4 E5:4 | D5:16 | .:16 | G4:8 B4:8 | C#5:8 E5:8 | D5:12 .:4 | A4:16"),128)
+B=voice("D2:16 D2:16 G2:16 G2:16 E2:16 A2:16 D2:16 A1:16",128)
+Hm=voice("F#4:16 A4:16 B4:16 B4:16 G#4:16 C#5:16 F#4:16 E4:16",128)
+track("THIN AIR",12,1,L,B,Hm,drums("........H.......",128),duty=2,lenv=0,hduty=0,henv=2,lvol=9,hvol=6,bvol=3)
+# 42 LAUNCH WARNING - SA-2 / MiG danger sting (one-shot)
+track("LAUNCH WARNING",4,0,voice("A5:2 G#5:2 A5:2 G#5:2 A5:2 G#5:2 A5:2 G#5:2 F5:8 E5:8",32),voice("A2:2 .:2 A2:2 .:2 A2:2 .:2 A2:2 .:2 A#2:8 A2:8",32),voice("E4:16 D#4:16",32),drums("KKKKKKKKS.S.S.S.C...............",32),duty=0,lvol=12,hvol=6)
+# 43 FILM DEVELOPED - intel report jingle (one-shot)
+track("FILM DEVELOPED",7,0,voice("E5:2 G5:2 B5:2 E6:4 D6:2 B5:4 G5:4 A5:2 B5:10",32),voice("E3:8 C3:8 D3:8 E3:8",32),voice("G4:8 E4:8 F#4:8 G#4:8",32),drums("K...S...K...S...K.K.S.S.RRRRK...",32),duty=2,lvol=12,hvol=6)
+# 44 ACCESS GRANTED - unlock sting (one-shot)
+track("ACCESS GRANTED",5,0,voice("C5:1 E5:1 G5:1 C6:1 E6:4 .:2 G5:1 C6:1 E6:1 G6:7 .:12",32),voice("C3:4 .:4 C3:2 G2:2 C3:8 .:12",32),voice("E4:8 .:2 G4:10 .:12",32),drums("K...K...S.S.K.......C...........",32),duty=1,lvol=13,hvol=6)
+# 45 FULDA GAP '85 - 1980s synth, octave bass
+L=voice(R8("A4:4 C5:4 E5:6 D5:2 | C5:4 B4:4 A4:8 | F5:4 E5:4 C5:6 A4:2 | A4:16 | C5:4 D5:4 E5:4 G5:4 | E5:8 D5:4 C5:4 | B4:4 C5:4 D5:4 B4:4 | G#4:16"),128)
+B=chordb("R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1",["A1","A1","F1","F1","C2","C2","G1","E1"])
+Hm=voice(" ".join(f"{n}:2 .:2 {n}:2 .:2 {n}:2 .:2 {n}:2 .:2" for n in ["C4","C4","A3","A3","E4","E4","D4","G#3"]),128)
+track("FULDA GAP '85",5,1,L,B,Hm,drums("K...S...K..KS...",128),duty=1,lenv=0,hduty=2,lvol=11,hvol=5,wave=1)
+# 46 DELTA FUNK - Vietnam-era funk rock, E minor pentatonic
+L=voice(R8("E5:2 G5:2 A5:2 B5:4 A5:2 G5:4 | E5:2 D5:2 E5:12 | A5:2 B5:2 D6:4 B5:2 A5:2 G5:4 | E5:16 | B4:2 D5:2 E5:2 G5:4 E5:2 D5:4 | B4:4 A4:4 B4:8 | A4:2 B4:2 D5:2 E5:4 G5:2 A5:4 | B5:16"),128)
+B=chordb("R:2 .:1 R:1 .:2 O:1 R:1 .:2 F:1 3:1 R:2 .:2",["E2","E2","A2","E2","D2","D2","A2","B1"])
+Hm=voice("B4:16 B4:16 E5:16 B4:16 A4:16 A4:16 E5:16 F#4:16",128)
+track("DELTA FUNK",5,1,L,B,Hm,drums("K..SK.HSK.KSH.S.",128),duty=2,lenv=1,hduty=0,lvol=11,hvol=5)
+# 47 RED SQUARE MARCH - Soviet-style brass + choir march (original), D minor
+L=voice(R8("D5:6 A4:2 D5:4 F5:4 | E5:4 D5:4 C#5:8 | D5:4 E5:4 F5:6 G5:2 | A5:16 | A#5:6 A5:2 G5:4 F5:4 | E5:4 F5:4 G5:8 | A5:4 F5:4 E5:4 C#5:4 | D5:16"),128)
+B=chordb("R:4 F:4 R:4 F:4",["D2","A1","D2","A1","G1","C2","A1","D2"])
+Hm=voice("F4:16 E4:16 A4:16 C#5:16 D5:16 C5:16 C#5:16 A4:16",128)
+track("RED SQUARE MARCH",7,1,L,B,Hm,drums("K...S.S.K...S.SS",128),duty=2,lenv=0,hduty=2,henv=2,lvol=12,hvol=6,bvol=2)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)
 emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])

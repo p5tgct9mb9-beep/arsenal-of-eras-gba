@@ -1,0 +1,64 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+wait 10
+shot v131_over_0_lock
+tap A
+wait 6
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 434F04D2
+tap A
+wait 40
+shot v131_over_0_denied
+wait 80
+shot v131_over_0_code
+poke32 0x0203FFD8 434F07D3
+wait 50
+shot v131_over_0_granted
+wait 200
+poke32 0x0203FFD8 46524D00
+wait 30
+shot v131_over_0_brief
+wait 700
+shot v131_over_0_00
+wait 700
+shot v131_over_0_01
+wait 700
+shot v131_over_0_02
+wait 700
+shot v131_over_0_03
+wait 700
+shot v131_over_0_04
+wait 700
+shot v131_over_0_05
+wait 700
+shot v131_over_0_06
+wait 700
+shot v131_over_0_07
+wait 700
+shot v131_over_0_08
+wait 700
+shot v131_over_0_09
+wait 700
+shot v131_over_0_10
+wait 700
+shot v131_over_0_11
+end
