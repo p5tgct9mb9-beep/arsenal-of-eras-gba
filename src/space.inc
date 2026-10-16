@@ -518,7 +518,7 @@ static int sp_rendezvous(int vi){const SPiv*V=&SPI[vi];memset(&RV,0,sizeof RV);R
    float ex=tvx-RV.vx,ez=tvz-RV.vz;if(ex>0.03f)ky|=K_RIGHT;if(ex<-0.03f)ky|=K_LEFT;if(ez>0.03f)ky|=K_UP;if(ez<-0.03f)ky|=K_DOWN;RV.warp=dh>1500?2:dh>300?1:0;}
   if(pr&K_B){RV.warp=(RV.warp+1)%3;sfx_menu();}
   float a=0.05f;int th=0;if(ky&K_RIGHT){RV.vx+=a;RV.dv+=a;th=1;}if(ky&K_LEFT){RV.vx-=a;RV.dv+=a;th=1;}if(ky&K_UP){RV.vz+=a;RV.dv+=a;th=1;}if(ky&K_DOWN){RV.vz-=a;RV.dv+=a;th=1;}
-  static const u8 WS[3]={1,5,20};int ss=WS[RV.warp];for(int i=0;i<ss;i++){float ax=2*CWN*RV.vz,az=-2*CWN*RV.vx+3*CWN*CWN*RV.z;RV.vx+=ax;RV.vz+=az;RV.x+=RV.vx;RV.z+=RV.vz;}
+  static const u8 WS[3]={1,5,20};int ss=WS[RV.warp];for(int i=0;i<ss;i++){float ax=-2*CWN*RV.vz,az=2*CWN*RV.vx+3*CWN*CWN*RV.z;RV.vx+=ax;RV.vz+=az;RV.x+=RV.vx;RV.z+=RV.vz;}
   r=fsqr(RV.x*RV.x+RV.z*RV.z);float ae=(RV.x*RV.x)/(2000.0f*2000)+(RV.z*RV.z)/(1000.0f*1000);
   if(ae<1&&!RV.ae){RV.ae=1;spf_msg("ENTERED APPROACH ELLIPSOID");}
   if(r<200&&!RV.kos){RV.kos=1;}if(r<190&&dh>40){RV.viol++;if((RV.viol&63)==1)spf_msg("KEEP-OUT SPHERE: NOT ON AXIS!");}
@@ -528,13 +528,13 @@ static int sp_rendezvous(int vi){const SPiv*V=&SPI[vi];memset(&RV,0,sizeof RV);R
   lfb=0;lf(0,0,240,160,RGB(4,6,16));float span=r>4000?12000:r>1200?4000:r>400?1200:500;float sc=200.0f/span;int cx=120,cy=84;
   for(int i=-3;i<=3;i++){lf(cx+(int)(i*span/6*sc),12,1,138,RGB(14,18,34));}lf(0,cy,240,1,RGB(30,40,70));lf(cx,12,1,138,RGB(30,40,70));
   ltx(2,cy-9,"-V",RGB(90,110,150));ltx(226,cy-9,"+V",RGB(90,110,150));ltx(cx+2,13,"+R",RGB(90,110,150));
-  for(int k=0;k<96;k++){float an=k*2*FPI/96;int px=cx+(int)(2000*fcos(an)*sc),py=cy-(int)(1000*fsin(an)*sc);if(k&1)sp_px(px,py,RGB(80,160,255));}
+  for(int k=0;k<64;k+=2){int px=cx+(int)(2000*COS(k*4)/256*sc),py=cy-(int)(1000*SIN(k*4)/256*sc);sp_px(px,py,RGB(80,160,255));}
   {int kr=(int)(200*sc);if(kr>=2)sp_circ(cx,cy,kr,RGB(255,90,90));}
   iss_draw(cx,cy,(int)(sc*16*10)<2?2:(int)(sc*16*10)>14?14:(int)(sc*16*10),1);
   int hx=cx+(int)(RV.hx*sc),hy=cy-(int)(RV.hz*sc);lf(hx-2,hy,5,1,C_GREEN);lf(hx,hy-2,1,5,C_GREEN);
   int px=cx+(int)(RV.x*sc),py=cy-(int)(RV.z*sc);if(px>=0&&px<240&&py>=10&&py<150){lf(px-1,py-1,3,3,th?RGB(255,160,60):RGB(255,255,120));sp_line(px,py,px+(int)(RV.vx*8),py-(int)(RV.vz*8),RGB(255,220,120));}
   // predicted path (ballistic, 40 steps of 30 s)
-  {float qx=RV.x,qz=RV.z,ux=RV.vx,uz=RV.vz;for(int k=0;k<40;k++){for(int j=0;j<30;j++){float ax=2*CWN*uz,az=-2*CWN*ux+3*CWN*CWN*qz;ux+=ax;uz+=az;qx+=ux;qz+=uz;}sp_px(cx+(int)(qx*sc),cy-(int)(qz*sc),RGB(120,120,160));}}
+  {static s16 PX[24],PY[24];if((RV.t&15)==0){float qx=RV.x,qz=RV.z,ux=RV.vx,uz=RV.vz;for(int k=0;k<24;k++){for(int j=0;j<5;j++){float ax=-2*CWN*uz*10,az=(2*CWN*ux+3*CWN*CWN*qz)*10;ux+=ax;uz+=az;qx+=ux*10;qz+=uz*10;}PX[k]=cx+(int)(qx*sc);PY[k]=cy-(int)(qz*sc);}}for(int k=0;k<24;k++)sp_px(PX[k],PY[k],RGB(120,120,160));}
   char b[48],*o;lf(0,0,240,10,RGB(8,10,20));o=sp_put(b,V->n);sp_put(o," RENDEZVOUS");ltx(2,1,b,RGB(255,220,120));o=sp_put(b,"X");sp_int(o,WS[RV.warp]);ltx(222,1,b,RGB(150,150,170));
   lf(0,150,240,10,RGB(8,10,20));o=sp_put(b,"RNG ");o=sp_int(o,(int)r);o=sp_put(o,"M  RATE ");o=sp_dec1(o,(int)(rate*10));o=sp_put(o,"  DV ");o=sp_dec1(o,(int)(RV.dv*10));ltx(2,151,b,C_WHITE);
   if(F.msgT>0){F.msgT--;ltc(136,F.msg,RGB(255,240,160));}else ltc(136,dh<300?"NULL YOUR RATES AT THE GREEN HOLD POINT":"D-PAD: THRUST  B: TIME WARP",RGB(150,170,210));
@@ -597,4 +597,116 @@ static void sp_iss(void){int sel=SPR.lastIss<8?SPR.lastIss:0;
      o=sp_put(b,"SCORE ");o=sp_int(o,sc);if(best)sp_put(o,"  BEST!");m3_ctext(94,b,best?C_GREEN:C_WHITE,1);for(int s=0;s<3;s++)m3_fill(99+s*14,106,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
     if(sp_isauto()&&t>200)pressed=K_A;if(t>20&&(pressed&(K_A|K_B))){pressed=0;break;}}}
   bgm_t(TR_SPACE);}}
-static void sp_eva(void){}
+// ---------------------------------------------------------------- SPACEWALK (EVA)
+typedef struct{const char*s;u16 key;u8 hold;}EvStep;
+typedef struct{const char*n,*sub,*air;u8 suit,scene,np;s16 px[12],py[12];u8 ws[3],nws,task[3];}EvMis;
+enum{ES_ISS,ES_RUS,ES_HST,ES_MMU};
+static const EvStep ETK[6][6]={
+ {{"OPEN BOX LATCH - A",K_A,0},{"PGT: DRIVE BOLT - HOLD R",K_R,50},{"PULL OLD BATTERY - DOWN",K_DOWN,0},{"INSERT LI-ION ORU - UP",K_UP,0},{"PGT: TORQUE - HOLD R",K_R,50},{"CLOSE LATCH - A",K_A,0}},
+ {{"RELEASE IROSA ROLL - A",K_A,0},{"ALIGN ON MAST - LEFT",K_LEFT,0},{"BOLT 1 - HOLD R",K_R,40},{"BOLT 2 - HOLD R",K_R,40},{"CONNECT CABLES - A",K_A,0},{"UNFURL ARRAY - UP",K_UP,0}},
+ {{"FIND FLAKES: CLOSE VALVE - A",K_A,0},{"DEMATE QD FLUID LINE - DOWN",K_DOWN,0},{"PGT: PUMP BOLTS - HOLD R",K_R,60},{"SWAP PUMP MODULE - UP",K_UP,0},{"MATE QD - A",K_A,0},{"OPEN VALVE - A",K_A,0}},
+ {{"OPEN BAY DOORS - A",K_A,0},{"PULL OLD RSU GYRO - DOWN",K_DOWN,0},{"INSERT NEW RSU - UP",K_UP,0},{"PGT: TORQUE - HOLD R",K_R,40},{"REMOVE WFPC2 - LEFT",K_LEFT,0},{"INSTALL WFC3 - RIGHT",K_RIGHT,0}},
+ {{"FOOT RESTRAINT: LOCK - A",K_A,0},{"OPEN CAMERA BAG - A",K_A,0},{"MOUNT CAMERA - UP",K_UP,0},{"TORQUE - HOLD R",K_R,40},{"ROUTE CABLE - RIGHT",K_RIGHT,0},{"VERIFY - A",K_A,0}},
+ {{"UNSTOW KIT - A",K_A,0},{"STRELA BOOM: SWING - RIGHT",K_RIGHT,0},{"MOUNT EXPERIMENT - UP",K_UP,0},{"HAND BOLT - HOLD R",K_R,40},{"CONNECT - A",K_A,0},{"PHOTO DOC - A",K_A,0}}};
+static const EvMis EVM[7]={
+ {"BATTERY SWAP","P4 TRUSS - LI-ION ORU","QUEST AIRLOCK",0,ES_ISS,7,{40,90,90,200,320,420,470},{110,110,90,90,90,90,70},{6},1,{0}},
+ {"IROSA INSTALL","2B MAST - ROLL-OUT ARRAY","QUEST AIRLOCK",0,ES_ISS,7,{40,90,90,240,380,520,560},{110,110,90,90,90,90,50},{6},1,{1}},
+ {"AMMONIA LEAK","P6 PUMP MODULE - FLAKES!","QUEST AIRLOCK",0,ES_ISS,6,{40,90,90,250,400,450},{110,110,90,90,90,120},{5},1,{2}},
+ {"HUBBLE SM4","ATLANTIS 2009 - GYROS + WFC3","SHUTTLE AIRLOCK",0,ES_HST,6,{60,120,200,260,300,330},{120,120,120,100,80,60},{5},1,{3}},
+ {"CANADARM2 RIDE","FOOT RESTRAINT ON THE ARM","QUEST AIRLOCK",0,ES_ISS,4,{40,90,90,140},{110,110,90,90},{3},1,{4}},
+ {"ORLAN: ZVEZDA","RUSSIAN SEGMENT - STRELA","POISK AIRLOCK",1,ES_RUS,6,{40,80,80,200,300,360},{110,110,90,90,90,70},{5},1,{5}},
+ {"MMU 1984 BONUS","STS-41B: FREE FLIGHT 98 M","CHALLENGER BAY",0,ES_MMU,2,{60,60},{110,110},{0},0,{0}}};
+static const char*eva_nm(int i){return EVM[i].n;}
+static const char*eva_rt(int i,char*b){char*o=b;for(int s=0;s<3;s++)*o++=s<SPR.evaS[i<6?i:5]?'*':'-';*o++=' ';sp_int(o,SPR.eva[i<6?i:5]);return b;}
+typedef struct{int s,len,clip,clipS,hand,t,gm,o2,bat,slip,drift,dx,dy,safer,gas,task,step,hold,cam,done,wsi,score,mmu,mx,my,mvx,mvy,arm;s16 cum[12];}EVS;
+static EVS EV EWRAM;
+static void eva_pos(const EvMis*M,int s,int*x,int*y){for(int i=0;i<M->np-1;i++){int a=EV.cum[i],b=EV.cum[i+1];if(s<=b||i==M->np-2){int L=b-a;int f=L?((s-a)<<8)/L:0;f=clampi(f,0,256);*x=M->px[i]+((M->px[i+1]-M->px[i])*f>>8);*y=M->py[i]+((M->py[i+1]-M->py[i])*f>>8);return;}}*x=M->px[0];*y=M->py[0];}
+static void eva_astro(int x,int y,int z,int suit,int fr,int lit){u16 W=C_WH,Rd=suit?RGB(60,90,200):RGB(200,40,40),V=lit?RGB(250,210,90):RGB(200,160,60),P=RGB(200,200,196);
+ #define AF(a,b,c,d,e) lf(x+(a)*z,y+(b)*z,(c)*z,(d)*z,e)
+ AF(-3,-12,6,5,W);AF(-2,-11,4,3,V);AF(-5,-7,10,7,W);AF(-6,-8,3,8,P);AF(-4,0,3,6,W);AF(1,0,3,6,W);AF(-4,3,3,1,Rd);AF(1,3,3,1,Rd);
+ int ar=fr&1;AF(4,-7+ar*2,2,5,W);AF(4,-8+ar*2,2,1,RGB(150,150,150));AF(-7,-6-ar*2,2,4,W);if(suit)AF(-1,-6,2,4,Rd);
+ if(lit){AF(-3,-13,1,1,RGB(255,255,200));AF(2,-13,1,1,RGB(255,255,200));}
+ #undef AF
+}
+static void eva_scene(const EvMis*M,int cam,int z,int night){int ox=cam;
+ #define WX(v) (((v)-ox)*z)
+ u16 sky=night?RGB(1,1,4):RGB(3,4,12);lf(0,0,240,160,sky);stars(cam/8,night?60:30);
+ // Earth below with day/night terminator
+ {u16 c=night?RGB(4,8,22):RGB(40,90,170);int y0=night?132:126;lf(0,y0,240,160-y0,c);if(!night){for(int i=0;i<6;i++)lf(((i*61-cam/3)%280+280)%280-20,y0+4+i*3,30,2,RGB(230,230,240));lf(0,y0,240,1,RGB(150,200,255));}else for(int i=0;i<14;i++)sp_px(((i*37-cam/3)%240+240)%240,y0+6+(i*7)%20,RGB(255,200,90));}
+ if(M->scene==ES_ISS||M->scene==ES_RUS){u16 T=RGB(170,170,176),A=RGB(160,118,58);
+  for(int x=0;x<620;x+=8){int sx=WX(x);if(sx<-8*z||sx>240)continue;lf(sx,(90-ox*0+2-0)*0+((90-0)*z-((z-1)*60)),1,0,T);}
+  int ty=z==1?88:88*2-120;for(int x=60;x<620;x+=10){int sx=WX(x);if(sx<-10*z||sx>240)continue;lf(sx,ty,10*z,4*z,T);sp_line(sx,ty,sx+10*z,ty+4*z,RGB(120,120,126));}
+  for(int k=0;k<4;k++){int ax=WX(420+k*40);if(ax>-20*z&&ax<240){lf(ax,ty-60*z,8*z,60*z,A);for(int q=0;q<60*z;q+=3)lf(ax,ty-60*z+q,8*z,1,RGB(110,80,40));lf(ax,ty+4*z,8*z,30*z,A);}}
+  int my=z==1?96:96*2-120;lf(WX(0),my,100*z,24*z,RGB(214,214,206));lf(WX(0),my,100*z,2*z,C_WH);lf(WX(30),my+4*z,1,16*z,RGB(160,160,160));
+  if(M->scene==ES_RUS){lf(WX(100),my-2*z,110*z,28*z,RGB(214,214,200));ltx(clampi(WX(120),0,200),my+8,"ZVEZDA",RGB(120,120,120));}else ltx(clampi(WX(10),0,200),my+8*z,"QUEST",RGB(120,120,120));}
+ else if(M->scene==ES_HST||M->scene==ES_MMU){int by=z==1?124:124*2-120;lf(WX(20),by,240*z,16*z,RGB(220,220,220));lf(WX(20),by,240*z,2*z,RGB(150,150,150));lf(WX(20),by+2*z,240*z,3*z,C_BK);lf(WX(250),by-20*z,20*z,36*z,C_WH);
+  if(M->scene==ES_HST){int hx=WX(250),hy=by-90*z;lf(hx,hy,24*z,80*z,RGB(200,200,206));lf(hx,hy,24*z,2*z,C_WH);lf(hx-26*z,hy+30*z,24*z,8*z,RGB(40,60,120));lf(hx+26*z,hy+30*z,24*z,8*z,RGB(40,60,120));lf(hx,hy+80*z,24*z,8*z,RGB(120,120,126));}
+  ltx(clampi(WX(30),0,200),by+6,M->scene==ES_HST?"ATLANTIS":"CHALLENGER",RGB(80,80,80));}
+ #undef WX
+}
+static int sp_eva_run(int mi){const EvMis*M=&EVM[mi];memset(&EV,0,sizeof EV);int au=sp_isauto();
+ EV.cum[0]=0;for(int i=1;i<M->np;i++)EV.cum[i]=EV.cum[i-1]+idist(M->px[i]-M->px[i-1],M->py[i]-M->py[i-1]);EV.len=EV.cum[M->np-1];EV.o2=420*60;EV.bat=480*60;EV.gas=600;EV.clip=0;EV.clipS=-1;EV.mmu=M->scene==ES_MMU;EV.mx=60<<4;EV.my=110<<4;EV.task=-1;
+ int out=0,tgt=0,lastHand=-1;
+ for(;;EV.t++){next_frame();u16 ky=keys,pr=pressed;int ax,ay;
+  int wsS=M->nws?EV.cum[M->ws[0]]:0;int goal=EV.done?0:wsS;
+  if(au){ky=0;pr=0;
+   if(EV.mmu){int tx=out?60:300,ty=out?110:70;int x=EV.mx>>4,y=EV.my>>4;if(x<tx-2&&EV.mvx<12)ky|=K_RIGHT;if(x>tx+2&&EV.mvx>-12)ky|=K_LEFT;if(y<ty-2&&EV.mvy<8)ky|=K_DOWN;if(y>ty+2&&EV.mvy>-8)ky|=K_UP;if(idist(x-tx,y-ty)<20){if(EV.mvx>0)ky|=K_LEFT;if(EV.mvx<0)ky|=K_RIGHT;}}
+   else if(EV.drift){pr|=(EV.t&1)?0:(K_L|K_R);ky|=K_L|K_R;ky|=EV.dx>0?K_LEFT:K_RIGHT;}
+   else if(EV.task>=0){const EvStep*S2=&ETK[M->task[0]][EV.step];if(S2->hold)ky|=S2->key;else if((EV.t&15)==0)pr|=S2->key;}
+   else{int fw=goal>EV.s;int dist=fw?goal-EV.s:EV.s-goal;
+    // anchors every 60 px; clip at the anchor nearest when tether nearly taut
+    int an=((EV.s+30)/60)*60;if(EV.clipS<0||(fabsi(EV.s-EV.clipS)>40&&fabsi(EV.s-an)<3&&an!=EV.clipS))pr|=K_SEL;
+    else if(dist>2){ky|=fw?K_RIGHT:K_LEFT;if((EV.t&7)==0)pr|=(EV.hand&1)?K_L:K_R;}
+    else if(!EV.done&&EV.task<0&&(EV.t&15)==0)pr|=K_A;}}
+  if(pr&K_B){EV.cam^=1;sfx_menu();}
+  if(!EV.mmu){
+   if(EV.drift){EV.dx+=EV.dx>0?1:-1;if(EV.safer){if(ky&K_LEFT)EV.dx-=3;if(ky&K_RIGHT)EV.dx+=3;EV.gas-=2;if(fabsi(EV.dx)<20){EV.drift=0;EV.dx=0;spf_msg("SAFER: BACK ON THE HANDRAIL");}}
+    else if((ky&(K_L|K_R))==(K_L|K_R)){EV.safer=1;spf_msg("SAFER JETPACK ACTIVATED");}
+    if(EV.gas<=0||fabsi(EV.dx)>900)return -1;}
+   else if(EV.task>=0){const EvStep*S2=&ETK[M->task[0]][EV.step];int ok=0;if(S2->hold){if(ky&S2->key){if(++EV.hold>=S2->hold)ok=1;}else EV.hold=0;}else if(pr&S2->key)ok=1;else if(pr&(K_A|K_UP|K_DOWN|K_LEFT|K_RIGHT)){EV.score-=20;}
+    if(ok){sfx_ok();EV.hold=0;EV.score+=150;if(++EV.step>=6){EV.task=-1;EV.done=1;spf_msg("TASK COMPLETE - RETURN TO THE AIRLOCK");}}}
+   else{
+    if(pr&K_SEL){int an=((EV.s+30)/60)*60;if(fabsi(EV.s-an)<6){EV.clipS=an;EV.clip=1;spf_msg("TETHER CLIPPED (MAKE BEFORE BREAK)");sfx_menu();}else if(EV.clip){EV.clip=0;EV.clipS=-1;spf_msg("TETHER UNCLIPPED!");}}
+    int dir=(ky&(K_RIGHT|K_UP))?1:(ky&(K_LEFT|K_DOWN))?-1:0;int hnd=(pr&K_L)?0:(pr&K_R)?1:-1;
+    if(dir&&hnd>=0){if(hnd==lastHand){spf_msg("ALTERNATE HANDS (L/R)");}else{int ns=EV.s+dir*6;ns=clampi(ns,0,EV.len);
+      if(EV.clip&&fabsi(ns-EV.clipS)>70){spf_msg("TETHER TAUT - CLIP AT THE NEXT RING");}
+      else{EV.s=ns;EV.hand++;lastHand=hnd;if(!EV.clip&&rr(100)<12){EV.drift=1;EV.dx=dir*30;EV.safer=0;spf_msg("LOST GRIP! L+R: SAFER");sfx_hurt();}}}}
+    if(pr&K_A){if(!EV.done&&M->nws&&fabsi(EV.s-wsS)<6){EV.task=0;EV.step=0;spf_msg("WORKSITE - FOLLOW THE PROCEDURE");}}
+    if(EV.done&&EV.s<3){break;}}
+  }else{ // MMU
+   int x=EV.mx>>4,y=EV.my>>4;if(ky&K_RIGHT){EV.mvx++;EV.gas--;}if(ky&K_LEFT){EV.mvx--;EV.gas--;}if(ky&K_UP){EV.mvy--;EV.gas--;}if(ky&K_DOWN){EV.mvy++;EV.gas--;}EV.mvx=clampi(EV.mvx,-16,16);EV.mvy=clampi(EV.mvy,-12,12);EV.mx+=EV.mvx;EV.my+=EV.mvy;
+   if(!out&&idist(x-300,y-70)<12){out=1;spf_msg("98 M FROM CHALLENGER - FIRST UNTETHERED EVA!");EV.score+=600;}
+   if(out&&idist(x-60,y-110)<10&&fabsi(EV.mvx)<4&&fabsi(EV.mvy)<4){EV.done=1;break;}if(EV.gas<=0)return -1;}
+  EV.gm=EV.t/60;EV.o2-=1;EV.bat-=1;if(EV.o2<=0)return -1;
+  int night=((EV.gm+10)%90)>=45;
+  if(EV.mmu){ax=EV.mx>>4;ay=EV.my>>4;}else eva_pos(M,EV.s,&ax,&ay);if(EV.drift){ay-=fabsi(EV.dx)/16;ax+=EV.dx/10;}
+  int z=EV.cam?2:1;int cam=clampi(ax-(z==1?120:60),0,640);
+  BEAT->screen=SCR_SPEVA;BEAT->mode=mi;BEAT->x=EV.mmu?ax:EV.s;BEAT->y=EV.done|(EV.clip<<1)|(EV.drift<<2)|(night<<3)|(EV.cam<<4);BEAT->timer=EV.gm;BEAT->scoreA=EV.score;BEAT->phase=EV.task>=0?1:EV.done?2:0;
+  lfb=0;eva_scene(M,cam,z,night);
+  if(!EV.mmu){// handrail + anchor rings + worksite + tether line
+   for(int i=0;i<M->np-1;i++){int x0=(M->px[i]-cam)*z,y0=z==1?M->py[i]:M->py[i]*2-120,x1=(M->px[i+1]-cam)*z,y1=z==1?M->py[i+1]:M->py[i+1]*2-120;sp_line(x0,y0+2,x1,y1+2,RGB(230,190,60));sp_line(x0,y0+3,x1,y1+3,RGB(150,120,40));}
+   for(int a=0;a<=EV.len;a+=60){int x,y;eva_pos(M,a,&x,&y);int sx=(x-cam)*z,sy=z==1?y:y*2-120;sp_circ(sx,sy+2,2*z,RGB(255,230,80));}
+   if(M->nws&&!EV.done){int x,y;eva_pos(M,wsS,&x,&y);int sx=(x-cam)*z,sy=z==1?y:y*2-120;lf(sx-4*z,sy-16*z,8*z,10*z,RGB(80,220,120));lf(sx-3*z,sy-15*z,6*z,8*z,RGB(20,60,30));}
+   if(EV.clip){int x,y;eva_pos(M,EV.clipS,&x,&y);sp_line((x-cam)*z,(z==1?y:y*2-120)+2,(ax-cam)*z,(z==1?ay:ay*2-120)-4*z,RGB(255,255,255));}}
+  else{int bx=(300-cam)*z,by=70;sp_circ(bx,by,6,RGB(80,220,120));ltx(clampi(bx-10,0,200),by+8,"98 M",RGB(80,220,120));}
+  {int sx=(ax-cam)*z,sy=z==1?ay:ay*2-120;eva_astro(sx,sy,z,M->suit,EV.hand,night);if(EV.mmu){lf(sx-8*z,sy-9*z,3*z,9*z,RGB(200,200,196));lf(sx+5*z,sy-9*z,3*z,9*z,RGB(200,200,196));}if(EV.safer&&EV.drift)lf(sx-8,sy-4,3,2,RGB(200,220,255));
+   if(night){for(int j=0;j<20;j++)sp_blend(sx+6*z+j*2,sy-12*z-j/2,2,1+j/3,RGB(255,250,200),60);}}
+  if(EV.cam){for(int y=0;y<160;y++){int w=isq(clampi(120*120-(y-80)*(y-80)*2,0,99999));lf(0,y,120-w,1,RGB(10,10,12));lf(120+w,y,120-w,1,RGB(10,10,12));}ltx(80,140,"SUIT CAM - HELMET",RGB(140,255,160));}
+  char b[48],*o;lf(0,0,240,10,RGB(8,10,20));o=sp_put(b,M->suit?"ORLAN ":"EMU ");sp_put(o,M->n);ltx(2,1,b,RGB(255,220,120));
+  o=sp_put(b,"GET ");o=sp_int(o,EV.gm/60);*o++=':';*o++='0'+(EV.gm%60)/10;*o++='0'+EV.gm%10;*o=0;ltx(150,1,b,RGB(140,255,160));ltx(204,1,night?"NIGHT":"DAY",night?RGB(120,140,255):RGB(255,230,120));
+  lf(0,150,240,10,RGB(8,10,20));o=sp_put(b,"O2 ");ltx(2,151,b,RGB(150,150,170));sp_bar(20,152,40,5,EV.o2,420*60,RGB(90,200,255));ltx(64,151,"BAT",RGB(150,150,170));sp_bar(84,152,30,5,EV.bat,480*60,RGB(255,220,90));
+  ltx(118,151,EV.mmu?"N2":EV.clip?"TETHER OK":"NO TETHER",EV.mmu?RGB(150,150,170):EV.clip?C_GREEN:RGB(255,100,80));if(EV.mmu||EV.safer)sp_bar(196,152,40,5,EV.gas,600,RGB(200,200,255));
+  if(EV.task>=0){const EvStep*S2=&ETK[M->task[0]][EV.step];lf(20,20,200,22,RGB(8,10,20));o=sp_put(b,"STEP ");o=sp_int(o,EV.step+1);sp_put(o,"/6");ltx(24,22,b,RGB(255,220,120));ltx(24,31,S2->s,C_WHITE);if(S2->hold)sp_bar(150,23,60,5,EV.hold,S2->hold,C_GREEN);}
+  else if(F.msgT>0){F.msgT--;ltc(138,F.msg,RGB(255,240,160));}else ltc(138,EV.mmu?"D-PAD: MMU JETS - FLY OUT, COME BACK SLOW":EV.done?"RETURN TO THE AIRLOCK":"HOLD DIR + ALTERNATE L/R  SEL: CLIP",RGB(150,170,210));
+  m3_present();if(EV.t>60*600)return -1;}
+ return 1;}
+static void sp_eva(void){int sel=SPR.lastEva<7?SPR.lastEva:0;
+ for(;;){int i=sp_list("SPACEWALK (EVA)","EMU / ORLAN - HAND OVER HAND",7,eva_nm,eva_rt,sel,SCR_SPSEL+0);if(i<0)return;sel=i;const EvMis*M=&EVM[i];
+  sp_brief(M->n,M->sub,cat(M->suit?"ORLAN-MKS SUIT - ":"EMU SUIT - ",M->air),"O2 7 H, DAY/NIGHT EVERY 45 MIN","B: SUIT CAM  SELECT: CLIP TETHER",EVM[i].scene==ES_MMU?"1984: BRUCE MCCANDLESS FLEW THE MMU|98 M FROM CHALLENGER. D-PAD = JETS.|FLY TO THE GREEN RING AND BACK.|LOW SPEED AT THE BAY.":"HOLD A DIRECTION + PRESS L, R, L, R|(ONE HAND AT A TIME). CLIP AT EACH|YELLOW RING. NO TETHER + SLIP = DRIFT:|HOLD L+R FOR SAFER, D-PAD BACK.");
+  BEAT->mode=i;if(!sp_wait_ab(SCR_SPSEL))continue;bgm_t(TR_SPACE);int r=sp_eva_run(i);int ri=i<6?i:5;
+  int sc=r>0?clampi(EV.score+1000+EV.o2/60*2-(EV.drift?0:0),0,9999):0;int st=r>0?1+(sc>=1600)+(sc>=2000&&!EV.safer):0;int best=sc>SPR.eva[ri];if(best)SPR.eva[ri]=sc;if(st>SPR.evaS[ri])SPR.evaS[ri]=st;SPR.lastEva=i;spr_write();if(r>0)music_victory();
+  for(int t=0;;t++){next_frame();BEAT->screen=SCR_SPEVA;BEAT->phase=r>0?3:4;BEAT->scoreA=sc;BEAT->scoreB=st;if(t==0){char b[48],*o;chrome(CAT_EXPLORE,0);m3_box(16,24,208,112,1);m3_ctext(32,r>0?"EVA COMPLETE":"EVA TERMINATED",r>0?C_YEL:C_RED,2);m3_ctext(52,M->n,C_WHITE,1);
+    o=sp_put(b,"DURATION ");o=sp_int(o,EV.gm/60);o=sp_put(o," H ");o=sp_int(o,EV.gm%60);sp_put(o," MIN");m3_ctext(66,b,C_GRAY,1);m3_ctext(78,r>0?(EV.safer?"SAFER USED - CREW SAFE":"TETHER DISCIPLINE OK"):"BACK INSIDE - SAFE. TRY AGAIN.",C_GRAY,1);
+    o=sp_put(b,"SCORE ");o=sp_int(o,sc);if(best)sp_put(o,"  BEST!");m3_ctext(94,b,best?C_GREEN:C_WHITE,1);for(int s=0;s<3;s++)m3_fill(99+s*14,106,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
+   if(sp_isauto()&&t>200)pressed=K_A;if(t>20&&(pressed&(K_A|K_B))){pressed=0;break;}}
+  bgm_t(TR_SPACE);}}
