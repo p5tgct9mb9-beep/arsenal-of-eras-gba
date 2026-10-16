@@ -21,6 +21,16 @@ Ten big tiles sit over the Earth-from-orbit scene. D-pad UP/DOWN changes the row
 
 In a submenu, A opens the mode's options (Play, Map, Side, Bots, Loadout, High Scores, How to Play) and B goes back.
 
+## What's new in v1.3.5
+- **World Flight has 113 aircraft, all unlocked:** 33 WW2, 20 Cold War and 60 Modern, in five categories (Planes, Drones, Helicopters, Experimental, Wunderwaffen).
+  - The new AIRCRAFT browser filters by era and category and shows big side-view art with a fact card.
+  - Helicopters hover and land on open ground.
+  - Rocket planes either drop from a mothership or launch from the ground.
+- **6v6 Dogfight/Armor:** slower, readable air combat (average life 8.6 s → 15.1 s) and era-correct mixed bot aircraft and vehicles. The MiG-29, Su-27 and F-15C are added.
+- **Mars Rocks:** every mode now ends with a MISSION PAY card.
+- **Art direction:** new large F-22-reference-style pixel art (`shots/v135/art_before_after_f22_f16.png`).
+- Full details and the complete roster are in `RELEASE_NOTES_v1.3.5.md`.
+
 ## What's new in v1.3.4
 Saves from v1.3.1 through v1.3.3 carry over. A dedicated migration test from a v1.3.2 save is described below. The only new SRAM is the arcade record at 0x3400 ('Z'), which holds high scores, initials and play counts.
 

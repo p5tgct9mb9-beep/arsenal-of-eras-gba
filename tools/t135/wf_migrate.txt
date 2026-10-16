@@ -1,0 +1,26 @@
+#newmenu
+#kc (save already past the first-boot tutorial)
+wait 100
+tap START
+wait 40
+tap RIGHT
+wait 30
+tap DOWN
+wait 30
+shot hub
+tap A
+wait 50
+tap DOWN
+wait 15
+tap DOWN
+wait 15
+tap DOWN
+wait 15
+shot cat
+tap A
+wait 20
+tap A
+wait 50
+beat
+shot migrated
+end

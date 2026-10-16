@@ -27,7 +27,7 @@ static void mm_logo(void){const char*s="ARSENAL OF ERAS";int w=slen(s)*12,x0=120
  for(int y=y0-1;y<y0+15;y++)for(int x=(kl_poll(),x0-2);x<x0+w+2;x++){u16 c=fb[y*240+x];if(c==RGB(250,250,255)||c==RGB(8,248,8))continue;
   int edge=0;for(int k=0;k<4;k++){int xx=x+(k==0)-(k==1),yy=y+(k==2)-(k==3);u16 q=fb[yy*240+xx];for(int j=0;j<14;j++)if(q==G[j]){edge=1;break;}if(edge)break;}
   int isg=0;for(int j=0;j<14;j++)if(c==G[j]){isg=1;break;}if(edge&&!isg)fb[y*240+x]=RGB(10,14,30);}
- m3_text(120-(20*6)/2,22,"FIELD EDITION V1.3.4",RGB(110,200,230),1);}
+ m3_text(120-(20*6)/2,22,"FIELD EDITION V1.3.5",RGB(110,200,230),1);}
 static void mm_static(void){
  for(int y=0;y<160;y++){kl_poll();u16 c=RGB(2+y/40,3+y/30,10+y/12);m3_fill(0,y,240,1,c);}
  // atmosphere glow above the limb

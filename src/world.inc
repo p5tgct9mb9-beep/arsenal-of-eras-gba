@@ -221,7 +221,7 @@ static int w_pause(void){int sel=0;static const char*const IT[3]={"RESUME","WORL
   BEAT->screen=SCR_PAUSE;vsync();dma32(hud,SCREENBLOCK(28),512);frame++;BEAT->frame=frame;poll();
   if(pressed&K_UP){sel=(sel+2)%3;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%3;sfx_menu();}if(pressed&K_START)return 0;
   if(pressed&K_A){sfx_ok();if(sel==1){w_worldmap();w_setup();sel=0;continue;}return sel==2;}}}
-static void w_run(void){bgm_t(TR_CRUISE);ws_read();w_setup();w_start();WS.flights++;
+static void w_run(void){bgm_t(TR_CRUISE);ws_read();WS.ac=fac;w_setup();w_start();WS.flights++;
  for(;;){BEAT->screen=SCR_WORLD;BEAT->mode=6;BEAT->hp=falt/100;BEAT->scoreA=fv/100;BEAT->scoreB=nlogged();BEAT->timer=ftime;BEAT->phase=fstate;BEAT->x=(fx>>8)>>4;BEAT->y=(fy>>8)>>4;BEAT->extra=ffuel/(WAC[fac].fuel>0?WAC[fac].fuel:1)|(fring<<8)|(fdone<<12)|(fac<<16);BEAT->kills=fzoom;
   int tz=256;if(falt>40000)tz=256+(falt-40000)*330/310000;if(tz>600)tz=600;fzoom+=(tz-fzoom)/8;if(iabs(tz-fzoom)<8)fzoom=tz;
   w_logic();w_hud();w_draw();

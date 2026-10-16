@@ -17,8 +17,8 @@ static const char*mln(int md){if(md==MD_OVER&&!v131_over_unlocked())return "CLAS
 // ---- NEW tags: content new since v1.3.1, shown until first opened (SRAM 0x26C0 'N')
 typedef struct{u8 seen[8];}NSeen;static NSeen NSN EWRAM;static int nsn_ld;
 static void nsn_load(void){if(nsn_ld)return;nsn_ld=1;if(!sv_get(0x26C0,'N',1,&NSN,sizeof NSN))memset(&NSN,0,sizeof NSN);}
-static int md_isnew(int md){static const u8 NEWM[9]={MD_FIRE,MD_INVADE,MD_GP,MD_TT,MD_FREE,MD_BUILD,MD_SAND,MD_VBM,MD_CABINET};if(LEGACY_MENU)return 0;
- for(int i=0;i<9;i++)if(NEWM[i]==md){nsn_load();return !((NSN.seen[md>>3]>>(md&7))&1);}return 0;}
+static int md_isnew(int md){static const u8 NEWM[10]={MD_FIRE,MD_INVADE,MD_GP,MD_TT,MD_FREE,MD_BUILD,MD_SAND,MD_VBM,MD_CABINET,MD_FLIGHT};if(LEGACY_MENU)return 0;
+ for(int i=0;i<10;i++)if(NEWM[i]==md){nsn_load();return !((NSN.seen[md>>3]>>(md&7))&1);}return 0;}
 static void md_seen(int md){if(md<0||md>=MD_N||!md_isnew(md))return;NSN.seen[md>>3]|=1<<(md&7);sv_put(0x26C0,'N',1,&NSN,sizeof NSN);}
 static int md_featured(int md){return md==MD_FIRE;}
 // ---- tiles
@@ -100,7 +100,7 @@ static void cat_screen_p(const MCat*C,int key,int bgc){static const char*const E
    if(MD_PSEUDO(md)){m3_text(144,38,foc?">":" ",C_GREEN,1);m3_text(150,38,"OPEN",C_GREEN,1);m3_text(144,56,"A: OPEN",C_GRAY,1);}
    else for(int i=0;i<no;i++){int y=38+i*13;int hi=foc&&i==os;m3_text(144,y,hi?">":" ",C_GREEN,1);m3_text(150,y,op_label(md,ops[i]),hi?C_GREEN:(i==0&&!foc?C_GREEN:C_WHITE),1);}
    if(!camp&&md_featured(md)){m3_fill(142,118,88,16,RGB(60,44,10));m3_fill(142,118,88,1,RGB(236,196,92));m3_text(146,123,"FEATURED MODE",RGB(236,196,92),1);}
-   else if(!camp&&md_isnew(md)){m3_fill(142,118,88,16,RGB(70,14,10));m3_fill(142,118,88,1,RGB(220,40,30));m3_text(146,123,md==MD_CABINET?"NEW IN V1.3.4":"NEW IN V1.3.2",RGB(255,150,130),1);}
+   else if(!camp&&md_isnew(md)){m3_fill(142,118,88,16,RGB(70,14,10));m3_fill(142,118,88,1,RGB(220,40,30));m3_text(146,123,md==MD_FLIGHT?"113 AIRCRAFT!":md==MD_CABINET?"NEW IN V1.3.4":"NEW IN V1.3.2",RGB(255,150,130),1);}
    m3_ctext(142,camp?ED[sel]:MDD[md],C_GRAY,1);m3_ctext(151,foc?"A: SELECT   B: BACK TO LIST":MD_PSEUDO(md)?"A: OPEN   B: BACK":"A: OPTIONS   B: BACK",C_GRAY,1);kl_poll();m3_present();redraw=0;}
   next_frame();
   if(!foc){if(pressed&K_UP){sel=(sel+nm-1)%nm;os=0;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%nm;os=0;redraw=1;sfx_menu();}

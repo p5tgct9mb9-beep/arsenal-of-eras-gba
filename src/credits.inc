@@ -2,7 +2,7 @@
 #define SCR_CRED 97
 typedef struct{const char*s;u8 kind;}CrLine; // kind: 0 heading(2x gold) 1 white 2 gray 3 cyan 4 KC portrait 5 gap 6 card break
 static const CrLine CRL[]={
- {"ARSENAL OF ERAS",0},{"FIELD EDITION V1.3.4",3},{"",6},
+ {"ARSENAL OF ERAS",0},{"FIELD EDITION V1.3.5",3},{"",6},
  {"CREATED BY",2},{"LT VASQUEZ",0},{"GAME DIRECTOR",1},{"DESIGNER - IDEAS",1},{"",6},
  {"BUILT WITH",2},{"KC, AI ASSISTANT",0},{"(GROK BOT)",3},{"PROGRAMMING - ART - MUSIC",1},{"",6},
  {"TUTORIAL GUIDE",2},{"KC THE DOG",0},{"",4},{"BLACK SHEPHERD MIX, BIG EARS,",1},{"GREY MUZZLE, WHITE CHEST.",1},{"GOOD GIRL. BEST SERGEANT.",3},{"",6},
