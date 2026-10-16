@@ -2,7 +2,7 @@
 enum{MM_INF=1,MM_TANK=2,MM_AIR=3,MM_SEA=4};
 static u8 mpMixed; // 6v6 arsenal: per-unit equipment era (u->ve)
 #define TV(u) (&TANKV[mpMixed?(u)->ve:mpEra][(u)->veh])
-static AirS hgAir;static u8 hgOn,hgRange,hgCam;static int hgPhotos;static u32 hgSpr[128] EWRAM;static void hg_photo(int i);
+static u8 sbOn,sbEra[2],sbMix,sbCnt[2],sbWin,sbBench[12];static int sbTarget,sbTime;static AirS hgAir;static u8 hgOn,hgRange,hgCam;static int hgPhotos;static u32 hgSpr[128] EWRAM;static void hg_photo(int i);
 #define AV(u) ((hgOn&&(u)->isp)?(const AirS*)&hgAir:&AIRV[mpMixed?(u)->ve:mpEra][(u)->veh])
 #define SV(u) (&SHIPV[(u)->ve][(u)->veh])
 static Wstat PW[3];static int pSpeed,pPerk,pLeth,pTact,pLaun,stealth,stealthR=130,pArmHP,pArmK,pMkey,pMark;static u32 pFX;
@@ -160,7 +160,7 @@ static void damage(int vi,int dmg,int ai){Unit*v=&U[vi];if(!v->alive||v->inv>0||
  if(!v->isp&&v->team!=U[0].team&&mpMode==MM_INF){if(pMark>0)dmg=dmg*5/4;if(pArmK==ATL[8][2][5]&&pArmK)dmg=dmg*11/10;}
  if(v->isp&&pArmK==ATL[8][2][6]&&ai>=0&&ai<MAXU&&mpMode==MM_INF){u16 a=atan2i(dxw(U[ai].x,v->x),dyw(U[ai].y,v->y));u16 df=a-v->tur;if(df<0x2000||df>0xE000)dmg=dmg*2/5;}if(mpMode==MM_SEA&&v->role!=R_WING)dmg=dmg*2/3+(dmg>0);if(msOn&&mpMode==MM_SEA&&v->isp)dmg=dmg/3+(dmg>0);if(v->role==R_STATIC&&mpMode==MM_AIR&&dmg<40)dmg=1;if(v->isp)dmg=diffd(dmg);v->hp-=dmg;v->hurt=6;if(v->isp){sfx_hurt();}
  if(v->hp<=0&&v->alive)wd_add(v);
- if(v->hp<=0){v->hp=0;v->alive=0;v->resp=mpMode==MM_TANK?240:mpMode==MM_SEA?300:180;v->deaths++;if(v->team<2&&v->role!=R_DISMOUNT&&v->role!=R_WING)score[1-v->team]++;if(ai>=0)U[ai].kills++;
+ if(v->hp<=0){v->hp=0;v->alive=0;v->resp=mpMode==MM_TANK?240:mpMode==MM_SEA?300:180;v->deaths++;if(v->team<2&&v->role!=R_DISMOUNT&&v->role!=R_WING){score[1-v->team]++;if(sbOn&&sbWin==3&&ai==0)score[0]++;}if(ai>=0)U[ai].kills++;
   if(ai==0&&mpMode==MM_INF&&pPerk==2){Unit*p=&U[0];if(p->gren<2)p->gren++;refill(p);p->rl=0;}
   sfx_boom();fx_add(v->x>>8,v->y>>8,mpMode==MM_INF?FXK_SMALL:FXK_BIG);fx_add(v->x>>8,(v->y>>8)-4,FXK_SMOKE);
   if(ai==0)feed(mpMode==MM_INF||v->role==R_DISMOUNT?"+1 KILL":v->role==R_WING?"AIRCRAFT SHOT DOWN":mpMode==MM_SEA?"+1 - SHIP SUNK":"+1 KILL - TARGET DESTROYED",HB_GREEN);else if(vi==0)feed("YOU WERE KILLED",HB_RED);if(msOn)ms_death(vi,ai);}}
@@ -554,9 +554,9 @@ static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hide
   U[i].wpn=i==0?0:rr(NPRIM_BOT[era]);if(era==0&&i>0)U[i].wpn=U[i].team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];spawn(&U[i],i);}
  if(mpMixed){ // balanced arsenal: bot k on each team draws from the same era
   int ncv[2]={0,0};
-  for(int k=0;k<6;k++){int e=(mpEra>=5&&mode!=MM_SEA)?mpEra:rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0&&mpEra<5)e=1; // v1.3: WW1/1776/medieval maps field that era's kit // Warsaw Pact bots: Cold War kit
-    int per=mpEra>=5&&mode!=MM_SEA; // v1.3: period maps (WW1/1776/medieval) put the player in period kit too
-    if(k==0&&per){e=mpEra;vi=mode==MM_TANK?tankSel[e]%NTK[e]:mode==MM_AIR?airSel[e]%NAIR[e]:0;if(mode==MM_TANK&&TANKV[e][vi].axis!=t){for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t){vi=q;break;}}if(mode==MM_AIR&&AIRV[e][vi].side!=t){for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==t){vi=q;break;}}}
+  for(int k=0;k<6;k++){int e=(mpEra>=5&&mode!=MM_SEA)?mpEra:rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];if(sbOn){static const u8 SBE[7]={7,6,5,0,1,2,3};e=sbMix?SBE[rr(7)]:sbEra[t];}int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0&&mpEra<5&&!sbOn)e=1; // v1.3: WW1/1776/medieval maps field that era's kit // Warsaw Pact bots: Cold War kit
+    int per=(mpEra>=5||sbOn)&&mode!=MM_SEA; // v1.3: period maps (WW1/1776/medieval) put the player in period kit too
+    if(k==0&&per){e=sbOn?(sbMix&&t?e:sbEra[t]):mpEra;vi=mode==MM_TANK?tankSel[e]%NTK[e]:mode==MM_AIR?airSel[e]%NAIR[e]:0;if(mode==MM_TANK&&TANKV[e][vi].axis!=t){for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t){vi=q;break;}}if(mode==MM_AIR&&AIRV[e][vi].side!=t){for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==t){vi=q;break;}}}
     else if(k==0){if(mode==MM_SEA)e=fdec(NSH,g6.shI,&vi);else if(mode==MM_TANK)e=fdec(NTK,g6.tkI,&vi);else if(mode==MM_AIR)e=fdec(NAIR,g6.aI,&vi);else e=fdec(NPRIM,g6.pI,&vi);}
     u->ve=e;
     if(i==0){u->veh=vi;if(per&&mode==MM_INF){load_player(e);u->wpn=0;refill(u);}}
@@ -574,15 +574,17 @@ static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hide
   if(mode==MM_TANK||mode==MM_SEA)nU=24;}
  if(msOn)ms_init();else feed(mode==MM_INF?"TEAM DEATHMATCH - FIRST TO 30":mode==MM_TANK?"ARMOR BATTLE - FIRST TO 30":mode==MM_SEA?"NAVAL BATTLE - FIRST TO 30":"DOGFIGHT - FIRST TO 30",HB_YEL);
  int scr=mode==MM_INF?SCR_INF:mode==MM_TANK?SCR_TANK:mode==MM_SEA?SCR_SEA:SCR_AIR;int over=0;
+ if(sbOn){mpTimer=sbTime;for(int i=0;i<12;i++){int t=i<6?0:1,k=i%6;sbBench[i]=k>=sbCnt[t];if(sbBench[i]){U[i].alive=0;U[i].resp=32000;}}if(sbBench[0]){sbBench[0]=0;}}
  for(;;){
   BEAT->screen=scr;BEAT->hp=U[0].hp;BEAT->scoreA=score[0];BEAT->scoreB=score[1];BEAT->timer=mpTimer;BEAT->kills=U[0].kills;BEAT->deaths=U[0].deaths;BEAT->x=U[0].x>>8;BEAT->y=U[0].y>>8;
   if(pressed&K_START){if(pause_menu())return;}
   if((keys&(K_L|K_R))==(K_L|K_R)&&(pressed&K_SEL)&&!over){if(msOn)ms_skip();else mpTimer=1;} // debug: end match now
   if(over){if(--over==0){if(msOn)ms_result(msWin);else mp_result();return;}}
   else if(msOn){int r=ms_tick();if(r){over=90;msWin=r==1;feed(r==1?"MISSION COMPLETE":"MISSION FAILED",r==1?HB_GREEN:HB_RED);if(r==1)music_victory();}}
-  else{mpTimer--;if(score[0]>=30||score[1]>=30||mpTimer<=0){over=90;feed(score[0]>score[1]?"YOUR TEAM WINS!":score[0]<score[1]?"ENEMY TEAM WINS":"DRAW",HB_YEL);}}
+  else{mpTimer--;int cap=sbOn?(sbWin==1||sbWin==2?9999:sbTarget):30;int ls=0;if(sbOn&&sbWin==2){int al[2]={0,0};for(int q=0;q<12;q++)if(U[q].alive)al[q<6?0:1]++;if(!al[0]||!al[1]){ls=1;score[0]=al[0];score[1]=al[1];}}
+   if(score[0]>=cap||score[1]>=cap||mpTimer<=0||ls){over=90;feed(score[0]>score[1]?"YOUR TEAM WINS!":score[0]<score[1]?"ENEMY TEAM WINS":"DRAW",HB_YEL);}}
   for(int i=0;i<NU;i++){Unit*u=&U[i];
-   if(!u->alive){if(u->role==R_DISMOUNT||u->role==R_WING||(i>=12&&!msOn))continue;if(--u->resp<=0&&!over)spawn(u,i);continue;}
+   if(!u->alive){if(u->role==R_DISMOUNT||u->role==R_WING||(i>=12&&!msOn))continue;if(sbOn&&(sbBench[i]||sbWin==2))continue;if(--u->resp<=0&&!over)spawn(u,i);continue;}
    if((u->role==R_DISMOUNT||u->role==R_WING)&&--u->regen<=0){u->alive=0;continue;}
    if(u->inv>0)u->inv--;
    if(mode==MM_INF||u->role==R_DISMOUNT)inf_update(i);else if(u->stun>0)u->stun--;else if(mode==MM_TANK)tank_update(i);else if(mode==MM_SEA&&u->role!=R_WING)sea_update(i);else air_update(i);}

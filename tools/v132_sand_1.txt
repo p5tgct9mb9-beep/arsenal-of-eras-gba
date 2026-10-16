@@ -1,0 +1,171 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap A
+wait 30
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 10
+tap A
+wait 40
+shot sb1_setup
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 53420001
+wait 60
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_00
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_03
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_06
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_09
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_12
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_15
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_18
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_21
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_24
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+shot sb1_27
+beat
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+hold A+UP 120
+hold A+RIGHT 90
+hold A+DOWN 120
+hold A+LEFT 90
+wait 300
+shot sb1_end
+beat
+end
