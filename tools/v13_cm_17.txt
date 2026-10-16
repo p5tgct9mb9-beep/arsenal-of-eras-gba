@@ -1,0 +1,59 @@
+wait 100
+tap START
+wait 15
+tap A
+wait 25
+tap A
+wait 6
+tap A
+wait 12
+hold L+R+SELECT 2
+wait 10
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+tap UP
+wait 6
+wait 6
+shot v13_cm17_select
+tap A
+wait 12
+shot v13_cm17_brief
+tap A
+wait 14
+shot v13_cm17_brief2
+tap START
+wait 30
+tap A
+wait 8
+tap A
+wait 8
+tap A
+wait 8
+tap A
+wait 30
+shot v13_cm17_start
+hold UP+B 200
+hold RIGHT+B 200
+shot v13_cm17_play1
+hold UP+A 300
+hold LEFT+B 200
+shot v13_cm17_play2
+hold UP+B 400
+shot v13_cm17_play3
+beat end

@@ -149,6 +149,7 @@ static void pl_respawn(int fromChk){
  pl_spawn_ents(fromChk);
  int sx=fromChk?pChkX:24,sy=-1;
  if(!fromChk&&(pFl&SF_B)){sx=56;}
+ if(*(volatile u32*)0x0203FFD4==0x53534F42u){for(int j=0;j<nPE;j++)if(PE[j].k==34){sx=PE[j].x0*16-40;pChkX=sx;break;}} // test-only: harness pokes 'BOSS' to start at the boss gate
  for(int y=0;y<PH;y++){if(!(TFL[ptile(sx>>4,y)]&(F_SOL))&&(TFL[ptile(sx>>4,y+1)]&(F_SOL|F_ONE))){sy=y*16+16;break;}}
  if(sy<0)sy=9*16;
  int keepHp=P.maxhp?P.maxhp:3;int lives=P.lives,gr=P.gren,e1=P.eq1n,mu=P.medUsed;int g0=EQ_CNT[SOL[PS.unit].eq0]+(UAB(PS.unit)==AB_BARRAGE&&SOL[PS.unit].eq0==EQ_FRAG?3:0);
