@@ -1,0 +1,32 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap A
+wait 8
+tap A
+wait 30
+shot v13_lrrp_missions
+tap A
+wait 30
+shot v13_lrrp_brief
+tap A
+wait 60
+shot v13_lrrp_insert
+wait 120
+shot v13_lrrp_lz
+hold RIGHT 200
+shot v13_lrrp_move
+tap B
+hold RIGHT 200
+shot v13_lrrp_zone2
+beat end

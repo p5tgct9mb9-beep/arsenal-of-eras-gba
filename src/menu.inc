@@ -4,12 +4,12 @@
 #define SCR_HOW 55
 #define SCR_REC 56
 #define SCR_OPT 57
-enum{MD_CAMP,MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_SPEC,MD_BRAD,MD_SNIPE,MD_EOD,MD_AA,MD_DRONE,MD_LAUNCH,MD_FLIGHT,MD_LRRP,MD_FPS,MD_N};
-static const char*const MDN[MD_N]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","SPEC OPS: BRADLEY","SNIPER","EOD - BOMB DISPOSAL","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS"};
-static const char*const MSN[MD_N+2]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","BRADLEY OPS","SNIPER","EOD","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS"};
+enum{MD_CAMP,MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_SPEC,MD_BRAD,MD_SNIPE,MD_EOD,MD_AA,MD_DRONE,MD_LAUNCH,MD_FLIGHT,MD_LRRP,MD_FPS,MD_SPACE,MD_ASTRO,MD_N};
+static const char*const MDN[MD_N]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","SPEC OPS: BRADLEY","SNIPER","EOD - BOMB DISPOSAL","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS","SPACE PROGRAM","ASTRONAUT EXPLORER"};
+static const char*const MSN[MD_N+2]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","BRADLEY OPS","SNIPER","EOD","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS","SPACE PROGRAM","ASTRONAUT EXPLORER"};
 static const char*const MDD[MD_N]={"MISSIONS ACROSS EVERY ERA","PICK A FACTION, ANY-ERA ARSENAL","TANKS, TDS, IFVS, HALFTRACKS, JEEPS","AIR SUPERIORITY - GUNS + MISSILES","BATTLESHIPS, CARRIERS, DESTROYERS",
  "KNIGHT, SAMURAI, VIKING... BEST OF 3","PLATFORMER: WORLDS OF COURSES","M2 BRADLEY VEHICLE PLATFORMER","LONG RANGE: DROP, WIND, BREATH","FIND, APPROACH, DEFUSE",
- "GUNS + SAMS VS PLANES AND DRONES","MODERN UAV STRIKES - MQ-9, TB2","35 REAL ROCKETS: ASCENT, LAND, DOCK","FREE ROAM IN THE X-15, LANDMARKS","VIETNAM 1966-70: 6-MAN RECON TEAM","FIRST-PERSON: MISSIONS, FFA, SURVIVAL"};
+ "GUNS + SAMS VS PLANES AND DRONES","MODERN UAV STRIKES - MQ-9, TB2","35 REAL ROCKETS: ASCENT, LAND, DOCK","FREE ROAM IN THE X-15, LANDMARKS","VIETNAM 1966-70: 6-MAN RECON TEAM","FIRST-PERSON: MISSIONS, FFA, SURVIVAL","REAL PROFILES, SATS, ISS DOCKING, EVA","PLANETS, MOONS, STARS: GRAVITY LAB"};
 static const char*const HOW[MD_N][6]={
  {"PICK A MISSION FROM ANY ERA.","EACH HAS 1-3 OBJECTIVES SHOWN","AT THE TOP OF THE SCREEN.","FOLLOW THE MINIMAP MARKERS.","CLEARING A MISSION UNLOCKS THE NEXT.","SOME MISSIONS LET YOU PLAY BOTH SIDES."},
  {"A FIRE   B GRENADE   L SWAP","R STRAFE   SELECT TACTICAL","FIRST TEAM TO 30 KILLS WINS.","FACTIONS SET COLOURS + BOT KIT.","THE ARSENAL MIXES WEAPONS","FROM EVERY ERA."},
@@ -25,8 +25,10 @@ static const char*const HOW[MD_N][6]={
  {"PICK A DRONE, CALL-IN, MISSION.","A FIRE THE SELECTED WEAPON","L/R CYCLE WEAPONS","WATCH FOR SAMS AND MANPADS.","CONFIRM TARGETS - ROE MATTERS.","SCORE IS SHOWN AFTER EACH SORTIE."},
  {"PICK A REAL ROCKET + MISSION.","A THROTTLE  LEFT/RIGHT PITCH","STAGE WITH B AT BURNOUT.","LAND BOOSTERS ON THE PAD OR","DRONESHIP; DOCK WITH THE ISS.","GENTLE = MORE POINTS."},
  {"FLY THE X-15 OR OTHERS FREELY.","UP/DOWN PITCH  L/R ROLL","A THROTTLE  B BRAKE","VISIT LANDMARKS FOR STAMPS.","COURSES RACE THROUGH RINGS.","WATCH THE FUEL GAUGE."},
- {"MOVE SLOW - THE METER IS NOISE.","R BINOCULARS: LOG CAMPS + TRAILS","L RADIO: CALL A GRID, ADJUST FIRE","B CRAWL  A FIRE  SEL CLAYMORE","SNATCH A PRISONER, NEVER HURT CIVS.","BREAK CONTACT AND RUN FOR THE LZ."},
- {"UP/DOWN MOVE  LEFT/RIGHT TURN","L/R STRAFE   A FIRE   B USE/DOOR","SELECT SWAPS WEAPON (R+SEL RELOAD)","WALK OVER DROPS TO TAKE WEAPONS.","LOADOUT WEAPONS FROM EVERY ERA.","MISSIONS, FFA VS BOTS, SURVIVAL."}};
+ {"MOVE SLOW - THE METER IS NOISE.","A ACT/FIRE  B PRONE  R SPRINT","L RADIO: FIRE MISSION, ADJUST","SELECT: SENSOR/CLAYMORE/STROBE","SNATCH FROM BEHIND. SPARE CIVS.","BREAK CONTACT, RUN FOR THE LZ."},
+ {"UP/DOWN MOVE  LEFT/RIGHT TURN","L/R STRAFE   A FIRE   B USE/DOOR","SELECT SWAPS WEAPON (R+SEL RELOAD)","WALK OVER DROPS TO TAKE WEAPONS.","LOADOUT WEAPONS FROM EVERY ERA.","MISSIONS, FFA VS BOTS, SURVIVAL."},
+ {"PROFILES: HIT EACH CUE (A/SEL/L/R)","AT THE REAL T+ TIME. B = TIME WARP.","SATS: BURN PROGRADE AT PERIGEE TO","RAISE APOGEE. ISS: SLOW + STRAIGHT,","UNDER 0.2 M/S AT CONTACT. EVA:","CLIP YOUR TETHER BEFORE YOU MOVE."},
+ {"PICK A WORLD ON THE STAR MAP.","LAND GENTLY: UP = THRUST.","WALK TO LAB STATIONS, PRESS A","TO RUN EXPERIMENTS. RESULTS GO","IN THE JOURNAL VS EARTH 9.81.","COLLECT SAMPLES TO UNLOCK MORE."}};
 typedef struct{const char*n;const char*sub;u8 nm;u8 m[6];u8 trk;}MCat;
 enum{CAT_CAMP,CAT_MP,CAT_SPEC,CAT_SPECIAL,CAT_EXPLORE,CAT_LOAD,CAT_SET,CAT_KC,CAT_N};
 static const MCat MC[CAT_N]={
@@ -34,7 +36,7 @@ static const MCat MC[CAT_N]={
  {"BATTLES / BOTS","6V6, 1V1 AND FPS VS BOTS",6,{MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_FPS},TR_MARCH},
  {"SPEC OPS","SIDE-SCROLLING OPERATIONS",2,{MD_SPEC,MD_BRAD},TR_JUNGLE},
  {"SPECIALIST","ONE JOB. DO IT RIGHT.",5,{MD_SNIPE,MD_EOD,MD_LRRP,MD_AA,MD_DRONE},TR_COLD},
- {"EXPLORE","ROCKETS + FLIGHT",2,{MD_LAUNCH,MD_FLIGHT},TR_SPACE},
+ {"EXPLORE","ROCKETS, SPACE + FLIGHT",4,{MD_SPACE,MD_ASTRO,MD_LAUNCH,MD_FLIGHT},TR_SPACE},
  {"LOADOUT/CHARACTER","KITS, ARSENAL, CHARACTER",0,{0},0},
  {"SETTINGS","MUSIC, VOLUME, DIFFICULTY",0,{0},0},
  {"BOOT CAMP WITH KC","CONTROLS + EVERY MODE",0,{0},0}};
@@ -65,13 +67,13 @@ static void chrome(int c,int lay){int key=c*4+lay;if(bgCached==key){dma32(dl_bg,
 static void cat_bgc(int c){chrome(c,0);}
 static void banner(const char*t,const char*sub,u16 c){m3_fill(0,4,240,30,RGB(10,12,24));m3_fill(0,4,240,1,c);m3_fill(0,33,240,1,c);m3_ctext(8,t,C_YEL,2);if(sub)m3_ctext(24,sub,C_GRAY,1);}
 // ---- stubs for modes still being built
-static void bradley_ops(void);static void sniper_ops(void);static void eod_ops(void);static void lrrp_ops(void);static void fps_ops(void);
-static int mode_avail(int md){return md!=MD_LRRP&&md!=MD_FPS;}
+static void bradley_ops(void);static void sniper_ops(void);static void eod_ops(void);static void lrrp_ops(void);static void fps_ops(void);static void space_program(void);static void astro_explorer(void);
+static int mode_avail(int md){return md!=MD_FPS;}
 // ---- per-mode pages
 static void how_to(int md,int c){int redraw=1;for(;;){BEAT->screen=SCR_HOW;BEAT->mode=md;
   if(redraw){chrome(c,2);banner(MDN[md],"HOW TO PLAY",C_YEL);for(int i=0;i<6;i++)m3_text(16,50+i*13,HOW[md][i],C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
-static void rec_brad(const char**L);static void rec_snipe(const char**L);static void rec_eod(const char**L);
+static void rec_brad(const char**L);static void rec_snipe(const char**L);static void rec_eod(const char**L);static void rec_lrrp(const char**L);static void rec_space(const char**L);static void rec_astro(const char**L);
 static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5;i++)L[i]="";
  #define SB(k,s) {const char*_s=(s);int _n=0;while(_s[_n]&&_n<38){b[k][_n]=_s[_n];_n++;}b[k][_n]=0;L[k]=b[k];}
  switch(md){
@@ -81,6 +83,9 @@ static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5
  case MD_BRAD:rec_brad(L);break;
  case MD_SNIPE:rec_snipe(L);break;
  case MD_EOD:rec_eod(L);break;
+ case MD_LRRP:rec_lrrp(L);break;
+ case MD_SPACE:rec_space(L);break;
+ case MD_ASTRO:rec_astro(L);break;
  default:L[0]="NO SAVED RECORDS FOR THIS MODE YET.";L[1]="RESULTS ARE SHOWN AFTER EACH MATCH.";}
  #undef SB
 }
@@ -112,6 +117,8 @@ static void mode_play(int md){
  case MD_AA:anti_air();break;
  case MD_DRONE:{static int dm=0;if(drone_hangar(&dm)){loading(cat("LAUNCHING: ",DRN[droneSel].n));drone_run(dm);}break;}
  case MD_LAUNCH:space_launch();break;
+ case MD_SPACE:space_program();break;
+ case MD_ASTRO:astro_explorer();break;
  case MD_FLIGHT:flight_menu();break;}
  pressed=0;bgCached=-1;}
 static void mode_loadout(int md){int era=0;if(md==MD_SPEC){ps_read();so_read();so_menu(PS.unit);}else loadout_hub(&era);pressed=0;bgCached=-1;}
@@ -119,7 +126,7 @@ static void mode_loadout(int md){int era=0;if(md==MD_SPEC){ps_read();so_read();s
 static s8 mpPickI[5]={-1,-1,-1,-1,-1},mpPickE[5];
 enum{OP_PLAY,OP_MAP,OP_SIDE,OP_BOTS,OP_LOAD,OP_REC,OP_HOW};
 static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
- if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP)o[n++]=OP_BOTS;if(md!=MD_CAMP)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
+ if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_BOTS;if(md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
 static const char*op_label(int md,int op){static char b[24];static const char*const BN[4]={"EASY","NORMAL","VETERAN","ELITE"};const char*v=0;const char*k="";
  switch(op){case OP_PLAY:return "PLAY";case OP_LOAD:return "LOADOUT";case OP_REC:return md==MD_CAMP?"PROGRESS":"HIGH SCORES";case OP_HOW:return "HOW TO PLAY";
  case OP_MAP:k="MAP: ";v=mpPickI[md]<0?"PICK":map_def(md,mpPickE[md],mpPickI[md])->n;break;
@@ -167,9 +174,6 @@ static void wip(const char*n){int redraw=1;for(;;){if(redraw){cat_bgc(CAT_SPECIA
 #ifndef HAVE_BRADLEY
 #endif
 #ifndef HAVE_SNIPER
-#endif
-#ifndef HAVE_LRRP
-static void lrrp_ops(void){wip("LRRP");}
 #endif
 #ifndef HAVE_FPS
 static void fps_ops(void){wip("FPS");}
