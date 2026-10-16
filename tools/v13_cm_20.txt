@@ -1,10 +1,13 @@
+#newmenu
+# translated from the v1.3.2 menu by tools/menu133_xlate.py
 wait 100
 tap START
 wait 15
+wait 10
 tap A
-wait 25
+wait 50
 tap A
-wait 6
+wait 12
 tap A
 wait 12
 hold L+R+SELECT 2

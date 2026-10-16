@@ -103,7 +103,7 @@ static void rc_track_wp(RC*c){int nw=rcNW;int px=c->x>>RQ,py=c->y>>RQ;
 // stand-in for a skilled human.
 // v1.3.3 pace: rivals' top speed + accel are pulled toward the player's car (so a fast pick doesn't trivialise the cup)
 static void rc_pace(const RC*c,s32*vmax,int*acc){const RCar*C=&RCARS[c->car];*vmax=C->vmax;*acc=C->acc;if(c==&rc[0])return;const RCar*P=&RCARS[rc[0].car];
- static const u8 K[3]={100,220,256};static const s16 M[3]={246,266,276};int k=K[rcDiff];
+ static const s16 K[3]={100,220,256};static const s16 M[3]={246,266,272};int k=K[rcDiff];
  s32 v=C->vmax+((P->vmax-C->vmax)*k>>8);int a=C->acc+((P->acc-C->acc)*k>>8);if(v<C->vmax&&rcDiff)v=C->vmax;if(a<C->acc&&rcDiff)a=C->acc;*vmax=(v*M[rcDiff]>>8)*(256+c->band/2)>>8;*acc=a*M[rcDiff]>>8;}
 static void rc_ai(RC*c,int*thr,int*brk,int*steer,int*drift,int*boost){int nw=rcNW;
  int me=c==&rc[0];int D=me?2:rcDiff;

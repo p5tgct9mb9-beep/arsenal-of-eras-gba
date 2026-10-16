@@ -74,6 +74,7 @@ static const MCat MC[CAT_N]={
 // ---- themed backgrounds (procedural, Mode 3 into fb)
 static void grad(int y0,int y1,u16 a,u16 b){for(int y=y0;y<y1;y++){int t=(y-y0)*256/(y1-y0>0?y1-y0:1);int r=((a&31)*(256-t)+(b&31)*t)>>8,g=(((a>>5)&31)*(256-t)+((b>>5)&31)*t)>>8,bl=(((a>>10)&31)*(256-t)+((b>>10)&31)*t)>>8;m3_fill(0,y,240,1,r|(g<<5)|(bl<<10));}}
 static void mstars(int n,int ymax,u16 c){for(int i=0;i<n;i++)m3_fill((i*73+11)%240,(i*37+5)%ymax,1,1,c);}
+static void bg133(int c);
 static void cat_bg(int c){
  switch(c){
  case CAT_CAMP:{grad(0,160,RGB(196,170,120),RGB(150,120,80));for(int x=0;x<240;x+=20)m3_fill(x,0,1,160,RGB(170,144,100));for(int y=0;y<160;y+=20)m3_fill(0,y,240,1,RGB(170,144,100));
@@ -92,7 +93,7 @@ static void cat_bg(int c){
    for(int y=96;y<160;y++){int w=(y-96)*3+4;m3_fill(120-w/2,y,w,1,RGB(80,82,94));if(((y-96)/5)%2==0){m3_fill(120-w/2,y,3,1,RGB(230,40,40));m3_fill(120+w/2-3,y,3,1,RGB(250,250,250));m3_fill(119,y,2,1,RGB(250,250,250));}}break;}
  case CAT_HANGAR:{grad(0,160,RGB(30,40,60),RGB(70,80,96));for(int x=0;x<240;x+=30)m3_fill(x,0,2,110,RGB(50,60,76));m3_fill(0,110,240,50,RGB(90,92,100));for(int x=0;x<240;x+=16)m3_fill(x,130,8,2,RGB(240,200,40));
    m3_fill(60,70,120,8,RGB(170,176,190));m3_fill(110,50,20,40,RGB(150,156,170));m3_fill(100,86,40,4,RGB(170,176,190));break;}
- default:{m3_fill(0,0,240,160,RGB(4,6,16));mstars(80,160,RGB(220,220,255));for(int y=110;y<160;y++){int w=(y-110)*4+40;m3_fill(120-w,y,2*w,1,y<114?RGB(120,180,255):RGB(30,70,150));}
+ default:if(c>=CAT_N){bg133(c);break;}{m3_fill(0,0,240,160,RGB(4,6,16));mstars(80,160,RGB(220,220,255));for(int y=110;y<160;y++){int w=(y-110)*4+40;m3_fill(120-w,y,2*w,1,y<114?RGB(120,180,255):RGB(30,70,150));}
    m3_fill(60,40,4,30,RGB(230,230,236));m3_fill(59,70,6,4,RGB(200,80,40));for(int i=0;i<6;i++)m3_fill(60+(i&1),74+i*3,2+(i&1),3,RGB(255,190-i*20,80));break;}}}
 static int bgCached=-1;
 static void chrome(int c,int lay){int key=c*4+lay;if(bgCached==key){dma32(dl_bg,fb,240*160/2);return;}cat_bg(c);
@@ -147,7 +148,9 @@ static void mode_options(int md,int c){int sel=0,redraw=1;int n=md>=MD_INF&&md<=
   if(pressed&K_UP){sel=(sel+n-1)%n;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%n;redraw=1;sfx_menu();}
   if(pressed&(K_LEFT|K_RIGHT|K_A)){if(sel==0){SET.bot=(SET.bot+((pressed&K_LEFT)?3:1))&3;}else if(sel==1)SET.hints^=1;else if(pressed&K_A){faction_select(md);pressed=0;bgCached=-1;}redraw=1;sfx_menu();}
   if(pressed&(K_B|K_START)){save_write();sfx_ok();pressed=0;return;}}}
+static void md_pseudo_open(int md);static void md_seen(int md);
 static void mode_play(int md){
+ if(MD_PSEUDO(md)){md_pseudo_open(md);pressed=0;bgCached=-1;return;}md_seen(md);
  switch(md){
  case MD_CAMP:mission_select();break;
  case MD_INF:case MD_TANK:case MD_AIR:case MD_SEA:{int sel=md;if(faction_select(sel)){if(arsenal_menu(sel)){int me=0;int mi=map_select(sel,&me);if(mi>=0){loading(cat("DEPLOYING: ",map_def(sel,me,mi)->n));mpMixed=1;mp_run(sel,me,mi);mpMixed=0;}}}break;}
@@ -176,7 +179,7 @@ static void mode_loadout(int md){int era=0;if(md==MD_SPEC){ps_read();so_read();s
 // ---- category screen (mockup layout): title bar, mode list left, options panel right
 static s8 mpPickI[5]={-1,-1,-1,-1,-1},mpPickE[5];
 enum{OP_PLAY,OP_MAP,OP_SIDE,OP_BOTS,OP_LOAD,OP_REC,OP_HOW};
-static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(md>=MD_MOON){if(md!=MD_HIST)o[n++]=OP_REC;else o[n++]=OP_REC;o[n++]=OP_HOW;return n;}if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
+static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(MD_PSEUDO(md))return n;if(md>=MD_MOON){if(md!=MD_HIST)o[n++]=OP_REC;else o[n++]=OP_REC;o[n++]=OP_HOW;return n;}if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
  if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_BOTS;if(md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO&&md!=MD_FPS)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
 static const char*op_label(int md,int op){static char b[24];static const char*const BN[4]={"EASY","NORMAL","VETERAN","ELITE"};const char*v=0;const char*k="";
  switch(op){case OP_PLAY:return md==MD_HIST?"START TOUR":md==MD_OVER&&!v131_over_unlocked()?"ENTER CODE":"PLAY";case OP_REC:if(md==MD_HIST)return "CREDITS";return md==MD_CAMP?"PROGRESS":"HIGH SCORES";case OP_LOAD:return "LOADOUT";case OP_HOW:return "HOW TO PLAY";

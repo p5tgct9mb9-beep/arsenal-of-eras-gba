@@ -1,21 +1,22 @@
+#newmenu
+# translated from the v1.3.2 menu by tools/menu133_xlate.py
 #guide
 wait 100
 tap START
 wait 40
-tap DOWN
-wait 4
-tap DOWN
-wait 4
-tap DOWN
-wait 4
-tap DOWN
-wait 4
-tap A
-wait 120
 shot g01
-tap A
-wait 120
 shot g02
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+wait 10
+tap A
+wait 50
+tap DOWN
+wait 6
+tap A
+wait 12
 tap A
 wait 4
 tap A

@@ -1,9 +1,18 @@
+#newmenu
+# translated from the v1.3.2 menu by tools/menu133_xlate.py
 wait 100
 tap START
 wait 40
+shot cr_menu
 tap UP
 wait 6
-shot cr_menu
+tap RIGHT
+wait 6
+wait 10
+tap A
+wait 50
+tap DOWN
+wait 6
 tap A
 wait 30
 shot cr_start
