@@ -1,0 +1,134 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 4
+tap A
+wait 6
+tap A
+wait 30
+shot v13_bradley_select
+tap SELECT
+wait 20
+shot v13_bradley_garage
+tap B
+wait 20
+tap A
+wait 60
+shot v13_bradley_start
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+shot v13_bradley_1
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold UP+A 30
+shot v13_bradley_aimup
+tap R
+wait 10
+shot v13_bradley_tow
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+tap L
+wait 4
+tap SELECT
+wait 20
+shot v13_bradley_squad
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+shot v13_bradley_2
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+hold RIGHT+A 46
+hold RIGHT+A+B 8
+wait 60
+shot v13_bradley_end
+beat end

@@ -7,7 +7,7 @@ ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #          9 red 10 yellow 11 white 12 glass 13 black 14 orange 15 skin
 BASE=[(0,0,0),(20,18,22),(46,44,48),(84,82,86),(150,150,154),(0,0,0),(0,0,0),(0,0,0),(62,64,60),(200,50,40),(246,210,70),(240,240,236),(110,170,210),(14,14,16),(246,140,40),(214,170,130)]
 CAMO={'DESERT':[(196,170,118),(150,122,80),(222,202,152)],'WOODLAND':[(88,102,60),(84,66,44),(44,48,32)],'WINTER':[(214,218,222),(146,152,158),(92,98,104)]}
-ENEM=[(86,100,58),(58,68,40),(126,136,88)]
+ENEM=[(116,120,108),(72,76,68),(150,154,140)]
 MISC=[(98,110,66),(70,70,74),(206,206,206)]
 def pal(c3):p=list(BASE);p[5:8]=c3;return p
 def G(w,h):return [[0]*w for _ in range(h)]
@@ -76,12 +76,12 @@ def bradley(v,f):
     camo(g,4,7,58,24,v*7+1)
     return g
 def era_overlay():
-    g=G(64,16)
-    for x in range(8,54,6):
-        for y in (2,7):R(g,x,y,x+4,y+3,8);R(g,x,y,x+4,y,4)
+    g=G(64,32)
+    for x in range(9,52,5):R(g,x,18,x+3,20,6);R(g,x,18,x+3,18,7)
+    for x in range(22,40,5):R(g,x,9,x+3,11,6)
     return g
 def busk():
-    g=G(16,16);R(g,2,2,13,13,8);R(g,4,4,11,11,12);R(g,2,2,13,2,4);return g
+    g=G(16,16);R(g,3,10,12,13,8);R(g,4,11,11,11,12);R(g,3,10,12,10,4);return g
 # ---------------------------------------------------------------- bosses / enemy armour (64x32, facing right)
 def t72(f,kind=0):
     g=G(64,32);tracks(g,4,58,23,f,6,3)
@@ -219,7 +219,7 @@ BOSSF=[lambda f:t72(f,0),lambda f:bmp(f,1),hind,lambda f:t72(f,1),t14]
 BOSS=[];[BOSS.extend(blob(BOSSF[b](f),64,32)) for b in range(5) for f in range(2)]
 COM=[];idx={}
 def add(name,g,w,h,o=True):idx[name]=len(COM)//8;COM.extend(blob(g,w,h,o))
-add('ERA',era_overlay(),64,16);add('BUSK',busk(),16,16)
+add('ERA',era_overlay(),64,32);add('BUSK',busk(),16,16)
 for f in range(2):add('BTR%d'%f,btr(f),64,32)
 for f in range(2):add('BMP2_%d'%f,bmp(f,0),64,32)
 for f in range(2):add('TECH%d'%f,technical(f),32,16)
@@ -232,6 +232,14 @@ for k in range(3):add('CRATE%d'%k,crate(k),16,16)
 for k in range(2):add('FLAG%d'%k,flag(k),16,32)
 for k in range(2):add('SMOKE%d'%k,smoke(k),32,32)
 for k in range(3):add('BOOM%d'%k,boom(k),32,32)
+def gun(k):
+    g=G(16,16)
+    if k==0:R(g,0,7,13,8,8);R(g,13,6,15,9,8)
+    else:
+        for i in range(12):R(g,i,14-i,i+1,15-i,8)
+        R(g,11,1,14,4,8)
+    return g
+add('GUN0',gun(0),16,16);add('GUN1',gun(1),16,16)
 for k in ('round','ebul','shell','arty','warn','barrel','spark','dot'):add(k.upper(),tiny(k),8,8,False)
 for k in ('tow','rpg','atgm','rocket'):add('M_'+k.upper(),missile(k),16,8)
 assert len(COM)//8<=440,len(COM)//8
@@ -242,7 +250,7 @@ EID={k:i for i,k in enumerate(EN)}
 H=12
 WORLDS=[('DESERT STORM',6,'DESERT',[('LINE OF DEPARTURE',1),('BERM BREACH',2),('WADI RUN',2),('MINEFIELD LANES',3),('OIL FIELD FIRES',3),('73 EASTING',4),('MEDINA RIDGE',4,0)]),
  ('FULDA FOREST',9,'WOODLAND',[('FULDA GAP',2),('FOREST TRAIL',2),('WESER FORD',3),('THE WEAK BRIDGE',3),('VILLAGE CROSSROADS',3),('HILL 402',4),('BMP-3 COLUMN',4,1)]),
- ('CITY FIGHT',4,'DESERT',[('CITY OUTSKIRTS',2),('IED ALLEY',3),('MARKET STREET',3),('HIND OVER THE CITY',4,2),('HIGHWAY OVERPASS',4),('RUBBLE DISTRICT',4),('T-90M PLAZA',5,3)]),
+ ('CITY FIGHT',10,'DESERT',[('CITY OUTSKIRTS',2),('IED ALLEY',3),('MARKET STREET',3),('HIND OVER THE CITY',4,2),('HIGHWAY OVERPASS',4),('RUBBLE DISTRICT',4),('T-90M PLAZA',5,3)]),
  ('FROZEN FRONT',8,'WINTER',[('FROZEN STEPPE',3),('ICE RIVER FORD',3),('BIRCH FOREST',3),('AT DITCH LINE',4),('BLIZZARD RUN',4),('RAIL YARD',5),('ARMATA',5,4)])]
 class Lv:
     def __init__(s):s.g=[[] for _ in range(H)];s.h=9;s.ents=[]
@@ -256,7 +264,7 @@ class Lv:
     def ent(s,k,x,y=None):s.ents.append((EID[k],x*16+8,(s.h-1) if y is None else y))
 def build(wi,ci,name,diff,boss,urban,snow):
     r=random.Random(wi*100+ci*7+3);L=Lv();L.flat(8)
-    target=150+diff*14+ci*4;medals=0;checked=False
+    target=min(318,205+diff*20+ci*6)-(34 if boss is not None else 0);medals=0;checked=False
     kinds=['flat','step','ditch','ford','bridge','wall','mound','mines']
     if urban:kinds+=['wall','plateau','ied','ied']
     if wi==1 or snow:kinds+=['ford','bridge']
@@ -267,7 +275,7 @@ def build(wi,ci,name,diff,boss,urban,snow):
         elif k=='step':
             dh=r.choice((-1,1));L.h=max(6,min(10,L.h+dh));L.flat(r.randint(3,6))
         elif k=='ditch':
-            L.flat(2);w=r.randint(2,min(4,1+diff));[L.col(H) for _ in range(w)];L.flat(4)
+            L.flat(2);w=r.randint(2,min(3,1+diff));[L.col(H) for _ in range(w)];L.flat(4)
         elif k=='ford':
             L.flat(2);w=r.randint(4,8)
             for _ in range(w):L.col(L.h+1,'#');L.g[L.h][-1]='~'
@@ -290,7 +298,7 @@ def build(wi,ci,name,diff,boss,urban,snow):
         # enemies on the new stretch
         x1=L.W
         for x in range(x0+2,x1-1,3):
-            if r.random()<0.16+diff*0.05:
+            if r.random()<0.22+diff*0.05:
                 e=r.choice(pool);top=next(y for y in range(H) if L.g[y][x]!='.') if any(L.g[y][x]!='.' for y in range(H)) else H
                 if top>=H or L.g[top][x] in '-C~':continue
                 if e in('ORLAN','FPV'):L.ents.append((EID[e],x*16+8,max(1,top-4)))
@@ -299,9 +307,17 @@ def build(wi,ci,name,diff,boss,urban,snow):
         if r.random()<.10:L.ents.append((EID[r.choice(('TOWC','REP'))],(L.W-2)*16+8,L.h-1))
         if not checked and L.W>target//2:L.flat(3);L.ent('CHECK',L.W-2);checked=True
     while medals<3:L.flat(6);L.ents.append((EID['MEDAL'],(L.W-3)*16+8,L.h-4));medals+=1
+    need=10+diff*4-sum(1 for e in L.ents if e[0]<8);tries=0
+    while need>0 and tries<500:
+        tries+=1;x=r.randint(14,L.W-6)
+        col=[L.g[y][x] for y in range(H)]
+        if '#' not in col:continue
+        top=col.index('#') if col.index('#')==min(i for i,c in enumerate(col) if c!='.') else -1
+        if top<1 or any(abs(e[1]//16-x)<3 for e in L.ents):continue
+        L.ents.append((EID[r.choice(pool)],x*16+8,top-1));need-=1
     L.h=9;L.flat(4)
     if boss is not None:
-        L.ent('REP',L.W-2);L.ent('TOWC',L.W-1);bx=L.W;L.flat(22);L.ents.append((EID['BOSS'],bx*16,boss))
+        L.ent('REP',L.W-2);L.ent('TOWC',L.W-1);bx=L.W;L.flat(23);L.ents.append((EID['BOSS'],bx*16,boss));L.flat(4)
     else:L.flat(6)
     L.ent('GOAL',L.W-4);L.flat(8)
     assert L.W<=352,L.W
@@ -335,7 +351,7 @@ stats=[]
 for wi,(wn,th,cm,courses) in enumerate(WORLDS):
     for ci,c in enumerate(courses):
         name,diff=c[0],c[1];boss=c[2] if len(c)>2 else None
-        L,rle,ents=build(wi,ci,name,diff,boss,th==4,th==8)
+        L,rle,ents=build(wi,ci,name,diff,boss,th==10,th==8)
         o.append("static const u8 brt_%d_%d[%d]={%s};"%(wi,ci,len(rle),",".join(map(str,rle))))
         o.append("static const BrEnt bre_%d_%d[%d]={%s};"%(wi,ci,len(ents),",".join("{%d,%d,%d}"%e for e in ents)))
         cl.append('{"%s",%d,%d,%d,%d,brt_%d_%d,bre_%d_%d,%d}'%(name,th,diff,255 if boss is None else boss,L.W,wi,ci,wi,ci,len(ents)))

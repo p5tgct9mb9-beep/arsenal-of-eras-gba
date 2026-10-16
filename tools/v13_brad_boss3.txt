@@ -1,0 +1,391 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 4
+tap A
+wait 6
+hold A+R 4
+wait 30
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+
+tap UP
+wait 10
+shot v13_bradley_bsel
+tap A
+wait 60
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_10
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_20
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_30
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_40
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_50
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_60
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_70
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+hold RIGHT+A 40
+hold RIGHT+A+B 8
+tap R
+shot brb_80
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+shot brbb_5
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+shot brbb_10
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+shot brbb_15
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+shot brbb_20
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+shot brbb_25
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+hold RIGHT+A 26
+hold A+B 6
+tap R
+hold A 20
+hold A+B 6
+hold UP+A 14
+shot brbb_30
+wait 60
+shot v13_bradley_bend
+beat end
