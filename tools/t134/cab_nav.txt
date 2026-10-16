@@ -1,0 +1,27 @@
+#newmenu
+wait 100
+tap START
+wait 40
+tap RIGHT
+wait 30
+tap DOWN
+wait 30
+tap DOWN
+wait 30
+tap A
+wait 50
+shot arc_sub
+tap A
+wait 30
+shot arc_sub2
+beat
+tap A
+wait 60
+beat
+shot cab0
+wait 120
+shot cab0b
+tap RIGHT
+wait 90
+shot cab1
+beat

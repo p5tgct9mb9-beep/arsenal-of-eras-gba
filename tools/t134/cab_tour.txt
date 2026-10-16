@@ -1,0 +1,66 @@
+#newmenu
+wait 100
+tap START
+wait 40
+tap RIGHT
+wait 30
+tap DOWN
+wait 30
+tap DOWN
+wait 30
+tap A
+wait 30
+tap A
+wait 200
+shot cab_00
+beat
+tap RIGHT
+wait 200
+shot cab_01
+beat
+tap RIGHT
+wait 200
+shot cab_02
+beat
+tap RIGHT
+wait 200
+shot cab_03
+beat
+tap RIGHT
+wait 200
+shot cab_04
+beat
+tap RIGHT
+wait 200
+shot cab_05
+beat
+tap RIGHT
+wait 200
+shot cab_06
+beat
+tap RIGHT
+wait 200
+shot cab_07
+beat
+tap RIGHT
+wait 200
+shot cab_08
+beat
+tap RIGHT
+wait 200
+shot cab_09
+beat
+tap RIGHT
+wait 200
+shot cab_10
+beat
+tap RIGHT
+wait 200
+shot cab_11
+beat
+tap RIGHT
+wait 200
+tap B
+wait 40
+shot cab_exit
+beat

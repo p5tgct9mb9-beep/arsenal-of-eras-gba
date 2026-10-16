@@ -1,0 +1,39 @@
+#newmenu
+wait 100
+tap START
+wait 60
+tap B
+wait 60
+shot m_menu
+beat
+savedump /tmp/mig/after_boot.sav
+tap RIGHT
+wait 30
+tap DOWN
+wait 30
+tap DOWN
+wait 30
+tap A
+wait 50
+shot m_arcade
+tap DOWN
+wait 10
+tap A
+wait 60
+shot m_inv
+beat
+tap B
+wait 30
+tap UP
+wait 10
+tap A
+wait 40
+beat
+shot m_cab
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 41470008
+wait 1500
+beat
+shot m_cab_after
+savedump /tmp/mig/after_arcade.sav
+end
