@@ -34,13 +34,16 @@ WORLDS=[ # name, enemy faction label, boss summary (fictional scenarios, generic
  ("COLD WAR","NVA / VC / WARSAW PACT","AA SITE, T-55, MI-24 HIND"),
  ("WORLD WAR II","AXIS POWERS","TIGER, TRAIN, BUNKER, ME 262"),
  ("SPACE ALIENS","ALIEN HIVE","BROOD QUEEN, MOTHERSHIP CORE"),
+ ("WESTERN FRONT 1917","CENTRAL POWERS (WW1)","IRON TANK (A7V)"),
+ ("COLONIAL WAR 1776","CROWN REDCOATS","SHIP OF THE LINE"),
+ ("CASTLE SIEGE","BLACK KNIGHTS","TREBUCHET, SIEGE TOWER"),
 ]
 # stage: name, theme, enemy set, enemy palette, boss ai, boss sprite A, boss sprite B, boss palette, flags
 # flags: c=paradrop start j=jetpack chasms b=boat w=water heavy d=dark (NVG helps) t=tunnel ceiling l=low gravity z=zero-g s=spikes v=vaults
 exec(open(os.path.join(ROOT,'tools','gen_courses.py')).read())
 NSTAGE=[len(s) for s in ST]
 # themes: name, style, top palette (15), backdrop palette (15)
-STY=['forest','arctic','canyon','jungle','city','mountain','desert','jungle','arctic','forest','ruins','pacific','space','mars','ship']
+STY=['forest','arctic','canyon','jungle','city','mountain','desert','jungle','arctic','forest','ruins','pacific','space','mars','ship','ruins','forest','mountain']
 TP=[
  [(30,22,36),(52,128,56),(92,176,72),(152,216,96),(112,72,40),(150,100,56),(190,140,88),(150,64,48),(196,96,64),(236,150,104),(132,84,44),(208,152,84),(110,116,128),(170,176,188),(255,214,72)],
  [(26,30,52),(150,176,216),(212,228,248),(250,252,255),(64,96,152),(92,132,192),(136,176,224),(96,140,196),(150,190,232),(210,236,255),(104,96,120),(160,156,176),(96,104,128),(176,184,204),(255,210,80)],
@@ -75,6 +78,11 @@ BP=[
  [(150,80,70),(170,96,80),(190,112,90),(206,130,104),(222,150,120),(150,70,60),(126,56,50),(104,44,42),(120,50,90),(100,40,76),(84,32,64),(70,26,54),(56,20,44),(44,16,34),(255,240,200)],
  [(4,6,16),(8,10,24),(12,16,34),(18,22,44),(24,30,56),(60,70,100),(46,54,80),(34,40,62),(50,60,90),(40,48,74),(80,255,200),(255,120,80),(30,36,56),(22,26,42),(255,255,255)],
 ]
+# v1.3 themes 15-17: WW1 mud trenches (ruins), colonial autumn forest, medieval castle stone (mountain)
+def _tint(pal,m):return [tuple(max(0,min(255,int(c*k))) for c,k in zip(col,m)) for col in pal]
+TP.append(_tint(TP[10],(0.92,0.86,0.72)));BP.append(_tint(BP[10],(0.96,0.94,0.86)))
+TP.append([(30,20,18),(150,84,40),(196,120,52),(232,170,80)]+TP[0][4:]);BP.append(_tint(BP[0],(1.04,0.98,0.86)))
+TP.append(_tint(TP[5],(0.86,0.86,0.9)));BP.append(_tint(BP[5],(0.92,0.92,1.0)))
 NTH=len(TP)
 MISC=[(0,0,0),(28,24,40),(40,104,200),(70,150,226),(150,210,248),(240,252,255),(132,92,52),(190,140,84),(80,80,92),(150,150,164),(220,220,232),(230,60,60),(250,200,60),(70,70,84),(120,200,120),(255,255,255)]
 def rgb(c):return rgb15(c)
@@ -328,17 +336,17 @@ U=[
  ("4TH RANGER REGT","UKRAINE","4TH RGR","boonie",(84, 96, 62),((58, 72, 44), (96, 112, 70), (140, 140, 96)),0,((60,120,220),(250,210,40)),(232, 190, 150)),
  ("7TH SOF REGT","UKRAINE","7TH SOF","helmetnvg",(64, 70, 56),((50, 58, 44), (84, 92, 70), (120, 118, 92)),3,((60,120,220),(250,210,40)),(226, 184, 142)),
  ("8TH SEPARATE SOF REGT","UKRAINE","8TH SOF","boonie",(96, 100, 70),((80, 86, 58), (122, 124, 86), (164, 156, 112)),4,((60,120,220),(250,210,40)),(236, 196, 154)),
- ("140TH SOC","UKRAINE","140 SOC","helmet",(70, 80, 60),((62, 74, 52), (110, 116, 84), (150, 140, 100)),0,((60,120,220),(250,210,40)),(240, 200, 160)),
+ ("140TH SOC","UKRAINE","140 SOC","beret",(58, 76, 52),((62, 74, 52), (110, 116, 84), (150, 140, 100)),0,((60,120,220),(250,210,40)),(240, 200, 160)),
  ("144TH SOC","UKRAINE","144 SOC","balaclava",(40, 44, 40),((44, 52, 40), (74, 84, 62), (110, 112, 86)),3,((60,120,220),(250,210,40)),(230, 188, 146)),
  ("73RD NAVAL SOC","UKRAINE","73 NAVAL","cap",(40, 48, 62),((40, 50, 64), (66, 78, 96), (104, 114, 130)),3,((60,120,220),(250,210,40)),(222, 178, 136)),
  ("OMEGA SF UNIT","UKRAINE","OMEGA","helmetnvg",(40, 40, 44),((34, 36, 40), (58, 60, 66), (90, 92, 98)),1,((60,120,220),(250,210,40)),(236, 194, 152)),
  ("HUR SPEC OPS","UKRAINE","HUR","balaclava",(36, 36, 40),((96, 88, 64), (136, 126, 92), (170, 160, 120)),3,((60,120,220),(250,210,40)),(226, 186, 144)),
- ("1ST PRES. BDE BUREVIY","UKRAINE","BUREVIY","helmet",(70, 84, 62),((54, 70, 48), (92, 108, 70), (132, 132, 92)),0,((60,120,220),(250,210,40)),(240, 198, 156)),
- ("8TH ARTY BDE HARMASH","UKRAINE","HARMASH","helmet",(90, 96, 70),((72, 80, 56), (112, 118, 84), (150, 146, 106)),5,((60,120,220),(250,210,40)),(220, 176, 134)),
- ("12TH SF BDE AZOV","UKRAINE","AZOV","helmet",(56, 60, 52),((46, 52, 40), (78, 86, 64), (116, 116, 90)),2,((60,120,220),(250,210,40)),(240, 200, 160)),
+ ("1ST PRES. BDE BUREVIY","UKRAINE","BUREVIY","cap",(70, 84, 62),((54, 70, 48), (92, 108, 70), (132, 132, 92)),0,((60,120,220),(250,210,40)),(240, 198, 156)),
+ ("8TH ARTY BDE HARMASH","UKRAINE","HARMASH","helmet",(176, 160, 112),((72, 80, 56), (112, 118, 84), (150, 146, 106)),5,((60,120,220),(250,210,40)),(220, 176, 134)),
+ ("12TH SF BDE AZOV","UKRAINE","AZOV","helmetnvg",(46, 50, 44),((46, 52, 40), (78, 86, 64), (116, 116, 90)),2,((60,120,220),(250,210,40)),(240, 200, 160)),
  ("14TH BDE CHERVONA KALYNA","UKRAINE","KALYNA","helmet",(80, 92, 60),((66, 82, 50), (100, 118, 72), (146, 90, 80)),0,((60,120,220),(250,210,40)),(232, 190, 148)),
- ("15TH BDE KARA DAG","UKRAINE","KARA DAG","helmet",(100, 96, 70),((86, 84, 60), (128, 122, 88), (170, 158, 116)),6,((60,120,220),(250,210,40)),(226, 182, 140)),
- ("20TH BDE LUBART","UKRAINE","LUBART","helmet",(76, 88, 58),((60, 74, 46), (98, 112, 68), (136, 130, 90)),5,((60,120,220),(250,210,40)),(236, 194, 150)),
+ ("15TH BDE KARA DAG","UKRAINE","KARA DAG","softcap",(150, 136, 96),((86, 84, 60), (128, 122, 88), (170, 158, 116)),6,((60,120,220),(250,210,40)),(226, 182, 140)),
+ ("20TH BDE LUBART","UKRAINE","LUBART","scarf",(150, 140, 110),((60, 74, 46), (98, 112, 68), (136, 130, 90)),5,((60,120,220),(250,210,40)),(236, 194, 150)),
  ("41ST UNMANNED SYS PILUM","UKRAINE","PILUM","cap",(60, 66, 56),((56, 64, 50), (90, 98, 78), (126, 128, 104)),1,((60,120,220),(250,210,40)),(230, 190, 150)),
  ("52ND INTL ASSAULT FORGE","UKRAINE","FORGE","helmetnvg",(70, 74, 60),((70, 70, 56), (108, 106, 82), (146, 140, 108)),5,((60,120,220),(250,210,40)),(214, 166, 124)),
 ]
@@ -487,7 +495,10 @@ ESETS=[("SYNDICATE",enemy_set('enemyhelmet',(0,2,6,4),'technical','btr')),
        ("KPA",enemy_set('softcap',(5,2,6,8),'jeep','tank')),
        ("CSTO",enemy_set('helmet',(0,2,6,4),'jeep','btr')),
        ("RUSSIA",enemy_set('enemyhelmet',(5,2,6,4),'jeep','btr')),
-       ("PLA",enemy_set('helmet',(0,2,6,4),'jeep','tank'))]
+       ("PLA",enemy_set('helmet',(0,2,6,4),'jeep','tank')),
+       ("CENTRAL POWERS",enemy_set('stahl',(7,2,7,7),'jeep','halftrack')),
+       ("REDCOATS",enemy_set('tricorn',(9,9,9,9),'jeep','jeep')),
+       ("BLACK KNIGHTS",enemy_set('greathelm',(10,11,10,10),'jeep','jeep'))]
 for i,(n,t) in enumerate(ESETS):emit("pf_eset_%d"%i,t,"unsigned int")
 EP=[
  ((220,170,130),(56,58,62),(88,90,96),(120,122,128),(60,64,56),(96,100,88),(40,36,34),(36,36,40),(200,40,40),(240,200,60),(70,70,80)),
@@ -510,6 +521,9 @@ EP=[
  ((220,176,140),(80,96,72),(116,130,98),(150,156,128),(88,100,80),(120,132,108),(70,66,56),(40,40,44),(96,104,90),(150,150,140),(40,40,44)),  # 17 CSTO: mountain flora
  ((226,184,148),(196,200,208),(230,232,238),(150,156,168),(200,204,212),(236,238,244),(90,94,104),(40,40,44),(170,176,186),(90,120,160),(40,40,44)), # 18 Russian winter white
  ((220,176,136),(56,80,110),(84,112,140),(124,150,170),(60,84,110),(96,120,146),(50,56,66),(40,40,44),(70,96,120),(200,60,50),(40,40,44)),   # 19 PLA marine digital blue
+ ((222,180,144),(92,98,90),(120,126,116),(150,154,140),(96,102,96),(130,136,128),(110,90,60),(40,40,44),(96,98,92),(150,140,110),(60,54,46)),   # 20 WW1 field grey + leather
+ ((226,184,148),(150,28,30),(196,46,40),(232,222,200),(30,28,32),(64,58,58),(232,222,200),(80,60,40),(150,28,30),(220,190,80),(40,40,44)),   # 21 redcoat + white belts, black tricorn
+ ((220,176,140),(58,60,68),(96,100,112),(146,150,162),(104,108,120),(164,168,180),(90,60,40),(120,90,60),(70,72,80),(200,170,60),(40,40,44)),  # 22 black knights steel
 ]
 ep=[]
 for e in EP:
@@ -590,6 +604,25 @@ def boss(kind,f):
         R(g,16,13,46,20,5);E(g,6,11,22,21,5);E(g,8,11,14,15,14);E(g,14,10,20,14,14);R(g,46,15,63,17,4);R(g,58,9,61,17,4)
         R(g,22,20,42,21,6);R(g,20,22,26,25,10);R(g,36,22,42,25,10);R(g,0,17,6,18,10)
         L(g,4 if f else 10,8,60 if f else 54,8,10);R(g,30,8,33,12,9);L(g,57,5+(4 if f else 0),62,13-(4 if f else 0),10)
+    elif kind=='a7v':   # WW1 box tank: tall slab hull, front gun, side MG ports, short track skirt
+        R(g,4,6,59,26,5);R(g,6,4,57,8,6);R(g,24,0,40,6,5);R(g,28,1,36,3,14);R(g,0,12,6,15,10)
+        for x in range(10,56,10):R(g,x,14,x+3,16,1);P(g,x+1,15,10)
+        R(g,4,24,59,28,4);[(E(g,6+i*8,26,12+i*8,31,1),P(g,9+i*8,28+(f+i)%2,11)) for i in range(7)]
+    elif kind=='frigate':   # 18th-c. ship of the line: hull, gunports, 2 masts, sails
+        for x in range(64):
+            top=16 if 6<x<58 else 16+abs(32-x)//8
+            for y in range(top,28):P(g,x,y,4 if y>22 else 5)
+        for x in range(8,58,7):R(g,x,18,x+2,20,1);(P(g,x-1,19,13) if f and x%14==8 else None)
+        R(g,50,10,60,16,5);R(g,18,0,19,16,10);R(g,40,0,41,16,10);R(g,12,2,26,12,15 if f else 14);R(g,34,2,48,12,14 if f else 15)
+        for x in range(0,64,4):P(g,x+(2 if f else 0),29,14);P(g,x+1,30,14)
+    elif kind=='trebuchet':
+        R(g,24,24,63,30,4);[(E(g,26+i*12,26,32+i*12,31,1)) for i in range(3)]
+        L(g,30,24,42,6,5);L(g,54,24,42,6,5);L(g,31,24,43,6,5);E(g,38,2,46,10,6)
+        a=8 if f else 0;L(g,42,6,4+a,0+a,10);L(g,42,7,5+a,1+a,10);R(g,44,10,52,18,9);E(g,2+a,0+a,8+a,6+a,9)
+    elif kind=='siege':   # wooden siege tower on wheels with a drop bridge
+        R(g,16,0,52,28,5);[L(g,16,y,52,y,4) for y in range(4,28,6)];[L(g,x,0,x,28,4) for x in (24,34,44)]
+        R(g,20,2,26,6,1);R(g,40,2,46,6,1);R(g,0,2+(0 if f else 2),16,4+(0 if f else 2),6);R(g,52,4,58,24,6)
+        for cx in (20,34,48):E(g,cx-5,24,cx+5,31,1);E(g,cx-3,26,cx+3,30,10);P(g,cx,27+f,11)
     elif kind=='mother':
         E(g,2,2,62,30,4);E(g,10,6,54,26,5);E(g,22,10,42,22,13 if f else 15);E(g,28,13,36,19,14)
         for i in range(8):x=6+i*7;P(g,x,16,13 if (i+f)%2 else 15)
@@ -606,7 +639,7 @@ def cmdr(f):
     E(g,9,1,23,14,15);R(g,15,5,22,7,2);P(g,19,6,1);P(g,21,6,1);E(g,9,0,21,5,7)
     R(g,14,18,31,20,10);R(g,20,21,26,24,10);R(g,26,17,31,17,11);P(g,31,19+a//2,12)
     return g
-BKINDS=['tank','heli','loco','car','boat','walker','fort','mi8','cmdr','t55','hind','aagun','tiger','bunker','zero','me262','brood','mother','armtruck','technical','kpatank','t90','type99','z10']
+BKINDS=['tank','heli','loco','car','boat','walker','fort','mi8','cmdr','t55','hind','aagun','tiger','bunker','zero','me262','brood','mother','armtruck','technical','kpatank','t90','type99','z10','a7v','frigate','trebuchet','siege']
 for k in BKINDS:
     t=[]
     for f in (0,1):t+=to_tiles(cmdr(f),32,32) if k=='cmdr' else to_tiles(boss(k,f),64,32)
@@ -616,7 +649,8 @@ BPAL=[((60,68,52),(96,104,80),(136,142,110)),((70,74,84),(110,116,128),(156,162,
       ((70,84,50),(100,116,70),(136,150,96)),((150,156,160),(190,194,200),(224,228,232)),((84,90,80),(120,126,112),(160,164,150)),((110,100,70),(150,140,104),(190,180,140)),
       ((60,30,80),(110,60,140),(170,110,200)),
       ((36,36,40),(70,70,78),(110,110,120)),((150,124,84),(190,166,120),(224,206,166)),((76,84,52),(106,112,74),(140,144,100)),
-      ((80,92,72),(112,124,100),(150,160,136)),((150,156,164),(196,200,208),(232,234,240)),((70,84,96),(104,118,130),(146,160,170))]
+      ((80,92,72),(112,124,100),(150,160,136)),((150,156,164),(196,200,208),(232,234,240)),((70,84,96),(104,118,130),(146,160,170)),
+      ((84,90,80),(116,122,108),(150,156,140)),((90,58,34),(136,92,56),(184,140,90)),((96,70,44),(140,104,66),(186,150,100))]
 bp=[]
 for d,m,l in BPAL:bp+=pal16([(0,0,0),(28,20,36),(210,160,120),(170,130,96),d,m,l,(60,64,60),(96,100,92),(50,48,46),(40,40,48),(110,110,124),(240,70,50),(255,200,80),(150,210,250),(26,26,30)])
 emit("pf_boss_pal",bp)
@@ -666,10 +700,10 @@ from PIL import Image,ImageDraw
 NODES=[]
 def img_emit(name,im):
     px=[rgb15(im.getpixel((x,y))) for y in range(160) for x in range(240)];emit(name,px)
-WTH=[ST[w][0][1] for w in range(10)]
-for w in range(10):
+WTH=[ST[w][0][1] for w in range(len(ST))]
+for w in range(len(ST)):
     th=WTH[w];im=Image.new('RGB',(240,160));d=ImageDraw.Draw(im)
-    sea=[(60,150,220),(120,170,230),(90,190,220),(40,150,190),(30,26,70),(100,150,210),(200,150,90),(70,150,170),(80,120,60),(8,8,24)][w]
+    sea=[(60,150,220),(120,170,230),(90,190,220),(40,150,190),(30,26,70),(100,150,210),(200,150,90),(70,150,170),(80,120,60),(8,8,24),(110,100,84),(70,130,190),(80,120,90)][w]
     for y in range(160):
         for x in range(240):
             c=sea
@@ -719,8 +753,8 @@ for w in range(10):
 im=Image.new('RGB',(240,160));d=ImageDraw.Draw(im)
 for y in range(160):
     for x in range(240):im.putpixel((x,y),(50,120,200) if (x//6+y//6)%2 else (56,128,206))
-WPOS=[(30,52),(76,40),(122,50),(168,40),(212,54),(212,104),(168,118),(122,106),(76,118),(30,104)]
-for i in range(9):d.line([WPOS[i],WPOS[i+1]],fill=(250,236,180),width=1)
+WPOS=[(30,52),(76,40),(122,50),(168,40),(212,54),(212,104),(168,118),(122,106),(76,118),(30,104),(64,80),(120,78),(176,80)]
+for i in range(len(WPOS)-1):d.line([WPOS[i],WPOS[i+1]],fill=(250,236,180),width=1)
 for w,(x,y) in enumerate(WPOS):
     th=WTH[w];c=TP[th][2];e=TP[th][0]
     if w==9:d.ellipse([x-17,y-13,x+17,y+13],fill=(14,14,32),outline=(28,20,36));[d.point((x+int(10*math.cos(k)),y+int(7*math.sin(k*2))),fill=(255,255,255)) for k in range(8)]
@@ -730,7 +764,7 @@ img_emit("pf_globe",im);im.resize((720,480),Image.NEAREST).save(os.path.join(ROO
 # ---------------------------------------------------------------- C tables
 AIS=['','tank','heli','train','boat','walker','fort','convoy','mi8','fortfly','mother']
 o=["// generated by tools/gen_platform.py"]
-o.append("#define PF_NU %d"%len(U));o.append("#define PF_NW 10");o.append("#define PF_MS 10");o.append("#define PF_NTH %d"%NTH)
+o.append("#define PF_NU %d"%len(U));o.append("#define PF_NW %d"%len(ST));o.append("#define PF_MS 10");o.append("#define PF_NTH %d"%NTH)
 o.append("static const char*const PF_UN[PF_NU]={"+",".join('"%s"'%u[0] for u in U)+"};")
 o.append("static const char*const PF_UC[PF_NU]={"+",".join('"%s"'%u[1] for u in U)+"};")
 o.append("static const char*const PF_US[PF_NU]={"+",".join('"%s"'%u[2] for u in U)+"};")
@@ -745,7 +779,7 @@ o.append("static const u32*const PF_BK[%d]={%s};"%(len(BKINDS),",".join("pf_bk_"
 o.append("typedef struct{const char*n;u8 th,es,ep,ai,ba,bb,bp;u16 fl;u8 stars;}PfStage;")
 FL="cjbwdtlzsvinraxk"
 rows=[]
-for w in range(10):
+for w in range(len(ST)):
     r=[]
     for s in ST[w]+[("",0,0,0,"","","",0,"")]*(10-len(ST[w])):
         n,th,es,ep,ai,ba,bb,bpl,fl=s
@@ -762,7 +796,7 @@ o.append("static const u32*const PF_BDT[PF_NTH]={"+",".join("pf_bdt_%d"%i for i 
 o.append("static const u16 PF_BDN[PF_NTH]={"+",".join("PF_BDN_%d"%i for i in range(NTH))+"};")
 o.append("static const u16*const PF_BDM[PF_NTH]={"+",".join("pf_bdm_%d"%i for i in range(NTH))+"};")
 o.append("static const u8 PF_THSTY[PF_NTH]={"+",".join(str(['forest','arctic','canyon','jungle','city','mountain','desert','pacific','ruins','space','mars','ship'].index(s)) for s in STY)+"};")
-o.append("static const u16*const PF_WMAP[PF_NW]={"+",".join("pf_wmap_%d"%i for i in range(10))+"};")
+o.append("static const u16*const PF_WMAP[PF_NW]={"+",".join("pf_wmap_%d"%i for i in range(len(ST)))+"};")
 o.append("static const u32*const PF_ESET[%d]={"%len(ESETS)+",".join("pf_eset_%d"%i for i in range(len(ESETS)))+"};")
 o.append("static const char*const PF_ESN[%d]={"%len(ESETS)+",".join('"%s"'%n for n,t in ESETS)+"};")
 open(os.path.join(ROOT,'src','platdb.inc'),'w').write("\n".join(o)+"\n")

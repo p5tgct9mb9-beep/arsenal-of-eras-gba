@@ -122,9 +122,11 @@ static int fLastHurt EWRAM;
 static void f_hurt(int d){FP.hp-=d;FP.hurt=10;fLastHurt=FP.t;sfx_hurt();}
 static void f_bot_spawn(FBot*b){for(int tries=0;tries<200;tries++){int x=1+rr(22),y=1+rr(22);if(!f_pass(x,y))continue;s32 wx=(x<<8)+128,wy=(y<<8)+128;if(idist(wx-FP.x,wy-FP.y)<8*256)continue;if(f_los(wx,wy,FP.x,FP.y))continue;b->x=wx;b->y=wy;b->hp=100;b->alive=1;b->alert=0;b->deadT=0;b->cd=90;return;}}
 static int f_alive(void);
+static u32 fV0 EWRAM; // holdout clock: real seconds from the vblank counter (game loop runs ~17 fps)
+#define FSEC() ((int)((vblN-fV0)/60))
 static void f_bots(void){const FMis*M=&FMI[FP.mi];
  for(int i=0;i<nFB;i++){FBot*b=&FB[i];if(b->shoot)b->shoot--;
-  if(!b->alive){if(M->dm){if(++b->deadT>(M->surv?420:300)&&(!M->surv||f_alive()<3+FP.t/2700))f_bot_spawn(b);}continue;} // holdout: waves grow every 45 s
+  if(!b->alive){if(M->dm){if(++b->deadT>(M->surv?420:300)&&(!M->surv||f_alive()<3+FSEC()/45))f_bot_spawn(b);}continue;} // holdout: waves grow every 45 s
   int dx=FP.x-b->x,dy=FP.y-b->y;int dd=idist(dx,dy);int los=dd<14*256&&FP.hp>0&&f_los(b->x,b->y,FP.x,FP.y);
   if(los){if(!b->alert){b->alert=1;b->cd=50+rr(40);}b->lkx=FP.x;b->lky=FP.y;b->seen=1;}
   int sp=b->alert?11:5;int mvx=0,mvy=0;
@@ -159,11 +161,11 @@ static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=136-(FP.cd>FWP[
   f_rect(bx+hw-6,by-18,12,10,S);f_rect(bx+hw-4,by-8,14,8,G);}
  if(FP.flash>0){int fy=by-(w==0?36:(w==4?54:w==2?52:50));f_rect(bx-7,fy-6,14,8,8);f_rect(bx-4,fy-10,8,6,2);f_rect(bx-10,fy-3,20,3,11);}}
 static u32*FHS EWRAM;
-static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)+(u32)(FMI[FP.mi].surv?FP.t/60:0)*0x9E3779B1u|((u32)FP.mag[FP.wep]<<8)|((u32)FP.res[FP.wep]<<16)|((u32)FP.wep<<26)|((u32)(FP.reload>0)<<29);sig^=(u32)(FP.kills*7919+f_alive()*104729+FP.intel*31+FP.fpsv*1299709+FP.deaths*15485863);int pg=fbk==(u16*)0x06000000?0:1;
+static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)+(u32)(FMI[FP.mi].surv?FSEC():0)*0x9E3779B1u|((u32)FP.mag[FP.wep]<<8)|((u32)FP.res[FP.wep]<<16)|((u32)FP.wep<<26)|((u32)(FP.reload>0)<<29);sig^=(u32)(FP.kills*7919+f_alive()*104729+FP.intel*31+FP.fpsv*1299709+FP.deaths*15485863);int pg=fbk==(u16*)0x06000000?0:1;
  if(FHS[pg]!=sig){FHS[pg]=sig;f_rect(0,136,240,24,5);f_rect(0,136,240,1,6);char b[48],*o;
  o=sp_put(b,"HP ");sp_int(o,FP.hp<0?0:FP.hp);f_text(2,139,b,FP.hp<30?3:4);f_rect(2,149,50,4,9);f_rect(2,149,(FP.hp<0?0:FP.hp)/2,4,FP.hp<30?3:4);
  f_text(60,139,FWP[FP.wep].n,1);o=sp_int(b,FP.mag[FP.wep]);o=sp_put(o,"/");sp_int(o,FP.res[FP.wep]);f_text(60,149,FP.reload?"RELOADING":b,FP.reload?2:7);
- if(M->surv){int r=180-FP.t/60;o=sp_put(b,"HOLD ");o=sp_int(o,r<0?0:r);o=sp_put(o,"S K");sp_int(o,FP.kills);}else if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"HOSTILES ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INTEL");}f_text(150,139,b,2);
+ if(M->surv){int r=180-FSEC();o=sp_put(b,"HOLD ");o=sp_int(o,r<0?0:r);o=sp_put(o,"S K");sp_int(o,FP.kills);}else if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"HOSTILES ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INTEL");}f_text(150,139,b,2);
  o=sp_int(b,FP.fpsv);sp_put(o," FPS");f_text(196,149,b,7);}
  int cx=120,cy=FVH/2;f_rect(cx-6,cy,4,1,4);f_rect(cx+3,cy,4,1,4);f_rect(cx,cy-6,1,4,4);f_rect(cx,cy+3,1,4,4);
  if(FP.hurt>0){f_rect(0,0,240,3,3);f_rect(0,133,240,3,3);f_rect(0,0,3,136,3);f_rect(237,0,3,136,3);}
@@ -200,7 +202,7 @@ static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_i
  for(int y=0;y<FVH;y++){int c=y<FVH/2?96+y*16/(FVH/2):112+(y-FVH/2)*16/(FVH/2+1);if(c>127)c=127;if(y<FVH/2&&c>111)c=111;u16 v=c|(c<<8);if(y<FVH/2)FCEIL[y]=v;else FFLR[y]=v;}
  for(int y=0;y<FVH;y++){if(y<FVH/2)FFLR[y]=FCEIL[y];else FCEIL[y]=FFLR[y];}
  vsync();REG_DISPCNT=4|(1<<10);fbk=(u16*)0x0600A000;F.msgT=0;f_msg(M->l1);bgm_t(TR_MODERN);
- FP.v0=vblN;int res=0,endT=0;int prevA=0;
+ FP.v0=vblN;fV0=vblN;int res=0,endT=0;int prevA=0;
  for(;;FP.t++){u16 ky=keys,pr=pressed;pressed=0;if(au)f_auto(&ky,&pr);
   if(!au&&(pr&K_START)){res=2;break;}
   // player
@@ -215,7 +217,7 @@ static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_i
    prevA=ky&K_A;f_pickups();if(FP.hp<100&&FP.t-fLastHurt>240&&(FP.t%30)==0)FP.hp++;}
   if(FP.t%20==0)f_bfs();
   f_bots();
-  if(!res){if(M->surv&&FP.t>=60*180&&FP.hp>0){res=1;endT=FP.t;f_msg("EXFIL HELO INBOUND - YOU HELD!");}if(M->surv&&FP.hp<=0){res=3;endT=FP.t;}
+  if(!res){if(M->surv&&FSEC()>=180&&FP.hp>0){res=1;endT=FP.t;f_msg("EXFIL HELO INBOUND - YOU HELD!");}if(M->surv&&FP.hp<=0){res=3;endT=FP.t;}
    if(M->surv){}else if(M->dm){if(FP.kills>=15){res=1;endT=FP.t;}if(FP.hp<=0){if(!FP.respawn){FP.deaths++;FP.respawn=120;f_msg("KILLED - RESPAWNING");}else if(--FP.respawn==0){const char(*m)[25]=FMAPS[M->map];for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){FP.x=(x<<8)+128;FP.y=(y<<8)+128;}FP.hp=100;f_bfs();}}if(FP.deaths>=15){res=3;endT=FP.t;}}
    else{if(FP.hp<=0){res=3;endT=FP.t;f_msg("YOU ARE DOWN - MISSION FAILED");}else if(M->exfil){if(FP.intel){const char(*m)[25]=FMAPS[M->map];int px=0,py=0;for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){px=x;py=y;}if((FP.x>>8)==px&&(FP.y>>8)==py){res=1;endT=FP.t;f_msg("HOSTAGE EXFILTRATED");}}}
     else if(!f_alive()&&FP.intel){res=1;endT=FP.t;f_msg("AREA SECURE - INTEL IN HAND");}else if(!f_alive()&&!FP.intel&&F.msgT==0)f_msg("ALL CLEAR - GRAB THE INTEL (X)");}}

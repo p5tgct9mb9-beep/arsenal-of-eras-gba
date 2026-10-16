@@ -20,11 +20,14 @@ static inline int pflag(int px,int py){return TFL[ptile(px>>4,py>>4)];}
 typedef struct{u8 cs[PF_NW][PF_MS];u8 unit,lastW,lastS,demo;u16 tags;u8 allun,pad;}PSave;
 static PSave PS;
 #define PS_OFF 0x500
-static void ps_write(void){const u8*b=(const u8*)&PS;u8 sum=0x5A;SRAM[PS_OFF]='A';SRAM[PS_OFF+1]='O';SRAM[PS_OFF+2]='E';SRAM[PS_OFF+3]='P';SRAM[PS_OFF+4]=1;
+static void ps_write(void){const u8*b=(const u8*)&PS;u8 sum=0x5A;SRAM[PS_OFF]='A';SRAM[PS_OFF+1]='O';SRAM[PS_OFF+2]='E';SRAM[PS_OFF+3]='P';SRAM[PS_OFF+4]=2;
  for(unsigned i=0;i<sizeof PS;i++){SRAM[PS_OFF+5+i]=b[i];sum+=b[i]*(i+3);}SRAM[PS_OFF+5+sizeof PS]=sum;}
-static void ps_read(void){memset(&PS,0,sizeof PS);if(SRAM[PS_OFF]!='A'||SRAM[PS_OFF+1]!='O'||SRAM[PS_OFF+2]!='E'||SRAM[PS_OFF+3]!='P'||SRAM[PS_OFF+4]!=1)return;
- u8 b[sizeof(PSave)];u8 sum=0x5A;for(unsigned i=0;i<sizeof PS;i++){b[i]=SRAM[PS_OFF+5+i];sum+=b[i]*(i+3);}if(sum!=SRAM[PS_OFF+5+sizeof PS])return;memcpy(&PS,b,sizeof PS);
- if(PS.unit>=PF_NU)PS.unit=0;if(PS.lastW>=PF_NW)PS.lastW=0;if(PS.lastS>=PF_NS[PS.lastW])PS.lastS=0;}
+// v1.3: save version 2 = 13 worlds; version 1 (10 worlds, cs[10][10] then unit..pad) is migrated in place
+static void ps_read(void){memset(&PS,0,sizeof PS);if(SRAM[PS_OFF]!='A'||SRAM[PS_OFF+1]!='O'||SRAM[PS_OFF+2]!='E'||SRAM[PS_OFF+3]!='P')return;int ver=SRAM[PS_OFF+4];
+ unsigned sz=ver==1?100+(sizeof PS-PF_NW*PF_MS):ver==2?sizeof PS:0;if(!sz)return;
+ u8 b[sizeof(PSave)];u8 sum=0x5A;for(unsigned i=0;i<sz;i++){b[i]=SRAM[PS_OFF+5+i];sum+=b[i]*(i+3);}if(sum!=SRAM[PS_OFF+5+sz])return;
+ if(ver==2)memcpy(&PS,b,sizeof PS);else{memcpy(PS.cs,b,100);memcpy((u8*)&PS+PF_NW*PF_MS,b+100,sizeof PS-PF_NW*PF_MS);}
+ if(PS.unit>=PF_NU)PS.unit=0;if(PS.lastW>=PF_NW)PS.lastW=0;if(PS.lastS>=PF_NS[PS.lastW])PS.lastS=0;if(ver==1)ps_write();}
 static int cs_clear(int w,int s){return PS.cs[w][s]&1;}
 static int cs_intel(int w,int s){int v=PS.cs[w][s]>>1&7;return (v&1)+(v>>1&1)+(v>>2&1);}
 static int is_bonus(int w,int s){return (PF_ST[w][s].fl&SF_K)!=0;}
@@ -52,7 +55,7 @@ static const char*const AB_D[PF_NU]={"PARADROP START. HOLD A TO GLIDE","JUMPS HI
  "MARKSMAN RIFLE. R: HEAVY SHOT","R: FLASHBANG STUNS + BREACHES","WALL JUMP. FAST SWIM, NO AIR","CARBINE. R: NVG SHOWS HIDDEN","DOUBLE JUMP. R: BLADE STRIKE",
  "PRECISION RIFLE. R: SLOW TIME","+3 GRENADES. R: 3-GRENADE FAN","FAST SWIM, NO AIR. R: DASH","FAST-ROPE IN. R: BREACH CHARGE","FAST SWIM, NO AIR. R: LIMPET MINE","PARADROP. R: CHUTE / DEMO CHARGE","LMG. R: PLANT HEAVY MG (2X FIRE)","TAVOR X95. R: STEALTH, 2X DMG","SWIM/NO AIR. R: DPV DASH / LIMPET","PARADROP, +3 LIVES. R: CHUTE/HEAL","PISTOL. R: DISGUISE. PICKS LOCKS","LONG RIFLE. R: 3-BALL VOLLEY","MUSKET. R: BAYONET CHARGE","SWORD. R: SHIELD UP / CHARGE","LONGBOW. R: ARROW RAIN AHEAD","KATANA. R: DASH, PARRIES SHOTS","SHURIKEN. 2X JUMP. R: SMOKE",
  "R: SPRINT. CLIMBS 2X FASTER","SUPPRESSED. R: STEALTH, SWIMS","MARKSMAN RIFLE. R: HEAVY SHOT","PARADROP START. HOLD A TO GLIDE","SUPPRESSED. R: STEALTH, 2X DMG","FAST SWIM, NO AIR. R: LIMPET MINE","SMG. R: FLASHBANG BREACH","SUPPRESSED. R: GRAPPLE, HACKS","MEDKITS +2. R: HEAL. 1 REVIVE","R: 5-ROUND ARTILLERY BARRAGE","LMG. R: PLANT HEAVY MG (2X FIRE)","+3 GRENADES. R: 3-GRENADE FAN","LAUNCHER. R: ANTI-TANK ROCKET","PARADROP. R: CHUTE / DEMO CHARGE","SMG. R: FPV DRONE HOMES ON TARGET","FAST-ROPE IN. R: BREACH CHARGE"};
-static const char*const WPN_N[14]={"CARBINE","SMG","LMG","SUPPRESSED","MARKSMAN","CARBINE","CARBINE","CARBINE","SUPPR. PISTOL","FLINTLOCK MUSKET","LONGBOW","LONGSWORD","KATANA","SHURIKEN"};
+static const char*const WPN_N[14]={"CARBINE","SMG","LMG","SUPPRESSED","MARKSMAN","ASSAULT RIFLE","CARBINE","CARBINE","SUPPR. PISTOL","FLINTLOCK MUSKET","LONGBOW","LONGSWORD","KATANA","SHURIKEN"};
 static const u8 WPN_RATE[14]={10,6,5,9,24,10,10,10,13,42,22,16,10,9},WPN_DMG[14]={1,1,1,1,3,1,1,1,1,4,2,3,2,1};
 #include "specload.inc"
 static int is_swimmer(int u){int a=UAB(u);return a==AB_STEALTH||a==AB_WALL||a==AB_AMPHIB||a==AB_DIVER||a==AB_S13;}
@@ -622,7 +625,7 @@ static int pl_result(void){ // returns 1
   oam_begin();present(1,camX/3,72+camY/2);if(t>40&&(pressed&(K_A|K_START)))break;if(pDemo&&t>90)break;}
  return 1;}
 static int pl_run(int w,int s,int demo){pDemo=demo;pKills=0;pToastT=0;dHold=dStuck=dBack=0;pl_start(w,s);if(demo)P.lives=40;
- static const u8 TRW[PF_NW]={TR_JUNGLE,TR_DUNE,TR_DMZ,TR_COLD,TR_FROST,TR_ISLAND,TR_SAND,TR_PADDY,TR_OLDC,TR_XENO};bgm_t((PF_ST[w][s].fl&SF_A)||PF_ST[w][s].ai?TR_FORT:TRW[w]);
+ static const u8 TRW[PF_NW]={TR_JUNGLE,TR_DUNE,TR_DMZ,TR_COLD,TR_FROST,TR_ISLAND,TR_SAND,TR_PADDY,TR_OLDC,TR_XENO,TR_TRENCH,TR_REVOL,TR_MEDIEV};bgm_t((PF_ST[w][s].fl&SF_A)||PF_ST[w][s].ai?TR_FORT:TRW[w]);
  ptoast(PF_ST[w][s].n);
  int doneT=0,deaths=0;camX=0;
  for(;;){BEAT->screen=SCR_PLAT;BEAT->mode=w;BEAT->era=s;BEAT->hp=P.hp;BEAT->x=P.x>>12;BEAT->y=P.y>>12;BEAT->phase=pDone?1:P.dead?2:pBossOn?3:0;BEAT->deaths=deaths;BEAT->kills=pKills;
@@ -685,7 +688,7 @@ static int unit_select(void){int sel=PS.unit,redraw=1;if(sel>=PF_NU)sel=0;
    m3_text(196,9,itoa(PF_NU),C_GREEN,1);
    if(tab==1){flag_tag(10,24,2);m3_text(25,25,"UA - 17 UNITS",C_YEL,1);int top=idx/6>1?(idx/6-1)*6:0;
     for(int k=top;k<NC[2]&&k<top+12;k++){int u=NL[2][k],x=12+(k%6)*22,y=38+((k-top)/6)*22;if(u==sel)m3_fill(x-1,y-1,18,18,RGB(90,80,30));m3_unit(u,x,y,1,0);}
-    {char b[8];b[0]='0'+(idx+1)/10;b[1]='0'+(idx+1)%10;b[2]='/';b[3]='1';b[4]='7';b[5]=0;m3_text(100,25,b,C_GRAY,1);}
+    {char b[8];b[0]='0'+(idx+1)/10;b[1]='0'+(idx+1)%10;b[2]='/';b[3]='1';b[4]='7';b[5]=0;m3_text(112,25,b,C_GRAY,1);}
     if(top>0)m3_text(136,38,"UP",C_YEL,1);if(top+12<NC[2])m3_text(136,74,"DN",C_YEL,1);}
    else{int n0=tab?NMODN:0,n1=tab?NNAT:NMODN;int row=0;for(int n=n0;n<n1;n++){if(n==2)continue;int y=tab?24+row*22:20+row*14;row++;flag_tag(10,y+3,n);m3_text(25,y+4,NAT_S[n],n==sn?C_YEL:C_GRAY,1);
      for(int k=0;k<NC[n]&&k<6;k++){int u=NL[n][k],x=(tab?50:40)+k*18;if(u==sel){m3_fill(x-1,y-1,18,16,RGB(90,80,30));}m3_unit(u,x,y-2,1,0);}
@@ -748,7 +751,7 @@ static void spec_ops(void){ps_read();so_read();bgm_t(TR_MAP);if(unit_select()<0)
    m3_fill(0,128,240,32,RGB(20,24,52));m3_box(0,127,240,33,2);
    m3_text(8,132,cat3("WORLD ",itoa(w+1),cat(": ",PF_WN[w])),world_open(w)?C_YEL:C_GRAY,1);
    m3_text(8,141,world_open(w)?cat("VS ",PF_WE[w]):"LOCKED - CLEAR THE PREVIOUS WORLD",world_open(w)?C_WHITE:C_RED,1);
-   m3_text(170,141,cat3(itoa(total_clear()),"/90 CLR",""),C_GRAY,1);m3_text(8,150,cat("UNIT: ",PF_US[PS.unit]),C_WHITE,1);m3_text(116,150,"SELECT: CHANGE UNIT",C_GREEN,1);
+   {int nt=0;for(int i=0;i<PF_NW;i++)nt+=PF_NS[i];m3_text(166,141,cat3(itoa(total_clear()),"/",cat(itoa(nt)," CLR")),C_GRAY,1);}m3_text(8,150,cat("UNIT: ",PF_US[PS.unit]),C_WHITE,1);m3_text(116,150,"SELECT: CHANGE UNIT",C_GREEN,1);
    m3_present();}
   next_frame();
   if((keys&K_L)&&(keys&K_R)&&(pressed&K_SEL)){PS.allun^=1;ps_write();sfx_ok();redraw=1;continue;}

@@ -1,6 +1,6 @@
-# v1.2 SPEC OPS: 90-course table (10 worlds). Each entry: name, stars(1-5), flags, boss ai, boss sprite A, boss sprite B, [theme, enemy set, enemy pal]
+# v1.2 SPEC OPS: 117-course table (13 worlds; v1.3 adds WW1 / American Revolution / Medieval). Each entry: name, stars(1-5), flags, boss ai, boss sprite A, boss sprite B, [theme, enemy set, enemy pal]
 # flags: c paradrop j jetpack b boat w water d dark t tunnel l low-g z zero-g s spikes v vaults i ice n wind r rising tide a autoscroll airship x secret exit k bonus course
-WDEF=[(6,7,14,12),(2,8,15,13),(0,9,16,14),(5,10,17,15),(1,11,18,16),(11,12,19,17),(6,1,6,6),(7,2,7,7),(9,4,10,9),(12,6,13,11)]  # theme, eset, epal, bosspal
+WDEF=[(6,7,14,12),(2,8,15,13),(0,9,16,14),(5,10,17,15),(1,11,18,16),(11,12,19,17),(6,1,6,6),(7,2,7,7),(9,4,10,9),(12,6,13,11),(15,13,20,18),(16,14,21,19),(17,15,22,20)]  # theme, eset, epal, bosspal
 J=(3,7,14);D=(6,8,15);CY_=(2,8,15);K=(5,9,16);CT=(4,11,18);M=(5,12,19)
 def T(t):return [None,None,None]+list(t)
 PF_COURSES=[
@@ -24,6 +24,12 @@ PF_COURSES=[
   ("BUNKER COMPLEX",5,"","fortfly","bunker","zero",11,5,12),("BOMBER STREAM",5,"a",None,None,None,10,4,10),("FINAL FORTRESS",5,"v","fortfly","fort","me262",10,4,10)],
  [("LUNAR BASE",3,"l"),("LOW-G CRATERS",3,"ljx"),("CRYSTAL VAULT",4,"kl"),("MARS HIVE",4,"s",None,None,None,13,6,13),("BROOD NEST",4,"l","walker","brood","",13,6,13),
   ("DERELICT STARSHIP",4,"zd",None,None,None,14,6,13),("ZERO-G CORE",5,"z",None,None,None,14,6,13),("MOTHERSHIP CORE",5,"z","mother","mother","",14,6,13)],
+[("NO MAN'S LAND",3,"s"),("TRENCH RAID",3,"t"),("GAS ATTACK",3,"d"),("SHELL CRATERS",3,"x"),("SUPPLY DUGOUT",3,"k"),("BARBED WIRE",4,"sv"),
+  ("OBSERVATION BALLOON",4,"c"),("ZEPPELIN RAID",4,"a"),("IRON TANK",4,"","tank","a7v")],
+ [("LEXINGTON ROAD",3,""),("FOREST AMBUSH",3,"x"),("FROZEN DELAWARE",3,"bi"),("POWDER MAGAZINE",3,"k"),("REDOUBT HILL",4,"v"),("SWAMP MARSH",4,"w"),
+  ("FORT WALLS",4,"v"),("HARBOR BATTERY",4,""),("SHIP OF THE LINE",5,"w","boat","frigate")],
+ [("VILLAGE GATE",3,""),("CASTLE MOAT",3,"w"),("DUNGEON",4,"td"),("CATACOMBS",4,"tx"),("TREASURY",3,"k"),("BATTLEMENTS",4,"v"),
+  ("TREBUCHET CAMP",4,"","fort","trebuchet"),("MOUNTAIN PASS",5,"n"),("SIEGE TOWER",5,"","walker","siege")],
 ]
 ST=[];STARS=[]
 for w,lst in enumerate(PF_COURSES):
