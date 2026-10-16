@@ -103,6 +103,7 @@ static void gen_sea(void){ // wrapping 1024x1024 ocean, islands are solid for sh
  for(int y=0;y<64;y++)for(int x=0;x<64;x++){int v=(vnoise(x,y,1+sd,4)*2+vnoise(x,y,7+sd,3))/3+bias;if(v<0)v=0;int t;
   t=v<120?(RB(15)==0?1:0):v<132?2:v<170?(RB(3)?3:6):v<200?4:5;
   if((y>=5&&y<=13)||(y>=50&&y<=59))t=RB(15)==0?1:0; // clear spawn lanes
+  if(l==4){int edge=30+(vnoise(x,0,3+sd,3)>>5)-3,top=18+(vnoise(x,1,5+sd,3)>>6);if(y>=top&&y<=edge)t=y>=edge-1?2:y>=edge-3?3:(RB(4)?4:5);else if(y==edge+1&&RB(3)==0)t=1;} // v1.3 coastline (Normandy)
   map[y*MAXW+x]=t;cmap[y*MAXW+x]=31;}
  for(int t=2;t<=6;t++)tflag[t]=TF_SOLID;}
 // ---------------------------------------------------------------- per-match vehicle sprite slots (OBJ tiles 384..895)
@@ -134,7 +135,7 @@ static void spawn(Unit*u,int i){
 static int dxw(s32 a,s32 b);static int dyw(s32 a,s32 b);
 static void damage(int vi,int dmg,int ai){Unit*v=&U[vi];if(!v->alive||v->inv>0||v->roll>0)return;
  if(!v->isp&&v->team!=U[0].team&&mpMode==MM_INF){if(pMark>0)dmg=dmg*5/4;if(pArmK==ATL[8][2][5]&&pArmK)dmg=dmg*11/10;}
- if(v->isp&&pArmK==ATL[8][2][6]&&ai>=0&&ai<MAXU&&mpMode==MM_INF){u16 a=atan2i(dxw(U[ai].x,v->x),dyw(U[ai].y,v->y));u16 df=a-v->tur;if(df<0x2000||df>0xE000)dmg=dmg*2/5;}if(mpMode==MM_SEA&&v->role!=R_WING)dmg=dmg*2/3+(dmg>0);if(v->role==R_STATIC&&mpMode==MM_AIR&&dmg<40)dmg=1;if(v->isp)dmg=diffd(dmg);v->hp-=dmg;v->hurt=6;if(v->isp){sfx_hurt();}
+ if(v->isp&&pArmK==ATL[8][2][6]&&ai>=0&&ai<MAXU&&mpMode==MM_INF){u16 a=atan2i(dxw(U[ai].x,v->x),dyw(U[ai].y,v->y));u16 df=a-v->tur;if(df<0x2000||df>0xE000)dmg=dmg*2/5;}if(mpMode==MM_SEA&&v->role!=R_WING)dmg=dmg*2/3+(dmg>0);if(msOn&&mpMode==MM_SEA&&v->isp)dmg=dmg/3+(dmg>0);if(v->role==R_STATIC&&mpMode==MM_AIR&&dmg<40)dmg=1;if(v->isp)dmg=diffd(dmg);v->hp-=dmg;v->hurt=6;if(v->isp){sfx_hurt();}
  if(v->hp<=0){v->hp=0;v->alive=0;v->resp=mpMode==MM_TANK?240:mpMode==MM_SEA?300:180;v->deaths++;if(v->team<2&&v->role!=R_DISMOUNT&&v->role!=R_WING)score[1-v->team]++;if(ai>=0)U[ai].kills++;
   if(ai==0&&mpMode==MM_INF&&pPerk==2){Unit*p=&U[0];if(p->gren<2)p->gren++;refill(p);p->rl=0;}
   sfx_boom();fx_add(v->x>>8,v->y>>8,mpMode==MM_INF?FXK_SMALL:FXK_BIG);fx_add(v->x>>8,(v->y>>8)-4,FXK_SMOKE);
@@ -494,7 +495,7 @@ static void gen_map(int mode,int era,int mi){mpMode=mode;mpEra=era;curMap=map_de
 static void mp_run(int mode,int era,int mapi){
  mpMode=mode;mpEra=era;BEAT->extra=mapi;BEAT->mode=mode;BEAT->era=era;if(mode==MM_SEA)bgm_t(TR_NAVAL);else bgm(mode==MM_AIR?3:2,era);if(!msOn)nU=12;
  int clouds=0;int te=era;
- if(msOn){te=msTEra;mpEra=te;curMap=msMap;if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);mpEra=era;}else gen_map(mode,era,mapi);
+ if(msOn){te=msTEra;mpEra=te;curMap=msMap;if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);mpEra=era;}else gen_map(mode,era,mapi);
  if(mode==MM_SEA){int ts=curMap->theme==TH_SNOW?1:0;setup_mode0(sky_t(ts),32*4*8,sky_p(ts),era,0);if(curMap->theme!=TH_SNOW)tint_bg(curMap->theme,1);shimmer=2;}
  else if(mode==MM_AIR){clouds=mpEra!=4;const u32*t=te==0?sky_tiles_0:te==1?sky_tiles_1:te==2?sky_tiles_2:te==3?sky_tiles_3:sky_tiles_4;
   const u16*p=te==0?sky_pal_0:te==1?sky_pal_1:te==2?sky_pal_2:te==3?sky_pal_3:sky_pal_4;setup_mode0(t,32*4*8,p,era,clouds);tint_bg(curMap->theme,1);if(te<2)shimmer=2;}

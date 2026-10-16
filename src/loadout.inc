@@ -5,7 +5,7 @@ typedef struct{int dmg,rate,spd16,spread,pellets,life,mag,reload,move,kind,fl;co
 #define MAXPRIM 35
 #define MAXSEC 8
 static const u8 NPRIM[5]={35,7,30,4,4};
-static const u8 NPRIM_V5[5]={35,5,30,4,4},NSEC_V5[5]={8,2,6,2,2},NL_V5[5]={4,2,6,2,2},NTK_V5[5]={55,6,40,2,2},NAIR_V5[5]={93,17,28,2,2}; // v1.2 layouts (save migration v5 -> v6)
+static const u8 NPRIM_V5[5]={35,5,30,4,4},NSEC_V5[5]={8,2,6,2,2},NL_V5[5]={4,2,6,2,2},NTK_V5[5]={55,6,40,2,2},NAIR_V5[5]={93,17,28,2,2},NSH_V5[5]={10,6,7,0,0}; // v1.2 layouts (save migration v5 -> v6)
 static const u8 NPRIM_V4[5]={17,5,5,4,4},NSEC_V4[5]={5,2,2,2,2},NL_V4[5]={3,2,2,2,2},NTK_V4[5]={55,6,6,2,2}; // v1.2-pre layouts (save migration)
 #define PRIM_EXP0 15 // WW2 primaries 15..16 are tagged EXPERIMENTAL
 #define PRIM_ISEXP(i) ((i)>=PRIM_EXP0&&(i)<17)
@@ -134,7 +134,7 @@ static int save_load(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!=
    if(g6.lI){e=fdec(NL_V4,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V4,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);}
   if(v==5){int i,e; // v1.2 -> v1.3: Cold War gained AKM/RPK + T-62/BMP-1 (flat 6v6 indices shift)
    e=fdec(NPRIM_V5,g6.pI,&i);g6.pI=fenc(NPRIM,e,i);e=fdec(NSEC_V5,g6.sI,&i);g6.sI=fenc(NSEC,e,i);
-   if(g6.lI){e=fdec(NL_V5,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V5,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);e=fdec(NAIR_V5,g6.aI,&i);g6.aI=fenc(NAIR,e,i);}
+   if(g6.lI){e=fdec(NL_V5,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V5,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);e=fdec(NAIR_V5,g6.aI,&i);g6.aI=fenc(NAIR,e,i);e=fdec(NSH_V5,g6.shI,&i);g6.shI=fenc(NSH,e,i);}
   if(g6.pI>=fsum(NPRIM)||g6.sI>=fsum(NSEC)||g6.lI>fsum(NL)||g6.leth>=NLETH6||g6.tact>=NTACT6||g6.tkI>=fsum(NTK)||g6.aI>=fsum(NAIR)||g6.shI>=fsum(NSH)||g6.fac0>=NFAC||g6.fac1>=NFAC||g6.fac0==g6.fac1){G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}
   if(CH.skin>=CH_NSKIN||CH.hair>=CH_NHAIR||CH.head>=CH_NHEAD||CH.hat>=CH_NHAT||CH.uni>=CH_NUNI||CH.camo>=CH_NCAMO||CH.vest>=CH_NVEST||CH.body>1||CH.use>1||!CH.name[0]){Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}}
  if(v==1){ // v1.0 -> v1.1 migration: WW2 tactical list changed (flash/smoke/stim -> smoke/morphine)

@@ -8,7 +8,8 @@ enum{ST_AA,ST_PILL,ST_CACHE,ST_CARRIER,ST_RADIO,ST_BLOCK};
 #define MM_DOGGREEN 9
 typedef struct{const char*name,*place,*date,*pov;u8 grp,mode,sEra,tEra,layout,theme,nAlly,nEnemy,flags,skind,ncv;
  u8 ob[3];s16 arg[3];const char*od[3];const char*b[4];}CMis;
-#define NCM 15
+#define NCM 16
+enum{SH_FLETCHER=6,SH_TEXAS=10,SH_SBOOT=11}; // SHIPV[0] indices (tools/gen_vehicles.py)
 static const CMis CM[NCM]={
  {"POINT LUCK","OFF MIDWAY ATOLL, PACIFIC","4 JUNE 1942","LT.(JG) FRANK DOYLE - SBD PILOT",0,MM_AIR,0,0,1,0,3,6,0,ST_CARRIER,0,
   {OB_KILL,OB_DESTROY,0},{4,2,0},{"BREAK THE FIGHTER SCREEN","DIVE-BOMB THE CARRIERS",""},
@@ -54,7 +55,10 @@ static const CMis CM[NCM]={
   {"STACK, BREACH, CLEAR, MARK, MOVE ON.","A FAMILY IS SHELTERING IN A CELLAR.","FIND THEM AND WALK THEM OUT SAFELY.","RULES OF ENGAGEMENT ARE STRICT."}},
  {"FULDA GAP (WHAT-IF)","FULDA GAP, WEST GERMANY","1985 - FICTIONAL","LT. ANNA HALE - M60A3 PLATOON LEADER",3,MM_TANK,1,1,LY_FOREST,TH_DUSK,3,6,0,0,0,
   {OB_SURVIVE,OB_KILL,0},{70,6,0},{"HOLD THE GAP","STOP THE FIRST ECHELON",""},
-  {"A FICTIONAL WAR THAT NEVER HAPPENED.","WARSAW PACT ARMOUR IS POURING INTO","THE GAP. HOLD THE TREELINE UNTIL THE","REINFORCEMENTS CROSS THE RHINE."}}};
+  {"A FICTIONAL WAR THAT NEVER HAPPENED.","WARSAW PACT ARMOUR IS POURING INTO","THE GAP. HOLD THE TREELINE UNTIL THE","REINFORCEMENTS CROSS THE RHINE."}},
+ {"GUNS OF TEXAS","OMAHA BEACH / POINTE DU HOC, NORMANDY","6 JUNE 1944","LT.CDR RUTH HALE - USS TEXAS GUNNERY",0,MM_SEA,0,0,4,TH_DUSK,2,4,0,ST_PILL,0,
+  {OB_DESTROY,OB_KILL,0},{4,3,0},{"SILENCE SHORE GUNS","DRIVE OFF S-BOATS",""},
+  {"D-DAY. THE RANGERS ARE CLIMBING","POINTE DU HOC AND OMAHA IS PINNED.","CLOSE THE BEACH AND PUT TEN 14-INCH","GUNS ON THE BLUFFS. CLEAR THE SKY."}}};
 static const char*const GRPN[4]={"WORLD WAR II","COLD WAR","MODERN","WHAT-IF"};
 static const CMis*cm;static int msGath,cmIdx,msObi,msNob,msT,msObT,msCount,msCivLost,msCivPlayer,msSaved,msE0,msX0,msXN,msCPx,msCPy,msGx,msGy,msReady,msMortT;
 static MapDef msMapDef;static u8 msAlt;
@@ -75,6 +79,7 @@ static void ms_place_extras(void){int W=worldPx(),Hp=mapH*16;(void)W;
   switch(u->role){
    case R_STATIC:u->team=1;u->hp=u->maxhp=u->kind==ST_CARRIER?210:u->kind==ST_PILL?200:u->kind==ST_BLOCK?140:110;
     if(mpMode==MM_AIR){u->x=((W/2-220+(i-msX0)*440+rr(60))&(W-1))<<8;u->y=(160+rr(80))<<8;u->ang=0x4000*(rr(2)?1:3);u->vel=0;}
+    else if(mpMode==MM_SEA){for(int k=0;k<80;k++){int tx=4+rr(56);if(k<40&&i>msX0&&iabs(tx-((U[i-1].x>>8)>>4))<6)continue;int ty=44;while(ty>12&&map[ty*MAXW+tx]<2)ty--;if(ty>14&&ty<40){u->x=(tx*16+8)<<8;u->y=((ty-1)*16+8)<<8;break;}}u->tur=0x8000;}
     else ms_free_pos(u,4*16,Hp/2);break;
    case R_PARA:u->team=0;u->hp=u->maxhp=100;ms_free_pos(u,Hp/4,Hp-6*16);u->wpn=ALLY_PRIM[rr(21)];break;
    case R_SNIPER:u->team=1;u->hp=u->maxhp=60;ms_free_pos(u,4*16,Hp/3);break;
@@ -91,6 +96,7 @@ static void ms_init_fn(void){Unit*P=&U[0];int ne=cm->nEnemy,na=cm->nAlly;
   else if(mpEra==0&&msAlt)u->wpn=u->team?ALLY_PRIM[rr(21)]:AXIS_PRIM[rr(11)];
   else if(mpEra==0)u->wpn=u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];
   else u->wpn=mpEra==0?(u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM[mpEra]);
+  if(mpMode==MM_SEA){u->ve=0;u->veh=u->team?SH_SBOOT:SH_FLETCHER;}
   spawn(u,i);}
  for(int i=msX0;i<MAXU;i++)memset(&U[i],0,sizeof(Unit));
  for(int k=0;k<msNob;k++){int o=cm->ob[k],a=cm->arg[k];
@@ -102,6 +108,7 @@ static void ms_init_fn(void){Unit*P=&U[0];int ne=cm->nEnemy,na=cm->nAlly;
  msXN=n;nU=n;ms_place_extras();
  if(mpMode==MM_TANK){P->veh=msAlt?1:tankSel[mpEra];P->hp=P->maxhp=TV(P)->hp;}
  if(mpMode==MM_AIR){P->veh=msAlt?11:13;P->hp=P->maxhp=AV(P)->hp;P->ammo=AV(P)->ammo;P->vel=AV(P)->spd;}
+ if(mpMode==MM_SEA){P->ve=0;P->veh=SH_TEXAS;P->hp=P->maxhp=SV(P)->hp;P->ammo=SV(P)->ammo2;P->y=(44*16)<<8;for(int i=1;i<msE0;i++){U[i].y=P->y+((10+i*30)<<8);U[i].x=P->x+(((i&1)?-60:60)<<8);}for(int i=msE0;i<msX0;i++){U[i].y=(60*16)<<8;U[i].ang=0;}vsNext=VS_BASE;vsN=0;for(int i=0;i<msX0;i++)U[i].vt=vslot(2,SV(&U[i])->gs);}
  if(msAlt){for(int c=2;c<=5;c++){u16 t=PAL_OBJ[c];PAL_OBJ[c]=PAL_OBJ[16+c];PAL_OBJ[16+c]=t;PAL_OBJ[32+c]=PAL_OBJ[c];}}
  // civilian palette (bank 5): desaturated warm clothing
  for(int c=1;c<16;c++){u16 v=PAL_OBJ[c];int r=v&31,g=(v>>5)&31,b=(v>>10)&31,l=(r*3+g*5+b*2)/10;PAL_OBJ[5*16+c]=clampi(l+5,0,31)|(clampi(l+1,0,31)<<5)|(clampi(l-4,0,31)<<10);}
@@ -260,7 +267,7 @@ static int brief_card(int i,const CMis*m){
    if(redraw){m3_title(1);m3_box(2,4,236,152,1);
     m3_ctext(10,m->name,C_YEL,2);m3_ctext(30,m->place,C_WHITE,1);m3_ctext(40,m->date,C_WHITE,1);m3_ctext(50,m->pov,C_BLUE,1);
     if(page==0){for(int k=0;k<4;k++)m3_text(8,66+k*11,m->b[k],C_WHITE,1);
-     m3_text(8,116,m->mode==MM_AIR?"MODE: DIVE-BOMBER (FLIGHT)":m->mode==MM_TANK?"MODE: ARMOUR":"MODE: INFANTRY",C_GRAY,1);
+     m3_text(8,116,m->mode==MM_AIR?"MODE: DIVE-BOMBER (FLIGHT)":m->mode==MM_TANK?"MODE: ARMOUR":m->mode==MM_SEA?"MODE: NAVAL - SHORE BOMBARDMENT":"MODE: INFANTRY",C_GRAY,1);
      m3_text(8,126,"FICTIONAL CHARACTERS IN A REAL BATTLE",C_GRAY,1);}
     else{m3_text(8,66,"OBJECTIVES",C_YEL,1);int n=0;for(int k=0;k<3;k++){if(m->mode!=MM_DOGGREEN&&!m->ob[k])continue;m3_text(8,80+n*11,cat3(itoa(n+1),". ",m->od[k]),C_WHITE,1);n++;}
      if(m->flags&MF_ROE)m3_text(8,126,"ROE: DO NOT HARM CIVILIANS",C_RED,1);if(m->flags&MF_MORTAR)m3_text(8,126,"WARNING: ENEMY MORTARS ACTIVE",C_RED,1);
@@ -278,7 +285,7 @@ static void mission_run(int i,int side){cmIdx=i;cm=mis_for(i,side);msAlt=side;ca
  msNob=0;while(msNob<3&&cm->ob[msNob])msNob++;msReady=0;
  ms_role=ms_role_fn;ms_draw=ms_draw_fn;ms_death=ms_death_fn;ms_init=ms_init_fn;ms_tick=ms_tick_fn;ms_hud=ms_hud_fn;ms_spawn=ms_spawn_fn;ms_result=ms_result_fn;ms_skip=ms_skip_fn;
  msOn=1;nU=MAXU;mp_run(cm->mode,cm->sEra,0);msOn=0;msReady=0;nU=12;}
-static void mission_select(void){static int sel=0;campUnlock|=1u<<14; // v1.3 what-if bonus mission is always open
+static void mission_select(void){static int sel=0;campUnlock|=(1u<<14)|(1u<<15); // v1.3 what-if bonus mission is always open
 int redraw=2,top=0;bgm(1,0);
  for(;;){BEAT->screen=SCR_MSEL;BEAT->menu=sel;BEAT->extra=campUnlock;
   if(sel<top)top=sel;if(sel>top+7)top=sel-7;
@@ -287,7 +294,7 @@ int redraw=2,top=0;bgm(1,0);
     if(k==top||CM[k].grp!=CM[k-1].grp){m3_text(150,y,GRPN[CM[k].grp],C_BLUE,1);}
     m3_text(10,y,k==sel?">":" ",C_YEL,1);m3_text(18,y,cat3(itoa(k+1),". ",un?CM[k].name:"LOCKED"),k==sel?C_YEL:un?C_WHITE:C_GRAY,1);y+=11;}
    const CMis*m=&CM[sel];int un=(campUnlock>>sel)&1;m3_fill(8,111,224,1,RGB(60,70,110));
-   m3_text(8,114,cat3(m->date,"  ",m->mode==MM_AIR?"FLIGHT":m->mode==MM_TANK?"ARMOUR":"INFANTRY"),un?C_WHITE:C_GRAY,1);m3_text(8,124,m->place,un?C_WHITE:C_GRAY,1);
+   m3_text(8,114,cat3(m->date,"  ",m->mode==MM_AIR?"FLIGHT":m->mode==MM_TANK?"ARMOUR":m->mode==MM_SEA?"NAVAL":"INFANTRY"),un?C_WHITE:C_GRAY,1);m3_text(8,124,m->place,un?C_WHITE:C_GRAY,1);
    m3_text(8,134,un?m->pov:"FINISH THE PREVIOUS MISSION TO UNLOCK",un?C_BLUE:C_GRAY,1);
    m3_ctext(146,"A:BRIEF  B:BACK  L+R+SEL:UNLOCK ALL",C_GRAY,1);m3_present();redraw=0;}
   next_frame();

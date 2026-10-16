@@ -128,7 +128,7 @@ extern const unsigned char*const trk_data[35];
 extern const unsigned char wave_shapes[32];
 extern const unsigned int tank_spr[27392];
 extern const unsigned int plane_spr[18176];
-extern const unsigned int ship_spr[2944];
+extern const unsigned int ship_spr[3200];
 extern const unsigned short world_pal[64];
 extern const unsigned int world_tiles[1600];
 #define WT_N 25

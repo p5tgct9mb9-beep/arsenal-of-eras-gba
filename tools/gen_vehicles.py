@@ -461,12 +461,16 @@ def ss(sp):
             gx=16-ng//2+g
             if fwd:c.l(gx,yy-ln,gx,yy-sz+1,7)
             else:c.l(gx,yy+sz-1,gx,yy+ln,7)
+    if sp.get('cas'):  # casemate secondary battery along the hull sides (Texas' 5in/51s)
+        for yy in range(y0+6,y1-6,3):c.px(16-B//2+1,yy,7);c.px(14+B//2,yy,7)
     s0,s1=sp.get('sup',(L//2-4,L//2+2))
     c.r(16-B//2+2,y0+s0,15+B//2-2,y0+s1,14);c.r(16-B//2+3,y0+s0,15+B//2-3,y0+s0+1,11)
     for fy in sp.get('fun',[]):c.e(14,y0+fy,17,y0+fy+2,7);c.px(15,y0+fy,2)
     if sp.get('vls'):
         for vy in sp['vls']:c.r(14,y0+vy,17,y0+vy+2,7);c.l(14,y0+vy+1,17,y0+vy+1,13)
     if sp.get('tt'):c.r(15-B//2+2,y0+sp['tt'],15-B//2+3,y0+sp['tt']+3,7);c.r(16+B//2-3,y0+sp['tt'],16+B//2-2,y0+sp['tt']+3,7)
+    for my in sp.get('tri',[]):  # tripod masts (1916+ refit) with fire-control tops
+        c.e(14,y0+my-1,17,y0+my+1,2);c.px(15,y0+my,11);c.px(16,y0+my,11)
     c.px(16,y1-2,9);c.px(15,y1-2,9)
     return c.grid(1)
 # (name,cls,axis,spd,turn,reload,dmg,hp,sspd,life,w2,ammo2,wing(era,idx) or None,sprite)
@@ -481,7 +485,10 @@ SH0=[('USS IOWA','BB',0,150,150,210,78,620,1100,150,0,0,None,S(k='BB',L=31,B=8,t
  ('USS FLETCHER','DD',0,260,260,60,22,250,1150,100,1,8,None,S(k='DD',L=22,B=5,tur=[(3,2,1),(6,2,1),(15,2,1),(18,2,1)],sup=(8,11),fun=[9,12],tt=13)),
  ('KAGERO','DD',1,260,260,60,22,240,1150,100,1,8,None,S(k='DD',L=22,B=5,tur=[(3,2,2),(15,2,2),(18,2,2)],sup=(6,10),fun=[8,11],tt=12)),
  ('USS ENTERPRISE CV-6','CV',0,180,150,40,8,520,1200,60,3,0,AI_(0,'SBD DAUNTLESS'),S(k='CV',L=31,B=8,isl=[(11,6)])),
- ('AKAGI','CV',1,180,150,40,8,500,1200,60,3,0,AI_(0,'B5N KATE'),S(k='CV',L=31,B=8,isl=[(12,4)]))]
+ ('AKAGI','CV',1,180,150,40,8,500,1200,60,3,0,AI_(0,'B5N KATE'),S(k='CV',L=31,B=8,isl=[(12,4)])),
+ # v1.3: USS TEXAS (BB-35) - New York-class dreadnought, 1914; 10x 14in/45 in 5 twin turrets, ~21 kn, WW1 Grand Fleet + D-Day Omaha/Pointe du Hoc, Cherbourg
+ ('USS TEXAS BB-35','BB',0,125,125,215,66,560,1050,145,0,0,None,S(k='BB',L=29,B=7,tur=[(4,2,2),(8,2,2),(16,2,2),(21,2,2),(25,2,2)],sup=(10,14),fun=[12],tri=[9,18],cas=1)),
+ ('S-BOOT (SCHNELLBOOT)','DD',1,300,300,45,10,150,1150,80,1,2,None,S(k='DD',L=15,B=4,tur=[(3,1,1),(12,1,1)],sup=(6,9),tt=4))]
 SH1=[('IOWA (1984 REFIT)','BB',0,150,150,210,76,640,1100,150,2,8,None,S(k='BB',L=31,B=8,mod=1,tur=[(5,3,3),(10,3,3),(24,3,3)],sup=(13,19),fun=[15],vls=[20])),
  ('KIROV','CA',1,190,170,90,40,520,1250,130,2,10,None,S(k='CA',L=30,B=8,mod=1,tur=[(26,2,2)],sup=(13,20),vls=[4,8])),
  ('SVERDLOV','CA',1,200,190,130,44,430,1150,130,0,0,None,S(k='CA',L=28,B=6,mod=1,tur=[(4,2,3),(8,2,3),(20,2,3),(24,2,3)],sup=(11,17),fun=[12,15])),
