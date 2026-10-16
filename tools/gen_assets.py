@@ -329,6 +329,11 @@ def arena_set(era):  # v1.2: GBA-adventure style (chunky outlines, 3-tone cel sh
     for y in range(0,16,4):cv.r(1,y,14,y+2,7);cv.l(1,y,14,y,9);cv.l(1,y+3,14,y+3,8)
     cv.l(0,0,0,15,8);cv.l(15,0,15,15,8);cv.l(1,0,1,15,6);cv.l(14,0,14,15,6)
     out.append(cv.grid())
+    # 13 v1.3 interior floor (wooden planks, staggered seams) - enterable buildings
+    cv=Cv(16,16);cv.r(0,0,15,15,7)
+    for row,y in enumerate((0,4,8,12)):
+        cv.l(0,y,15,y,8);cv.l(0,y+1,15,y+1,9);off=3 if row%2 else 10;cv.l(off,y+1,off,y+3,8)
+    out.append(cv.grid())
     if be==5:   # WW1: dead stump instead of a tree, barbed-wire picket instead of sandbags
         cv=Cv(16,16);grass(cv,505,0);cv.e(1,2,14,14,14);cv.e(2,3,13,13,6);cv.r(6,1,9,12,14);cv.r(7,2,8,11,7);cv.l(9,4,12,1,14);out[7]=cv.grid()
         cv=Cv(16,16);grass(cv,506,1);[cv.l(x,2,x,14,14) for x in (2,13)];[cv.l(0,y,15,y+1,13) for y in (4,8,12)];[cv.px(x,y,15) for x in range(1,16,3) for y in (4,8,12)];out[6]=cv.grid()
@@ -360,7 +365,7 @@ ARENA_PALS+= [_tint(ARENA_PALS[0],(1.0,0.86,0.66)),_tint(ARENA_PALS[0],(1.08,0.9
 WATER_PALS+=[_tint(WATER_PALS[0],(0.8,0.8,0.7)),WATER_PALS[0],_tint(WATER_PALS[0],(0.9,1.0,0.95))]
 for e in range(8):
     emit(f"arena_tiles_{e}",arena_set(e),"unsigned int");emit(f"arena_pal_{e}",pal16(ARENA_PALS[e]));emit(f"water_pal_{e}",pal16(WATER_PALS[e]))
-Hh.append("enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_WATER,AM_BRIDGE,AM_N};")
+Hh.append("enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_WATER,AM_BRIDGE,AM_FLOOR,AM_N};")
 
 # dogfight terrain (seen from altitude) + clouds
 SKY_PALS=[

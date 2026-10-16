@@ -32,16 +32,16 @@ tap A
 wait 14
 shot v13_cm20_brief2
 wait 30
-tap START
-wait 40
-tap A
-wait 20
-tap A
-wait 20
-tap A
-wait 20
-tap A
-wait 40
+hold START 6
+wait 60
+hold A 6
+wait 50
+hold A 6
+wait 50
+hold A 6
+wait 50
+hold A 6
+wait 60
 shot v13_cm20_start
 hold UP+B 200
 hold RIGHT+B 200

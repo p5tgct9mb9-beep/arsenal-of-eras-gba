@@ -149,13 +149,13 @@ static void pl_respawn(int fromChk){
  pl_spawn_ents(fromChk);
  int sx=fromChk?pChkX:24,sy=-1;
  if(!fromChk&&(pFl&SF_B)){sx=56;}
- if(*(volatile u32*)0x0203FFD4==0x53534F42u){for(int j=0;j<nPE;j++)if(PE[j].k==34){sx=PE[j].x0*16-40;pChkX=sx;break;}} // test-only: harness pokes 'BOSS' to start at the boss gate
+ if(*(volatile u32*)0x0203FFD4==0x53534F42u){for(int j=0;j<nPE;j++)if(PE[j].k==34){sx=PE[j].x0*16-120;pChkX=sx;break;}} // test-only: harness pokes 'BOSS' to start at the boss gate
  for(int y=0;y<PH;y++){if(!(TFL[ptile(sx>>4,y)]&(F_SOL))&&(TFL[ptile(sx>>4,y+1)]&(F_SOL|F_ONE))){sy=y*16+16;break;}}
  if(sy<0)sy=9*16;
  int keepHp=P.maxhp?P.maxhp:3;int lives=P.lives,gr=P.gren,e1=P.eq1n,mu=P.medUsed;int g0=EQ_CNT[SOL[PS.unit].eq0]+(UAB(PS.unit)==AB_BARRAGE&&SOL[PS.unit].eq0==EQ_FRAG?3:0);
  memset(&P,0,sizeof P);P.lives=lives;P.maxhp=keepHp;P.hp=P.maxhp;P.gren=gr<g0?g0:gr;P.eq1n=e1<EQ_CNT[SOL[PS.unit].eq1]?EQ_CNT[SOL[PS.unit].eq1]:e1;P.medUsed=mu;
  P.x=sx<<8;P.y=sy<<8;P.face=1;P.air=600;P.inv=60;
- if(!fromChk&&((pFl&SF_C)||UAB(PS.unit)==AB_GLIDE||UAB(PS.unit)==AB_DEMO||UAB(PS.unit)==AB_RESCUE)&&!(pFl&(SF_T|SF_B|SF_A))){P.y=-8<<8;P.chute=1;}
+ if(!fromChk&&!pChkX&&((pFl&SF_C)||UAB(PS.unit)==AB_GLIDE||UAB(PS.unit)==AB_DEMO||UAB(PS.unit)==AB_RESCUE)&&!(pFl&(SF_T|SF_B|SF_A))){P.y=-8<<8;P.chute=1;}
  memset(&B,0,sizeof B);pBossOn=0;
  pAuto=(pFl&(SF_A|SF_B))?1:0;pCamX8=(fromChk||pChkX)?((pChkX-80)<<8):0;if(pCamX8<0)pCamX8=0;
  pTide=0;pWindOn=0;pWindT=0;pRaft=-1;
@@ -192,7 +192,8 @@ static void bump_tile(int cx,int cy){int t=ptile(cx,cy);
   pm[PMI(cx,cy)]=T_USED;if(!found){pTags++;fx_add(cx*16+8,cy*16-6,FXK_SPARK);sfx_menu();}
   for(int i=0;i<nPE;i++){PEnt*e=&PE[i];if(e->alive&&e->k<10&&iabs((e->x>>8)-(cx*16+8))<12&&iabs((e->y>>8)-(cy*16))<6){e->hp=0;}}}}
 static void ent_kill(PEnt*e){e->alive=0;pKills++;fx_add(e->x>>8,(e->y>>8)-8,e->k>=6?FXK_BIG:FXK_SMALL);if(e->k>=6){sfx_boom();shake(6);}else sfx_shot(1);
- if(e->k<=7&&((pKills*7)%5)==0){PEnt*t=pe_new();if(t){t->k=11;t->x=e->x;t->y=e->y-(4<<8);}}}
+ if(e->k<=7&&((pKills*7)%5)==0){PEnt*t=pe_new();if(t){t->k=11;t->x=e->x;t->y=e->y-(4<<8);}}
+ else if(e->k>=1&&e->k<=4&&(pKills%3)==1&&!P.spaceW){PEnt*t=pe_new();if(t){t->k=19;t->p=e->k;t->x=e->x;t->y=e->y-(4<<8);}}} // v1.3: enemies drop their weapon
 static void ent_dmg(PEnt*e,int d){e->hp-=d;e->c=6;if(e->hp<=0)ent_kill(e);}
 static void boss_dmg(int d);static void boss_start(void);
 static int boss_hit(int x,int y){if(!pBossOn||B.hp<=0)return 0;int hw=B.ai==BA_MI8&&B.ph==1?12:28,ht=B.ai==BA_MI8&&B.ph==1?30:28;return iabs(x-(B.x>>8))<hw&&y<(B.y>>8)-2&&y>(B.y>>8)-ht;}
@@ -431,13 +432,13 @@ static void ents_update(void){int px=P.x>>8,py=P.y>>8;int stealth=((UAB(PS.unit)
    int hw=e->k>=6?14:6;if(!P.dead&&iabs(dx)<hw+4&&py>ey-16&&py-14<ey){if(P.dashT>0){ent_dmg(e,3);}else if(!(UAB(PS.unit)==AB_SPY&&P.abT>0))pl_hurt(1);}
    continue;}
   switch(e->k){
-   case 10:case 11:case 12:case 13:case 14:case 15:case 16:case 17:case 18:if(e->st==2)break;
+   case 10:case 11:case 12:case 13:case 14:case 15:case 16:case 17:case 18:case 19:if(e->st==2)break;
     if(!P.dead&&iabs(dx)<11&&iabs((py-8)-(ey-8))<13){e->alive=0;sfx_ok();
      switch(e->k){case 10:pIntel|=1<<e->p;{int n=(pIntel&1)+(pIntel>>1&1)+(pIntel>>2&1);ptoast(cat3("INTEL FILE ",itoa(n),"/3"));}break;
       case 11:pTags++;break;case 12:P.gren+=3;if(P.gren>12)P.gren=12;ptoast("GRENADES +3");break;
       case 13:P.hp+=UAB(PS.unit)==AB_MEDIC?2:1;if(P.hp>P.maxhp){if(P.maxhp<5)P.maxhp++;P.hp=P.maxhp;}ptoast(UAB(PS.unit)==AB_MEDIC?"MEDKIT +2":"MEDKIT");break;
       case 14:P.armor=2;ptoast("BODY ARMOR");break;case 15:P.rapidT=600;ptoast("RAPID FIRE");break;case 16:P.jetT=480;ptoast("JETPACK - HOLD A");break;
-      case 17:P.lives++;ptoast("1UP");break;case 18:P.spaceW=P.spaceW==1?2:1;ptoast(P.spaceW==1?"PLASMA RIFLE":"COILGUN");break;}}break;
+      case 17:P.lives++;ptoast("1UP");break;case 19:{SoW c=SW[0];c.melee=0;c.sup=0;c.pel=1;c.pierce=0;if(e->p==2){c.n="CAPTURED PKM";c.rate=5;c.dmg=110;c.move=85;}else if(e->p==3){c.n="CAPTURED RPG-7";c.rate=40;c.dmg=420;c.pierce=1;}else if(e->p==4){c.n="CAPTURED SVD";c.rate=28;c.dmg=340;c.pierce=1;}else{c.n="CAPTURED AK";c.rate=9;c.dmg=120;}SW[1]=c;pWsel=1;ptoast(cat(c.n," - SEL SWAPS"));}break;case 18:P.spaceW=P.spaceW==1?2:1;ptoast(P.spaceW==1?"PLASMA RIFLE":"COILGUN");break;}}break;
    case 20:if(!e->st&&dx>-6&&iabs(py-ey)<40){e->st=1;pChkX=ex;ptoast("KC: WOOF! CHECKPOINT!");sfx_ok();}break;
    case 21:case 22:if(!P.dead&&iabs(dx)<10&&py>ey-40&&py<=ey+2&&!pDone){pDone=1;if(e->k==22)pSecret=1;e->st=1;music_jingle(TR_CLEAR);}break;
    case 24:{e->a+=(e->p&16)?-2:2;int n=e->p&15;for(int k=1;k<=n;k++){int bx=ex+(COS(e->a)*k*8>>8),by=ey-8+(SIN(e->a)*k*8>>8);if(!P.dead&&iabs(px-bx)<7&&iabs(py-7-by)<8)pl_hurt(1);}}break;
@@ -547,8 +548,8 @@ static void pl_draw(void){oam_begin();int u=PS.unit;
    if(e->stun>0&&(frame&8))sprf(sx-4,sy-24,OT_FX+FX_FLASH,0,0,3,0,0);
    if(k==4&&e->b>0&&(frame&2)){for(int q=1;q<5;q++)sprf(sx+(e->face*q*14)-4,sy-12,OT_PROJ+6,0,0,4,1,0);}
    continue;}
-  switch(k){case 10:case 11:case 12:case 13:case 14:case 15:case 16:case 17:case 18:if(e->st==2)break;
-    sprf(sx-8,sy-16-((frame>>4)&1),OT_PICK+(k==18?(8+(P.spaceW==1)):(k-10))*4,0,1,4,1,0);break;
+  switch(k){case 10:case 11:case 12:case 13:case 14:case 15:case 16:case 17:case 18:case 19:if(e->st==2)break;
+    sprf(sx-8,sy-16-((frame>>4)&1),OT_PICK+(k==19?9:k==18?(8+(P.spaceW==1)):(k-10))*4,0,1,4,1,0);break;
    case 20:sprf(sx-8,sy-32,OT_FLAG+(e->st?0:8),2,2,4,1,0);sprf(sx+6,sy-16,OT_KC+(e->st?((frame>>4)&1?16:8):8),0,1,5,1,1);break;
    case 21:sprf(sx-8,sy-32,OT_FLAG+(pDone?0:8),2,2,4,1,0);break;
    case 22:sprf(sx-8,sy-32,OT_FLAG+(pDone?0:8),2,2,3,1,0);break;

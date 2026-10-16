@@ -72,14 +72,18 @@ static void gen_arena(int W,int Hh,int tankmap){
  if(lay==LY_TOWN){int st=tankmap?9:7;
   for(int by=7;by+4<Hh/2-1;by+=st)for(int bx=3;bx+4<W-3;bx+=st){if(iabs(bx+2-W/2)<3)continue;int w=3+rr(2)+(tankmap?1:0),h=3+rr(2);
    for(int x=bx;x<=bx+w;x++){SETC(x,by,AM_WALL);SETC(x,by+h,AM_WALL);}for(int y=by;y<=by+h;y++){SETC(bx,y,AM_WALL);SETC(bx+w,y,AM_WALL);}
-   for(int y=by+1;y<by+h;y++)for(int x=bx+1;x<bx+w;x++)SETC(x,y,AM_G2);
-   int dd=rr(4);if(dd==0)SETC(bx+w/2,by,AM_G2);else if(dd==1)SETC(bx+w/2,by+h,AM_G2);else if(dd==2)SETC(bx,by+h/2,AM_G2);else SETC(bx+w,by+h/2,AM_G2);
-   if(!tankmap){SETC(bx+w/2+1,by+h,AM_G2);}
+   for(int y=by+1;y<by+h;y++)for(int x=bx+1;x<bx+w;x++)SETC(x,y,AM_FLOOR);
+   int dd=rr(4);if(dd==0)SETC(bx+w/2,by,AM_FLOOR);else if(dd==1)SETC(bx+w/2,by+h,AM_FLOOR);else if(dd==2)SETC(bx,by+h/2,AM_FLOOR);else SETC(bx+w,by+h/2,AM_FLOOR);
+   if(!tankmap){SETC(bx+w/2+1,by+h,AM_FLOOR);SETC(bx+w/2,by+h,AM_FLOOR);if(dd>=2)SETC(bx+w/2,by,AM_FLOOR);else SETC(dd?bx:bx+w,by+h/2,AM_FLOOR);}
    for(int x=bx-1;x<=bx+w+1;x++)SETC(x,by+h+1,AM_PATH);}}
+ if(!tankmap&&(lay==LY_FIELD||lay==LY_FOREST))for(int hN=0;hN<2;hN++){int w=4+rr(2),h=3+rr(2),bx=3+rr(W-10),by=7+rr(Hh/2-13>1?Hh/2-13:1);if(iabs(bx+w/2-W/2)<4)bx=bx<W/2?W/2-w-4:W/2+4; // v1.3 enterable farmhouse
+   for(int x=bx;x<=bx+w;x++){SETC(x,by,AM_WALL);SETC(x,by+h,AM_WALL);}for(int y=by;y<=by+h;y++){SETC(bx,y,AM_WALL);SETC(bx+w,y,AM_WALL);}
+   for(int y=by+1;y<by+h;y++)for(int x=bx+1;x<bx+w;x++)SETC(x,y,AM_FLOOR);SETC(bx+w/2,by+h,AM_FLOOR);SETC(bx+w/2+1,by+h,AM_FLOOR);SETC(bx,by+h/2,AM_FLOOR);SETC(bx+w,by+1,AM_FLOOR);}
  int nf=lay==LY_TOWN?8:lay==LY_FOREST?(tankmap?26:40):tankmap?16:26;
  for(int f=0;f<nf;f++){int x=2+rr(W-4),y=2+rr(Hh/2-2),k=rr(10);
   if(idist(x-W/2,y-3)<(tankmap?9:6))continue;
   if(lay==LY_RIVER&&y>=rv0-1)continue;
+  {int t0=map[y*MAXW+x];if(t0==AM_FLOOR||t0==AM_WALL)continue;}
   if(lay==LY_TOWN&&map[y*MAXW+x]!=AM_G0&&map[y*MAXW+x]!=AM_G1&&map[y*MAXW+x]!=AM_PATH)continue;
   if(lay==LY_FOREST)k=k<6?7:k<8?6:9;
   int len=3+rr(3);
@@ -142,9 +146,19 @@ static void spawn(Unit*u,int i){
  if(!u->isp&&u->team==1&&!u->role){u->hp=u->maxhp=u->maxhp*BD(u)->hp/100;}
  u->lx=u->x;u->ly=u->y;if(msOn)ms_spawn(u,i);}
 static int dxw(s32 a,s32 b);static int dyw(s32 a,s32 b);
+static int indoor_at(int px,int py){int x=px>>4,y=py>>4;return x>=0&&y>=0&&x<mapW&&y<mapH&&map[y*MAXW+x]==AM_FLOOR;}
+static int indoor(const Unit*u){return mpMode==MM_INF&&indoor_at(u->x>>8,u->y>>8);}
+typedef struct{s32 x,y;s16 t;u8 e,w;}WDrop;static WDrop WD[6];static u8 botSee[MAXU],hideT[MAXU]; // v1.3 enemy weapon drops, bot LOS cache, cover timer
+static void wd_add(const Unit*u){if(mpMode!=MM_INF||u->isp||u->team==U[0].team||u->team>1||u->role==R_CIV||u->role==R_STATIC||u->role==R_PARA)return;
+ int e=mpMixed?u->ve:mpEra;if(e<0||e>=NERA||u->wpn>=NPRIM[e])return;int k=0;for(int i=1;i<6;i++)if(WD[i].t<WD[k].t)k=i;WD[k].x=u->x;WD[k].y=u->y;WD[k].t=60*20;WD[k].e=e;WD[k].w=u->wpn;}
+static int wd_near(const Unit*u){for(int i=0;i<6;i++)if(WD[i].t>0&&iabs((WD[i].x-u->x)>>8)<12&&iabs((WD[i].y-u->y)>>8)<12)return i;return -1;}
+static void wd_take(Unit*u,int i){Loadout l;memset(&l,0,sizeof l);l.prim=WD[i].w;int sl=u->wpn==2?0:u->wpn;PW[sl]=wcalc(WD[i].e,&l,0);u->mag[sl]=PW[sl].mag;u->rl=0;u->wpn=sl;WD[i].t=0;
+ feed(cat("PICKED UP ",PW[sl].n),HB_GREEN);sfx_ok();}
 static void damage(int vi,int dmg,int ai){Unit*v=&U[vi];if(!v->alive||v->inv>0||v->roll>0)return;
+ if(mpMode==MM_INF&&ai>=0&&ai<MAXU&&indoor(v)&&!indoor(&U[ai]))dmg=dmg*3/4+(dmg>0);
  if(!v->isp&&v->team!=U[0].team&&mpMode==MM_INF){if(pMark>0)dmg=dmg*5/4;if(pArmK==ATL[8][2][5]&&pArmK)dmg=dmg*11/10;}
  if(v->isp&&pArmK==ATL[8][2][6]&&ai>=0&&ai<MAXU&&mpMode==MM_INF){u16 a=atan2i(dxw(U[ai].x,v->x),dyw(U[ai].y,v->y));u16 df=a-v->tur;if(df<0x2000||df>0xE000)dmg=dmg*2/5;}if(mpMode==MM_SEA&&v->role!=R_WING)dmg=dmg*2/3+(dmg>0);if(msOn&&mpMode==MM_SEA&&v->isp)dmg=dmg/3+(dmg>0);if(v->role==R_STATIC&&mpMode==MM_AIR&&dmg<40)dmg=1;if(v->isp)dmg=diffd(dmg);v->hp-=dmg;v->hurt=6;if(v->isp){sfx_hurt();}
+ if(v->hp<=0&&v->alive)wd_add(v);
  if(v->hp<=0){v->hp=0;v->alive=0;v->resp=mpMode==MM_TANK?240:mpMode==MM_SEA?300:180;v->deaths++;if(v->team<2&&v->role!=R_DISMOUNT&&v->role!=R_WING)score[1-v->team]++;if(ai>=0)U[ai].kills++;
   if(ai==0&&mpMode==MM_INF&&pPerk==2){Unit*p=&U[0];if(p->gren<2)p->gren++;refill(p);p->rl=0;}
   sfx_boom();fx_add(v->x>>8,v->y>>8,mpMode==MM_INF?FXK_SMALL:FXK_BIG);fx_add(v->x>>8,(v->y>>8)-4,FXK_SMOKE);
@@ -213,17 +227,28 @@ static void inf_update(int i){Unit*u=&U[i];if(u->cd>0)u->cd--;if(u->cd2>0)u->cd2
  if(u->isp){int dx=0,dy=0;if(keys&K_LEFT)dx--;if(keys&K_RIGHT)dx++;if(keys&K_UP)dy--;if(keys&K_DOWN)dy++;
   sp=sp*PW[u->wpn].move/100;
   if(dx||dy){int a=atan2i(dx,dy);if(!(keys&K_R))u->tur=u->ang=a<<8;else u->ang=a<<8;if(dx&&dy)sp=sp*181/256;move_unit(u,dx*sp,dy*sp,5);u->anim++;}
-  if(pressed&K_L){next_wpn(u);feed(PW[u->wpn].n,HB_YEL);sfx_menu();}
+  if(pressed&K_L){int d=wd_near(u);if(d>=0)wd_take(u,d);else{next_wpn(u);feed(PW[u->wpn].n,HB_YEL);sfx_menu();}}
+  {static u8 wasIn;int in=indoor(u);if(in&&!wasIn)feed("INDOORS - COVER",HB_GREEN);wasIn=in;}
   if(keys&K_A)inf_fire(i);if(pressed&K_B)throw_gren(i,u->tur>>8);if(pressed&K_SEL)use_tact(i);return;}
  if(u->stun>0){u->stun--;return;}
  if(--u->think<=0){u->think=BD(u)->think;int t=nearest(i,190*BD(u)->eng/100,1);if(t>=0){u->tgt=t;u->mode=1;}else{u->tgt=nearest(i,4000,0);u->mode=0;}}
+ if(mpMode==MM_INF&&(frame+i)%8==0)botSee[i]=u->tgt>=0&&U[u->tgt].alive&&los(u->x>>8,u->y>>8,U[u->tgt].x>>8,U[u->tgt].y>>8);
+ if(mpMode==MM_INF&&!hideT[i]&&u->hp*3<u->maxhp&&!indoor(u)&&(frame+i)%45==0){int cx=u->x>>12,cy=u->y>>12,bd=99;
+  for(int y=cy-5;y<=cy+5;y++)for(int x=cx-5;x<=cx+5;x++)if(indoor_at(x*16+8,y*16+8)){int d=iabs(x-cx)+iabs(y-cy);if(d<bd){bd=d;u->gx=(x*16+8)<<8;u->gy=(y*16+8)<<8;}}
+  if(bd<99)hideT[i]=150;}
+ if(hideT[i]>0){hideT[i]--;if(!indoor(u)){int a=steer(u,atan2i(dxw(u->gx,u->x),dyw(u->gy,u->y)),12,5);if(move_unit(u,SIN(a)*sp>>8,-COS(a)*sp>>8,5))u->anim++;u->ang=u->tur=a<<8;
+   if(u->tgt>=0&&botSee[i]&&U[u->tgt].alive){int aim=atan2i(dxw(U[u->tgt].x,u->x),dyw(U[u->tgt].y,u->y));turn_to(&u->tur,aim,10<<8);if(iabs(angd(u->tur>>8,aim))<10)inf_fire(i);}return;}
+  else if(u->hp*2>=u->maxhp)hideT[i]=0;}
+ if(msOn&&u->team==U[0].team&&!u->role&&u->mode==0&&U[0].alive&&u->wander<=0){Unit*p=&U[0];int fx=(p->x>>8)+((i%3)-1)*22,fy=(p->y>>8)+(p->team?-26:26)+((i/3)&1)*14;
+  int dx=fx-(u->x>>8),dy=fy-(u->y>>8);if(idist(dx,dy)>28){int a=steer(u,atan2i(dx,dy),12,5);if(move_unit(u,SIN(a)*sp>>8,-COS(a)*sp>>8,5))u->anim++;u->ang=u->tur=a<<8;}
+  else{u->tur=p->tur;}return;} // v1.3: campaign squadmates stay with the player instead of marching off to the far edge
  if(u->wander>0){u->wander--;int a=steer(u,u->wang,12,5);move_unit(u,SIN(a)*sp>>8,-COS(a)*sp>>8,5);u->ang=u->tur=a<<8;u->anim++;return;}
  if(u->tgt<0||!U[u->tgt].alive){u->think=0;int gy=u->team?(mapH-4)*16:4*16;int a=steer(u,atan2i(0,gy-(u->y>>8)),12,5);move_unit(u,SIN(a)*sp>>8,-COS(a)*sp>>8,5);u->ang=u->tur=a<<8;u->anim++;return;}
  Unit*t=&U[u->tgt];int dx=dxw(t->x,u->x),dy=dyw(t->y,u->y),d=idist(dx,dy),aim=atan2i(dx,dy);
  if(u->mode&&d<180){turn_to(&u->tur,aim,10<<8);int mv;
   if(d>120)mv=aim;else if(d<50)mv=aim+128;else{if(rr(90)==0)u->wang^=1;mv=aim+(u->wang&1?64:-64);}
   int a=steer(u,mv&255,10,5);if(move_unit(u,SIN(a)*sp/2>>8,-COS(a)*sp/2>>8,5))u->anim++;
-  if(iabs(angd(u->tur>>8,aim))<10){if(u->role==R_DISMOUNT&&u->kind==1&&U[u->tgt].role!=R_DISMOUNT&&u->cd2<=0&&d<170){at_rocket(i,aim,45);u->cd2=200;}else inf_fire(i);}
+  if(iabs(angd(u->tur>>8,aim))<10&&(mpMode!=MM_INF||botSee[i]||d<40)){if(u->role==R_DISMOUNT&&u->kind==1&&U[u->tgt].role!=R_DISMOUNT&&u->cd2<=0&&d<170){at_rocket(i,aim,45);u->cd2=200;}else inf_fire(i);}
   if(u->gren>0&&d<100&&d>40&&rr(16000/BD(u)->eng)==0)throw_gren(i,aim);
  }else{int a=steer(u,aim,14,5);if(move_unit(u,SIN(a)*sp>>8,-COS(a)*sp>>8,5))u->anim++;u->ang=u->tur=a<<8;
   if(u->gren>0&&d<90&&rr(200)==0)throw_gren(i,aim);}
@@ -433,6 +458,7 @@ static void shots_update(void){int W=worldPx();
     if(s->kind==K_MISSILE||s->kind==K_ROCKET||s->kind==K_SHELL){if(e->isp||idist(dx,dy)<300)sfx_boom();}break;}}
   if(s->life==0&&s->kind==K_ROCKET)fx_add(bx,by,FXK_SMALL);}}
 // ---------------------------------------------------------------- rendering
+static void draw_drops(void){if(mpMode!=MM_INF)return;for(int i=0;i<6;i++){WDrop*d=&WD[i];if(d->t<=0)continue;d->t--;if(d->t<120&&(frame&4))continue;int x=scrx(d->x),y=scry(d->y);spr(x-8,y-6,OT_FX+40,0,1,3,1);}}
 static void draw_shots(void){int bt=bulletTile();
  for(int i=0;i<NS;i++){Shot*s=&S[i];if(s->life<=0||s->tgt==-2)continue;int x=scrx(s->x),y=scry(s->y);
   switch(s->kind){case K_GREN:if(s->sub==20){spr_aff(x,y,OT_FX+FX_ROCKET,0,3,atan2i(s->vx,s->vy),0x100,1,0);break;}spr(x-4,y-4,OT_FX+FX_GRENADE,0,0,3,1);break;
@@ -459,7 +485,7 @@ static void draw_units(void){
    spr_aff(x,y,u->vt,2,k==0?2:u->team?1:0,u->ang>>8,0x81,1,0);if(u->vel>40&&((frame+k)&15)==0)fx_add((u->x>>8)-(SIN(u->ang>>8)*30>>8),(u->y>>8)+(COS(u->ang>>8)*30>>8),FXK_SPARK);}
   for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role!=R_WING)continue;spr_aff(scrx(u->x)+8,scry(u->y)+12,u->vt,2,4,u->ang>>8,0x100,2,1);}}
  if(mpMode==MM_AIR&&mpEra!=4)for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role||(u->inv>0&&(frame&4)))continue;spr_aff(scrx(u->x)+10,scry(u->y)+16,plane_tile(u),2,4,u->ang>>8,0x100,2,1);}}
-static void inf_hud(Unit*P){htxt(7,19,trunc12(PW[P->wpn].n),HB_WHITE);
+static void inf_hud(Unit*P){htxt(7,19,trunc12(PW[P->wpn].n),HB_WHITE);{int d=wd_near(P);if(d>=0){htxt(7,18,cat("L: TAKE ",trunc12(PRIM[WD[d].e][WD[d].w].n)),HB_GREEN);}}
  if(P->wpn==2){hput(19,19,HT_ICON+1,15);htxt(20,19,itoa(P->mag[2]),P->mag[2]?HB_YEL:HB_RED);}else if(P->rl>0)htxt(20,19,"RLD",(frame&8)?HB_RED:HB_YEL);else htxt(20,19,itoa(P->mag[P->wpn]),P->mag[P->wpn]*4<PW[P->wpn].mag?HB_RED:HB_WHITE);
  hput(24,19,HT_ICON,15);htxt(25,19,itoa(P->gren),HB_WHITE);{static const char TL[]="FS+GDEMACTR";char tb[2]={TL[pTact<11?pTact:0],0};htxt(27,19,tb,HB_GREEN);}htxt(28,19,itoa(P->tact),HB_WHITE);}
 static int hintT;
@@ -506,7 +532,7 @@ static const u16*water_p(int e){return WATER_P[e];}
 static const u32*sky_t(int e){return SKY_T[e];}
 static const u16*sky_p(int e){return SKY_P[e];}
 static void gen_map(int mode,int era,int mi){mpMode=mode;mpEra=era;curMap=map_def(mode,era,mi);if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);}
-static void mp_run(int mode,int era,int mapi){
+static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hideT,0,sizeof hideT);memset(botSee,0,sizeof botSee);
  mpMode=mode;mpEra=era;BEAT->extra=mapi;BEAT->mode=mode;BEAT->era=era;if(mode==MM_SEA)bgm_t(TR_NAVAL);else bgm(mode==MM_AIR?3:2,era);if(!msOn)nU=12;
  int clouds=0;int te=era;
  if(msOn){te=msTEra;mpEra=te;curMap=msMap;if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);mpEra=era;}else gen_map(mode,era,mapi);
@@ -564,7 +590,7 @@ static void mp_run(int mode,int era,int mapi){
   if(mapWrap){camX=(px-120)&(worldPx()-1);camY=(py-80)&(mapH*16-1);}
   else{int tx=clampi(px-120,0,worldPx()-240),ty=clampi(py-80,0,mapH*16-160);camX+=(tx-camX)/3;camY+=(ty-camY)/3;if(iabs(tx-camX)<3)camX=tx;if(iabs(ty-camY)<3)camY=ty;}
   oam_begin();hud_clear();
-  draw_hud();draw_shots();fx_update_draw();smoke_tick_draw();draw_units();
+  draw_hud();draw_drops();draw_shots();fx_update_draw();smoke_tick_draw();draw_units();
   draw_layer(map,bgw,camX,camY,0,mapWrap);
   int ccx=0,ccy=0;if(clouds){ccx=(camX+camX/4+frame/3)&1023;ccy=(camY+camY/4)&1023;draw_layer(cmap,bgc,ccx,ccy,0,1);}
   present(clouds,ccx,ccy);}
