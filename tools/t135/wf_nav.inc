@@ -1,0 +1,20 @@
+#newmenu
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 20
+tap DOWN
+wait 20
+tap A
+wait 50
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap A
+wait 20
+tap A
+wait 50

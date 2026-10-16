@@ -1,0 +1,37 @@
+#newmenu
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 20
+tap DOWN
+wait 20
+tap A
+wait 50
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap A
+wait 20
+tap A
+wait 50
+shot fmenu
+beat
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+shot fmenu_ac
+beat
+tap A
+wait 30
+shot hangar
+beat
+end

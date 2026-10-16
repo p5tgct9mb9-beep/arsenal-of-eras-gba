@@ -2,7 +2,7 @@ CC=arm-none-eabi-gcc
 CFLAGS=-mcpu=arm7tdmi -mthumb -mthumb-interwork -O2 -Wall -Wno-unused -Wno-misleading-indentation -ffreestanding -fno-tree-loop-distribute-patterns -fno-strict-aliasing
 ROM=ArsenalOfEras.gba
 all: $(ROM)
-src/assets.c src/assets.h src/vehdb.inc src/worlddb.inc src/platdb.inc src/pflevels.inc: tools/gen_assets.py tools/gen_vehicles.py tools/gen_world.py tools/gen_platform.py tools/gen_courses.py tools/gen_levels.py tools/gen_kc.py
+src/assets.c src/assets.h src/vehdb.inc src/worlddb.inc src/wfdb.inc src/platdb.inc src/pflevels.inc: tools/gen_assets.py tools/gen_vehicles.py tools/gen_world.py tools/gen_platform.py tools/gen_courses.py tools/gen_levels.py tools/gen_kc.py tools/gen_wf.py tools/wf_roster.py tools/gen_bigart.py
 	@mkdir -p build
 	python3 tools/gen_assets.py
 src/rocketdb.inc: tools/gen_rockets.py

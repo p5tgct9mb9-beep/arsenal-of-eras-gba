@@ -1,0 +1,499 @@
+#newmenu
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 20
+tap DOWN
+wait 20
+tap A
+wait 50
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap A
+wait 20
+tap A
+wait 50
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+shot fmenu_ac
+beat
+tap A
+wait 30
+shot era_ww2
+beat
+tap SELECT
+wait 20
+shot ww2_planes
+beat
+tap SELECT
+wait 20
+shot ww2_drones
+beat
+tap SELECT
+wait 20
+shot ww2_helos
+beat
+tap SELECT
+wait 20
+shot ww2_exper
+beat
+tap SELECT
+wait 20
+shot ww2_wunder
+beat
+tap SELECT
+wait 20
+tap R
+wait 20
+shot era_cw
+beat
+tap SELECT
+wait 20
+shot cw_planes
+beat
+tap SELECT
+wait 20
+shot cw_drones
+beat
+tap SELECT
+wait 20
+shot cw_helos
+beat
+tap SELECT
+wait 20
+shot cw_exper
+beat
+tap SELECT
+wait 20
+shot cw_wunder
+beat
+tap SELECT
+wait 20
+tap R
+wait 20
+shot era_mod
+beat
+tap SELECT
+wait 20
+shot mod_planes
+beat
+tap SELECT
+wait 20
+shot mod_drones
+beat
+tap SELECT
+wait 20
+shot mod_helos
+beat
+tap SELECT
+wait 20
+shot mod_exper
+beat
+tap SELECT
+wait 20
+shot mod_wunder
+beat
+tap SELECT
+wait 20
+tap R
+wait 20
+shot era_all
+beat
+tap SELECT
+wait 20
+shot all_planes
+beat
+tap SELECT
+wait 20
+shot all_drones
+beat
+tap SELECT
+wait 20
+shot all_helos
+beat
+tap SELECT
+wait 20
+shot all_exper
+beat
+tap SELECT
+wait 20
+shot all_wunder
+beat
+tap SELECT
+wait 20
+tap R
+wait 20
+tap L
+wait 20
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+tap RIGHT
+wait 12
+beat
+end

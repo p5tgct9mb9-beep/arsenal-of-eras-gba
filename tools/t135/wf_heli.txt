@@ -1,0 +1,123 @@
+#newmenu
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 20
+tap DOWN
+wait 20
+tap A
+wait 50
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap DOWN
+wait 12
+tap A
+wait 20
+tap A
+wait 50
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap DOWN
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+tap LEFT
+wait 10
+shot sel
+beat
+tap UP
+wait 10
+tap UP
+wait 10
+tap UP
+wait 10
+tap UP
+wait 10
+tap A
+wait 150
+shot start
+beat
+hold A 4
+wait 20
+hold A 150
+beat
+hold UP 60
+shot fwd
+beat
+wait 240
+shot hover
+beat
+hold L 30
+hold LEFT 30
+beat
+hold B 260
+wait 30
+shot landed
+beat
+hold A 4
+wait 30
+beat
+end

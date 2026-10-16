@@ -1350,6 +1350,7 @@ def pack(w):return [(w[2*i]<<4)|w[2*i+1] for i in range(16)]
 emit("wave_shapes",pack(tri)+pack(org),"unsigned char")
 exec(open(os.path.join(ROOT,'tools','gen_vehicles.py')).read())
 exec(open(os.path.join(ROOT,'tools','gen_world.py')).read())
+exec(open(os.path.join(ROOT,'tools','gen_wf.py')).read())
 exec(open(os.path.join(ROOT,'tools','gen_platform.py')).read())
 exec(open(os.path.join(ROOT,'tools','gen_levels.py')).read())
 exec(open(os.path.join(ROOT,'tools','gen_kc.py')).read())
