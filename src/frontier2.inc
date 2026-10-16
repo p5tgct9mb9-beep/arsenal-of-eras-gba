@@ -28,7 +28,7 @@ static int fr_result(const char*title,const char*l1,const char*l2,int ok,int sco
  for(int t=0;;t++){BEAT->phase=ok?3:4;BEAT->scoreA=score;
   if(t==0){fr_bgspace();fr_earth_bg(56,frame&511);fr_panel(16,24,208,112);m3_ctext(34,title,ok?C_YEL:C_RED,2);m3_ctext(58,l1,C_WHITE,1);m3_ctext(70,l2,C_WHITE,1);
    m3_ctext(88,cat("SCORE ",itoa(score)),C_WHITE,2);if(best)m3_ctext(108,"NEW RECORD!",C_YEL,1);m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
-  next_frame();if(t>30&&((pressed&(K_A|K_B|K_START))||(FR_AUTO&&t>60))){sfx_ok();pressed=0;return ok;}}}
+  next_frame();if(t>30&&((pressed&(K_A|K_B|K_START))||(FR_AUTO&&t>520))){sfx_ok();pressed=0;return ok;}}}
 static int fr_menu(const char*title,const char*sub,const char*const*items,int n,const u8*done,int*sel,int scr){int redraw=1;
  for(;;){BEAT->screen=scr;BEAT->menu=*sel;BEAT->phase=0;
   if(redraw){redraw=0;fr_bgspace();fr_panel(8,6,224,148);m3_ctext(12,title,C_YEL,2);m3_ctext(30,sub,RGB(110,200,230),1);
