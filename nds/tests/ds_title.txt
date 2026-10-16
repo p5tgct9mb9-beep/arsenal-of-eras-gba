@@ -1,0 +1,3 @@
+#kc
+wait 160
+shot title

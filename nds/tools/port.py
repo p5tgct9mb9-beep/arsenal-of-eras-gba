@@ -94,7 +94,12 @@ FUNC_REPL = {
  r'static u16 bigbuf\[240\*160\] EWRAM;': 'static u16 bigbuf[240*160+240*16] EWRAM;',
 }
 NO_VRAM_REWRITE = {'braddb.inc'}
+DSVER = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'VERSION')).read().strip()
 def rewrite(fn, s):
+    # edition / version strings (the GBA source says FIELD EDITION V1.3.5)
+    ed = 'DS EDITION V' + DSVER
+    s = s.replace('m3_text(120-(20*6)/2,22,"FIELD EDITION V1.3.5"', 'm3_text(120-(%d*6)/2,22,"%s"' % (len(ed), ed))
+    s = s.replace('"FIELD EDITION V1.3.5"', '"%s"' % ed).replace('"A GBA FIELD EDITION - BY LT VASQUEZ"', '"A DS FIELD EDITION - BY LT VASQUEZ"')
     for pat, rep in FUNC_REPL.items(): s = re.sub(pat, lambda m: rep, s)
     s = s.replace('#include "gba.h"', '#include "gba_ds.h"').replace('#include "assets.h"', '#include "assets_ds.h"')
     s = re.sub(r'0x0203[Ff][Ff]([0-9A-Fa-f]{2})\b', r'(GBA_BEATBASE+0x\1)', s)

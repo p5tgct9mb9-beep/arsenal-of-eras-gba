@@ -15,6 +15,7 @@
 #define HDR 16
 static u8 saved[0x10000];
 static u8 job[SLOT] __attribute__((aligned(4)));static int jobLen,jobPos=-1,jobSlot,jobAddr;
+int ds_save_dbg_type,ds_save_dbg_size;u32 ds_save_verified;
 static u32 seq;static int curSlot=-1;static int eeType=-1;static u32 eeSize;
 int ds_save_kind;const char* ds_save_status="NO SAVE CHIP";
 u32 ds_save_writes,ds_save_imported,ds_save_complen;
@@ -48,7 +49,7 @@ static int fat_import(void){
  int n=fread(gba_sram,1,sizeof gba_sram,f);fclose(f);return n>=0x4000;}
 void save_init(void){
  memset(gba_sram,0xFF,sizeof gba_sram);
- eeType=cardEepromGetType();eeSize=cardEepromGetSize();
+ eeType=cardEepromGetType();eeSize=cardEepromGetSize();ds_save_dbg_type=eeType;ds_save_dbg_size=eeSize;
  int have=0;
  if(eeType>0&&eeSize>=2*SLOT){ds_save_kind=1;
   u32 qa=0,qb=0;int la=read_slot(0,&qa),lb=read_slot(1,&qb);
@@ -68,7 +69,11 @@ void save_tick(void){
  if(jobPos>=0){ // write one 32-byte page per frame; data first, header last
   int end=jobLen+HDR;int p=jobPos;
   if(p<end-HDR){int n=end-HDR-p;if(n>32)n=32;cardWriteEeprom(jobAddr+HDR+p,job+HDR+p,n,eeType);jobPos+=n;}
-  else{cardWriteEeprom(jobAddr,job,HDR,eeType);curSlot=jobSlot;jobPos=-1;ds_save_writes++;ds_save_status="SAVED TO DS SAVE CHIP";}
+  else{cardWriteEeprom(jobAddr,job,HDR,eeType);curSlot=jobSlot;jobPos=-1;ds_save_writes++;
+   // read the slot back from the chip and check it decodes to exactly what we meant to save
+   u32 q=0;static u8 chk[0x10000];int ok=read_slot(jobSlot,&q)==jobLen&&q==seq;
+   if(ok){static u8 b[SLOT];cardReadEeprom(jobAddr+HDR,b,jobLen,eeType);ok=rle_unpack(b,jobLen,chk,sizeof chk)==(int)sizeof chk&&!memcmp(chk,saved,sizeof chk);}
+   if(ok){ds_save_verified++;ds_save_status="SAVED TO DS SAVE CHIP";}else{ds_save_status="SAVE VERIFY FAILED";memset(saved,0x5A,sizeof saved);}}
   return;}
  if(ds_frame%30)return;
  if(!memcmp(saved,gba_sram,sizeof saved))return;

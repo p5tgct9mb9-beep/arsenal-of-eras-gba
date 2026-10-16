@@ -16,7 +16,7 @@ static int dsvol(int c,int v,int*pan){
  static const int PR[4]={25,50,100,100};int pr=PR[h&3];
  if(!(IO(0x84)&0x80)||(!en&&!el))return 0;
  *pan=en&&el?64:(el?16:112);
- int r=v*127/15*mv/8*pr/100;return r>127?127:r;}
+ int r=v*90/15*mv/8*pr/100; /* ~0.7x: the DS mix is louder than the GBA at equal register values */return r>127?127:r;}
 static void trig(int c){Ch*h=&C[c];ds_snd_trig[c]++;
  u16 cnt=IO(c==0?0x62:c==1?0x68:0x78),fr=IO(c==0?0x64:c==1?0x6C:0x7C);
  h->on=1;h->vol=cnt>>12;h->edir=(cnt>>11)&1;h->estep=(cnt>>8)&7;h->eacc=0;

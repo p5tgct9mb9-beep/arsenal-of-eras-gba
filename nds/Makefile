@@ -14,9 +14,9 @@ ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 NAME		?= ArsenalOfEras
 
 GAME_TITLE	?= Arsenal of Eras
-GAME_SUBTITLE	?= DS edition
+GAME_SUBTITLE	?= DS edition v$(shell cat VERSION)
 GAME_AUTHOR	?= LT Vasquez
-GAME_ICON	?= $(BLOCKSDS)/sys/icon.gif
+GAME_ICON	?= icon.gif
 
 # A compile_commands.json file is created if this is set to 1
 COMPDB		?= 0

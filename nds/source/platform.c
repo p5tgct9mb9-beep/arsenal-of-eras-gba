@@ -22,7 +22,7 @@ u16 ds_vkeys;
 volatile u32 ds_frame;
 int ds_last_screen;
 // harness debug block (nds/tools/dsharness scans RAM for the two magic words)
-volatile u32 ds_dbg[8]={0x5EA7DB60u,0xDB60DB60u,(u32)&gba_beat_area[1],(u32)gba_sram,(u32)gba_io,(u32)gba_bmp,(u32)&ds_frame,0};
+volatile u32 ds_dbg[12]={0x5EA7DB60u,0xDB60DB60u,(u32)&gba_beat_area[1],(u32)gba_sram,(u32)gba_io,(u32)gba_bmp,(u32)&ds_frame,0};
 
 void mus_isr(void);
 void isr_stub(void){}
@@ -87,6 +87,18 @@ static void push_display(void){
   volatile u16*r=(volatile u16*)(0x04000020+n*0x10);
   r[0]=pa;r[1]=pb;r[2]=pc;r[3]=pd;
   *(volatile s32*)(r+4)=x-8*pa-16*pb;*(volatile s32*)(r+6)=y-8*pc-16*pd;}
+ // HBlank DMA (GBA DMA0, used by the Grand Prix per-scanline affine floor): the GBA table is copied
+ // into a 193-line DS table (centred 16 lines down, x origin shifted 8 px) and replayed by DS DMA0.
+ {u32 dc0=IO32(0xB8);DMA_CR(0)=0;
+  if((dc0&0x80000000u)&&((dc0>>28)&3)==2&&IO32(0xB4)==0x04000020u&&(dc0&0xFFFF)==4){
+   static s32 hd[194][4] __attribute__((aligned(32)));
+   const s32*T=(const s32*)IO32(0xB0)-4; // the GBA code points the DMA at line 1
+   for(int l=0;l<194;l++){int g=l-16;if(g<0)g=0;if(g>159)g=159;const s32*e=T+4*g;
+    s16 pa=(s16)e[0],pc=(s16)e[1];hd[l][0]=e[0];hd[l][1]=e[1];hd[l][2]=e[2]-8*pa;hd[l][3]=e[3]-8*pc;}
+   DC_FlushRange(hd,sizeof hd);
+   volatile u32*r=(volatile u32*)0x04000020;r[0]=hd[0][0];r[1]=hd[0][1];r[2]=hd[0][2];r[3]=hd[0][3];
+   DMA_SRC(0)=(u32)&hd[1];DMA_DEST(0)=0x04000020;
+   DMA_CR(0)=DMA_ENABLE|DMA_REPEAT|DMA_START_HBL|DMA_32_BIT|DMA_DST_RESET|4;}}
  // windows: game windows are offset into the centred frame; a free window masks the border
  u16 w0h=IO(0x40),w1h=IO(0x42),w0v=IO(0x44),w1v=IO(0x46);
  #define WH(v) ((u16)((((v)>>8)+8>255?255:((v)>>8)+8)<<8|(((v)&255)+8>255?255:((v)&255)+8)))
@@ -114,6 +126,7 @@ void gba_vsync(void){
  ui_frame();
  save_tick();
  ds_dbg[7]=ds_dbg[0]; // keep the block referenced
+ {extern u32 ds_save_writes;extern int ds_save_dbg_type;extern u32 ds_save_verified;ds_dbg[8]=ds_save_kind;ds_dbg[9]=ds_save_dbg_type;ds_dbg[10]=ds_save_verified;ds_dbg[11]=ds_save_writes;}
 }
 u16 gba_keyinput(void){return (REG_KEYINPUT&0x3FF)&~ds_vkeys;}
 

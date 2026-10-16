@@ -107,6 +107,7 @@ int main(int argc,char**argv){
   else if(!strcmp(c,"peek")){unsigned ad=strtoul(a,0,16);int N=atoi(b);long o=mapaddr(ad);printf("[peek %08x]",ad);for(int i=0;i<N;i++){unsigned v=rd32(o+2*i);printf(" %04x",v&0xFFFF);}printf("\n");}
   else if(!strcmp(c,"peekds")){long o=strtoul(a,0,16)&0x3FFFFF;int N=atoi(b);printf("[peekds %08lx]",o);for(int i=0;i<N;i++)printf(" %08x",rd32(o+4*i));printf("\n");}
   else if(!strcmp(c,"sram64")){unsigned so=a[0]?strtoul(a,0,16):0;finddbg();printf("[sram64]");for(int i=0;i<64;i++)printf(" %02x",sramOff<0?0:ram[sramOff+so+i]);printf("\n");}
+  else if(!strcmp(c,"savestat")){finddbg();if(dbgOff>=0)printf("[savestat] kind=%u type=%d verified=%u writes=%u\n",rd32(dbgOff+32),(int)rd32(dbgOff+36),rd32(dbgOff+40),rd32(dbgOff+44));}
   else if(!strcmp(c,"sram")){finddbg();printf("[sram]");for(int i=0;i<16;i++)printf(" %02x",sramOff<0?0:ram[sramOff+i]);printf("\n");}
   else if(!strcmp(c,"savedump")){finddbg();FILE*o=fopen(a,"wb");if(o&&sramOff>=0)fwrite(ram+sramOff,1,32768,o);if(o)fclose(o);printf("[savedump %s]\n",a);}
   else if(!strcmp(c,"audio")){

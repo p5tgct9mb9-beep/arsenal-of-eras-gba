@@ -23,3 +23,4 @@ for k in diff: print('DIFF %-28s gba=%s ds=%s'%(k,gb[k],ds[k]))
 for k in miss: print('MISS',k)
 PY
 cat $O/compare.txt | head -60
+python3 nds/tools/dsbeatcmp.py $O build/R135 | tee $O/beatcmp.txt | head -1
