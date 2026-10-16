@@ -1295,6 +1295,11 @@ L=voice(R8("G4:2 B4:2 D5:4 B4:2 C5:2 D5:4 | E5:4 D5:2 B4:2 A4:8 | C5:2 E5:2 G5:4
 B=chordb("R:2 .:1 R:1 F:2 .:2 R:2 .:1 R:1 O:2 .:2",["G2","E2","C2","D2","G2","E2","C2","D2"])
 Hm=voice("B3:16 G3:16 E4:16 F#4:16 B3:16 G4:16 E4:16 D4:16",128)
 track("HANGAR BAY",7,1,L,B,Hm,drums("K..HS.H.K.KHS.H.",128),duty=2,lenv=1,hduty=1,lvol=11,hvol=5)
+# 52 ORBIT DEFENDERS - Rocket Invaders arcade chiptune, E minor
+L=voice(R8("E5:2 G5:2 B5:2 G5:2 E6:4 B5:4 | D6:2 B5:2 A5:2 F#5:2 G5:8 | C6:2 B5:2 A5:2 G5:2 F#5:4 E5:4 | D#5:4 F#5:4 B5:8 | E5:2 G5:2 B5:2 G5:2 E6:4 G6:4 | F#6:2 E6:2 D6:2 B5:2 C6:8 | A5:2 C6:2 E6:2 C6:2 B5:4 D#6:4 | E6:12 .:4"),128)
+B=chordb("R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1",["E2","G2","C2","B1","E2","A1","A1","B1"])
+Hm=voice(arp4([["E4","G4","B4","G4"],["G4","B4","D5","B4"],["C4","E4","G4","E4"],["B3","D#4","F#4","D#4"],["E4","G4","B4","G4"],["A3","C4","E4","C4"],["A3","C4","E4","C4"],["B3","D#4","F#4","D#4"]]),128)
+track("ORBIT DEFENDERS",4,1,L,B,Hm,drums("K.H.S.HKK.H.S.HS",128),duty=1,lenv=0,hduty=2,lvol=11,hvol=5,wave=1)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)
 emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])

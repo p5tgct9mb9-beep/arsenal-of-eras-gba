@@ -1,0 +1,53 @@
+wait 100
+tap START
+wait 40
+tap UP
+wait 4
+tap UP
+wait 4
+tap UP
+wait 4
+tap UP
+wait 4
+tap A
+wait 30
+tap DOWN
+wait 4
+tap A
+wait 6
+tap A
+wait 60
+shot rm_car0
+tap RIGHT
+wait 20
+shot rm_car1
+tap LEFT
+wait 10
+tap SELECT
+wait 10
+shot rm_car0_nospacex
+tap SELECT
+wait 10
+tap A
+wait 40
+shot rm_track0
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 20
+shot rm_track3
+tap A
+wait 300
+shot rm_tt_go
+wait 100
+hold A+LEFT 30
+hold A 200
+hold A+RIGHT 40
+hold A 130
+shot rm_tt_drive
+tap START
+wait 20
+shot rm_pause
+end

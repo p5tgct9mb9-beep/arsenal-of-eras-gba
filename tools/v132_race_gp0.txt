@@ -1,0 +1,148 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 6
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 52430000
+tap A
+wait 600
+shot r_gp0_00
+beat
+wait 600
+shot r_gp0_01
+beat
+wait 600
+shot r_gp0_02
+beat
+wait 600
+shot r_gp0_03
+beat
+wait 600
+shot r_gp0_04
+beat
+wait 600
+shot r_gp0_05
+beat
+wait 600
+shot r_gp0_06
+beat
+wait 600
+shot r_gp0_07
+beat
+wait 600
+shot r_gp0_08
+beat
+wait 600
+shot r_gp0_09
+beat
+wait 600
+shot r_gp0_10
+beat
+wait 600
+shot r_gp0_11
+beat
+wait 600
+shot r_gp0_12
+beat
+wait 600
+shot r_gp0_13
+beat
+wait 600
+shot r_gp0_14
+beat
+wait 600
+shot r_gp0_15
+beat
+wait 600
+shot r_gp0_16
+beat
+wait 600
+shot r_gp0_17
+beat
+wait 600
+shot r_gp0_18
+beat
+wait 600
+shot r_gp0_19
+beat
+wait 600
+shot r_gp0_20
+beat
+wait 600
+shot r_gp0_21
+beat
+wait 600
+shot r_gp0_22
+beat
+wait 600
+shot r_gp0_23
+beat
+wait 600
+shot r_gp0_24
+beat
+wait 600
+shot r_gp0_25
+beat
+wait 600
+shot r_gp0_26
+beat
+wait 600
+shot r_gp0_27
+beat
+wait 600
+shot r_gp0_28
+beat
+wait 600
+shot r_gp0_29
+beat
+wait 600
+shot r_gp0_30
+beat
+wait 600
+shot r_gp0_31
+beat
+wait 600
+shot r_gp0_32
+beat
+wait 600
+shot r_gp0_33
+beat
+wait 600
+shot r_gp0_34
+beat
+wait 600
+shot r_gp0_35
+beat
+wait 600
+shot r_gp0_36
+beat
+wait 600
+shot r_gp0_37
+beat
+wait 600
+shot r_gp0_38
+beat
+wait 600
+shot r_gp0_39
+beat
+sram64 2200
+end

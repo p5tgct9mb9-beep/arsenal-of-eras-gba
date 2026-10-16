@@ -172,6 +172,8 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "over.inc"
 #include "frontier5.inc"
 #include "frontier_stub.inc"
+#include "race.inc"
+#include "v132_stub.inc"
 #include "menu131.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
@@ -180,7 +182,7 @@ int main(void){
   if(!kc_done()){ps_read();tutorial(1);}
   int sel=0,era=0;
   for(;;){bgm(1,0);sel=main_menu3(sel);if(sel<0)break;
-   if(sel==CAT_LOAD)loadout_hub(&era);else if(sel==CAT_SET)settings_menu();else if(sel==CAT_KC)tutorial(0);else category(sel);
+   if(sel==CAT_LOAD)loadout_hub(&era);else if(sel==CAT_SET)settings_menu();else if(sel==CAT_KC)tutorial(0);else if(sel==CAT_CRED)credits_roll(0);else category(sel);
    pressed=0;
    }
  }

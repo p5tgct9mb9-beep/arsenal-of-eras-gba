@@ -7,7 +7,9 @@ src/assets.c src/assets.h src/vehdb.inc src/worlddb.inc src/platdb.inc src/pflev
 	python3 tools/gen_assets.py
 src/rocketdb.inc: tools/gen_rockets.py
 	python3 tools/gen_rockets.py
-build/game.elf: src/crt0.s src/main.c $(wildcard src/*.inc) src/v131db.inc src/assets.c src/assets.h src/gba.h src/gba.ld
+src/racedb.inc: tools/gen_race.py tools/gen_race_cars.py
+	python3 tools/gen_race.py
+build/game.elf: src/crt0.s src/main.c $(wildcard src/*.inc) src/v131db.inc src/racedb.inc src/assets.c src/assets.h src/gba.h src/gba.ld
 	@mkdir -p build
 	$(CC) $(CFLAGS) -nostartfiles -nostdlib -T src/gba.ld -o $@ src/crt0.s src/main.c src/assets.c -lgcc
 $(ROM): build/game.elf tools/gbafix

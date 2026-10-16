@@ -1,0 +1,64 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 6
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 52430125
+tap A
+wait 500
+shot r_tt5_00
+beat
+wait 500
+shot r_tt5_01
+beat
+wait 500
+shot r_tt5_02
+beat
+wait 500
+shot r_tt5_03
+beat
+wait 500
+shot r_tt5_04
+beat
+wait 500
+shot r_tt5_05
+beat
+wait 500
+shot r_tt5_06
+beat
+wait 500
+shot r_tt5_07
+beat
+wait 500
+shot r_tt5_08
+beat
+wait 500
+shot r_tt5_09
+beat
+wait 500
+shot r_tt5_10
+beat
+wait 500
+shot r_tt5_11
+beat
+sram64 2200
+end

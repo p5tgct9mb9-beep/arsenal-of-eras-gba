@@ -37,7 +37,15 @@ static void mm_static(void){
  for(int y=MP_Y0;y<158;y++){kl_poll();for(int x=4;x<236;x++){if(!mm_under(x,y))continue;u16 c=fb[y*240+x];int r=c&31,g=(c>>5)&31,b=(c>>10)&31;
   r=(r*3+1*5)>>3;g=(g*3+2*5)>>3;b=(b*3+6*5)>>3;fb[y*240+x]=r|(g<<5)|(b<<10);}}
  dma32(fb,bigbuf,240*160/2);mm_earth_rows(0,160,0);}
-static void mm_icon(int k,int x0,int y0){const u8*s=&mi_icon[k*144];for(int y=0;y<12;y++)for(int x=0;x<12;x++){int v=s[y*12+x];if(v)fb[(y0+y)*240+x0+x]=mi_pal[v];}}
+static void mm_icon2(int k,int x,int y){u16*F=fb;
+ #define IP(a,b,w,h,c) do{for(int _j=0;_j<(h);_j++)for(int _i=0;_i<(w);_i++)F[(y+(b)+_j)*240+x+(a)+_i]=(c);}while(0)
+ if(k==CAT_RACE){IP(1,5,10,4,RGB(230,40,40));IP(3,3,5,2,RGB(230,40,40));IP(4,3,3,2,RGB(120,190,240));IP(1,9,3,2,RGB(20,20,20));IP(8,9,3,2,RGB(20,20,20));}
+ else if(k==CAT_HANGAR){IP(5,1,2,10,RGB(200,206,220));IP(0,5,12,2,RGB(200,206,220));IP(3,10,6,1,RGB(200,206,220));IP(5,0,2,1,RGB(120,190,240));}
+ else if(k==CAT_ARCADE){IP(2,2,8,4,RGB(110,240,120));IP(1,4,10,2,RGB(110,240,120));IP(3,3,2,1,0);IP(7,3,2,1,0);IP(1,6,2,2,RGB(110,240,120));IP(9,6,2,2,RGB(110,240,120));IP(5,8,2,3,RGB(250,250,250));}
+ else{IP(1,2,10,8,RGB(236,196,92));IP(2,3,8,6,RGB(40,30,20));IP(3,4,6,1,RGB(236,196,92));IP(3,6,4,1,RGB(236,196,92));}
+ #undef IP
+}
+static void mm_icon(int k,int x0,int y0){if(k>=8){mm_icon2(k,x0,y0);return;}const u8*s=&mi_icon[k*144];for(int y=0;y<12;y++)for(int x=0;x<12;x++){int v=s[y*12+x];if(v)fb[(y0+y)*240+x0+x]=mi_pal[v];}}
 
 static u16 mmLog[1600] EWRAM;static int mmLn;
 static inline void mm_px(int x,int y,u16 c){if((unsigned)x<240&&(unsigned)y<160&&!mm_under(x,y)&&mmLn<1600){int i=y*240+x;mmLog[mmLn++]=i;MMV[i]=c;}}
@@ -82,9 +90,9 @@ static void mm_launch(void){int cyc=frame/720,t=frame%720;int k=cyc&3;static con
 static void mm_kc_bake(int x0,int y0){for(int y=0;y<20;y++)for(int x=0;x<20;x++){int v=kc_astro[y*20+x];if(v)fb[(y0+y)*240+x0+x]=kc_astro_pal[v];}}
 static void mm_kc(int x0,int y0){
  if((frame&127)<6){mm_px(x0+8,y0+6,RGB(200,140,70));mm_px(x0+13,y0+6,RGB(200,140,70));}mm_px(x0+14,y0+3+((frame>>4)&1),RGB(255,255,255));}
-static int main_menu3(int sel){static const char*const MN[CAT_N]={"CAMPAIGN","BATTLES","SPEC OPS","SPECIALIST","EXPLORE","LOADOUT","SETTINGS","BOOT CAMP (KC)"};
- static const char*const L1[CAT_N]={"WW2 - COLD WAR - MODERN","6V6 INFANTRY - ARMOR - DOGFIGHT","SPEC OPS PLATFORMER","SNIPER - EOD - LRRP - CLASSIFIED","SPACE LAUNCH - MOON - MARS - DEFENSE","KITS - 6V6 ARSENAL - CHARACTER","MUSIC - VOLUME - DIFFICULTY","CONTROLS + EVERY MODE"};
- static const char*const L2[CAT_N]={"WHAT-IF SCENARIOS","NAVAL - SWORD FIGHT 1V1 - FPS","SPEC OPS: BRADLEY","ANTI-AIRCRAFT - DRONE OPS","ROCKET BUILDER - ASTEROIDS - HISTORY","","BOT SKILL - HINTS - MUSIC PLAYER","WITH KC THE DOG"};
+static int main_menu3(int sel){static const char*const MN[CAT_N]={"CAMPAIGN","BATTLES","SPEC OPS","SPECIALIST","EXPLORE","LOADOUT","SETTINGS","BOOT CAMP (KC)","RACING","HANGAR","ARCADE","CREDITS"};
+ static const char*const L1[CAT_N]={"WW2 - COLD WAR - MODERN","6V6 INFANTRY - ARMOR - DOGFIGHT","SPEC OPS PLATFORMER","SNIPER - EOD - LRRP - CLASSIFIED","SPACE LAUNCH - MOON - MARS - DEFENSE","KITS - 6V6 ARSENAL - CHARACTER","MUSIC - VOLUME - DIFFICULTY","CONTROLS + EVERY MODE","TESLA EV GRAND PRIX - TIME TRIAL","AIRCRAFT BUILDER: PLANES - DRONES","ROCKET INVADERS","ARSENAL OF ERAS"};
+ static const char*const L2[CAT_N]={"WHAT-IF SCENARIOS","NAVAL - SWORD FIGHT 1V1 - FPS","SPEC OPS: BRADLEY","ANTI-AIRCRAFT - DRONE OPS","ROCKET BUILDER - ASTEROIDS - HISTORY","","BOT SKILL - HINTS - MUSIC PLAYER","WITH KC THE DOG","FREE DRIVE - 4 TRACKS, MODE 7","HELICOPTERS - TEST FLIGHT","ORIGINAL ROCKET ARCADE SHOOTER","THE PEOPLE (AND DOG) BEHIND IT"};
  bgCached=-1;mm_ls=0;mm_cs=0;mm_part=0;mmLn=0;mm_static();lfb=0;dma32(bigbuf,fb,240*160/2);vsync();dma32(bigbuf,MMV,240*160/2);REG_DISPCNT=3|(1<<10);int dirty=1;
  for(;;){BEAT->screen=SCR_MENU;BEAT->menu=sel;
   next_frame();
@@ -93,7 +101,9 @@ static int main_menu3(int sel){static const char*const MN[CAT_N]={"CAMPAIGN","BA
    u16 CY=RGB(90,210,240),GD=RGB(236,196,92);
    m3_fill(4,MP_Y0,MP_X1-4,1,CY);m3_fill(4,MP_Y1-1,MP_X1-4,1,CY);m3_fill(4,MP_Y0,1,MP_Y1-MP_Y0,CY);m3_fill(MP_X1-1,MP_Y0,1,MP_Y1-MP_Y0,CY);
    m3_fill(4,MP_Y0,14,2,GD);m3_fill(MP_X1-15,MP_Y1-2,14,2,GD);m3_fill(4,MD_Y0,232,1,CY);m3_fill(4,157,232,1,CY);m3_fill(4,MD_Y0,10,2,GD);m3_fill(226,156,10,2,GD);
-   for(int k=0;k<CAT_N;k++){int y=34+k*13;int on=k==sel;
+   int top=sel-7;if(top<0)top=0;if(top>CAT_N-8)top=CAT_N-8;
+   if(top>0)m3_text(110,31,"^",C_YEL,1);if(top<CAT_N-8)m3_text(110,128,"v",C_YEL,1);
+   for(int k=top;k<top+8;k++){int y=34+(k-top)*13;int on=k==sel;
     if(on){m3_fill(6,y-2,MP_X1-8,12,RGB(16,60,110));m3_fill(6,y-2,2,12,CY);}
     mm_icon(k,10,y-2);m3_text(25,y,MN[k],on?C_YEL:C_WHITE,1);}
    ltx(10,140,L1[sel],RGB(170,200,220));ltx(10,149,L2[sel],RGB(130,150,180));
@@ -103,6 +113,6 @@ static int main_menu3(int sel){static const char*const MN[CAT_N]={"CAMPAIGN","BA
   mm_stars();mm_iss();mm_launch();mm_kc(216,3);
   if(pressed&K_UP){sel=(sel+CAT_N-1)%CAT_N;sfx_menu();dirty=1;}
   if(pressed&K_DOWN){sel=(sel+1)%CAT_N;sfx_menu();dirty=1;}
-  if(pressed&(K_LEFT|K_RIGHT)){sel=(sel+4)%8;sfx_menu();dirty=1;}
+  if(pressed&(K_LEFT|K_RIGHT)){sel=sel<8?(sel+4)%8:(pressed&K_LEFT?0:CAT_N-1);sfx_menu();dirty=1;}
   if(pressed&(K_A|K_START)){sfx_ok();bgCached=-1;return sel;}
   if(pressed&K_B){bgCached=-1;return -1;}}}
