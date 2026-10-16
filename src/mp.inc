@@ -133,11 +133,23 @@ static u8 msOn,msWin;static int msTEra;static const MapDef*msMap;
 static int (*ms_role)(int i);static int (*ms_draw)(int k,int x,int y);static void (*ms_death)(int vi,int ai);static void (*ms_init)(void);
 static int (*ms_tick)(void);static void (*ms_hud)(void);static void (*ms_spawn)(Unit*u,int i);static void (*ms_result)(int win);static void (*ms_skip)(void);
 // ---------------------------------------------------------------- units
+// v1.3.5 dogfight pacing (6v6 air only; hangar test flights keep their own model)
+#ifdef PACE_OFF
+#define AIRPACE 0
+#else
+#define AIRPACE (mpMode==MM_AIR&&!hgOn)
+#endif
+#define AIR_SPD(v) (AIRPACE?(v)*11/16:(v))      // cruise/max speed -31%
+#define AIR_TRN(v) (AIRPACE?(v)*3/4:(v))        // turn rate -25%
+#define AIR_BSP(v) (AIRPACE?(v)*3/4:(v))        // bullet closure -25% (life +22% keeps gun range)
+static int mpAP; // headless autopilot: player unit flown/driven by the bot AI when the AUTO mailbox is set
+#define MPM ((volatile u32*)0x0203FF80)       // [0]'MPST' [1]kills [2]sum life frames [3]missiles [4]locked [5..7]veh ids (12 x u16 packed) 
+static u32 mpSpF[12] EWRAM;
 static void spawn(Unit*u,int i){
  int team=u->team;int W=worldPx(),Hp=mapH*16;
- u->alive=1;u->inv=90;u->hurt=0;u->vel=0;u->roll=0;u->evade=0;u->wander=0;u->tgt=-1;u->cd=30;u->cd2=0;
+ if(i>=0&&i<12)mpSpF[i]=frame;u->alive=1;u->inv=90;u->hurt=0;u->vel=0;u->roll=0;u->evade=0;u->wander=0;u->tgt=-1;u->cd=30;u->cd2=0;
  int slot=(i%6)-3;
- if(mpMode==MM_AIR){u->x=((W/2+slot*40)&(W-1))<<8;u->y=(team?120:Hp-120)<<8;u->ang=team?0x8000:0;u->vel=AV(u)->spd;u->hp=u->maxhp=AV(u)->hp;u->ammo=AV(u)->ammo;u->fuel=AV(u)->fuel*60;}
+ if(mpMode==MM_AIR){u->x=((W/2+slot*40)&(W-1))<<8;u->y=(team?120:Hp-120)<<8;u->ang=team?0x8000:0;u->vel=AIR_SPD(AV(u)->spd);u->hp=u->maxhp=AV(u)->hp;u->ammo=AV(u)->ammo;u->fuel=AV(u)->fuel*60;}
  else if(mpMode==MM_SEA){u->x=((W/2+slot*72+36)&(W-1))<<8;u->y=(team?150:Hp-150)<<8;u->ang=u->tur=team?0x8000:0;u->vel=0;u->mode=team?1:0;u->hp=u->maxhp=SV(u)->hp;u->ammo=SV(u)->ammo2;}
  else{int sp=mpMode==MM_TANK?36:20;u->x=(W/2+slot*sp+sp/2)<<8;u->y=(team?3*16+8:Hp-3*16-8)<<8;
   if(mpMode==MM_TANK){u->y+=(team?16:-16)<<8;}
@@ -159,9 +171,9 @@ static void wd_take(Unit*u,int i){Loadout l;memset(&l,0,sizeof l);l.prim=WD[i].w
 static void damage(int vi,int dmg,int ai){Unit*v=&U[vi];if(!v->alive||v->inv>0||v->roll>0)return;
  if(mpMode==MM_INF&&ai>=0&&ai<MAXU&&indoor(v)&&!indoor(&U[ai]))dmg=dmg*3/4+(dmg>0);
  if(!v->isp&&v->team!=U[0].team&&mpMode==MM_INF){if(pMark>0)dmg=dmg*5/4;if(pArmK==ATL[8][2][5]&&pArmK)dmg=dmg*11/10;}
- if(v->isp&&pArmK==ATL[8][2][6]&&ai>=0&&ai<MAXU&&mpMode==MM_INF){u16 a=atan2i(dxw(U[ai].x,v->x),dyw(U[ai].y,v->y));u16 df=a-v->tur;if(df<0x2000||df>0xE000)dmg=dmg*2/5;}if(mpMode==MM_SEA&&v->role!=R_WING)dmg=dmg*2/3+(dmg>0);if(msOn&&mpMode==MM_SEA&&v->isp)dmg=dmg/3+(dmg>0);if(v->role==R_STATIC&&mpMode==MM_AIR&&dmg<40)dmg=1;if(v->isp)dmg=diffd(dmg);v->hp-=dmg;v->hurt=6;if(v->isp){sfx_hurt();}
+ if(v->isp&&pArmK==ATL[8][2][6]&&ai>=0&&ai<MAXU&&mpMode==MM_INF){u16 a=atan2i(dxw(U[ai].x,v->x),dyw(U[ai].y,v->y));u16 df=a-v->tur;if(df<0x2000||df>0xE000)dmg=dmg*2/5;}if(mpMode==MM_SEA&&v->role!=R_WING)dmg=dmg*2/3+(dmg>0);if(msOn&&mpMode==MM_SEA&&v->isp)dmg=dmg/3+(dmg>0);if(v->role==R_STATIC&&mpMode==MM_AIR&&dmg<40)dmg=1;if(AIRPACE&&v->role!=R_STATIC)dmg=dmg/2+(dmg>0);if(v->isp)dmg=diffd(dmg);v->hp-=dmg;v->hurt=6;if(v->isp){sfx_hurt();}
  if(v->hp<=0&&v->alive)wd_add(v);
- if(v->hp<=0){v->hp=0;v->alive=0;v->resp=mpMode==MM_TANK?240:mpMode==MM_SEA?300:180;v->deaths++;if(v->team<2&&v->role!=R_DISMOUNT&&v->role!=R_WING){score[1-v->team]++;if(sbOn&&sbWin==3&&ai==0)score[0]++;}if(ai>=0)U[ai].kills++;
+ if(v->hp<=0){v->hp=0;v->alive=0;v->resp=mpMode==MM_TANK?240:mpMode==MM_SEA?300:AIRPACE?260:180;v->deaths++;{int vi=(int)(v-U);if(vi>=0&&vi<12){MPM[1]++;MPM[2]+=frame-mpSpF[vi];}}if(v->team<2&&v->role!=R_DISMOUNT&&v->role!=R_WING){score[1-v->team]++;if(sbOn&&sbWin==3&&ai==0)score[0]++;}if(ai>=0)U[ai].kills++;
   if(ai==0&&mpMode==MM_INF&&pPerk==2){Unit*p=&U[0];if(p->gren<2)p->gren++;refill(p);p->rl=0;}
   sfx_boom();fx_add(v->x>>8,v->y>>8,mpMode==MM_INF?FXK_SMALL:FXK_BIG);fx_add(v->x>>8,(v->y>>8)-4,FXK_SMOKE);
   if(ai==0)feed(mpMode==MM_INF||v->role==R_DISMOUNT?"+1 KILL":v->role==R_WING?"AIRCRAFT SHOT DOWN":mpMode==MM_SEA?"+1 - SHIP SUNK":"+1 KILL - TARGET DESTROYED",HB_GREEN);else if(vi==0)feed("YOU WERE KILLED",HB_RED);if(msOn)ms_death(vi,ai);}}
@@ -304,7 +316,7 @@ static void tank_drive(Unit*u,int throttle){ // throttle -256..256
  const TankS*T=TV(u);int tv=T->spd*throttle/256;if(flag_at(u->x>>8,u->y>>8)&TF_SLOW)tv=tv*2/3;if(u->vel<tv)u->vel+=16;if(u->vel>tv)u->vel-=16;if(iabs(u->vel-tv)<16)u->vel=tv;
  int a=u->ang>>8;int dx=SIN(a)*u->vel>>8,dy=-COS(a)*u->vel>>8;if(!move_unit(u,dx,dy,T->cls==VC_MINE||T->cls==VC_JEEP?7:10))u->vel=u->vel*3/4;if(u->vel)u->anim++;}
 static void tank_update(int i){Unit*u=&U[i];const TankS*T=TV(u);if(u->cd>0)u->cd--;if(u->cd2>0)u->cd2--;if(msOn&&u->role&&ms_role(i))return;int cs=mpMixed&&is_case(T);
- if(u->isp){int th=0;if(keys&K_UP)th=256;if(keys&K_DOWN)th=-150;int tr=0;if(keys&K_LEFT)tr=-T->turn;if(keys&K_RIGHT)tr=T->turn;
+ if(u->isp&&!mpAP){int th=0;if(keys&K_UP)th=256;if(keys&K_DOWN)th=-150;int tr=0;if(keys&K_LEFT)tr=-T->turn;if(keys&K_RIGHT)tr=T->turn;
   u->ang+=tr;u->tur+=tr;if(!cs){if(keys&K_L)u->tur-=T->turn*2;if(keys&K_R)u->tur+=T->turn*2;}
   if(pressed&K_SEL){if(u->gren>0&&(T->cls==VC_IFV||T->cls==VC_APC))deploy(i);else u->tur=u->ang;}if(cs)u->tur=u->ang;
   tank_drive(u,th);if(keys&K_A)tank_fire(i);if(keys&K_B)tank_b(i);return;}
@@ -377,19 +389,19 @@ static void sea_update(int i){Unit*u=&U[i];const ShipS*S=SV(u);if(u->cd>0)u->cd-
  if((frame+i)%60==0){if(idist(dxw(u->x,u->lx),dyw(u->y,u->ly))<3){u->wander=50;u->wang=rr(256);}u->lx=u->x;u->ly=u->y;}}
 // ---------------------------------------------------------------- air
 static void air_fire(int i){Unit*u=&U[i];const AirS*A=AV(u);if(u->cd>0)return;if(hgRange&&!u->isp)return;u->cd=A->rate+(u->isp?0:3+BD(u)->cd/3);if(u->cd<1)u->cd=1;u->anim^=1;int j=u->isp?0:(BD(u)->jit+1)/2;
- fire_bullet(i,(u->ang>>8)+(j?rr(j*2+1)-j:0),A->bspd,A->dmg,36,K_BUL,u->anim?6:-6);
+ fire_bullet(i,(u->ang>>8)+(j?rr(j*2+1)-j:0),AIR_BSP(A->bspd),A->dmg,AIRPACE?44:36,K_BUL,u->anim?6:-6);
  if(u->isp||idist(dxw(u->x,U[0].x),dyw(u->y,U[0].y))<140){if(ERA_SCIFI(mpEra))sfx_laser();else sfx_shot(0);}}
-static void air_missile(int i){Unit*u=&U[i];const AirS*A=AV(u);if(hgRange&&!u->isp)return;if(hgOn&&u->isp&&hgCam){if(u->cd2<=0){u->cd2=30;hg_photo(i);}return;}if(u->ammo<=0||u->cd2>0)return;u->ammo--;u->cd2=40;
+static void air_missile(int i){Unit*u=&U[i];const AirS*A=AV(u);if(hgRange&&!u->isp)return;if(hgOn&&u->isp&&hgCam){if(u->cd2<=0){u->cd2=30;hg_photo(i);}return;}if(u->ammo<=0||u->cd2>0)return;u->ammo--;u->cd2=AIRPACE?90:40;MPM[3]++;
  if(A->sec==2){Shot*s=shot_new();if(!s)return;int a=u->ang>>8;int sp=u->vel+60;s->x=u->x;s->y=u->y;s->vx=SIN(a)*sp>>8;s->vy=-COS(a)*sp>>8;s->kind=K_GREN;s->sub=21;s->dmg=75;s->life=44;s->team=u->team;s->owner=i;
   sfx_whoosh();if(u->isp)feed("BOMBS AWAY",HB_YEL);return;}
  if(A->sec==3){Shot*s=shot_new();if(!s)return;int a=u->ang>>8;int sp=u->vel+180;s->x=u->x;s->y=u->y;s->vx=SIN(a)*sp>>8;s->vy=-COS(a)*sp>>8;s->kind=K_ROCKET;s->sub=30;s->dmg=95;s->life=130;s->team=u->team;s->owner=i;s->ang=a<<8;
   sfx_whoosh();if(u->isp)feed("TORPEDO AWAY",HB_YEL);return;}
- Shot*s=shot_new();if(!s)return;int a=u->ang>>8;s->x=u->x;s->y=u->y;s->ang=a<<8;s->kind=A->mturn?K_MISSILE:K_ROCKET;s->team=u->team;s->owner=i;s->dmg=A->mturn?65:50;s->life=A->mturn?170:80;
- int sp=u->vel+(A->mturn?250:500);s->vx=SIN(a)*sp>>8;s->vy=-COS(a)*sp>>8;s->dist=sp;s->tgt=-1;
+ Shot*s=shot_new();if(!s)return;int a=u->ang>>8;s->x=u->x;s->y=u->y;s->ang=a<<8;s->kind=A->mturn?K_MISSILE:K_ROCKET;s->team=u->team;s->owner=i;s->dmg=A->mturn?65:50;s->life=A->mturn?(AIRPACE?220:170):(AIRPACE?100:80);
+ int sp=u->vel+AIR_BSP(A->mturn?250:500);s->vx=SIN(a)*sp>>8;s->vy=-COS(a)*sp>>8;s->dist=sp;s->tgt=-1;
  if(A->mturn){int best=-1,bd=330;for(int k=0;k<NU;k++){Unit*e=&U[k];if(!e->alive||e->team==u->team)continue;int dx=dxw(e->x,u->x),dy=dyw(e->y,u->y),d=idist(dx,dy);
-   if(d<bd&&iabs(angd(atan2i(dx,dy),a))<40){bd=d;best=k;}}s->tgt=best;}
+   if(d<bd&&iabs(angd(atan2i(dx,dy),a))<(AIRPACE?32:40)){bd=d;best=k;}}s->tgt=best;if(best>=0)MPM[4]++;}
  sfx_whoosh();if(u->isp)feed(s->tgt>=0?"FOX TWO - LOCKED":(A->mturn?"FOX TWO - NO LOCK":"ROCKETS AWAY"),HB_YEL);}
-static void air_move(Unit*u,int target_spd){const AirS*A=AV(u);if(u->vel<target_spd)u->vel+=6;if(u->vel>target_spd)u->vel-=6;
+static void air_move(Unit*u,int target_spd){const AirS*A=AV(u);target_spd=AIR_SPD(target_spd);int ac=AIRPACE?4:6;if(u->vel<target_spd)u->vel+=ac;if(u->vel>target_spd)u->vel-=ac;
  int a=u->ang>>8;int W=worldPx()<<8;u->x=(u->x+(SIN(a)*u->vel>>8))&(W-1);u->y=(u->y-(COS(a)*u->vel>>8))&(W-1);
  if(u->roll>0){u->roll--;int p=a+(u->wang?64:-64);u->x=(u->x+SIN(p)*1)&(W-1);u->y=(u->y-COS(p)*1)&(W-1);}if(u->rollcd>0)u->rollcd--;(void)A;}
 static void air_gunner(int i){Unit*u=&U[i];if((frame+i)%9)return;if(hgRange&&!u->isp)return;int tail=((u->ang>>8)+128)&255;
@@ -409,21 +421,21 @@ static void air_hover(int i,const AirS*A,int burn){Unit*u=&U[i];int a=u->ang>>8;
 static void air_update(int i){Unit*u=&U[i];const AirS*A=AV(u);if(u->cd>0)u->cd--;if(u->cd2>0)u->cd2--;if(msOn&&u->role&&ms_role(i))return;if(A->gunner)air_gunner(i);
  int burn=A->fuel&&u->fuel<=0;if(A->fuel&&u->fuel>0){if(--u->fuel==0&&u->isp)feed(hgOn?"BINGO FUEL - REDUCED POWER":"ROCKET BURNOUT - GLIDING",HB_RED);}
  if(u->isp&&hgHov){air_hover(i,A,burn);return;}
- if(u->isp){if(keys&K_LEFT)u->ang-=A->turn;if(keys&K_RIGHT)u->ang+=A->turn;int ts=A->spd;if(keys&K_UP)ts=ts*21/16;if(keys&K_DOWN)ts=(hgOn&&A->cls>=12)?ts/6:ts*11/16;
+ if(u->isp&&!mpAP){if(keys&K_LEFT)u->ang-=AIR_TRN(A->turn);if(keys&K_RIGHT)u->ang+=AIR_TRN(A->turn);int ts=A->spd;if(keys&K_UP)ts=ts*21/16;if(keys&K_DOWN)ts=(hgOn&&A->cls>=12)?ts/6:ts*11/16;
   if((pressed&(K_L|K_R))&&u->rollcd==0){u->roll=28;u->rollcd=140;u->wang=(pressed&K_R)?1:0;sfx_whoosh();}
   if(burn){ts=ts*45/100;}air_move(u,ts);if(keys&K_A)air_fire(i);if(pressed&K_B)air_missile(i);return;}
  if(--u->think<=0){u->think=BD(u)->think>4?BD(u)->think-2:3;u->tgt=nearest(i,5000,0);
   if(u->evade<=0)for(int k=0;k<NU;k++){Unit*e=&U[k];if(!e->alive||e->team==u->team)continue;int dx=dxw(u->x,e->x),dy=dyw(u->y,e->y);
    if(idist(dx,dy)<110&&iabs(angd(atan2i(dx,dy),e->ang>>8))<18&&rr(3)==0){u->evade=40+rr(30);u->wang=rr(2);if(u->rollcd==0&&rr(3)==0){u->roll=28;u->rollcd=200;}break;}}}
  int ts=A->spd;
- if(u->evade>0){u->evade--;u->ang+=u->wang?A->turn:-A->turn;ts=ts*20/16;}
+ if(u->evade>0){u->evade--;u->ang+=u->wang?AIR_TRN(A->turn):-AIR_TRN(A->turn);ts=ts*20/16;}
  else if(u->tgt>=0&&U[u->tgt].alive){Unit*t=&U[u->tgt];int dx=dxw(t->x,u->x),dy=dyw(t->y,u->y),d=idist(dx,dy);
-  int tt=d*256/(A->bspd+u->vel);int ta=t->ang>>8;int lx=dx+(SIN(ta)*t->vel>>8)*tt/256,ly=dy-(COS(ta)*t->vel>>8)*tt/256;int aim=atan2i(lx,ly);
-  turn_to(&u->ang,aim,A->turn*7/8);if(d<80)ts=ts*13/16;
-  if(iabs(angd(u->ang>>8,aim))<7&&d<170)air_fire(i);
+  int tt=d*256/(AIR_BSP(A->bspd)+u->vel);int ta=t->ang>>8;int lx=dx+(SIN(ta)*t->vel>>8)*tt/256,ly=dy-(COS(ta)*t->vel>>8)*tt/256;int aim=atan2i(lx,ly);
+  turn_to(&u->ang,aim,AIR_TRN(A->turn)*7/8);if(d<80)ts=ts*13/16;
+  if(iabs(angd(u->ang>>8,aim))<7&&d<(AIRPACE?150:170))air_fire(i);
   if(A->sec==2){if(u->ammo>0&&d<90&&iabs(angd(u->ang>>8,aim))<20&&rr(20)==0)air_missile(i);}
   else if(A->sec==3){if(u->ammo>0&&d<260&&d>60&&iabs(angd(u->ang>>8,aim))<12&&rr(30)==0)air_missile(i);}
-  else if(u->ammo>0&&d<300&&d>70&&iabs(angd(u->ang>>8,aim))<24&&rr(110)==0&&!(hgHov&&u->tgt==0&&hgAlt<15))air_missile(i);}
+  else if(u->ammo>0&&d<300&&d>70&&iabs(angd(u->ang>>8,aim))<24&&rr(AIRPACE?300:110)==0&&!(hgHov&&u->tgt==0&&hgAlt<15))air_missile(i);}
  if(burn)ts=ts*45/100;air_move(u,ts);}
 // ---------------------------------------------------------------- shots
 static int trophy_hit(Shot*s,int gx,int gy){if(s->sub>=10&&s->sub<20)return 0;for(int z=0;z<6;z++){Zone*q=&zn[z];if(q->t>0&&q->k==ZK_TROPHY&&q->team!=s->team&&q->n&&idist(gx-q->x,gy-q->y)<46){q->n--;if(!q->n)q->t=1;s->life=0;s->kind=K_BUL;fx_add(gx,gy,FXK_SMALL);sfx_shot(0);return 1;}}return 0;}
@@ -450,8 +462,8 @@ static void shots_update(void){int W=worldPx();
    if(s->life<=0)det_explosive(s);
    continue;}
   if(s->life==0&&s->kind==K_SHELL&&(s->sub||mpMode==MM_SEA)){he_splash(s->x>>8,s->y>>8,s);continue;}
-  if(s->kind==K_MISSILE&&s->tgt>=0&&U[s->tgt].alive){Unit*t=&U[s->tgt];int aim=atan2i(dxw(t->x,s->x),dyw(t->y,s->y));turn_to(&s->ang,aim,s->sub?s->sub<<6:AV(&U[s->owner])->mturn);
-   int a=s->ang>>8;s->vx=SIN(a)*s->dist>>8;s->vy=-COS(a)*s->dist>>8;if(s->dist<900)s->dist+=12;}
+  if(s->kind==K_MISSILE&&s->tgt>=0&&U[s->tgt].alive){Unit*t=&U[s->tgt];int aim=atan2i(dxw(t->x,s->x),dyw(t->y,s->y));turn_to(&s->ang,aim,s->sub?s->sub<<6:AIR_TRN(AV(&U[s->owner])->mturn));
+   int a=s->ang>>8;s->vx=SIN(a)*s->dist>>8;s->vy=-COS(a)*s->dist>>8;if(s->dist<(s->sub||!AIRPACE?900:660))s->dist+=s->sub||!AIRPACE?12:7;}
   if(s->kind==K_MISSILE||(s->kind==K_ROCKET&&s->sub!=30)){if((s->life&3)==0)fx_add(s->x>>8,s->y>>8,FXK_SMOKE);}
   s->x+=s->vx;s->y+=s->vy;
   if(mapWrap){s->x&=(W<<8)-1;s->y&=(W<<8)-1;}
@@ -547,7 +559,17 @@ static const u16*water_p(int e){return WATER_P[e];}
 static const u32*sky_t(int e){return SKY_T[e];}
 static const u16*sky_p(int e){return SKY_P[e];}
 static void gen_map(int mode,int era,int mi){mpMode=mode;mpEra=era;curMap=map_def(mode,era,mi);if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);}
-static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hideT,0,sizeof hideT);memset(botSee,0,sizeof botSee);
+// v1.3.5 bot variety: each bot draws a different era-correct type (fighters for dogfights, combat vehicles for armor),
+// matching its side; repeats only once the team has used every candidate.
+static u8 bpUsed[2][128] EWRAM;
+static int bot_ok(int k,int e,int q,int east,int wp){if(k){const AirS*a=&AIRV[e][q];if(a->exp)return 0;if(!(a->cls<=2||a->cls==8||a->cls==9))return 0;return a->side==east;}
+ const TankS*v=&TANKV[e][q];if(v->exp)return 0;if(!(v->cls<=VC_TDC||v->cls==VC_IFV||v->cls==VC_AC))return 0;
+ if(wp&&e>0){const char*vn=v->n;return (vn[0]=='T'&&vn[1]=='-')||(vn[0]=='B'&&vn[1]=='M'&&vn[2]=='P');}return v->axis==east;}
+static int bot_pick(int k,int e,int east,int wp,int t){int n=k?NAIR[e]:NTK[e];if(n>128)n=128;u8 pick[128];int np=0;
+ for(int pass=0;pass<3&&!np;pass++)for(int q=0;q<n;q++){int ok=pass==0?bot_ok(k,e,q,east,wp)&&!bpUsed[t][q]:pass==1?bot_ok(k,e,q,east,wp):1;if(pass==1&&q==0&&np==0){} if(ok)pick[np++]=q;
+  if(pass==1&&q==n-1&&np){for(int z=0;z<n;z++)bpUsed[t][z]=0;}}
+ if(!np)return rr(n);int v=pick[rr(np)];bpUsed[t][v]=1;return v;}
+static void mp_run(int mode,int era,int mapi){mpAP=*(volatile u32*)0x0203FFD0==0x4F545541&&(mode==MM_AIR||mode==MM_TANK);MPM[0]=0x5453504D;for(int k=1;k<8;k++)MPM[k]=0;memset(bpUsed,0,sizeof bpUsed);memset(WD,0,sizeof WD);memset(hideT,0,sizeof hideT);memset(botSee,0,sizeof botSee);
  mpMode=mode;mpEra=era;BEAT->extra=mapi;BEAT->mode=mode;BEAT->era=era;if(mode==MM_SEA)bgm_t(TR_NAVAL);else bgm(mode==MM_AIR?3:2,era);if(!msOn)nU=12;
  int clouds=0;int te=era;
  if(msOn){te=msTEra;mpEra=te;curMap=msMap;if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);mpEra=era;}else gen_map(mode,era,mapi);
@@ -568,7 +590,7 @@ static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hide
   U[i].wpn=i==0?0:rr(NPRIM_BOT[era]);if(era==0&&i>0)U[i].wpn=U[i].team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];spawn(&U[i],i);}
  if(mpMixed){ // balanced arsenal: bot k on each team draws from the same era
   int ncv[2]={0,0};
-  for(int k=0;k<6;k++){int e=(mpEra>=5&&mode!=MM_SEA)?mpEra:rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];if(sbOn){static const u8 SBE[7]={7,6,5,0,1,2,3};e=sbMix?SBE[rr(7)]:sbEra[t];}int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0&&mpEra<5&&!sbOn)e=1; // v1.3: WW1/1776/medieval maps field that era's kit // Warsaw Pact bots: Cold War kit
+  for(int k=0;k<6;k++){int e=(mpEra>=5&&mode!=MM_SEA)||mode==MM_AIR||mode==MM_TANK?mpEra:rr(mode==MM_SEA?3:5); /* v1.3.5: air/armor bots use the selected map's era */for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];if(sbOn){static const u8 SBE[7]={7,6,5,0,1,2,3};e=sbMix?SBE[rr(7)]:sbEra[t];}int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0&&mpEra<5&&!sbOn)e=1; // v1.3: WW1/1776/medieval maps field that era's kit // Warsaw Pact bots: Cold War kit
     int per=(mpEra>=5||sbOn)&&mode!=MM_SEA; // v1.3: period maps (WW1/1776/medieval) put the player in period kit too
     if(k==0&&per){e=sbOn?(sbMix&&t?e:sbEra[t]):mpEra;vi=mode==MM_TANK?tankSel[e]%NTK[e]:mode==MM_AIR?airSel[e]%NAIR[e]:0;if(mode==MM_TANK&&TANKV[e][vi].axis!=t){for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t){vi=q;break;}}if(mode==MM_AIR&&AIRV[e][vi].side!=t){for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==t){vi=q;break;}}}
     else if(k==0){if(mode==MM_SEA)e=fdec(NSH,g6.shI,&vi);else if(mode==MM_TANK)e=fdec(NTK,g6.tkI,&vi);else if(mode==MM_AIR)e=fdec(NAIR,g6.aI,&vi);else e=fdec(NPRIM,g6.pI,&vi);}
@@ -578,11 +600,12 @@ static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hide
       if(!np)for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].cls!=SC_CV)pick[np++]=q;u->veh=pick[rr(np)];}
     else if(mode==MM_TANK&&e>=5){int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NTK[e]);}
     else if(mode==MM_AIR&&e>=5){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==t)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NAIR[e]);}
-    else if(mode==MM_TANK){if(e==0){int pick[MAXTK],np=0;for(int q=0;q<NTK[0];q++)if(TANKV[0][q].axis==ax&&TANKV[0][q].cls!=VC_MINE&&(TANKV[0][q].cls!=VC_JEEP||rr(2)))pick[np++]=q;u->veh=pick[rr(np)];}else{int east=(f==2||f==5||f==6||f==10||f==FAC_WP);int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++){const char*vn=TANKV[e][q].n;if(f==FAC_WP?((vn[0]=='T'&&vn[1]=='-')||(vn[0]=='B'&&vn[1]=='M'&&vn[2]=='P')):TANKV[e][q].axis==east)pick[np++]=q;}u->veh=np&&e<=2?pick[rr(np)]:rr(NTK[e]);}}
-    else if(mode==MM_AIR){if(e==0){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[0];q++)if(AIRV[0][q].side==ax)pick[np++]=q;u->veh=pick[rr(np)];}else if(f==FAC_WP){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==1)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NAIR[e]);}else u->veh=rr(NAIR[e]);}
+    else if(mode==MM_TANK){int east=e==0?ax:(f==2||f==5||f==6||f==10||f==FAC_WP);u->veh=bot_pick(0,e,east,f==FAC_WP,t);}
+    else if(mode==MM_AIR){int east=e==0?ax:(f==2||f==5||f==6||f==10||f==FAC_WP);u->veh=bot_pick(1,e,east,f==FAC_WP,t);}
     else u->wpn=f==FAC_WP?(const u8[]){0,3,5,6,5,6}[rr(6)]:e==0?(ax?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM_BOT[e]);
     if(i==0)u->wpn=0;if(mode==MM_SEA&&SHIPV[u->ve][u->veh].cls==SC_CV)ncv[t]++;spawn(u,i);e=e0;}}
   fac_pal(0,g6.fac0,0);fac_pal(1,g6.fac1,0);fac_pal(2,g6.fac0,1);
+  for(int i=0;i<12;i++){u32 g=mode==MM_AIR?AV(&U[i])->gs:mode==MM_TANK?TV(&U[i])->gs:0;((volatile u8*)0x0203FF94)[i]=(u8)g;}
   vsNext=VS_BASE;vsN=0;for(int i=0;i<12;i++){Unit*u=&U[i];u->vt=mode==MM_TANK?vslot(0,TV(u)->gs):mode==MM_AIR?vslot(1,AV(u)->gs):mode==MM_SEA?vslot(2,SV(u)->gs):0;
    if(mode==MM_SEA&&SV(u)->w2==3)wingTile[i]=vslot(1,AIRV[SV(u)->we][SV(u)->wi].gs);}
   if(mode==MM_TANK||mode==MM_SEA)nU=24;}

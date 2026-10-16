@@ -107,8 +107,9 @@ static void bgm(int ctx,int era){if(SET.track==NTRK-1+1){music_stop();return;} /
  music_play(t);}
 static void bgm_t(int t){if(SET.track==NTRK){music_stop();return;}music_play(SET.track>0?SET.track-1:t);}
 static void music_jingle(int t){if(SET.musVol&&SET.track!=NTRK){musOn=0;musTrk=-1;music_play(t);}}
-static void music_defeat(void){music_jingle(TR_DEFEAT);}
-static void music_victory(void){if(SET.musVol){musOn=0;musTrk=-1;music_play(TR_VICTORY);}}
+static u8 moWin,moLoss; // v1.3.5 session outcome tally for Mars Rocks payouts
+static void music_defeat(void){if(moLoss<250)moLoss++;music_jingle(TR_DEFEAT);}
+static void music_victory(void){if(moWin<250)moWin++;if(SET.musVol){musOn=0;musTrk=-1;music_play(TR_VICTORY);}}
 // ---------------------------------------------------------------- frame
 static void beat_common(int scr){BEAT->magic=0xA0E5;BEAT->screen=scr;}
 static int shimmer; // v1.2 animated water: 1 = arena water bank rotate, 2 = open-sea swap

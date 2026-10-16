@@ -472,6 +472,10 @@ MD_ADD=[
  A('JF-17 THUNDER','jf',1,(-60,40,-25,0),'PL-12 AAM',4,mt=480,sp=S(span=20,ch=7,wy=14,sw=6,tp=.4,fl=26,fy=2,fw=5,ts=10,**J)),
  A('KA-52 ALLIGATOR','heli',1,(30,-20,30,1),'S-8 ROCKETS',12,0,sp=S(rotor=1,fl=26,fy=3,fw=6,nose='glass',twin=1,ts=10)),
  A('SU-25 FROGFOOT','cas',1,(40,40,0,4),'S-13 ROCKETS',10,sp=S(span=26,ch=5,wy=12,sw=2,fl=26,fy=2,fw=5,ts=10,eng=[3],jeteng=1,**J)),
+ # v1.3.5: more air-superiority types so dogfight bots fly a real mix (appended: save indices migrate via NAIR_V6)
+ A('MIG-29 FULCRUM','jf',1,(20,110,-10,0),'R-73 AAM',6,mt=540,sp=S(span=24,ch=8,wy=13,sw=6,tp=.45,fl=27,fy=1,fw=6,twin=1,ts=11,**J)),
+ A('SU-27 FLANKER','jf',1,(40,70,20,1),'R-27 AAM',8,mt=500,sp=S(span=27,ch=9,wy=12,sw=7,tp=.35,fl=31,fy=0,fw=7,twin=1,ts=12,**J)),
+ A('F-15C EAGLE','jf',0,(40,20,20,1),'AIM-120 AMRAAM',8,mt=520,sp=S(span=25,ch=10,wy=13,sw=7,tp=.35,fl=28,fy=1,fw=7,twin=1,ts=11,**J)),
 ]
 ERA_AIR=[W0,
  [dict(n='MIG-21',mn='K-13 AAM',spd=480,turn=520,rate=5,dmg=11,bspd=1300,ammo=4,mturn=380,hp=95,side=1,sec=1,gunner=0,exp=0,fuel=0,sp=('era',1),cls='jet'),

@@ -1,0 +1,694 @@
+#newmenu
+# translated from the v1.3.2 menu by tools/menu133_xlate.py
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 6
+wait 10
+tap A
+wait 50
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap A
+wait 12
+tap A
+wait 12
+tap A
+wait 12
+tap R
+wait 4
+tap R
+wait 4
+tap R
+wait 4
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+tap RIGHT
+wait 2
+wait 6
+tap START
+wait 40
+shot map
+wait 30
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+tap DOWN
+wait 50
+shot map2
+poke32 0x0203FFD0 4F545541
+tap A
+wait 60
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f003
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f023
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f043
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f063
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f083
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f103
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f123
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f143
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f163
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f183
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f203
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f223
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f243
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f263
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+shot f283
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+wait 60
+beat
+peek 0203FF80 16
+end

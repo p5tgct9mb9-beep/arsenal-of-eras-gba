@@ -1,0 +1,276 @@
+#newmenu
+wait 100
+tap START
+wait 40
+tap RIGHT
+wait 30
+tap DOWN
+wait 30
+tap DOWN
+wait 30
+tap A
+wait 50
+tap DOWN
+wait 30
+shot cat
+tap A
+wait 30
+tap A
+wait 40
+shot inv_sel
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFC4 01234567
+poke32 0x0203FFD8 52490000
+tap A
+wait 120
+beat
+shot q000
+wait 120
+beat
+shot q001
+wait 120
+beat
+shot q002
+wait 120
+beat
+shot q003
+wait 120
+beat
+shot q004
+wait 120
+beat
+shot q005
+wait 120
+beat
+shot q006
+wait 120
+beat
+shot q007
+wait 120
+beat
+shot q008
+wait 120
+beat
+shot q009
+wait 120
+beat
+shot q010
+wait 120
+beat
+shot q011
+wait 120
+beat
+shot q012
+wait 120
+beat
+shot q013
+wait 120
+beat
+shot q014
+wait 120
+beat
+shot q015
+wait 120
+beat
+shot q016
+wait 120
+beat
+shot q017
+wait 120
+beat
+shot q018
+wait 120
+beat
+shot q019
+wait 120
+beat
+shot q020
+wait 120
+beat
+shot q021
+wait 120
+beat
+shot q022
+wait 120
+beat
+shot q023
+wait 120
+beat
+shot q024
+wait 120
+beat
+shot q025
+wait 120
+beat
+shot q026
+wait 120
+beat
+shot q027
+wait 120
+beat
+shot q028
+wait 120
+beat
+shot q029
+wait 120
+beat
+shot q030
+wait 120
+beat
+shot q031
+wait 120
+beat
+shot q032
+wait 120
+beat
+shot q033
+wait 120
+beat
+shot q034
+wait 120
+beat
+shot q035
+wait 120
+beat
+shot q036
+wait 120
+beat
+shot q037
+wait 120
+beat
+shot q038
+wait 120
+beat
+shot q039
+wait 120
+beat
+shot q040
+wait 120
+beat
+shot q041
+wait 120
+beat
+shot q042
+wait 120
+beat
+shot q043
+wait 120
+beat
+shot q044
+wait 120
+beat
+shot q045
+wait 120
+beat
+shot q046
+wait 120
+beat
+shot q047
+wait 120
+beat
+shot q048
+wait 120
+beat
+shot q049
+wait 120
+beat
+shot q050
+wait 120
+beat
+shot q051
+wait 120
+beat
+shot q052
+wait 120
+beat
+shot q053
+wait 120
+beat
+shot q054
+wait 120
+beat
+shot q055
+wait 120
+beat
+shot q056
+wait 120
+beat
+shot q057
+wait 120
+beat
+shot q058
+wait 120
+beat
+shot q059
+wait 120
+beat
+shot q060
+wait 120
+beat
+shot q061
+wait 120
+beat
+shot q062
+wait 120
+beat
+shot q063
+wait 120
+beat
+shot q064
+wait 120
+beat
+shot q065
+wait 120
+beat
+shot q066
+wait 120
+beat
+shot q067
+wait 120
+beat
+shot q068
+wait 120
+beat
+shot q069
+tap B
+wait 60
+beat
+shot q070
+shot b0
+tap B
+wait 60
+beat
+shot q071
+shot b1
+tap B
+wait 60
+beat
+shot q072
+shot b2
+tap B
+wait 60
+beat
+shot q073
+shot b3
+tap B
+wait 60
+beat
+shot q074
+shot b4
+tap B
+wait 60
+beat
+shot q075
+shot b5
+tap B
+wait 60
+beat
+shot q076
+shot b6
+tap B
+wait 60
+beat
+shot q077
+shot b7
+sram64 2600
+end

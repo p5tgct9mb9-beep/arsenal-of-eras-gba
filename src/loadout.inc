@@ -10,6 +10,7 @@ typedef struct{int dmg,rate,spd16,spread,pellets,life,mag,reload,move,kind,fl;co
 #define MAXSEC 8
 static const u8 NPRIM[NERA]=NPRIM_ALL;static const u8 NPRIM_BOT[NERA]=NPRIM_LIT; // v1.3: sniper rifles appended per era (bots keep the classic pools)
 static const u8 NPRIM_V5[NERA]={35,5,30,4,4},NSEC_V5[NERA]={8,2,6,2,2},NL_V5[NERA]={4,2,6,2,2},NTK_V5[NERA]={55,6,40,2,2},NAIR_V5[NERA]={93,17,28,2,2},NSH_V5[NERA]={10,6,7,0,0}; // v1.2 layouts (save migration v5 -> v6)
+static const u8 NAIR_V6[NERA]={93,17,28,2,2,9,2,2};
 static const u8 NPRIM_V4[NERA]={17,5,5,4,4},NSEC_V4[NERA]={5,2,2,2,2},NL_V4[NERA]={3,2,2,2,2},NTK_V4[NERA]={55,6,6,2,2}; // v1.2-pre layouts (save migration)
 #define PRIM_EXP0 15 // WW2 primaries 15..16 are tagged EXPERIMENTAL
 #define PRIM_ISEXP(i) ((i)>=PRIM_EXP0&&(i)<17)
@@ -124,7 +125,7 @@ static void fac_pal(int bank,int f,int player){volatile u16*p=PAL_OBJ+bank*16;co
 #define SAVE_N2 (5*LO_F+10+6+4+2)
 #define SAVE_N3 (SAVE_N2+9+20)
 #define SAVE_N (SAVE_N2+10+20+1)
-#define SAVE_V 6
+#define SAVE_V 7
 static u32 campUnlock=1;static u8 droneSel,droneCall;
 static void lo_defaults(void){campUnlock=1;droneSel=0;droneCall=0;{G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}SET.bot=1;{Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}memset(LO,0,sizeof LO);memset(tankSel,0,NERA);memset(airSel,0,NERA);}
 static int lo_valid(void){for(int e=0;e<5;e++){Loadout*l=&LO[e];if(l->prim>=NPRIM[e]||l->sec>=NSEC[e]||l->opt>=NATL[0][e]||l->muz>=NATL[1][e]||l->grip>=NATL[2][e]||l->mag>=NATL[3][e]||l->leth>=NLE[e]||l->tact>=NTACT[e]||l->perk>4||l->laun>NL[e]||tankSel[e]>=NTK[e]||airSel[e]>=NAIR[e])return 0;}return 1;}
@@ -148,7 +149,7 @@ static void ne_read(void){for(int e=5;e<NERA;e++){memset(&LO[e],0,sizeof LO[e]);
 static int saveLoaded; // 0 none/defaults, 1 v4, 2 migrated from v1, 3 migrated from v2, 4 migrated from v3
 static int save_load0(void);static int save_load(void){int r=save_load0();ne_read();if((campUnlock>>13)&1)campUnlock|=1u<<14;if((campUnlock>>15)&1)campUnlock|=1u<<16;return r;} // v1.3: v1.2 finishers continue straight into the new modern missions
 static int save_load0(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!='O'||SRAM[2]!='E'||SRAM[3]!='L')return 0;
- int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:v==3?SAVE_N3:SAVE_N;if(v<1||v>6)return 0;
+ int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:v==3?SAVE_N3:SAVE_N;if(v<1||v>7)return 0;
  u8 b[SAVE_N];u8 sum=0x5A;for(int i=0;i<n;i++){b[i]=SRAM[5+i];sum+=b[i]*(i+1);}if(sum!=SRAM[5+n])return 0;
  for(int e=0;e<5;e++){u8*p=&LO[e].prim;for(int k=0;k<nf;k++)p[k]=b[e*nf+k];tankSel[e]=b[5*nf+e];airSel[e]=b[5*nf+5+e];}
  if(v>=2){u8*q=&SET.track;for(int k=0;k<6;k++)q[k]=b[5*LO_F+10+k];campUnlock=0;for(int k=0;k<4;k++)campUnlock|=(u32)b[5*LO_F+16+k]<<(8*k);droneSel=b[5*LO_F+20]%9;droneCall=b[5*LO_F+21]%3;
@@ -164,6 +165,8 @@ static int save_load0(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!
    e=fdec(NPRIM_V4,g6.pI,&i);g6.pI=fenc(NPRIM,e,i);e=fdec(NSEC_V4,g6.sI,&i);g6.sI=fenc(NSEC,e,i);
    if(g6.lI){e=fdec(NL_V4,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V4,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);}
   if(v==5){int i,e; // v1.2 -> v1.3: Cold War gained AKM/RPK + T-62/BMP-1 (flat 6v6 indices shift)
+  if(v==6){int i,e; // v1.3.4 -> v1.3.5: modern air gained MIG-29 / SU-27 / F-15C (flat aircraft index shifts for later eras)
+   e=fdec(NAIR_V6,g6.aI,&i);g6.aI=fenc(NAIR,e,i);}
    e=fdec(NPRIM_V5,g6.pI,&i);g6.pI=fenc(NPRIM,e,i);e=fdec(NSEC_V5,g6.sI,&i);g6.sI=fenc(NSEC,e,i);
    if(g6.lI){e=fdec(NL_V5,g6.lI-1,&i);g6.lI=1+fenc(NL,e,i);}e=fdec(NTK_V5,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);e=fdec(NAIR_V5,g6.aI,&i);g6.aI=fenc(NAIR,e,i);e=fdec(NSH_V5,g6.shI,&i);g6.shI=fenc(NSH,e,i);}
   if(g6.pI>=fsum(NPRIM)||g6.sI>=fsum(NSEC)||g6.lI>fsum(NL)||g6.leth>=NLETH6||g6.tact>=NTACT6||g6.tkI>=fsum(NTK)||g6.aI>=fsum(NAIR)||g6.shI>=fsum(NSH)||g6.fac0>=NFAC||g6.fac1>=NFAC||g6.fac0==g6.fac1){G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}

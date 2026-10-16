@@ -60,6 +60,28 @@ static void bg133(int c){
 // ---- Mars Rocks balance chip
 static void rocks_chip(int x,int y){mr_load();u32 b=MR.bal;if(b>999999)b=999999;const char*s=itoa(b);int w=slen(s)*6+16;m3_fill(x-w,y,w,11,RGB(40,16,10));m3_fill(x-w,y,w,1,RGB(220,100,50));
  m3_fill(x-w+3,y+3,6,6,RGB(200,80,40));m3_fill(x-w+4,y+2,4,1,RGB(230,120,70));m3_px(x-w+5,y+5,RGB(140,50,30));m3_text(x-w+12,y+2,s,RGB(255,190,120),1);}
+// ---- v1.3.5 Mars Rocks: every mode pays. Wins/losses are tallied from the victory/defeat jingles,
+// plus a time bonus; modes that already pay inline (Firefighter, Arcade) just show their session total.
+static u32 moV0,moE0;static int moLast;
+static void mo_begin(void){moWin=moLoss=0;mr_load();moE0=MR.earned;moV0=vblN;}
+static int mo_wbase(int md){switch(md){case MD_CAMP:case MD_FPS:case MD_LRRP:case MD_BRAD:case MD_SPEC:return 30;
+ case MD_INF:case MD_TANK:case MD_AIR:case MD_SEA:case MD_SNIPE:case MD_EOD:case MD_DRONE:return 25;
+ case MD_SWORD:case MD_INVADE:case MD_GP:case MD_TT:return 15;case MD_FIRE:return 0;default:return 20;}}
+static void mo_end(int md){u32 secs=(vblN-moV0)/60;int w=moWin>4?4:moWin,l=moLoss>4?4:moLoss;int b=0;
+ if(md!=MD_FIRE&&md!=MD_CABINET&&!MD_PSEUDO(md)){b=w*mo_wbase(md)+l*4+(int)(secs/45>12?12:secs/45);if(secs<20&&!w&&!l)b=0;else if(b<2)b=2;if(b>120)b=120;}
+ int bn=b?mr_add(b):0;int tot=(int)(MR.earned-moE0);moLast=tot;if(tot<=0)return;
+ for(int t=0;;t++){BEAT->screen=110;BEAT->scoreA=tot;BEAT->scoreB=MR.bal;BEAT->phase=w;
+  if(t==0){chrome(BG_EXTRA,2);banner("MISSION PAY","MARS ROCKS EARNED",RGB(220,100,50));rocks_chip(232,8);
+   m3_fill(30,46,180,46,RGB(40,16,10));m3_box(30,46,180,46,0);
+   for(int k=0;k<3;k++){int x=46+k*5,y=60-k*3;m3_fill(x,y,12,12,RGB(170-k*20,64,34));m3_fill(x+2,y+1,8,2,RGB(230,130,80));m3_px(x+4,y+6,RGB(110,40,24));}
+   m3_text(78,56,cat("+",itoa(tot)),RGB(255,190,120),3);
+   int y=100;char bf[40],*o;
+   if(md==MD_FIRE||tot!=bn){o=sp_put(bf,"EARNED IN PLAY: +");sp_int(o,tot-bn);m3_ctext(y,bf,C_WHITE,1);y+=10;}
+   if(bn){int wb=w*mo_wbase(md);if(w){o=sp_put(bf,"WINS x");o=sp_int(o,w);o=sp_put(o,"  +");sp_int(o,wb);m3_ctext(y,bf,C_GREEN,1);y+=10;}
+    if(l){o=sp_put(bf,"TRIED x");o=sp_int(o,l);o=sp_put(o,"  +");sp_int(o,l*4);m3_ctext(y,bf,C_GRAY,1);y+=10;}
+    o=sp_put(bf,"PLAY TIME ");o=sp_int(o,(int)(secs/60));o=sp_put(o," MIN  +");sp_int(o,bn-wb-l*4);m3_ctext(y,bf,C_GRAY,1);y+=10;}
+   m3_ctext(126,cat("WALLET: ",itoa(MR.bal)),RGB(255,190,120),1);m3_ctext(138,"A: CONTINUE",C_YEL,1);m3_present();sfx_ok();}
+  next_frame();if((t>20&&(pressed&(K_A|K_B|K_START)))||((*(volatile u32*)0x0203FFD0==0x4F545541)&&t>150)){pressed=0;return;}}}
 // ---- generalized submenu: list (icons, NEW/FEATURED) + per-mode options; same key flow as v1.3 categories (A focus, A select)
 static void md_pseudo_open(int md);
 static void cat_screen_p(const MCat*C,int key,int bgc){static const char*const EN[4]={"WORLD WAR II","COLD WAR","MODERN","WHAT-IF"};static const char*const ED[4]={"1942-1945: MIDWAY TO OMAHA","1950-1985: KOREA, VIETNAM, FULDA","1993-2026","FICTIONAL SCENARIOS"};
@@ -90,7 +112,7 @@ static void cat_screen_p(const MCat*C,int key,int bgc){static const char*const E
    int op=ops[os];
    if(op==OP_BOTS&&(pressed&(K_A|K_RIGHT))){SET.bot=(SET.bot+1)&3;save_write();redraw=1;sfx_menu();continue;}
    if(pressed&(K_A|K_START)){sfx_ok();pressed=0;last[key]=sel;
-    switch(op){case OP_PLAY:if(camp){for(int k=0;k<NCM;k++)if(CM[k].grp==sel){msel_jump=k;break;}mission_select();pressed=0;}else if(md>=MD_INF&&md<=MD_SEA){md_seen(md);if(faction_select(md))play_6v6(md);pressed=0;}else mode_play(md);bgCached=-1;bgm_t(C->trk);break;
+    switch(op){case OP_PLAY:mo_begin();if(camp){for(int k=0;k<NCM;k++)if(CM[k].grp==sel){msel_jump=k;break;}mission_select();pressed=0;}else if(md>=MD_INF&&md<=MD_SEA){md_seen(md);if(faction_select(md))play_6v6(md);pressed=0;}else mode_play(md);mo_end(camp?MD_CAMP:md);bgCached=-1;bgm_t(C->trk);break;
      case OP_MAP:{int me=0;int mi=map_select(md,&me);if(mi>=0){mpPickI[md]=mi;mpPickE[md]=me;}else mpPickI[md]=-1;pressed=0;bgCached=-1;break;}
      case OP_SIDE:faction_select(md);pressed=0;bgCached=-1;break;
      case OP_LOAD:mode_loadout(md);break;case OP_REC:records(md,bgc);break;case OP_HOW:how_to(md,bgc);break;}
