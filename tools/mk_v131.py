@@ -14,3 +14,4 @@ def script(name,cat,item,scr,mis,shots=10,gap=600,extra=""):
     open(os.path.join(D,name+".txt"),"w").write("\n".join(L)+"\n")
 EXP=4;SPC=3
 for m in range(4):script("v131_odef_%d"%m,EXP,6,73,m,shots=10,gap=500)
+for t in range(6):script("v131_rb_%d"%t,EXP,7,74,t,shots=14,gap=600,extra="wait 20\nshot v131_rb_%d_design\ntap A\nwait 300\nhold SELECT 20"%t)

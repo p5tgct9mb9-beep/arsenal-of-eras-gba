@@ -26,7 +26,7 @@ static FE*fe_new(FE*P,int n){for(int i=0;i<n;i++)if(!P[i].on){FE*e=&P[i];e->on=1
 static void fr_bar(int x,int y,int w,int v,int mx,u16 c){lf(x,y,w,4,RGB(30,30,44));if(mx>0)lf(x,y,w*clampi(v,0,mx)/mx,4,c);}
 static int fr_result(const char*title,const char*l1,const char*l2,int ok,int score,int best){if(ok)music_victory();else music_defeat();
  for(int t=0;;t++){BEAT->phase=ok?3:4;BEAT->scoreA=score;
-  if(t==0){m3_title(1);fr_panel(16,24,208,112);m3_ctext(34,title,ok?C_YEL:C_RED,2);m3_ctext(58,l1,C_WHITE,1);m3_ctext(70,l2,C_WHITE,1);
+  if(t==0){fr_bgspace();fr_earth_bg(56,frame&511);fr_panel(16,24,208,112);m3_ctext(34,title,ok?C_YEL:C_RED,2);m3_ctext(58,l1,C_WHITE,1);m3_ctext(70,l2,C_WHITE,1);
    m3_ctext(88,cat("SCORE ",itoa(score)),C_WHITE,2);if(best)m3_ctext(108,"NEW RECORD!",C_YEL,1);m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
   next_frame();if(t>30&&((pressed&(K_A|K_B|K_START))||(FR_AUTO&&t>60))){sfx_ok();pressed=0;return ok;}}}
 static int fr_menu(const char*title,const char*sub,const char*const*items,int n,const u8*done,int*sel,int scr){int redraw=1;
