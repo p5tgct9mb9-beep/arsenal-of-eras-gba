@@ -173,6 +173,8 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "frontier5.inc"
 #include "frontier_stub.inc"
 #include "race.inc"
+#include "v132core.inc"
+#include "hangar.inc"
 #include "v132_stub.inc"
 #include "menu131.inc"
 int main(void){

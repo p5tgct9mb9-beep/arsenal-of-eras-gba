@@ -41,7 +41,7 @@ static inline int ad16(int a,int b){return (s16)(u16)(a-b);}
 // ---- race state
 #define RQ 12
 typedef struct{s32 x,y,vx,vy;u16 h;s16 z,vz;u8 car,ai,air,surf,drift,boost,fin,place,cp,resp;s16 lane,driftT;int wp,lap,finT,lapStart,lastLap,bestLap,bat,respT,skill,boostT,stuck;int prog;}RC;
-static RC rc[8];static int rcN,rcTrk,rcMode,rcT,rcPhase,rcLaps,rcNW,rcHalf,rcMsgT,rcPlayerCar,rcSpacex,rcRecLap;static const char*rcMsg;static const short*rcW;static const u8*rcS;
+static RC rc[8] EWRAM;static int rcN,rcTrk,rcMode,rcT,rcPhase,rcLaps,rcNW,rcHalf,rcMsgT,rcPlayerCar,rcSpacex,rcRecLap;static const char*rcMsg;static const short*rcW;static const u8*rcS;
 static const u8*rcSurf;static s32 camX,camY;static u16 camH;static int rcOrder[8];static int rcPts[8];static int rcAutoQuit;
 typedef struct{s16 pa,pb,pc,pd;s32 x,y;}HLine;
 static HLine hlt[2][230] EWRAM;static int hlb;

@@ -1,0 +1,279 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+tap A
+wait 20
+tap A
+wait 30
+shot hg_plane_default
+beat
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+shot hg_plane_built
+beat
+tap DOWN
+wait 6
+tap A
+wait 30
+shot hg_plane_saved
+tap A
+wait 20
+tap A
+wait 200
+shot hg_plane_fly0
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_plane_fly1
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_plane_fly2
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_plane_fly3
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_plane_fly4
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_plane_fly5
+beat
+tap START
+wait 20
+tap DOWN
+wait 6
+tap A
+wait 120
+shot hg_plane_after
+beat
+tap DOWN
+wait 4
+tap A
+wait 20
+tap DOWN
+wait 4
+tap A
+wait 30
+shot hg_drone_default
+beat
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+shot hg_drone_built
+beat
+tap DOWN
+wait 6
+tap A
+wait 30
+shot hg_drone_saved
+tap UP
+wait 6
+tap DOWN
+wait 4
+tap A
+wait 20
+tap A
+wait 200
+shot hg_drone_fly0
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_drone_fly1
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_drone_fly2
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_drone_fly3
+beat
+tap START
+wait 20
+tap DOWN
+wait 6
+tap A
+wait 120
+shot hg_drone_after
+beat
+tap UP
+wait 6
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 20
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+shot hg_heli_default
+beat
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap RIGHT
+wait 8
+tap DOWN
+wait 6
+shot hg_heli_built
+beat
+tap DOWN
+wait 6
+tap A
+wait 30
+shot hg_heli_saved
+tap UP
+wait 6
+tap UP
+wait 6
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 20
+tap DOWN
+wait 4
+tap A
+wait 200
+shot hg_heli_fly0
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_heli_fly1
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_heli_fly2
+beat
+hold A+RIGHT 150
+tap B
+hold A+UP 140
+shot hg_heli_fly3
+beat
+tap START
+wait 20
+tap DOWN
+wait 6
+tap A
+wait 120
+shot hg_heli_after
+beat
+shot hg_menu_final
+sram64 2300
+savedump /workspace/aoe-gba/build/hg.sav
+end

@@ -1,0 +1,46 @@
+wait 100
+tap START
+wait 20
+tap B
+wait 25
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+shot hgl_menu
+beat
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 20
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+shot hgl_edit_heli
+beat
+end
