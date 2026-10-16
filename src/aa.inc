@@ -39,7 +39,7 @@ static const u8 AAPN[4]={3,4,5,9};
 // ---- runtime
 typedef struct{s32 x,y,vx,vy;s16 hp,t,cd,st,dir,flash,fl;u8 k,alive,tgt;}AEn;
 #define NAEN 20
-static AEn AE[NAEN];
+static AEn AE[NAEN] EWRAM;
 typedef struct{s32 x,y,vx,vy;s16 life,dmg,r;u8 k,tgt,decoy,alive;}APr; // k: 0 tracer 1 flak shell 2 missile 3 flare 4 bomb 5 ebul 6 rocket 7 emissile
 #define NAPR 72
 static APr AP[NAPR] EWRAM;
@@ -51,7 +51,7 @@ static int aaBld[3];static const s16 BLDX[3][2]={{12,58},{70,96},{176,228}};stat
 #define AAGY 128
 #define AAPX 120
 #define AAPY 114
-static u16 aaOam[128*4];static int aaNo;
+static u16 aaOam[128*4] EWRAM;static int aaNo;
 #define AA_OFF 0x880
 static u32 aaBest[4][2];
 static void aa_load(void){if(SRAM[AA_OFF]=='A'&&SRAM[AA_OFF+1]=='O'&&SRAM[AA_OFF+2]=='E'&&SRAM[AA_OFF+3]=='A'&&SRAM[AA_OFF+4]==1){for(int i=0;i<8;i++){u32 v=0;for(int k=0;k<4;k++)v|=(u32)SRAM[AA_OFF+8+i*4+k]<<(8*k);aaBest[i>>1][i&1]=v;}}else memset(aaBest,0,sizeof aaBest);}

@@ -48,7 +48,7 @@ static void tut_text(int st,int ch,int mouth,int ok){static int lst=-1,lch=-1,lm
  if(ch!=lch){int n=0,from=lch<0?0:lch;for(int k=0;k<4;k++){const char*s=KST[st].l[k];for(int j=0;s[j]&&j<30;j++,n++){if(n>=ch)break;if(n>=from){char b[2]={s[j],0};m3_text(60+j*6,117+k*8,b,C_WHITE,1);}}}}
  lst=st;lch=ch;lmo=mouth;lok=ok;}
 static void yfill(int x,int y,int w,int h,u16 c){if(y<3){h-=3-y;y=3;}if(y+h>101)h=101-y;if(x<0){w+=x;x=0;}if(x+w>240)w=240-x;if(w>0&&h>0)m3_fill(x,y,w,h,c);}
-typedef struct{s16 x,y,w,h;}KRect;static KRect krc[2][40];static int knr[2],kcur;
+typedef struct{s16 x,y,w,h;}KRect;static KRect krc[2][40] EWRAM;static int knr[2],kcur;
 static void kmark(int x,int y,int w,int h){if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>240)w=240-x;if(y+h>104)h=104-y;if(w<=0||h<=0||knr[kcur]>=40)return;KRect*r=&krc[kcur][knr[kcur]++];r->x=x&~1;r->y=y;r->w=(w+(x&1)+1)&~1;r->h=h;if(r->x+r->w>240)r->w=240-r->x;}
 static void krow_copy(u16*d,const u16*s,int n){*(volatile u32*)0x40000D4=(u32)s;*(volatile u32*)0x40000D8=(u32)d;*(volatile u32*)0x40000DC=(u32)n|0x80000000u;}
 static void krestore(int b){for(int i=0;i<knr[b];i++){KRect*r=&krc[b][i];for(int y=r->y;y<r->y+r->h;y++)krow_copy(fb+y*240+r->x,kc_bg+y*240+r->x,r->w);}}
