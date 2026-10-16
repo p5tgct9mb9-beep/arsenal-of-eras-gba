@@ -211,8 +211,9 @@ for w in range(NTH):
     for t in range(34):tl+=mt4(mtile(w,t,7))
     emit("pf_tiles_%d"%w,tl,"unsigned int")
 # ---------------------------------------------------------------- parallax backdrops (256x256, bank 1, tiles from 96)
+BGSTY={15:'trench',17:'castle'}  # v1.3: backdrop-only styles (tiles keep STY)
 def backdrop(w):
-    st=STY[w];g=G(256,256)
+    st=BGSTY.get(w,STY[w]);g=G(256,256)
     for y in range(256):
         b=min(4,y//30)
         for x in range(256):
@@ -237,6 +238,11 @@ def backdrop(w):
         if st=='city' or st=='ruins':h=150-int(40*H(w,x//10,3))-(20 if (x//10)%3==0 else 0)
         elif st in ('canyon','desert','mars'):h=140-int(30*abs(math.sin(x/31.0)))-int(12*math.sin(x/7.0+w))
         elif st=='ship':h=256
+        elif st=='trench':h=164-int(5*math.sin(x/13.0))-int(3*math.sin(x/4.0+w))
+        elif st=='castle':
+            tx=x%86;h=136-int(6*math.sin(x/29.0))
+            if tx<18:h=96 if (tx%6)<3 else 100          # tower with merlons
+            elif (x//5)%2==0:h-=5                       # crenellated curtain wall
         elif st=='space':h=160-int(16*abs(math.sin(x/19.0)))
         else:h=128-int(38*abs(math.sin(x/40.0+w)))-int(10*math.sin(x/9.0))
         for y in range(h,256):g[y][x]=6 if y<h+3 else (7 if y<h+18 else 8)
@@ -254,9 +260,31 @@ def backdrop(w):
         elif st in('city','ruins'):h=180-(30 if (x//16)%3==0 else 12 if (x//16)%3==1 else 0)-(int(8*H(w,x//3,9)) if st=='ruins' else 0)
         elif st=='space':h=186-int(6*math.sin(x/9.0))
         elif st=='ship':h=196
+        elif st=='trench':h=190-int(3*math.sin(x/7.0))-(4 if (x%14)<9 else 0)   # sandbag parapet
         else:h=172-int(14*math.sin(x/21.0+w*2))-int(6*math.sin(x/5.0))
         for y in range(h,256):g[y][x]=9 if y<h+2 else (10 if y<h+12 else 11)
-    if st in ('forest','jungle','mountain','pacific'):
+    if st=='castle':  # arrow-slit windows, banner poles on towers
+        for x in range(256):
+            tx=x%86
+            if tx in (8,9):
+                for y in (108,109,110,111,120,121,122,123):g[y][x]=15 if H(w,x//86,y//10)<.5 else 8
+            if tx==9:
+                for y in range(84,96):g[y][x]=8
+                for y in range(84,89):
+                    for xx in range(x+1,x+7):g[y][xx%256]=15
+    if st=='trench':  # shattered trees on the ridge + barbed-wire pickets on the parapet
+        for i in range(16):
+            cx=int(H(w,i,7)*256);top=110+int(H(w,i,8)*40)
+            for y in range(top,172):
+                for x in (cx,cx+1):g[y][x%256]=8
+            by=top+6+int(H(w,i,9)*12);dx=1 if H(w,i,3)<.5 else -1
+            for k in range(7):g[by-k//2][(cx+dx*(2+k))%256]=8
+        for x in range(0,256,22):
+            for k in range(10):
+                g[178+k][(x+k)%256]=9;g[178+k][(x+9-k)%256]=9
+            for xx in range(x,x+22):
+                if xx%3==0:g[181][xx%256]=9;g[184][(xx+1)%256]=9
+    if st in ('forest','jungle','mountain','pacific','castle'):
         for i in range(26):
             cx=int(H(w,i,7)*256);base=180+int(H(w,i,8)*20);hh=18+int(H(w,i,9)*14)
             for y in range(base-hh,base+30):

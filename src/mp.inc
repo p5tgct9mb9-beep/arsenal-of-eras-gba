@@ -554,9 +554,11 @@ static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hide
  if(mpMixed){ // balanced arsenal: bot k on each team draws from the same era
   int ncv[2]={0,0};
   for(int k=0;k<6;k++){int e=(mpEra>=5&&mode!=MM_SEA)?mpEra:rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0&&mpEra<5)e=1; // v1.3: WW1/1776/medieval maps field that era's kit // Warsaw Pact bots: Cold War kit
-    if(k==0){if(mode==MM_SEA)e=fdec(NSH,g6.shI,&vi);else if(mode==MM_TANK)e=fdec(NTK,g6.tkI,&vi);else if(mode==MM_AIR)e=fdec(NAIR,g6.aI,&vi);else e=fdec(NPRIM,g6.pI,&vi);}
+    int per=mpEra>=5&&mode!=MM_SEA; // v1.3: period maps (WW1/1776/medieval) put the player in period kit too
+    if(k==0&&per){e=mpEra;vi=mode==MM_TANK?tankSel[e]%NTK[e]:mode==MM_AIR?airSel[e]%NAIR[e]:0;if(mode==MM_TANK&&TANKV[e][vi].axis!=t){for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t){vi=q;break;}}if(mode==MM_AIR&&AIRV[e][vi].side!=t){for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==t){vi=q;break;}}}
+    else if(k==0){if(mode==MM_SEA)e=fdec(NSH,g6.shI,&vi);else if(mode==MM_TANK)e=fdec(NTK,g6.tkI,&vi);else if(mode==MM_AIR)e=fdec(NAIR,g6.aI,&vi);else e=fdec(NPRIM,g6.pI,&vi);}
     u->ve=e;
-    if(i==0){u->veh=vi;}
+    if(i==0){u->veh=vi;if(per&&mode==MM_INF){load_player(e);u->wpn=0;refill(u);}}
     else if(mode==MM_SEA){int east=e==0?ax:(f==2||f==5||f==6||f==10);int pick[MAXSH],np=0;for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].axis==east&&!(SHIPV[e][q].cls==SC_CV&&ncv[t]))pick[np++]=q;
       if(!np)for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].cls!=SC_CV)pick[np++]=q;u->veh=pick[rr(np)];}
     else if(mode==MM_TANK&&e>=5){int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NTK[e]);}

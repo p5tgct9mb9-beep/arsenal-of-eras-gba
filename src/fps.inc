@@ -1,3 +1,4 @@
+#include "fpslut.inc"
 // v1.3 FPS VS BOTS - mode 4 raycaster (120 columns x 2 px, 136-row view), ARM column loop in IWRAM
 #define SCR_FPS 84
 #define SCR_FPSEL 85
@@ -47,38 +48,48 @@ static int fcs(int a){return fsn(a+256);}
 // ---------------------------------------------------------------- palette + textures
 static u16 f_rgb(int r,int g,int b){return RGB(clampi(r,0,255),clampi(g,0,255),clampi(b,0,255));}
 static int fNight EWRAM;
-static void f_palette(int outdoor){static const u8 WC[5][3]={{150,150,140},{170,90,60},{110,120,130},{170,150,100},{120,80,40}};
- for(int t=0;t<5;t++)for(int s=0;s<2;s++)for(int l=0;l<8;l++){int k=(l+1)*(s?22:32);PAL_BG[16+t*16+s*8+l]=f_rgb(WC[t][0]*k/256,WC[t][1]*k/256,WC[t][2]*k/256);}
+static void f_palette(int outdoor){ // v1.3: per wall type 4 texel colours x 4 light levels (distance/side)
+ static const u8 WC[5][4][3]={{{150,148,138},{112,110,104},{178,176,166},{86,84,80}},      // '#' concrete: panel, seam, highlight, stain
+  {{168,72,48},{196,190,176},{124,50,36},{204,106,72}},                                   // 'B' brick: brick, mortar, dark brick, lit edge
+  {{104,118,132},{60,66,76},{168,182,196},{140,100,60}},                                  // 'M' metal: plate, seam, sheen, rust
+  {{176,156,104},{124,106,70},{206,190,140},{96,84,56}},                                  // 'S' sandbags: bag, crease, highlight, shadow
+  {{132,86,44},{86,54,28},{220,190,60},{164,116,64}}};                                    // 'D' door: plank, gap, brass/sign, grain
+ static const u8 LK[4]={255,200,150,104};
+ for(int t=0;t<5;t++)for(int k=0;k<4;k++)for(int l=0;l<4;l++){int m=LK[l];PAL_BG[16+t*16+k*4+l]=f_rgb(WC[t][k][0]*m/256,WC[t][k][1]*m/256,WC[t][k][2]*m/256);}
  for(int i=0;i<16;i++){PAL_BG[96+i]=outdoor?f_rgb(60+i*8,110+i*6,190+i*3):f_rgb(20+i,20+i,24+i);PAL_BG[112+i]=outdoor?f_rgb(90+i*5,80+i*4,60+i*3):f_rgb(40+i*3,40+i*3,38+i*3);}
  static const u8 SC[16][3]={{0,0,0},{200,160,120},{70,90,50},{45,60,35},{30,30,30},{90,90,96},{60,70,40},{255,230,120},{150,40,40},{230,230,220},{60,60,180},{180,140,60},{40,120,40},{200,60,60},{120,90,60},{250,250,250}};
  for(int s=0;s<3;s++)for(int i=0;i<16;i++){int k=256-s*70;PAL_BG[128+s*16+i]=f_rgb(SC[i][0]*k/256,SC[i][1]*k/256,SC[i][2]*k/256);}
  if(fNight)for(int i=16;i<176;i++){u16 c=PAL_BG[i];int r=(c&31)*2/5,g=((c>>5)&31)*2/5,b=((c>>10)&31)*3/5;if(i>=96&&i<112){r=1+(i-96)/8;g=1+(i-96)/8;b=3+(i-96)/5;}PAL_BG[i]=r|(g<<5)|(b<<10);}
  PAL_BG[0]=0;PAL_BG[1]=RGB(248,248,248);PAL_BG[2]=RGB(255,220,80);PAL_BG[3]=RGB(240,60,50);PAL_BG[4]=RGB(80,220,80);PAL_BG[5]=RGB(20,22,30);PAL_BG[6]=RGB(70,74,90);PAL_BG[7]=RGB(140,140,150);PAL_BG[8]=RGB(255,250,200);PAL_BG[9]=RGB(40,40,46);PAL_BG[10]=RGB(90,60,40);PAL_BG[11]=RGB(255,140,40);}
-static void f_textures(void){for(int t=0;t<5;t++)for(int y=0;y<16;y++)for(int x=0;x<16;x++){u32 h=xh(t*977+y*16+x);int v=(h&7)==0?1:0;
-  if(t==0){v=(h%5==0)?1:0;if(y==0)v=2;}
-  else if(t==1){int off=(y/4)&1?4:0;if((y&3)==0||((x+off)&7)==0)v=3;else v=(h&3)==0;}
-  else if(t==2){v=(x==0||y==0)?2:((x==2||x==13)&&(y==2||y==13))?3:0;}
-  else if(t==3){int yy=y%5;v=yy==4?3:(yy==0?1:0);if(((x+(y/5)*5)%8)==0)v=2;}
-  else{v=(x==1||x==14||y==1||y==14)?2:(x==11&&y==8)?3:((y==5||y==10)?1:0);}
+static void f_textures(void){for(int t=0;t<5;t++)for(int y=0;y<16;y++)for(int x=0;x<16;x++){u32 h=xh(t*977+y*16+x);int v=0;
+  if(t==0){v=(x==0||y==0||y==8)?1:(x==1||y==1||y==9)?2:((h&15)==0||(y>11&&(h&7)==0&&x>5&&x<10))?3:0;}                       // concrete panels + water stains
+  else if(t==1){int off=(y/4)&1?4:0;if((y&3)==3||((x+off)&7)==7)v=1;else if((y&3)==0||((x+off)&7)==0)v=3;else v=(h%5==0)?2:0;} // running-bond brick
+  else if(t==2){v=(x==0||x==8||y==0)?1:(x==1||x==9||y==1)?2:((x==3||x==12)&&(y==3||y==12))?2:(y>12&&(h&3)==0)?3:0;}        // riveted plates, rust at foot
+  else if(t==3){int yy=y%5,o=((y/5)&1)*4;v=yy==4?1:yy==0?2:(((x+o)%8)==0)?1:(yy==3&&(h&1))?3:0;}                              // stacked sandbags
+  else{v=(x==0||x==15)?1:(x%5==0)?1:(x==12&&(y==7||y==8))?2:(y==3&&x>3&&x<12)?2:((h&7)==0)?3:0;}                              // plank door, brass handle, sign
   FTEX[t][y*16+x]=v;}}
 // ---------------------------------------------------------------- mode 4 primitives
-static void f_rect(int x,int y,int w,int h,int c){u16 v=c|(c<<8);if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>240)w=240-x;if(y+h>160)h=160-y;if(w<=0||h<=0)return;
+IWCODE static void f_rect(int x,int y,int w,int h,int c){u16 v=c|(c<<8);if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>240)w=240-x;if(y+h>160)h=160-y;if(w<=0||h<=0)return;
  for(int j=y;j<y+h;j++){u16*p=fbk+j*120;int a=x,b=x+w;if(a&1){p[a>>1]=(p[a>>1]&0xFF)|(c<<8);a++;}if(b&1){p[b>>1]=(p[b>>1]&0xFF00)|c;b--;}for(int k=a>>1;k<(b+1)>>1;k++)p[k]=v;}}
 static void f_px(int x,int y,int c){if((unsigned)x>=240||(unsigned)y>=160)return;u16*p=fbk+y*120+(x>>1);*p=(x&1)?((*p&0xFF)|(c<<8)):((*p&0xFF00)|c);}
 static void f_text(int x,int y,const char*s,int c){for(;*s;s++,x+=6){int ch=*s;if(ch>='a'&&ch<='z')ch-=32;if(ch<32||ch>127)ch='?';const u8*g=&font_bits[(ch-32)*7];for(int gy=0;gy<7;gy++)for(int gx=0;gx<5;gx++)if(g[gy]&(1<<gx)){f_px(x+gx+1,y+gy+1,5);f_px(x+gx,y+gy,c);}}}
 static void f_ctext(int y,const char*s,int c){f_text(120-(slen(s)*6-1)/2,y,s,c);}
-IWCODE static void f_col(u16*p,int top,int h,const u8*tex,const u16*lut,const u16*ceil,const u16*flr){int y=0,y0=top<0?0:top,y1=top+h;if(y1>FVH)y1=FVH;
- for(;y<y0;y++){*p=ceil[y];p+=120;}int st=(16<<16)/h,ty=(y0-top)*st;for(;y<y1;y++){*p=lut[tex[(ty>>16)<<4]];ty+=st;p+=120;}for(;y<FVH;y++){*p=flr[y];p+=120;}}
+IWCODE static void f_col(u16*p,int top,int h,const u8*tex,const u16*lut,const u16*ceil,const u16*flr,int st){int y=0,y0=top<0?0:top,y1=top+h;if(y1>FVH)y1=FVH;
+ for(;y<y0;y++){*p=ceil[y];p+=120;}int ty=(y0-top)*st;for(;y<y1;y++){*p=lut[tex[(ty>>16)<<4]];ty+=st;p+=120;}for(;y<FVH;y++){*p=flr[y];p+=120;}}
 // ---------------------------------------------------------------- render
-static void f_cast(void){int dx=fcs(FP.a),dy=fsn(FP.a);int plx=-dy*169>>8,ply=dx*169>>8;int px=FP.x,py=FP.y;
- for(int c=0;c<120;c++){int cx=(2*c-119)*256/120;int rx=dx+(plx*cx>>8),ry=dy+(ply*cx>>8);int mx=px>>8,my=py>>8;
-  int ddx=rx?iabs((256*256)/rx):1<<24,ddy=ry?iabs((256*256)/ry):1<<24;int sx,sy,sdx,sdy;
+static s16 FCX[120] EWRAM;
+#define FABS(v) ((v)<0?-(v):(v))
+IWCODE static void f_cast_a(int dx,int dy,int px,int py,int bob,u16*fb){int plx=-dy*169>>8,ply=dx*169>>8;
+ for(int c=0;c<120;c++){int cx=FCX[c];int rx=dx+(plx*cx>>8),ry=dy+(ply*cx>>8);int mx=px>>8,my=py>>8;int arx=FABS(rx),ary=FABS(ry);
+  int ddx=arx?(int)(FRCP[arx<2047?arx:2047]>>8):1<<24,ddy=ary?(int)(FRCP[ary<2047?ary:2047]>>8):1<<24;int sx,sy,sdx,sdy;
   if(rx<0){sx=-1;sdx=(px&255)*ddx>>8;}else{sx=1;sdx=(256-(px&255))*ddx>>8;}if(ry<0){sy=-1;sdy=(py&255)*ddy>>8;}else{sy=1;sdy=(256-(py&255))*ddy>>8;}
-  int side=0,hit=0,cell='#';for(int n=0;n<48;n++){if(sdx<sdy){sdx+=ddx;mx+=sx;side=0;}else{sdy+=ddy;my+=sy;side=1;}if((unsigned)mx>=24||(unsigned)my>=24){hit=1;break;}cell=FM[my][mx];if(FW(cell)){hit=1;break;}}
-  int perp=side==0?sdx-ddx:sdy-ddy;if(perp<24)perp=24;(void)hit;FZ[c]=perp>65535?65535:perp;
-  int lh=FVH*256/perp;int top=FVH/2-lh/2+FP.bob;int wx=side==0?py+(perp*ry>>8):px+(perp*rx>>8);int tx=(wx&255)>>4;if(side==0&&rx>0)tx=15-tx;if(side==1&&ry<0)tx=15-tx;
-  int wt=fwt(cell);int sh=perp>>8;sh=sh>6?6:sh;u16 lut[4];for(int k=0;k<4;k++){int l=7-sh-k;if(l<0)l=0;int idx=16+wt*16+side*8+l;lut[k]=idx|(idx<<8);}
-  f_col(fbk+c,top,lh<1?1:lh,&FTEX[wt][tx],lut,FCEIL,FFLR);}}
+  int side=0,cell='#';for(int n=0;n<48;n++){if(sdx<sdy){sdx+=ddx;mx+=sx;side=0;}else{sdy+=ddy;my+=sy;side=1;}if((unsigned)mx>=24||(unsigned)my>=24)break;cell=FM[my][mx];if(FW(cell))break;}
+  int perp=side==0?sdx-ddx:sdy-ddy;if(perp<24)perp=24;if(perp>65535)perp=65535;FZ[c]=perp;
+  int lh=perp<2048?(int)(((unsigned long long)(FVH*256)*FRCP[perp])>>24):(int)(((unsigned long long)(FVH*8)*FRCP[perp>>5])>>24);if(lh<1)lh=1;
+  int top=FVH/2-lh/2+bob;int wx=side==0?py+(perp*ry>>8):px+(perp*rx>>8);int tx=(wx&255)>>4;if(side==0&&rx>0)tx=15-tx;if(side==1&&ry<0)tx=15-tx;
+  int wt=cell=='#'?0:cell=='B'?1:cell=='M'?2:cell=='S'?3:4;int lv=(perp>>9)+side;if(lv>3)lv=3;u16 lut[4];for(int k=0;k<4;k++){int idx=16+wt*16+k*4+lv;lut[k]=idx|(idx<<8);}
+  f_col(fb+c,top,lh,&FTEX[wt][tx],lut,FCEIL,FFLR,lh<2047?(int)(FRCP[lh]>>4):0);}}
+static void f_cast(void){f_cast_a(fcs(FP.a),fsn(FP.a),FP.x,FP.y,FP.bob,fbk);}
 // sprite art (16 wide): . clear, k skin, g uniform, d dark, b boots, w weapon, h helmet, f flash, r blood, c cap, 1-3 pickups
 static const char*const FSA[4][24]={
 {"......hhhh......",".....hhhhhh.....",".....hkkkkh.....","......kkkk......","......kkkk......",".......kk.......","....gggggggg....","...gggggggggg...","...gg.gggg.gg...","...gg.gggg.gg...","...gg.gggg.gg...","...kk.gggg.kk...","......dddd......","......dddd......","......dddd......",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....bb..bb.....","....bbb..bbb...."},
@@ -170,14 +181,16 @@ static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)+(u32)(
  int cx=120,cy=FVH/2;f_rect(cx-6,cy,4,1,4);f_rect(cx+3,cy,4,1,4);f_rect(cx,cy-6,1,4,4);f_rect(cx,cy+3,1,4,4);
  if(FP.hurt>0){f_rect(0,0,240,3,3);f_rect(0,133,240,3,3);f_rect(0,0,3,136,3);f_rect(237,0,3,136,3);}
  if(F.msgT>0){F.msgT--;f_ctext(12,F.msg,2);}}
-static void f_render(void){f_cast();
+#define FTK() ((u32)(*(volatile u16*)0x4000108)|((u32)(*(volatile u16*)0x400010C)<<16))
+static u32 fPr[4];
+static void f_render(void){u32 t0=FTK();f_cast();u32 t1=FTK();fPr[0]=(t1-t0)>>10;
  // sprites back to front
  u8*ord=FORD;int*dep=FDEP;int n=0;int dx=fcs(FP.a),dy=fsn(FP.a);
  for(int i=0;i<nFB;i++){if(!FB[i].alive&&FB[i].deadT>240&&FMI[FP.mi].dm)continue;dep[n]=((FB[i].x-FP.x)*dx+(FB[i].y-FP.y)*dy)>>8;ord[n++]=i;}
  for(int i=0;i<nFK;i++)if(FK[i].on){dep[n]=((FK[i].x-FP.x)*dx+(FK[i].y-FP.y)*dy)>>8;ord[n++]=100+i;}
  for(int i=1;i<n;i++){int j=i;while(j>0&&dep[j-1]<dep[j]){int t=dep[j];dep[j]=dep[j-1];dep[j-1]=t;u8 o=ord[j];ord[j]=ord[j-1];ord[j-1]=o;j--;}}
  for(int i=0;i<n;i++){int k=ord[i];if(k>=100){FPk*p=&FK[k-100];f_billboard(p->x,p->y,FPA[p->t],8,8,70);}else{FBot*b=&FB[k];int fr=!b->alive?3:b->shoot>4?2:(b->fr>>3)&1;f_billboard(b->x,b->y,FSA[fr],16,24,230);}}
- f_weapon();f_hud();}
+ u32 t2=FTK();fPr[1]=(t2-t1)>>10;f_weapon();f_hud();fPr[2]=(FTK()-t2)>>10;}
 static void f_flip(void){volatile u16*dc=(volatile u16*)0x04000000;*dc^=0x10;fbk=(*dc&0x10)?(u16*)0x06000000:(u16*)0x0600A000;}
 // ---------------------------------------------------------------- autopilot
 static void f_auto(u16*ky,u16*pr){*ky=0;*pr=0;int best=-1,bd=1<<30;for(int i=0;i<nFB;i++){FBot*b=&FB[i];if(!b->alive)continue;int d=idist(b->x-FP.x,b->y-FP.y);if(d<14*256&&d<bd&&f_los(FP.x,FP.y,b->x,b->y)){bd=d;best=i;}}
@@ -199,10 +212,11 @@ static void fr_write(void){const u8*b=(const u8*)&FR;u8 s=0x46;SRAM[FP_OFF]='A';
 static void fr_read(void){memset(&FR,0,sizeof FR);if(SRAM[FP_OFF]!='A'||SRAM[FP_OFF+1]!='O'||SRAM[FP_OFF+2]!='E'||SRAM[FP_OFF+3]!='F')return;u8*b=(u8*)&FR;u8 s=0x46;for(int i=0;i<(int)sizeof FR;i++){b[i]=SRAM[FP_OFF+4+i];s+=b[i]*(i+1);}if(s!=SRAM[FP_OFF+4+sizeof FR])memset(&FR,0,sizeof FR);}
 static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_isauto();
  for(int i=0;i<256;i++)FPALB[i]=PAL_BG[i];fNight=M->night;f_palette(M->outdoor);f_textures();for(int c=0;c<128;c++)FSPC[c]=f_spc(c);static u32 hsig[2] EWRAM;hsig[0]=hsig[1]=0xFFFFFFFF;FHS=hsig;
- for(int y=0;y<FVH;y++){int c=y<FVH/2?96+y*16/(FVH/2):112+(y-FVH/2)*16/(FVH/2+1);if(c>127)c=127;if(y<FVH/2&&c>111)c=111;u16 v=c|(c<<8);if(y<FVH/2)FCEIL[y]=v;else FFLR[y]=v;}
+ for(int c=0;c<120;c++)FCX[c]=(2*c-119)*256/120;
+ for(int y=0;y<FVH;y++){int up=y<FVH/2;int f=up?y*32/(FVH/2):(y-FVH/2)*32/(FVH/2+1);if(f>31)f=31;int base=up?96:112,c0=base+f/2,c1=c0+((f&1)&&(f/2<15));u16 v=(y&1)?(c0|(c1<<8)):(c1|(c0<<8));if(up)FCEIL[y]=v;else FFLR[y]=v;}
  for(int y=0;y<FVH;y++){if(y<FVH/2)FFLR[y]=FCEIL[y];else FCEIL[y]=FFLR[y];}
  vsync();REG_DISPCNT=4|(1<<10);fbk=(u16*)0x0600A000;F.msgT=0;f_msg(M->l1);bgm_t(TR_MODERN);
- FP.v0=vblN;fV0=vblN;int res=0,endT=0;int prevA=0;
+ FP.v0=vblN;fV0=vblN;int res=0,endT=0;int prevA=0;*(volatile u16*)0x400010A=0;*(volatile u16*)0x400010E=0;*(volatile u16*)0x4000108=0;*(volatile u16*)0x400010C=0;*(volatile u16*)0x400010E=0x84;*(volatile u16*)0x400010A=0x80;u32 tL=0;
  for(;;FP.t++){u16 ky=keys,pr=pressed;pressed=0;if(au)f_auto(&ky,&pr);
   if(!au&&(pr&K_START)){res=2;break;}
   // player
@@ -215,14 +229,14 @@ static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_i
    if(FP.reload>0){if(--FP.reload==0){int need=FWP[FP.wep].mag-FP.mag[FP.wep];if(need>FP.res[FP.wep])need=FP.res[FP.wep];FP.mag[FP.wep]+=need;FP.res[FP.wep]-=need;}}
    else{int want=FWP[FP.wep].auto_?(ky&K_A):(pr&K_A)||((ky&K_A)&&!prevA);if(want&&FP.cd==0){if(FP.mag[FP.wep]>0)f_fire();else if(FP.res[FP.wep]>0)FP.reload=70;else{f_msg("EMPTY - SELECT: SWITCH");FP.cd=20;}}}
    prevA=ky&K_A;f_pickups();if(FP.hp<100&&FP.t-fLastHurt>240&&(FP.t%30)==0)FP.hp++;}
-  if(FP.t%20==0)f_bfs();
+  tL=FTK();if(FP.t%20==0)f_bfs();
   f_bots();
   if(!res){if(M->surv&&FSEC()>=180&&FP.hp>0){res=1;endT=FP.t;f_msg("EXFIL HELO INBOUND - YOU HELD!");}if(M->surv&&FP.hp<=0){res=3;endT=FP.t;}
    if(M->surv){}else if(M->dm){if(FP.kills>=15){res=1;endT=FP.t;}if(FP.hp<=0){if(!FP.respawn){FP.deaths++;FP.respawn=120;f_msg("KILLED - RESPAWNING");}else if(--FP.respawn==0){const char(*m)[25]=FMAPS[M->map];for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){FP.x=(x<<8)+128;FP.y=(y<<8)+128;}FP.hp=100;f_bfs();}}if(FP.deaths>=15){res=3;endT=FP.t;}}
    else{if(FP.hp<=0){res=3;endT=FP.t;f_msg("YOU ARE DOWN - MISSION FAILED");}else if(M->exfil){if(FP.intel){const char(*m)[25]=FMAPS[M->map];int px=0,py=0;for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){px=x;py=y;}if((FP.x>>8)==px&&(FP.y>>8)==py){res=1;endT=FP.t;f_msg("HOSTAGE EXFILTRATED");}}}
     else if(!f_alive()&&FP.intel){res=1;endT=FP.t;f_msg("AREA SECURE - INTEL IN HAND");}else if(!f_alive()&&!FP.intel&&F.msgT==0)f_msg("ALL CLEAR - GRAB THE INTEL (X)");}}
   if(res&&FP.t-endT>150)break;if(FP.t>60*60*8){res=3;break;}
-  f_render();
+  fPr[3]=(FTK()-tL)>>10;f_render();
   FP.fcnt++;{u32 el=vblN-FP.v0;if(el>=60){FP.fpsv=(FP.fcnt*60+el/2)/el;FP.fcnt=0;FP.v0=vblN;}}
   BEAT->screen=SCR_FPS;BEAT->mode=mi;BEAT->hp=FP.hp;BEAT->scoreA=FP.kills;BEAT->scoreB=FP.fpsv;BEAT->kills=FP.kills;BEAT->deaths=FP.deaths;BEAT->timer=FP.t;BEAT->phase=res?(res==1?3:4):1;BEAT->x=FP.x>>4;BEAT->y=FP.y>>4;BEAT->extra=f_alive()|(FP.intel<<8)|(FP.wep<<12);
   next_frame();f_flip();}

@@ -236,9 +236,9 @@ extern const unsigned short pf_bdm_13[1024];
 extern const unsigned int pf_bdt_14[672];
 extern const unsigned short pf_bdm_14[1024];
 #define PF_BDN_14 84
-extern const unsigned int pf_bdt_15[1904];
+extern const unsigned int pf_bdt_15[1656];
 extern const unsigned short pf_bdm_15[1024];
-#define PF_BDN_15 238
+#define PF_BDN_15 207
 extern const unsigned int pf_bdt_16[2104];
 extern const unsigned short pf_bdm_16[1024];
 #define PF_BDN_16 263

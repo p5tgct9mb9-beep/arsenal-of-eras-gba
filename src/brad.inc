@@ -28,7 +28,7 @@ typedef struct{s32 x,y,vx,vy;s16 hp,maxhp,tow,smoke,sq,inv,cd,face,on,aimUp,live
 static BrV V;
 typedef struct{s32 x,y,vx,vy;s16 hp,t,cd,c;u8 k,alive,face,st;}BrE;
 #define NBE 48
-static BrE BE[NBE];static int nBE,brEi; // brEi: next course entity to activate (sorted by x)
+static BrE BE[NBE] EWRAM;static int nBE,brEi; // brEi: next course entity to activate (sorted by x)
 typedef struct{s32 x,y,vx,vy;s16 life,dmg;u8 k,team,guided,pad;}BrB;
 #define NBB 40
 static BrB BB[NBB];

@@ -42,7 +42,7 @@ typedef struct{s32 x,y,vx,vy;s16 hp,t,cd,st,dir,flash,fl;u8 k,alive,tgt;}AEn;
 static AEn AE[NAEN];
 typedef struct{s32 x,y,vx,vy;s16 life,dmg,r;u8 k,tgt,decoy,alive;}APr; // k: 0 tracer 1 flak shell 2 missile 3 flare 4 bomb 5 ebul 6 rocket 7 emissile
 #define NAPR 72
-static APr AP[NAPR];
+static APr AP[NAPR] EWRAM;
 typedef struct{s16 x,y,t;u8 k;}AFx; // k 0 burst 1 boom 2 smoke
 #define NAFX 20
 static AFx AF[NAFX];
