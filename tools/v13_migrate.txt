@@ -4,22 +4,7 @@ wait 20
 tap B
 wait 25
 shot mig_main
-tap UP
-wait 6
-tap UP
-wait 6
-tap UP
-wait 6
-tap UP
-wait 6
-tap UP
-wait 6
-tap UP
-wait 6
-tap UP
-wait 6
-tap UP
-wait 6
+# v1.3.2: the 8x UP wrap (net zero on the 8-row menu) removed for the 13-row menu
 tap DOWN
 wait 6
 tap DOWN

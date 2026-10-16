@@ -106,9 +106,12 @@ beat f1
 tap B
 wait 12
 beat f2
-tap DOWN
-tap DOWN
-tap DOWN
+# v1.3.2: menu has 13 rows now; UP x5 reaches CAMPAIGN the same way DOWN x3 wrapped on the 8-row menu
+tap UP
+tap UP
+tap UP
+tap UP
+tap UP
 wait 6
 beat f3
 tap A

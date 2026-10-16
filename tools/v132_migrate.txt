@@ -1,0 +1,58 @@
+wait 100
+tap START
+wait 40
+shot mig_menu
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+shot mig_camp
+tap B
+wait 20
+tap B
+wait 20
+tap B
+wait 30
+shot mig_back
+tap UP
+wait 4
+tap UP
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 30
+tap A
+wait 40
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 46490002
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+wait 400
+beat
+shot mig_fire
+savedump /workspace/aoe-gba/build/mig/v132.sav
