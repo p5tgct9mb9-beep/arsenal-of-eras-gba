@@ -177,6 +177,7 @@ static void credits_roll(int after_campaign);
 #include "v132core.inc"
 #include "hangar.inc"
 #include "credits.inc"
+#include "vbm.inc"
 #include "v132_stub.inc"
 #include "menu131.inc"
 int main(void){

@@ -1,0 +1,120 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 6
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 46526204
+tap A
+wait 300
+shot vb4w_00
+beat
+wait 300
+shot vb4w_01
+beat
+wait 300
+shot vb4w_02
+beat
+wait 300
+shot vb4w_03
+beat
+wait 300
+shot vb4w_04
+beat
+wait 300
+shot vb4w_05
+beat
+wait 300
+shot vb4w_06
+beat
+wait 300
+shot vb4w_07
+beat
+wait 300
+shot vb4w_08
+beat
+wait 300
+shot vb4w_09
+beat
+wait 300
+shot vb4w_10
+beat
+wait 300
+shot vb4w_11
+beat
+wait 300
+shot vb4w_12
+beat
+wait 300
+shot vb4w_13
+beat
+wait 300
+shot vb4w_14
+beat
+wait 300
+shot vb4w_15
+beat
+wait 300
+shot vb4w_16
+beat
+wait 300
+shot vb4w_17
+beat
+wait 300
+shot vb4w_18
+beat
+wait 300
+shot vb4w_19
+beat
+wait 300
+shot vb4w_20
+beat
+wait 300
+shot vb4w_21
+beat
+wait 300
+shot vb4w_22
+beat
+wait 300
+shot vb4w_23
+beat
+wait 300
+shot vb4w_24
+beat
+wait 300
+shot vb4w_25
+beat
+sram64 2380
+end
