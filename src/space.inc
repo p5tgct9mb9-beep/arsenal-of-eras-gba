@@ -123,9 +123,9 @@ static void sp_plume(int t,int x,int y,int w,int len,int altk){int ex=altk>25?(a
  for(int j=0;j<len;j++){int ww=w+(j*(2+ex))/12;int k=j*256/len;u16 c;int tr=0;
   switch(t){
   case PL_RP1:c=j<2?RGB(255,250,220):sp_mix(RGB(255,200,90),RGB(220,90,30),k);if(j>len*2/3)c=sp_mix(c,RGB(70,50,40),(k-170)*3);tr=altk>40?140:0;break;
-  case PL_H2:c=RGB(200,220,255);tr=200;if((j%6)<2&&j<len*3/4){int dw=(j%6)?ww/2:ww/3;lf(x-dw/2,y+j,dw+1,1,RGB(255,236,200));continue;}break;
+  case PL_H2:c=RGB(200,220,255);tr=altk>30?225:200;if(altk<30&&(j%6)<2&&j<len*3/4){int dw=(j%6)?ww/2:ww/3;lf(x-dw/2,y+j,dw+1,1,RGB(255,236,200));continue;}break;
   case PL_SRB:c=j<len/2?RGB(255,252,236):sp_mix(RGB(255,240,200),RGB(255,180,90),(k-128)*2);break;
-  case PL_CH4:c=sp_mix(RGB(150,170,255),RGB(190,120,255),k);tr=150;if((j%7)<2&&j<len*2/3){lf(x-ww/4,y+j,ww/2+1,1,RGB(240,230,255));continue;}break;
+  case PL_CH4:c=sp_mix(RGB(150,170,255),RGB(190,120,255),k);tr=altk>30?200:150;if(altk<30&&(j%7)<2&&j<len*2/3){lf(x-ww/4,y+j,ww/2+1,1,RGB(240,230,255));continue;}break;
   default:c=sp_mix(RGB(255,220,140),RGB(240,140,60),k);tr=60;}
   ww+=(frame+j)&1;if(tr)sp_blend(x-ww/2,y+j,ww,1,c,256-tr);else lf(x-ww/2,y+j,ww,1,c);}}
 // ---------------------------------------------------------------- missions (real profiles, approximate public data)
@@ -183,7 +183,7 @@ static int sp_isauto(void){return *(volatile u32*)0x0203FFD0==0x4F545541u;}
 // ---------------------------------------------------------------- flight state
 typedef struct{s16 x,y,vx,vy,life,r;u8 k;}SPpart;   // x,y in 1/16 px (y world = altitude px)
 typedef struct{s16 x,y,vx,vy,life,w,h;u16 c;u8 k;}SPdeb;
-typedef struct{u32 lv;int fc,fv,fps,tq,warp,ei,st,fl,roll,pitch,thr,thrT,score,guid,gerr,gn,maxq,auto_,iT,ign,lastEv,msgT,inset,insY,insV,landT,qwarn,done;const char*msg;u8 gr[20];s8 dt[20];}SPF;
+typedef struct{u32 lv;int loop,lsec,fc,fv,fps,tq,warp,ei,st,fl,roll,pitch,thr,thrT,score,guid,gerr,gn,maxq,auto_,iT,ign,lastEv,msgT,inset,insY,insV,landT,qwarn,done;const char*msg;u8 gr[20];s8 dt[20];}SPF;
 static SPF F EWRAM;static SPpart SPP[56] EWRAM;static SPdeb SPD[8] EWRAM;
 static void spf_msg(const char*s){F.msg=s;F.msgT=150;}
 // interpolate profile at time tq (1/60 s): alt m, vel km/h, dr km, g x10
@@ -213,7 +213,7 @@ static void sp_pad(const SPm*m,int gy,int cx,int rh){if(gy>=160)return;u16 sand=
   case SV_SOY:{int op=F.tq>0?clampi(F.tq/6,0,10):0;for(int s=-1;s<=1;s+=2){int bx=cx+s*(10+op);sp_line(bx,gy,bx+s*(-2+op/2),gy-30,RGB(150,150,150));lf(bx-1,gy-30-op/2,3,2,RGB(150,150,150));}break;}
   case SV_CZ5:for(int j=0;j<th;j+=4)lf(tx,gy-j-4,7,3,RGB(200,200,204));lf(tx+7,gy-th+14,cx-tx-12,2,RGB(170,170,174));break;
   default:lf(cx-20,gy-6,40,6,RGB(110,110,110));}
- ltx(4,gy+2<150?gy+2:150,m->pad,RGB(255,255,200));}
+ ltx(46,12,m->pad,RGB(255,255,200));}
 static void sp_sky(int altm){int a=altm/1000;u16 top,bot;
  if(a<12){top=sp_mix(RGB(70,120,200),RGB(20,40,110),a*20);bot=sp_mix(RGB(150,190,235),RGB(60,100,180),a*20);}
  else if(a<60){int t=(a-12)*256/48;top=sp_mix(RGB(20,40,110),RGB(2,2,8),t);bot=sp_mix(RGB(60,100,180),RGB(6,8,24),t);}
@@ -260,7 +260,7 @@ static void sp_hud(const SPm*m,int alt,int vel,int dr,int g){char b[48],*o;
  lf(176,12,62,82,RGB(8,10,20));
  o=sp_put(b,"ALT ");o=sp_dec1(o,alt/100);ltx(178,14,b,C_WHITE);ltx(178,22,"KM",RGB(130,130,150));
  o=sp_put(b,"VEL ");o=sp_intc(o,vel);ltx(178,30,b,C_WHITE);ltx(178,38,"KM/H",RGB(130,130,150));
- o=sp_put(b,"DR ");o=sp_intc(o,dr);o=sp_put(o," KM");ltx(178,46,b,C_WHITE);
+ o=sp_put(b,"DR ");o=sp_int(o,dr);o=sp_put(o," KM");ltx(178,46,b,C_WHITE);
  o=sp_put(b,"THR ");o=sp_int(o,F.thr);o=sp_put(o,"%");ltx(178,54,b,F.thr<100?RGB(255,220,120):C_WHITE);
  o=sp_put(b,"G ");o=sp_dec1(o,g);ltx(178,62,b,g>=30?RGB(255,160,80):C_WHITE);
  for(int k=0;k<m->ns;k++){int f=sp_fuel(m,k,F.tq);if(k<F.st)f=0;b[0]='S';b[1]='1'+k;b[2]=0;ltx(178,71+k*7,b,RGB(150,150,170));sp_bar(192,72+k*7,42,4,f,100,f>20?RGB(90,200,120):RGB(230,90,60));}
@@ -299,8 +299,8 @@ static void sp_fly_draw(const SPm*m,int alt,int vel,int g,int dAlt){
  int lit=F.ign&&!F.done;rh=sp_draw(m->v,120,by,F.st,F.fl);
  if(lit){s8 xo[4];u8 ty[4],wd[4];int n=sp_noz(m,F.st,xo,ty,wd);int ak=alt/1000;
   for(int k=0;k<n;k++){int L=(F.tq<0?6:14)+F.thr/8+(ak>20?ak/4:0);if(L>60)L=60;if(F.tq<0&&ty[k]==PL_SRB)continue;sp_plume(ty[k],120+xo[k],by+2,wd[k],L,ak);
-   if(ak<25&&(F.tq&1)&&(ty[k]==PL_SRB||ty[k]==PL_RP1)&&F.tq>0)sp_puff((120+xo[k]+rr(5)-2)<<4,(by+L)<<4,rr(9)-4,8,140,ty[k]==PL_SRB?5:3,0);}
-  if(F.tq>-60&&alt<30&&(F.tq&1)){for(int s=-1;s<=1;s+=2)sp_puff((120+s*20)<<4,(gy-4)<<4,s*(16+rr(16)),-rr(6),200,4,1);}}
+   if(ak<25&&(F.loop&1)&&(ty[k]==PL_SRB||ty[k]==PL_RP1)&&F.tq>0)sp_puff((120+xo[k]+rr(5)-2)<<4,(by+L)<<4,rr(9)-4,8,140,ty[k]==PL_SRB?5:3,0);}
+  if(F.tq>-60&&alt<30&&(F.loop&1)){for(int s=-1;s<=1;s+=2)sp_puff((120+s*20)<<4,(gy-4)<<4,s*(16+rr(16)),-rr(6),200,4,1);}}
  sp_inset(m);}
 static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);F.lv=vblN;memset(SPP,0,sizeof SPP);memset(SPD,0,sizeof SPD);F.tq=m->cd*60;F.warp=1;F.roll=-1;F.thrT=0;F.auto_=sp_isauto();bgm_t(TR_ASCENT);
  int prevAlt=0,endT=0,ri=-1,rollT=-1,rollG=0;
@@ -317,10 +317,10 @@ static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);F.lv=vblN;m
    else if(e->ev==EV_ROLLE&&F.tq>=e->t*60){int er=fabsi(F.roll-rollG);int gg=er<=3?3:er<=10?2:1;F.gr[F.ei]=gg;F.score+=gg==3?300:gg==2?150:50;spf_msg(gg==3?"ROLL ON TARGET +300":"ROLL COMPLETE");sp_do_event(m,F.ei,1);F.roll=-1;F.ei++;}
    else if(F.tq>=e->t*60+(k?180:0)){if(k){F.gr[F.ei]=0;spf_msg("AUTO SEQUENCER");}if(e->ev==EV_ROLL){F.roll=0;rollG=e->arg;rollT=e->t;}sp_do_event(m,F.ei,1);F.ei++;}}
   // roll/pitch/throttle
-  if(F.roll>=0&&(ky&K_RIGHT)&&(F.tq&1))F.roll++;if(F.roll>=0&&(ky&K_LEFT)&&(F.tq&1)&&F.roll>0)F.roll--;
-  if(F.tq>8*60&&!F.done){if((ky&K_UP)&&(F.tq%4==0))F.pitch++;if((ky&K_DOWN)&&(F.tq%4==0))F.pitch--;if(F.warp>1)F.pitch=sp_pitchref(m,F.tq);
-   if(F.warp==1&&(F.tq%90)==0&&!F.auto_)F.pitch+=rr(3)-1;F.pitch=clampi(F.pitch,0,95);if((F.tq%60)==0&&F.warp==1){F.gerr+=fabsi(F.pitch-sp_pitchref(m,F.tq));F.gn++;}}
-  if(F.ign&&F.thrT==0)F.thrT=100;if(F.done)F.thrT=0;if(F.thr<F.thrT&&(F.tq&1))F.thr++;if(F.thr>F.thrT&&(F.tq&1))F.thr--;if(F.thr<F.thrT-30)F.thr+=3;
+  if(F.roll>=0&&(ky&K_RIGHT))F.roll++;if(F.roll>=0&&(ky&K_LEFT)&&F.roll>0)F.roll--;
+  if(F.tq>8*60&&!F.done){if((ky&K_UP)&&(F.loop&1))F.pitch++;if((ky&K_DOWN)&&(F.loop&1))F.pitch--;if(F.warp>1)F.pitch=sp_pitchref(m,F.tq);
+   int sec=F.tq/60;int nsec=sec!=F.lsec;F.lsec=sec;if(F.warp==1&&nsec&&(sec%2)==0&&!F.auto_)F.pitch+=rr(3)-1;F.pitch=clampi(F.pitch,0,95);if(nsec&&F.warp==1){F.gerr+=fabsi(F.pitch-sp_pitchref(m,F.tq));F.gn++;}}
+  if(F.ign&&F.thrT==0)F.thrT=100;if(F.done)F.thrT=0;F.loop++;if(F.thr<F.thrT)F.thr++;if(F.thr>F.thrT)F.thr--;if(F.thr<F.thrT-30)F.thr+=3;
   // advance time
   {int el=(int)(vblN-F.lv);F.lv=vblN;if(el<1)el=1;if(el>4)el=4;F.fc++;F.fv+=el;if(F.fv>=60){F.fps=F.fc;F.fc=0;F.fv=0;}if(!F.done)F.tq+=F.warp*el;else endT+=el;}
   sp_prof(m,F.tq,&alt,&vel,&dr,&g);int dA=(alt-prevAlt)*4/5;if(dA<0)dA=0;if(dA>200)dA=200;prevAlt=alt;
@@ -338,10 +338,10 @@ static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);F.lv=vblN;m
  music_victory();
  for(int t=0;;t++){next_frame();BEAT->screen=SCR_SPFLY;BEAT->phase=3;BEAT->scoreA=sc;BEAT->scoreB=st;
   if(t==0){char b[48],*o;chrome(CAT_EXPLORE,0);m3_box(8,8,224,144,1);m3_ctext(14,m->n,C_YEL,2);m3_ctext(32,cat3(m->veh," - ",m->pad),C_WHITE,1);
-   int y=44,n=0;for(int i=0;i<m->ne&&n<9;i++){int k=sp_evkey(m->e[i].ev);if(!k&&m->e[i].ev!=EV_ROLLE)continue;o=sp_put(b,"T");o=sp_tm(o,m->e[i].t);o=sp_put(o," ");int j=0;while(m->e[i].s[j]&&j<22)*o++=m->e[i].s[j++];*o=0;m3_text(16,y,b,C_GRAY,1);
-    static const char*const GN[4]={"AUTO","LATE","GOOD","PERFECT"};m3_text(180,y,GN[F.gr[i]],F.gr[i]==3?C_GREEN:F.gr[i]?C_YEL:C_RED,1);y+=9;n++;}
+   int y=44,n=0;for(int i=0;i<m->ne&&n<9;i++){int k=sp_evkey(m->e[i].ev);if(!k&&m->e[i].ev!=EV_ROLLE)continue;o=sp_put(b,"T");o=sp_tm(o,m->e[i].t);o=sp_put(o," ");int j=0;while(m->e[i].s[j]&&j<16)*o++=m->e[i].s[j++];*o=0;m3_text(14,y,b,C_GRAY,1);
+    static const char*const GN[4]={"AUTO","LATE","GOOD","PERFECT"};m3_text(178,y,GN[F.gr[i]],F.gr[i]==3?C_GREEN:F.gr[i]?C_YEL:C_RED,1);y+=9;n++;}
    o=sp_put(b,"GUIDANCE ");o=sp_int(o,gs/10);o=sp_put(o,"%   SCORE ");o=sp_int(o,sc);if(best)o=sp_put(o," BEST!");m3_text(16,128,b,best?C_GREEN:C_WHITE,1);
-   for(int s=0;s<3;s++)m3_fill(176+s*14,126,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(141,"A: CONTINUE",C_GRAY,1);m3_present();}
+   for(int s=0;s<3;s++)m3_fill(186+s*14,114,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(141,"A: CONTINUE",C_GRAY,1);m3_present();}
   if(sp_isauto()&&t>200)pressed=K_A;if(t>20&&(pressed&(K_A|K_B))){pressed=0;break;}}
  bgCached=-1;return sc;}
 static int sp_list(const char*title,const char*sub,int n,const char*(*nm)(int),const char*(*rt)(int,char*),int sel,int scr){int redraw=1;
@@ -355,7 +355,7 @@ static const char*spm_nm(int i){return SPM[i].n;}
 static const char*spm_rt(int i,char*b){char*o=sp_put(b,"");for(int s=0;s<3;s++)*o++=s<SPR.flyS[i]?'*':'-';*o++=' ';sp_int(o,SPR.fly[i]);return b;}
 static void sp_brief(const char*n,const char*l1,const char*l2,const char*l3,const char*l4,const char*help){chrome(CAT_EXPLORE,0);banner(n,l1,C_YEL);m3_box(4,38,232,118,1);m3_text(12,46,l2,C_WHITE,1);m3_text(12,58,l3,C_GRAY,1);m3_text(12,70,l4,C_GRAY,1);
  int y=86;const char*p=help;char b[40];while(*p&&y<136){int k=0;while(p[k]&&p[k]!='|'&&k<38){b[k]=p[k];k++;}b[k]=0;m3_text(12,y,b,RGB(170,200,255),1);y+=10;p+=k;if(*p=='|')p++;}m3_ctext(146,"A: GO   B: BACK",C_GRAY,1);m3_present();}
-static int sp_wait_ab(int scr){for(int t=0;;t++){next_frame();BEAT->screen=scr;if(sp_isauto()&&t>30)return 1;if(pressed&K_A){pressed=0;return 1;}if(pressed&K_B){pressed=0;return 0;}}}
+static int sp_wait_ab(int scr){for(int t=0;;t++){next_frame();BEAT->screen=scr;if(sp_isauto()&&t>30)return 1;if(pressed&K_A){pressed=0;return 1;}if(pressed&K_SEL){pressed=0;return 2;}if(pressed&K_B){pressed=0;return 0;}}}
 static void sp_profiles(void){int sel=SPR.last<SPM_N?SPR.last:0;
  for(;;){int i=sp_list("MISSION PROFILES","REAL LAUNCHES - REAL TIMELINES",SPM_N,spm_nm,spm_rt,sel,SCR_SPSEL+0);if(i<0)return;sel=i;const SPm*m=&SPM[i];
   char l2[48],*o=sp_put(l2,m->veh);(void)o;char l3[48];o=sp_put(l3,m->pad);o=sp_put(o," - ");sp_put(o,m->date);char l4[48];o=sp_put(l4,"TARGET: ");sp_put(o,m->orb);
@@ -371,4 +371,230 @@ static void space_program(void){spr_read();bgm_t(TR_SPACE);int sel=0;
  for(;;){int i=sp_list("SPACE PROGRAM","REAL MISSIONS - NO SHORTCUTS",4,sph_nm,sph_rt,sel,SCR_SPSEL);if(i<0){bgCached=-1;return;}sel=i;
   if(i==0)sp_profiles();else if(i==1)sp_satellites();else if(i==2)sp_iss();else sp_eva();bgm_t(TR_SPACE);}}
 static void rec_space(const char**L){spr_read();static char b[4][40];for(int i=0;i<4;i++){char t[24];char*o=sp_put(b[i],SPHN[i]);o=sp_put(o,": ");sp_put(o,sph_rt(i,t));L[i]=b[i];}L[4]="REAL PROFILES, SATS, ISS, EVA";}
-static void sp_satellites(void){}static void sp_iss(void){}static void sp_eva(void){}
+// ---------------------------------------------------------------- orbital mechanics (2D Kepler, km / s)
+#define MU 398600.4f
+#define RE 6371.0f
+typedef struct{float a,e,w,M0,t0,n;float t;}Orb;
+static void orb_from(Orb*o,float rx,float ry,float vx,float vy,float t){float r=fsqr(rx*rx+ry*ry),v2=vx*vx+vy*vy;float en=v2/2-MU/r;o->a=-MU/(2*en);
+ float rv=rx*vx+ry*vy;float ex=((v2-MU/r)*rx-rv*vx)/MU,ey=((v2-MU/r)*ry-rv*vy)/MU;o->e=fsqr(ex*ex+ey*ey);if(o->e>0.995f)o->e=0.995f;if(o->a<0)o->a=4e6f;
+ o->w=o->e>1e-5f?fatan2(ey,ex):0;float nu=fatan2(ry,rx)-o->w;float h=rx*vy-ry*vx;if(h<0)h=-h;
+ float E=2*fatan2(fsqr(1-o->e)*fsin(nu/2),fsqr(1+o->e)*fcos(nu/2));o->M0=E-o->e*fsin(E);o->t0=t;o->t=t;o->n=fsqr(MU/(o->a*o->a*o->a));}
+static float orb_E(const Orb*o,float t){float M=fwrap(o->M0+o->n*(t-o->t0));float E=o->e>0.8f?(M<0?-FPI*0.9f:FPI*0.9f)*0+M+o->e*fsin(M):M;for(int i=0;i<8;i++){float f=E-o->e*fsin(E)-M,d=1-o->e*fcos(E);E-=f/d;}return E;}
+static void orb_state(const Orb*o,float t,float*rx,float*ry,float*vx,float*vy,float*nuo){float E=orb_E(o,t);float e=o->e;float nu=2*fatan2(fsqr(1+e)*fsin(E/2),fsqr(1-e)*fcos(E/2));float r=o->a*(1-e*fcos(E));
+ float th=nu+o->w;float c=fcos(th),sn=fsin(th);*rx=r*c;*ry=r*sn;float p=o->a*(1-e*e);float h=fsqr(MU*p);float vr=MU/h*e*fsin(nu),vt=MU/h*(1+e*fcos(nu));*vx=vr*c-vt*sn;*vy=vr*sn+vt*c;if(nuo)*nuo=fwrap(nu);}
+static int orb_pe(const Orb*o){return (int)(o->a*(1-o->e)-RE);}
+static int orb_ap(const Orb*o){return (int)(o->a*(1+o->e)-RE);}
+// ---------------------------------------------------------------- satellite deploy
+typedef struct{const char*n,*sub,*veh;u8 prof;s16 pe0;s32 ap0;s32 tpe,tap,tol;u16 dv;u8 kind;const char*fact;}SPsat;
+enum{PK_STARLINK,PK_GPS,PK_HST,PK_JWST,PK_TDRS,PK_COMM,PK_WX,PK_LAND};
+static const SPsat SPS[8]={
+ {"STARLINK","60-SAT STACK - LEO","FALCON 9 / SLC-40",4,195,212,280,290,12,250,PK_STARLINK,"FLAT-PACKED, RELEASED ALL AT ONCE"},
+ {"GPS III SV05","NAVIGATION - MEO 55 DEG","FALCON 9 / SLC-40",3,185,185,20180,20180,300,4300,PK_GPS,"31 SATS GIVE YOUR PHONE ITS FIX"},
+ {"HUBBLE (STS-31)","SPACE TELESCOPE - 618 KM","DISCOVERY / LC-39B",2,260,620,612,622,10,250,PK_HST,"CANADARM LIFTS IT OUT OF THE BAY"},
+ {"JWST","L2 TRANSFER - 1.5M KM","ARIANE 5 / KOUROU",9,180,1400,180,1500000,250000,3600,PK_JWST,"ARIANE WAS SO PRECISE IT SAVED FUEL"},
+ {"TDRS-C (STS-26)","RELAY SAT - GEO VIA IUS","DISCOVERY / LC-39B",2,300,300,35786,35786,250,4600,PK_TDRS,"IUS SOLID MOTOR: 2 BURNS TO GEO"},
+ {"SES-8 COMMS","GEO COMMS - GTO DROP-OFF","FALCON 9 / SLC-40",4,185,185,250,35786,400,2800,PK_COMM,"SAT USES ITS OWN MOTOR AFTERWARDS"},
+ {"HIMAWARI-9 WEATHER","GEO WEATHER - 140.7 E","H-IIA / TANEGASHIMA",11,250,35786,35786,35786,250,1800,PK_WX,"CIRCULARISE AT APOGEE (APOGEE BURN)"},
+ {"LANDSAT 9","SUN-SYNC 705 KM 98.2 DEG","ATLAS V / VANDENBERG",12,185,705,700,710,8,400,PK_LAND,"SSO: SAME SUN ANGLE EVERY PASS"}};
+static const char*sps_nm(int i){return SPS[i].n;}
+static const char*sps_rt(int i,char*b){char*o=b;for(int s=0;s<3;s++)*o++=s<SPR.satS[i]?'*':'-';*o++=' ';sp_int(o,SPR.sat[i]);return b;}
+typedef struct{Orb o;float dv;int warp,burn,dep,acc,auto_,t;}SPO;
+static SPO SO EWRAM;
+static void sp_orbit_draw(const SPsat*S,float rx,float ry){char b[48],*o;float apr=SO.o.a*(1+SO.o.e);float tr=(float)S->tap+RE;float mx=apr>tr?apr:tr;if(mx<RE*1.6f)mx=RE*1.6f;float sc=66.0f/mx;int cx=110,cy=84;
+ lf(0,0,240,160,RGB(2,3,10));stars(0,30);int er=(int)(RE*sc);if(er<1)er=1;sp_disc(cx,cy,er,RGB(40,90,170));if(er>4){sp_disc(cx-er/4,cy-er/4,er/3,RGB(60,140,80));sp_circ(cx,cy,er,RGB(140,190,255));}
+ // target orbit (dashed, same orientation)
+ {float ta=((float)S->tpe+(float)S->tap)/2+RE,te=((float)S->tap-(float)S->tpe)/(2*ta);float p=ta*(1-te*te);for(int k=0;k<96;k+=2){float nu=k*2*FPI/96;float r=p/(1+te*fcos(nu));float th=nu+SO.o.w;sp_px(cx+(int)(r*fcos(th)*sc),cy-(int)(r*fsin(th)*sc),RGB(80,220,120));}}
+ {float p=SO.o.a*(1-SO.o.e*SO.o.e);int px=0,py=0;for(int k=0;k<=96;k++){float nu=k*2*FPI/96;float r=p/(1+SO.o.e*fcos(nu));float th=nu+SO.o.w;int x=cx+(int)(r*fcos(th)*sc),y=cy-(int)(r*fsin(th)*sc);if(k)sp_line(px,py,x,y,RGB(230,230,240));px=x;py=y;}
+  float ra=SO.o.a*(1+SO.o.e),rp=SO.o.a*(1-SO.o.e);int ax=cx-(int)(ra*fcos(SO.o.w)*sc),ay=cy+(int)(ra*fsin(SO.o.w)*sc);ltx(clampi(ax-3,0,200),clampi(ay-4,10,150),"AP",RGB(255,200,120));
+  int qx=cx+(int)(rp*fcos(SO.o.w)*sc),qy=cy-(int)(rp*fsin(SO.o.w)*sc);ltx(clampi(qx-3,0,200),clampi(qy+2,10,150),"PE",RGB(150,200,255));}
+ int sx=cx+(int)(rx*sc),sy=cy-(int)(ry*sc);lf(sx-1,sy-1,3,3,SO.burn?RGB(255,160,60):RGB(255,255,120));if(SO.burn)sp_line(sx,sy,sx-(SO.burn>0?3:-3),sy,RGB(255,120,40));
+ lf(0,0,240,10,RGB(8,10,20));ltx(2,1,S->n,RGB(255,220,120));o=sp_put(b,"X");sp_int(o,SO.warp==0?1:SO.warp==1?4:16);ltx(222,1,b,RGB(150,150,170));
+ lf(172,12,66,74,RGB(8,10,20));int pe=orb_pe(&SO.o),ap=orb_ap(&SO.o);
+ ltx(174,14,"PE KM",RGB(150,200,255));o=sp_intc(b,pe);ltx(174,22,b,fabsi(pe-S->tpe)<=S->tol?C_GREEN:C_WHITE);
+ ltx(174,31,"AP KM",RGB(255,200,120));o=sp_intc(b,ap);ltx(174,39,b,fabsi(ap-S->tap)<=S->tol?C_GREEN:C_WHITE);
+ ltx(174,48,"TARGET",RGB(80,220,120));o=sp_intc(b,(int)S->tpe);o=sp_put(o,"X");ltx(174,56,b,RGB(80,220,120));o=sp_intc(b,(int)S->tap);ltx(174,64,b,RGB(80,220,120));
+ o=sp_put(b,"DV ");o=sp_int(o,(int)(SO.dv*1000));sp_put(o," M/S");ltx(174,74,b,SO.dv<0.1f?RGB(255,120,80):C_WHITE);
+ lf(0,150,240,10,RGB(8,10,20));int ok=fabsi(pe-S->tpe)<=S->tol&&fabsi(ap-S->tap)<=S->tol;ltc(151,ok?"IN TARGET ORBIT - SELECT: DEPLOY":"A PROGRADE  L RETRO  R FINE  B WARP",ok?RGB(140,255,160):RGB(170,200,255));
+ o=sp_put(b,"T");sp_tm(o,(int)SO.o.t);ltx(2,140,b,RGB(140,255,160));}
+static int sp_orbit(int si){const SPsat*S=&SPS[si];memset(&SO,0,sizeof SO);SO.auto_=sp_isauto();float rp=RE+S->pe0,ra=RE+S->ap0;float a=(rp+ra)/2;float vp=fsqr(MU*(2/rp-1/a));orb_from(&SO.o,rp,0,0,vp,0);SO.dv=S->dv/1000.0f;bgm_t(TR_SPACE);
+ for(SO.t=0;;SO.t++){next_frame();float rx,ry,vx,vy,nu;orb_state(&SO.o,SO.o.t,&rx,&ry,&vx,&vy,&nu);int pe=orb_pe(&SO.o),ap=orb_ap(&SO.o);int ok=fabsi(pe-S->tpe)<=S->tol&&fabsi(ap-S->tap)<=S->tol;
+  u16 ky=keys,pr=pressed;
+  float adv=0;if(SO.auto_){ky=0;pr=0;float an=nu<0?-nu:nu;int nearP=an<0.06f,nearA=an>FPI-0.06f;float r=fsqr(rx*rx+ry*ry),v=fsqr(vx*vx+vy*vy);
+   if(ok)pr|=K_SEL;else if(nearP||nearA){float other=nearP?(float)S->tap+RE:(float)S->tpe+RE;int need=nearP?fabsi(ap-S->tap)>S->tol/4:fabsi(pe-S->tpe)>S->tol/4;
+    if(nearA&&!need&&fabsi(ap-S->tap)>S->tol/4){other=(float)S->tap+RE;need=0;}
+    if(need){float an2=(r+other)/2;float vr=fsqr(MU*(2/r-1/an2));adv=vr-v;if(ffabs(adv)<0.0005f)adv=0;}}
+   SO.warp=(nearP||nearA)?0:2;}
+  if(pr&K_B){SO.warp=(SO.warp+1)%3;sfx_menu();}
+  SO.burn=0;if(((ky&(K_A|K_L))||adv!=0)&&SO.dv>0){float dvs=(ky&K_R)?0.002f:0.02f;float sg=(ky&K_A)?1:-1;if(adv!=0){sg=adv>0?1:-1;dvs=ffabs(adv);if(dvs>0.02f)dvs=0.02f;}if(dvs>SO.dv)dvs=SO.dv;float v=fsqr(vx*vx+vy*vy);vx+=sg*dvs*vx/v;vy+=sg*dvs*vy/v;SO.dv-=dvs;SO.o.t+=2;orb_from(&SO.o,rx,ry,vx,vy,SO.o.t);SO.burn=(int)sg;if((SO.t&7)==0)sfx_whoosh();}
+  else{static const s16 WR[3]={10,60,300};float step=WR[SO.warp];float per=2*FPI/SO.o.n;if(step>per/60)step=per/60;SO.o.t+=step;}
+  BEAT->screen=SCR_SPORB;BEAT->mode=si;BEAT->x=pe;BEAT->y=ap;BEAT->scoreA=(int)(SO.dv*1000);BEAT->phase=ok;BEAT->timer=(int)SO.o.t;
+  lfb=0;sp_orbit_draw(S,rx,ry);m3_present();
+  if((pr&K_SEL)&&ok){int acc=1000-(fabsi(pe-S->tpe)+fabsi(ap-S->tap))*500/S->tol;SO.acc=clampi(acc,0,1000);return 1;}
+  if(pr&K_START)return 0;if(SO.t>36000)return 0;}}
+// payload sprites
+static void sp_payload(int k,int x,int y,int ph){u16 G=RGB(210,170,70),Pn=RGB(40,60,120),W=C_WH;
+ switch(k){
+ case PK_STARLINK:for(int i=0;i<10;i++){int dx=ph?(i-5)*ph/6:0,dy=ph?(i-5)*ph/12:0;lf(x-8+dx,y-10+i*2+dy,16,1,RGB(150,150,160));lf(x-8+dx,y-10+i*2+dy,16,1,i&1?RGB(110,110,120):RGB(160,160,170));}break;
+ case PK_GPS:lf(x-4,y-5,8,10,G);lf(x-4,y-5,8,1,lit(G));if(ph){lf(x-4-ph,y-2,ph,4,Pn);lf(x+4,y-2,ph,4,Pn);}lf(x-1,y-8,3,3,W);break;
+ case PK_HST:lf(x-12,y-3,22,7,RGB(200,200,206));lf(x-12,y-3,22,1,C_WH);lf(x+10,y-2,3,5,RGB(80,80,90));if(ph){lf(x-6,y-12,4,9,Pn);lf(x-6,y+4,4,9,Pn);}break;
+ case PK_JWST:if(ph<6){lf(x-4,y-8,8,16,G);lf(x-6,y+6,12,3,RGB(180,120,170));}else{for(int r=0;r<5;r++)lf(x-5+(r&1)*2,y-9+r*3,8,3,G);int sw=clampi(ph-6,0,20);lf(x-sw,y+8,sw*2,3,RGB(190,130,180));lf(x-sw/2,y+11,sw,2,RGB(160,110,160));}if(ph)lf(x+5,y+2,6,3,Pn);break;
+ case PK_TDRS:lf(x-4,y-4,8,8,G);if(ph){sp_circ(x-8,y,5,C_WH);sp_circ(x+8,y,5,C_WH);lf(x-2,y-6-ph/2,4,ph/2,Pn);}break;
+ default:lf(x-4,y-5,8,10,k==PK_LAND?RGB(200,200,206):G);if(ph){lf(x+4,y-2,ph+2,4,Pn);if(k!=PK_LAND)lf(x-4-ph-2,y-2,ph+2,4,Pn);}if(k==PK_WX)lf(x-2,y-8,4,3,C_WH);}}
+static int sp_canadarm(void){ // STS-31: grapple Hubble in the bay, lift, deploy arrays, release
+ int ex=40,ey=60,st=0,t=0,score=1000,au=sp_isauto();int hx=130,hy=110;int gx=hx-4,gy=hy-8,rx=150,ry=60,dep=0;
+ for(;;t++){next_frame();u16 ky=keys,pr=pressed;int tx=st==0?gx:rx,ty=st==0?gy:ry;if(au){ky=0;pr=0;if(ex<tx)ky|=K_RIGHT;if(ex>tx)ky|=K_LEFT;if(ey<ty)ky|=K_DOWN;if(ey>ty)ky|=K_UP;if(ex==tx&&ey==ty&&(t&15)==0&&(st==0||dep>=60))pr|=K_A;}
+  if((t&1)==0){if(ky&K_LEFT)ex--;if(ky&K_RIGHT)ex++;if(ky&K_UP)ey--;if(ky&K_DOWN)ey++;}ex=clampi(ex,10,230);ey=clampi(ey,20,140);
+  if(st==1){hx=ex+4;hy=ey+8;if(idist(ex-rx,ey-ry)<3&&dep<60)dep++;}
+  if(pr&K_A){if(st==0&&idist(ex-gx,ey-gy)<3){st=1;sfx_ok();}else if(st==1&&dep>=60){st=2;sfx_ok();}else score-=50;}
+  if(st==2){hy--;if(t%2)hx++;}
+  BEAT->screen=SCR_SPDEP;BEAT->phase=st;BEAT->x=ex;BEAT->y=ey;
+  lfb=0;lf(0,0,240,160,RGB(2,3,10));stars(0,30);earth_limb(30);
+  lf(20,118,200,20,RGB(220,220,220));lf(20,118,200,2,RGB(150,150,150));lf(20,124,200,14,RGB(190,190,194));for(int i=0;i<10;i++)lf(26+i*20,120,1,4,RGB(160,160,160));lf(14,100,8,38,C_WH);ltx(24,140,"DISCOVERY PAYLOAD BAY",RGB(150,200,255));
+  {int sx=30,sy=116;int mx=(sx+ex)/2-10,my=(sy+ey)/2-14;sp_line(sx,sy,mx,my,RGB(240,240,240));sp_line(sx+1,sy,mx+1,my,RGB(200,200,200));sp_line(mx,my,ex,ey,RGB(240,240,240));sp_line(mx,my+1,ex,ey+1,RGB(200,200,200));lf(mx-1,my-1,3,3,RGB(60,60,60));lf(ex-1,ey-1,3,3,RGB(60,60,60));}
+  sp_payload(PK_HST,hx,hy,st>=1?dep/6:0);if(st==0)lf(gx-1,gy-1,3,3,RGB(255,80,80));if(st==1&&dep<60){lf(rx-2,ry,5,1,C_GREEN);lf(rx,ry-2,1,5,C_GREEN);}
+  lf(0,0,240,10,RGB(8,10,20));ltx(2,1,"CANADARM - HUBBLE RELEASE",RGB(255,220,120));
+  ltc(151,st==0?"D-PAD: ARM TO RED GRAPPLE PIN, A: GRAB":st==1?(dep<60?"LIFT TO THE GREEN MARK - ARRAYS UNFURL":"A: RELEASE HUBBLE"):"HUBBLE IS FREE - 25 APR 1990",RGB(170,200,255));m3_present();
+  if(st==2&&hy<40)return clampi(score-t/4,200,1000);if(t>5000)return 0;}}
+static int sp_deploy(const SPsat*S){int t=0,res=0,au=sp_isauto();int sepT=300,ph=0,sx=120,sy=80;
+ for(;;t++){next_frame();u16 pr=pressed;if(au)pr=(t==sepT)?K_A:0;
+  if(!res&&(pr&K_A)&&t>=sepT-120){int d=t-sepT;if(d<0)d=-d;res=d<=15?3:d<=45?2:1;sfx_ok();ph=1;}
+  if(!res&&t>sepT+120){res=1;ph=1;}
+  if(ph&&ph<40&&(t&3)==0)ph++;
+  BEAT->screen=SCR_SPDEP;BEAT->phase=res;BEAT->timer=t;
+  lfb=0;lf(0,0,240,160,RGB(2,3,10));stars(0,40);earth_limb(40);
+  int stx=sx-(ph?ph:0),sty=sy+12;lf(stx-5,sty,10,18,C_WH);lf(stx-3,sty+18,6,3,RGB(80,80,86));
+  sp_payload(S->kind,sx+(ph?ph/2:0),sy-(ph?ph/3:0),ph>6?ph-6:0);
+  lf(0,0,240,10,RGB(8,10,20));ltx(2,1,S->n,RGB(255,220,120));
+  char b[40],*o;if(!res){int c=(sepT-t)/60;o=sp_put(b,"SEPARATION IN ");sp_int(o,c<0?0:c);ltc(130,b,RGB(255,240,160));ltc(151,"A: SEPARATE AT ZERO",RGB(170,200,255));}
+  else{static const char*const GN[4]={"","LATE SEP","GOOD SEP","PERFECT SEP"};ltc(130,GN[res],res==3?C_GREEN:C_YEL);ltc(140,S->fact,C_WHITE);}
+  m3_present();if(res&&t>sepT+260)return res;}}
+static void sp_satellites(void){int sel=SPR.lastSat<8?SPR.lastSat:0;
+ for(;;){int i=sp_list("SATELLITE DEPLOY","REACH THE ORBIT, THEN DEPLOY",8,sps_nm,sps_rt,sel,SCR_SPSEL+0);if(i<0)return;sel=i;const SPsat*S=&SPS[i];
+  char l3[48],*o=sp_put(l3,"TARGET ");o=sp_intc(o,(int)S->tpe);o=sp_put(o," X ");o=sp_intc(o,(int)S->tap);sp_put(o," KM");char l4[48];o=sp_put(l4,"START ");o=sp_intc(o,S->pe0);o=sp_put(o," X ");o=sp_intc(o,(int)S->ap0);o=sp_put(o," KM  DV ");sp_int(o,S->dv);
+  sp_brief(S->n,S->sub,S->veh,l3,l4,"BURN PROGRADE (A) AT PERIGEE TO RAISE|APOGEE; AT APOGEE TO RAISE PERIGEE.|L = RETRO.  SELECT: FLY THE ASCENT|FIRST. ACCURACY + DV LEFT = SCORE.");
+  BEAT->mode=i;int w=sp_wait_ab(SCR_SPSEL);if(!w)continue;if(w==2)sp_fly(S->prof);
+  if(sp_orbit(i)){int sep=S->kind==PK_HST?3:0;int arm=0;if(S->kind==PK_HST)arm=sp_canadarm();else sep=sp_deploy(S);
+   int sc=SO.acc+(int)(SO.dv*1000*500/S->dv)/1+sep*100+arm/2;int st=1+(SO.acc>=600)+(SO.acc>=900);int best=sc>SPR.sat[i];if(best)SPR.sat[i]=sc;if(st>SPR.satS[i])SPR.satS[i]=st;SPR.lastSat=i;spr_write();music_victory();
+   for(int t=0;;t++){next_frame();BEAT->screen=SCR_SPORB;BEAT->phase=3;BEAT->scoreA=sc;BEAT->scoreB=st;if(t==0){char b[48];chrome(CAT_EXPLORE,0);m3_box(16,24,208,112,1);m3_ctext(32,"PAYLOAD DEPLOYED",C_YEL,2);m3_ctext(52,S->n,C_WHITE,1);
+     o=sp_put(b,"ORBIT ");o=sp_intc(o,orb_pe(&SO.o));o=sp_put(o," X ");o=sp_intc(o,orb_ap(&SO.o));sp_put(o," KM");m3_ctext(66,b,C_WHITE,1);
+     o=sp_put(b,"ACCURACY ");o=sp_int(o,SO.acc/10);o=sp_put(o,"%  DV LEFT ");o=sp_int(o,(int)(SO.dv*1000));m3_ctext(78,b,C_GRAY,1);
+     o=sp_put(b,"SCORE ");o=sp_int(o,sc);if(best)sp_put(o,"  BEST!");m3_ctext(94,b,best?C_GREEN:C_WHITE,1);for(int s=0;s<3;s++)m3_fill(99+s*14,106,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
+    if(sp_isauto()&&t>200)pressed=K_A;if(t>20&&(pressed&(K_A|K_B))){pressed=0;break;}}}
+  bgm_t(TR_SPACE);}}
+// ---------------------------------------------------------------- ISS
+// front view of the ISS (looking aft along -V-bar at Harmony forward). sc = px per 10 m (x16)
+static void iss_draw(int cx,int cy,int sc,int view){ // view 0 front, 1 side (plot icon)
+ int L=(sc*110)>>4;if(L<4)L=4;int tw=(sc*3)>>4;if(tw<1)tw=1;u16 T=RGB(170,170,176),A=RGB(160,118,58),AG=RGB(110,80,40),R=C_WH,M=RGB(220,220,214);
+ if(view==1){lf(cx-L/2,cy,L,tw,T);for(int k=-1;k<=1;k+=2)for(int j=0;j<2;j++){int ax=cx+k*(L/2-j*L/7)-((sc*2)>>4);int ah=(sc*35)>>4;lf(ax,cy-ah,(sc*4)>>4|1,ah*2+tw,A);}lf(cx-((sc*3)>>4),cy-((sc*8)>>4),(sc*6)>>4|1,(sc*16)>>4|1,M);return;}
+ lf(cx-L/2,cy-tw/2,L,tw,T);for(int i=-L/2;i<L/2;i+=4)lf(cx+i,cy-tw/2,1,tw,RGB(120,120,126));                // integrated truss
+ for(int k=-1;k<=1;k+=2)for(int j=0;j<2;j++){int ax=cx+k*(L/2-((sc*6)>>4)-j*((sc*14)>>4));int aw=(sc*12)>>4,ah=(sc*35)>>4;if(aw<1)aw=1;           // 8 solar array wings (+iROSA)
+  for(int s2=-1;s2<=1;s2+=2){int y0=s2<0?cy-tw/2-ah:cy+tw/2;lf(ax-aw/2,y0,aw,ah,A);for(int q=0;q<ah;q+=3)lf(ax-aw/2,y0+q,aw,1,AG);lf(ax,y0,1,ah,AG);
+   if(sc>=8){int iw=aw*2/3,ih=ah/2;lf(ax-iw/2,s2<0?y0:y0+ah-ih,iw,ih,RGB(60,70,110));}}}
+ for(int k=-1;k<=1;k+=2){int rx=cx+k*((sc*20)>>4);lf(rx-((sc*2)>>4),cy+tw/2,(sc*4)>>4|1,(sc*16)>>4,R);}                          // radiators
+ int mw=(sc*5)>>4|1;lf(cx-mw/2,cy-((sc*12)>>4),mw,(sc*24)>>4|1,M);                                                    // module stack
+ if(sc>=6){sp_disc(cx,cy,mw,RGB(200,200,196));sp_circ(cx,cy,mw,RGB(140,140,140));}}
+typedef struct{const char*n,*port,*how;u8 app,arm,shut;}SPiv;   // app: 0 V-bar fwd (+x), 1 R-bar zenith (+z), 2 R-bar nadir (-z)
+static const SPiv SPI[8]={
+ {"CREW DRAGON","HARMONY FWD - IDA-2/PMA-2","AUTONOMOUS, CREW MONITORS",0,0,0},
+ {"CREW DRAGON (ZEN)","HARMONY ZENITH - IDA-3/PMA-3","CREW-2 STYLE ZENITH DOCK",1,0,0},
+ {"SOYUZ MS","RASSVET (MRM-1) NADIR","KURS RADAR, TORU BACKUP",2,0,0},
+ {"STARLINER","HARMONY FWD - IDA-2/PMA-2","CFT: CREW TAKES MANUAL",0,0,0},
+ {"CARGO DRAGON","HARMONY ZENITH - IDA-3","CRS-2: DOCKS ITSELF",1,0,0},
+ {"CYGNUS","UNITY NADIR (CANADARM2)","HOLD AT 10 M, ARM CAPTURE",2,1,0},
+ {"HTV KOUNOTORI","HARMONY NADIR (CANADARM2)","R-BAR APPROACH, ARM CAPTURE",2,1,0},
+ {"SPACE SHUTTLE","PMA-2 ON HARMONY FWD","R-BAR PITCH MANEUVER FIRST",0,0,1}};
+static const char*spi_nm(int i){return SPI[i].n;}
+static const char*spi_rt(int i,char*b){char*o=b;for(int s=0;s<3;s++)*o++=s<SPR.issS[i]?'*':'-';*o++=' ';sp_int(o,SPR.iss[i]);return b;}
+typedef struct{float x,z,vx,vz,dv;int t,warp,kos,ae,viol;float hx,hz;}SPR1;
+static SPR1 RV EWRAM;
+#define CWN 0.00113f
+static int sp_rendezvous(int vi){const SPiv*V=&SPI[vi];memset(&RV,0,sizeof RV);RV.x=-9000;RV.z=-1500;RV.vx=1.5f*CWN*1500;RV.vz=0;int au=sp_isauto();
+ RV.hx=V->app==0?200:0;RV.hz=V->app==1?200:V->app==2?-200:0;int held=0;
+ for(;;RV.t++){next_frame();u16 ky=keys,pr=pressed;float r=fsqr(RV.x*RV.x+RV.z*RV.z),rate=(RV.x*RV.vx+RV.z*RV.vz)/(r>1?r:1);
+  float dx=RV.hx-RV.x,dz=RV.hz-RV.z,dh=fsqr(dx*dx+dz*dz);
+  if(au){ky=0;pr=0;float vmax=dh>3000?8:dh>800?3:dh>200?1.0f:0.3f;float k=vmax/(dh>1?dh:1);if(k>0.004f)k=0.004f;float tvx=dx*k*(dh>1?1:0),tvz=dz*k;if(dh<vmax*250){tvx=dx*0.004f;tvz=dz*0.004f;}
+   // route around the keep-out sphere: stay outside 260 m until on the approach axis
+   if(r<300&&dh>60){float ox=RV.x/r,oz=RV.z/r;tvx+=ox*0.4f;tvz+=oz*0.4f;}
+   float ex=tvx-RV.vx,ez=tvz-RV.vz;if(ex>0.03f)ky|=K_RIGHT;if(ex<-0.03f)ky|=K_LEFT;if(ez>0.03f)ky|=K_UP;if(ez<-0.03f)ky|=K_DOWN;RV.warp=dh>1500?2:dh>300?1:0;}
+  if(pr&K_B){RV.warp=(RV.warp+1)%3;sfx_menu();}
+  float a=0.05f;int th=0;if(ky&K_RIGHT){RV.vx+=a;RV.dv+=a;th=1;}if(ky&K_LEFT){RV.vx-=a;RV.dv+=a;th=1;}if(ky&K_UP){RV.vz+=a;RV.dv+=a;th=1;}if(ky&K_DOWN){RV.vz-=a;RV.dv+=a;th=1;}
+  static const u8 WS[3]={1,5,20};int ss=WS[RV.warp];for(int i=0;i<ss;i++){float ax=2*CWN*RV.vz,az=-2*CWN*RV.vx+3*CWN*CWN*RV.z;RV.vx+=ax;RV.vz+=az;RV.x+=RV.vx;RV.z+=RV.vz;}
+  r=fsqr(RV.x*RV.x+RV.z*RV.z);float ae=(RV.x*RV.x)/(2000.0f*2000)+(RV.z*RV.z)/(1000.0f*1000);
+  if(ae<1&&!RV.ae){RV.ae=1;spf_msg("ENTERED APPROACH ELLIPSOID");}
+  if(r<200&&!RV.kos){RV.kos=1;}if(r<190&&dh>40){RV.viol++;if((RV.viol&63)==1)spf_msg("KEEP-OUT SPHERE: NOT ON AXIS!");}
+  float sp=fsqr(RV.vx*RV.vx+RV.vz*RV.vz);if(dh<15&&sp<0.12f)held++;else held=0;
+  BEAT->screen=SCR_SPRDV;BEAT->mode=vi;BEAT->x=(int)RV.x+20000;BEAT->y=(int)RV.z+20000;BEAT->timer=RV.t;BEAT->scoreA=(int)(RV.dv*10);BEAT->phase=RV.ae+RV.kos*2;
+  // draw
+  lfb=0;lf(0,0,240,160,RGB(4,6,16));float span=r>4000?12000:r>1200?4000:r>400?1200:500;float sc=200.0f/span;int cx=120,cy=84;
+  for(int i=-3;i<=3;i++){lf(cx+(int)(i*span/6*sc),12,1,138,RGB(14,18,34));}lf(0,cy,240,1,RGB(30,40,70));lf(cx,12,1,138,RGB(30,40,70));
+  ltx(2,cy-9,"-V",RGB(90,110,150));ltx(226,cy-9,"+V",RGB(90,110,150));ltx(cx+2,13,"+R",RGB(90,110,150));
+  for(int k=0;k<96;k++){float an=k*2*FPI/96;int px=cx+(int)(2000*fcos(an)*sc),py=cy-(int)(1000*fsin(an)*sc);if(k&1)sp_px(px,py,RGB(80,160,255));}
+  {int kr=(int)(200*sc);if(kr>=2)sp_circ(cx,cy,kr,RGB(255,90,90));}
+  iss_draw(cx,cy,(int)(sc*16*10)<2?2:(int)(sc*16*10)>14?14:(int)(sc*16*10),1);
+  int hx=cx+(int)(RV.hx*sc),hy=cy-(int)(RV.hz*sc);lf(hx-2,hy,5,1,C_GREEN);lf(hx,hy-2,1,5,C_GREEN);
+  int px=cx+(int)(RV.x*sc),py=cy-(int)(RV.z*sc);if(px>=0&&px<240&&py>=10&&py<150){lf(px-1,py-1,3,3,th?RGB(255,160,60):RGB(255,255,120));sp_line(px,py,px+(int)(RV.vx*8),py-(int)(RV.vz*8),RGB(255,220,120));}
+  // predicted path (ballistic, 40 steps of 30 s)
+  {float qx=RV.x,qz=RV.z,ux=RV.vx,uz=RV.vz;for(int k=0;k<40;k++){for(int j=0;j<30;j++){float ax=2*CWN*uz,az=-2*CWN*ux+3*CWN*CWN*qz;ux+=ax;uz+=az;qx+=ux;qz+=uz;}sp_px(cx+(int)(qx*sc),cy-(int)(qz*sc),RGB(120,120,160));}}
+  char b[48],*o;lf(0,0,240,10,RGB(8,10,20));o=sp_put(b,V->n);sp_put(o," RENDEZVOUS");ltx(2,1,b,RGB(255,220,120));o=sp_put(b,"X");sp_int(o,WS[RV.warp]);ltx(222,1,b,RGB(150,150,170));
+  lf(0,150,240,10,RGB(8,10,20));o=sp_put(b,"RNG ");o=sp_int(o,(int)r);o=sp_put(o,"M  RATE ");o=sp_dec1(o,(int)(rate*10));o=sp_put(o,"  DV ");o=sp_dec1(o,(int)(RV.dv*10));ltx(2,151,b,C_WHITE);
+  if(F.msgT>0){F.msgT--;ltc(136,F.msg,RGB(255,240,160));}else ltc(136,dh<300?"NULL YOUR RATES AT THE GREEN HOLD POINT":"D-PAD: THRUST  B: TIME WARP",RGB(150,170,210));
+  m3_present();
+  if(held>60)return 1;if(pr&K_START)return 0;if(RV.t>20000)return 0;}}
+typedef struct{float x,y,z,vx,vy,vz,ro,pi,ya,vro,vpi,vya;int t,ff,soft,cont;}SPD1;
+static SPD1 DK EWRAM;
+static int sp_dock(int vi){const SPiv*V=&SPI[vi];memset(&DK,0,sizeof DK);DK.x=V->arm?30:200;DK.y=3.5f;DK.z=-2.0f;DK.ro=4;DK.pi=-3;DK.ya=5;int au=sp_isauto();int capT=0;
+ for(;;DK.t++){next_frame();u16 ky=keys,pr=pressed;
+  if(au){ky=0;pr=0;DK.ff=DK.x>12?1:0;int ph=DK.t%12;float tx=V->arm?10:0;float vt=DK.x>40?-0.8f:DK.x>12?-0.3f:-0.1f;if(V->arm&&DK.x<tx+0.3f)vt=0;
+   float tr=0;if(ph==0){if(DK.vy> -DK.y*0.02f+0.01f)pr|=K_LEFT;else if(DK.vy< -DK.y*0.02f-0.01f)pr|=K_RIGHT;}if(ph==3){if(DK.vz> -DK.z*0.02f+0.01f)pr|=K_DOWN;else if(DK.vz< -DK.z*0.02f-0.01f)pr|=K_UP;}
+   if(ph==6){if(-DK.vx< -vt-0.02f)pr|=K_L;else if(-DK.vx> -vt+0.02f)pr|=K_R;}
+   if(ph==9){ky|=K_B;float*a[3]={&DK.ro,&DK.pi,&DK.ya};float*v[3]={&DK.vro,&DK.vpi,&DK.vya};int w=(DK.t/12)%3;float dsr=-*a[w]*0.03f;if(*v[w]>dsr+0.02f)pr|=w==0?K_L:w==1?K_DOWN:K_LEFT;else if(*v[w]<dsr-0.02f)pr|=w==0?K_R:w==1?K_UP:K_RIGHT;}(void)tr;
+   if(V->arm&&DK.x<tx+0.5f&&fabsi((int)(DK.y*10))<3&&fabsi((int)(DK.z*10))<3)capT++;}
+  if(pr&K_START)DK.ff^=1;
+  int rot=(ky&K_B)!=0;float tp=0.02f,rp=0.1f;
+  if(!rot){if(pr&K_LEFT)DK.vy-=tp;if(pr&K_RIGHT)DK.vy+=tp;if(pr&K_UP)DK.vz+=tp;if(pr&K_DOWN)DK.vz-=tp;if(pr&K_L)DK.vx-=0.05f;if(pr&K_R)DK.vx+=0.05f;}
+  else{if(pr&K_LEFT)DK.vya-=rp;if(pr&K_RIGHT)DK.vya+=rp;if(pr&K_UP)DK.vpi+=rp;if(pr&K_DOWN)DK.vpi-=rp;if(pr&K_L)DK.vro-=rp;if(pr&K_R)DK.vro+=rp;}
+  if(rot&&!au){}
+  int ss=DK.ff?10:1;for(int i=0;i<ss;i++){float dt=1.0f/60*2;DK.x+=DK.vx*dt*-1*-1;DK.y+=DK.vy*dt;DK.z+=DK.vz*dt;DK.ro+=DK.vro*dt;DK.pi+=DK.vpi*dt;DK.ya+=DK.vya*dt;}
+  // L moves toward the port (closing), R backs away: vx is closing speed sign-reversed
+  float rate=-DK.vx;
+  if(DK.x<=0.2f&&!V->arm){int ok=ffabs(DK.y)<0.3f&&ffabs(DK.z)<0.3f&&ffabs(DK.ro)<1&&ffabs(DK.pi)<1&&ffabs(DK.ya)<1&&rate<0.25f;
+   if(ok){DK.cont=1;break;}DK.soft++;DK.x=10;DK.vx=0;spf_msg("NO SOFT CAPTURE - BACKED OUT TO 10 M");}
+  if(V->arm&&DK.x<10.6f&&capT>60){DK.cont=1;break;}
+  if(DK.x>400){return 0;}
+  BEAT->screen=SCR_SPDOCK;BEAT->mode=vi;BEAT->x=(int)(DK.x*100);BEAT->y=(int)(rate*1000+1000);BEAT->extra=(int)(ffabs(DK.y)*100)|((int)(ffabs(DK.z)*100)<<10)|(DK.soft<<20);BEAT->timer=DK.t;
+  // draw first-person view
+  lfb=0;lf(0,0,240,160,RGB(2,3,8));stars(DK.t/50,30);
+  float rr_=DK.x<1?1:DK.x;int sc=(int)(16*400/(rr_*10+40));if(sc>40)sc=40;if(sc<2)sc=2;
+  int tx=120+(int)((-DK.y/rr_)*400)+(int)(DK.ya*4),ty=80+(int)((DK.z/rr_)*400)-(int)(DK.pi*4);
+  iss_draw(tx,ty-(V->app==0?0:sc/2),sc>14?14:sc,0);
+  int pr2=(int)(60.0f/(rr_+2))+2;if(pr2>70)pr2=70;sp_disc(tx,ty,pr2,RGB(190,190,186));sp_circ(tx,ty,pr2,RGB(120,120,120));sp_circ(tx,ty,pr2*2/3,RGB(90,90,90));
+  {int cl=pr2/2;float ca=DK.ro*FPI/180;int ox=(int)(fcos(ca)*cl),oy=(int)(fsin(ca)*cl);sp_line(tx-ox,ty-oy,tx+ox,ty+oy,RGB(30,30,30));sp_line(tx+oy,ty-ox,tx-oy,ty+ox,RGB(30,30,30));}
+  // reticle
+  u16 RC=RGB(80,255,120);sp_circ(120,80,20,RC);lf(100,80,12,1,RC);lf(128,80,12,1,RC);lf(120,60,1,12,RC);lf(120,88,1,12,RC);
+  char b[40],*o;lf(0,0,240,10,RGB(8,10,20));o=sp_put(b,V->n);o=sp_put(o," > ");sp_put(o,V->port);ltx(2,1,b,RGB(255,220,120));
+  lf(0,12,56,58,RGB(8,10,20));o=sp_put(b,"X ");o=sp_dec1(o,(int)(DK.x*10));ltx(2,14,b,C_WHITE);o=sp_put(b,"Y ");o=sp_dec1(o,(int)(DK.y*10));ltx(2,24,b,ffabs(DK.y)<0.3f?C_GREEN:C_WHITE);
+  o=sp_put(b,"Z ");o=sp_dec1(o,(int)(DK.z*10));ltx(2,34,b,ffabs(DK.z)<0.3f?C_GREEN:C_WHITE);o=sp_put(b,"RATE");ltx(2,46,b,RGB(150,150,170));o=sp_dec1(b,(int)(rate*100));o=sp_put(o," CM");ltx(2,56,b,rate>0.25f&&DK.x<10?RGB(255,120,80):C_WHITE);
+  lf(184,12,56,58,RGB(8,10,20));const char*AN[3]={"ROLL ","PITCH","YAW  "};float av[3]={DK.ro,DK.pi,DK.ya};for(int k=0;k<3;k++){o=sp_put(b,AN[k]);ltx(186,14+k*18,b,RGB(150,150,170));o=sp_dec1(b,(int)(av[k]*10));ltx(196,22+k*18,b,ffabs(av[k])<1?C_GREEN:C_WHITE);}
+  lf(0,150,240,10,RGB(8,10,20));if(F.msgT>0){F.msgT--;ltc(151,F.msg,RGB(255,240,160));}else ltc(151,V->arm?"HOLD AT 10 M CAPTURE BOX FOR THE ARM":"DPAD:Y/Z  L/R:FWD/BACK  B+:ROT  ST:X10",RGB(150,170,210));
+  if(DK.ff)ltx(222,1,"X10",RGB(255,160,80));m3_present();if(DK.t>30000)return 0;}
+ // contact / capture vignette
+ for(int t=0;t<200;t++){next_frame();BEAT->screen=SCR_SPDOCK;BEAT->phase=1;lfb=0;lf(0,0,240,160,RGB(2,3,8));stars(0,30);iss_draw(120,70,14,0);
+  if(V->arm){int ax=60+t/4,ay=40+t/8;sp_line(30,40,ax,ay,C_WH);sp_line(ax,ay,120,100-t/10,C_WH);lf(110,100-t/10,20,14,V->n[0]=='C'?RGB(200,190,150):RGB(210,170,70));ltc(140,t<100?"CANADARM2 CAPTURE!":V->port,C_GREEN);}
+  else{sp_disc(120,80,40,RGB(190,190,186));ltc(140,t<100?"SOFT CAPTURE... HARD CAPTURE":V->port,C_GREEN);}m3_present();}
+ return 1;}
+static void sp_rbar_pitch(void){for(int t=0;t<240;t++){next_frame();BEAT->screen=SCR_SPRDV;BEAT->phase=9;lfb=0;lf(0,0,240,160,RGB(2,3,8));stars(0,30);earth_limb(30);iss_draw(60,40,6,1);
+  int a=t*256/240;int L=26;int x1=150+(SIN(a)*L>>8),y1=80-(COS(a)*L>>8),x2=150-(SIN(a)*L>>8),y2=80+(COS(a)*L>>8);for(int w=-3;w<=3;w++)sp_line(x1+w,y1,x2+w,y2,w<0?C_BK:C_WH);
+  ltc(130,"R-BAR PITCH MANEUVER (180 M)",RGB(255,220,120));ltc(140,"ISS CREW PHOTOGRAPHS THE HEAT SHIELD",C_WHITE);m3_present();}}
+static void sp_iss(void){int sel=SPR.lastIss<8?SPR.lastIss:0;
+ for(;;){int i=sp_list("ISS DOCKING","RENDEZVOUS + PROXIMITY OPS",8,spi_nm,spi_rt,sel,SCR_SPSEL+0);if(i<0)return;sel=i;const SPiv*V=&SPI[i];
+  sp_brief(V->n,"ISS 420 KM - 92.7 MIN ORBIT",V->port,V->how,V->app==0?"APPROACH ALONG +V-BAR":V->app==1?"APPROACH ALONG +R-BAR (ABOVE)":"APPROACH ALONG -R-BAR (BELOW)",
+   "1 RENDEZVOUS: CW ORBIT MECHANICS - THRUST|  PRO/RETRO CHANGES YOUR ALTITUDE TOO.|2 DOCK: <0.25 M/S, ALIGN Y/Z <0.3 M,|  ANGLES <1 DEG. KEEP-OUT SPHERE 200 M.");
+  BEAT->mode=i;if(!sp_wait_ab(SCR_SPSEL))continue;
+  int ok=sp_rendezvous(i);if(ok&&V->shut)sp_rbar_pitch();if(ok)ok=sp_dock(i);
+  if(ok){int sc=3000-(int)(RV.dv*40)-DK.soft*400-RV.viol*2-DK.t/40;sc=clampi(sc,300,3000);int st=1+(sc>=1800)+(sc>=2400&&!DK.soft&&!RV.viol);int best=sc>SPR.iss[i];if(best)SPR.iss[i]=sc;if(st>SPR.issS[i])SPR.issS[i]=st;SPR.lastIss=i;spr_write();music_victory();
+   for(int t=0;;t++){next_frame();BEAT->screen=SCR_SPDOCK;BEAT->phase=3;BEAT->scoreA=sc;BEAT->scoreB=st;if(t==0){char b[48],*o;chrome(CAT_EXPLORE,0);m3_box(16,24,208,112,1);m3_ctext(32,V->arm?"BERTHED!":"DOCKED!",C_YEL,2);m3_ctext(52,V->port,C_WHITE,1);
+     o=sp_put(b,"DV ");o=sp_dec1(o,(int)(RV.dv*10));o=sp_put(o," M/S  RETRIES ");sp_int(o,DK.soft);m3_ctext(66,b,C_GRAY,1);o=sp_put(b,"KOS VIOLATIONS ");sp_int(o,RV.viol/60);m3_ctext(78,b,C_GRAY,1);
+     o=sp_put(b,"SCORE ");o=sp_int(o,sc);if(best)sp_put(o,"  BEST!");m3_ctext(94,b,best?C_GREEN:C_WHITE,1);for(int s=0;s<3;s++)m3_fill(99+s*14,106,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
+    if(sp_isauto()&&t>200)pressed=K_A;if(t>20&&(pressed&(K_A|K_B))){pressed=0;break;}}}
+  bgm_t(TR_SPACE);}}
+static void sp_eva(void){}
