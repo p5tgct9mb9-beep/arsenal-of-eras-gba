@@ -294,18 +294,27 @@ static int side_select(int mi,int*side){int a=alt_of(mi);if(a<0){*side=0;return 
   if(pressed&K_B){sfx_menu();return 0;}}}
 static const CMis*mis_for(int i,int side){if(!side)return &CM[i];const CAlt*A=&CALT[alt_of(i)];cmAlt=CM[i];cmAlt.pov=A->pov;cmAlt.flags&=~(MF_ROE|MF_CIVESC);cmAlt.ncv=0;
  for(int k=0;k<3;k++){cmAlt.ob[k]=A->ob[k];cmAlt.arg[k]=A->arg[k];cmAlt.od[k]=A->od[k];}for(int k=0;k<4;k++)cmAlt.b[k]=A->b[k];if(i==8)cmAlt.flags|=MF_MORTAR;return &cmAlt;}
+static void m3_burst(int x0,int y0,int w,int h,u16 c1,u16 c2){for(int y=0;y<h;y++)for(int x=0;x<w;x++)M3[(y0+y)*240+x0+x]=BURST[y*48+x]?c1:c2;} // v1.3 anime burst (48x48 ROM mask)
+static int pov_portrait(const CMis*m){int k=m->mode==MM_AIR?PK_PILOT:m->mode==MM_SEA?PK_NAVAL:m->mode==MM_TANK?(m->grp==3?PK_FUTURE:PK_TANKER):m->grp==0?PK_WW2:m->grp==1?PK_COLD:m->grp==2?PK_MODERN:PK_FUTURE;
+ static const char*const FN[]={"NADIA","ELENA","ANNA","RUTH","MAYA","OKSANA","LAYLA","NORA"};const char*p=m->pov;while(*p&&*p!=' ')p++;while(*p==' ')p++;
+ int fem=0;for(int f=0;f<8;f++){const char*a=FN[f],*b=p;while(*a&&*a==*b){a++;b++;}if(!*a&&(*b==' '||!*b)){fem=1;break;}}
+ u32 h=0;for(const char*q=m->pov;*q;q++)h=h*31+*q;return k*6+fem*3+(int)(h%3);}
+static void m3_portrait(int x0,int y0,int id){m3_box(x0-3,y0-3,54,54,1);m3_burst(x0,y0,48,48,RGB(70,110,200),RGB(40,64,140));const u16*p=PORTR+id*48*48;
+ for(int y=0;y<48;y++)for(int x=0;x<48;x++){u16 c=p[y*48+x];if(!(c&0x8000))M3[(y0+y)*240+x0+x]=c;}}
 static int brief_card(int i,const CMis*m){
  for(int page=0;page<2;){int redraw=1;
   for(;;){BEAT->screen=SCR_MBRIEF;BEAT->menu=i;BEAT->phase=page;
    if(redraw){m3_title(1);m3_box(2,4,236,152,1);
-    m3_ctext(10,m->name,C_YEL,2);m3_ctext(30,m->place,C_WHITE,1);m3_ctext(40,m->date,C_WHITE,1);m3_ctext(50,m->pov,C_BLUE,1);
-    if(page==0){for(int k=0;k<4;k++)m3_text(8,66+k*11,m->b[k],C_WHITE,1);
-     m3_text(8,116,m->mode==MM_AIR?"MODE: DIVE-BOMBER (FLIGHT)":m->mode==MM_TANK?"MODE: ARMOUR":m->mode==MM_SEA?"MODE: NAVAL - SHORE BOMBARDMENT":"MODE: INFANTRY",C_GRAY,1);
-     m3_text(8,126,"FICTIONAL CHARACTERS IN A REAL BATTLE",C_GRAY,1);}
-    else{m3_text(8,66,"OBJECTIVES",C_YEL,1);int n=0;for(int k=0;k<3;k++){if(m->mode!=MM_DOGGREEN&&!m->ob[k])continue;m3_text(8,80+n*11,cat3(itoa(n+1),". ",m->od[k]),C_WHITE,1);n++;}
-     if(m->flags&MF_ROE)m3_text(8,126,"ROE: DO NOT HARM CIVILIANS",C_RED,1);if(m->flags&MF_MORTAR)m3_text(8,126,"WARNING: ENEMY MORTARS ACTIVE",C_RED,1);
-     if(m->ob[0]==OB_TREACH)m3_text(8,126,cat3("TIDE WINDOW: ",itoa(m->arg[0])," SECONDS"),C_RED,1);}
-    m3_ctext(140,page==0?"A: NEXT   B: BACK":"A: BEGIN MISSION   B: BACK",C_GRAY,1);m3_present();redraw=0;}
+    m3_ctext(8,m->name,C_YEL,2);m3_ctext(26,m->place,C_WHITE,1);
+    m3_portrait(11,40,pov_portrait(m)); // v1.3 dialogue-box portrait
+    {char nm[40];int k=0;const char*q=m->pov;while(*q&&!(q[0]==' '&&q[1]=='-')&&k<28){nm[k++]=*q++;}nm[k]=0;while(*q==' '||*q=='-')q++;
+     m3_text(68,42,nm,C_BLUE,1);m3_text(68,52,q,C_WHITE,1);m3_text(68,64,m->date,C_YEL,1);
+     m3_text(68,76,m->mode==MM_AIR?"MODE: FLIGHT":m->mode==MM_TANK?"MODE: ARMOUR":m->mode==MM_SEA?"MODE: NAVAL GUNNERY":"MODE: INFANTRY",C_GRAY,1);m3_text(68,86,"FICTIONAL CHARACTER",C_GRAY,1);}
+    if(page==0){for(int k=0;k<4;k++)m3_text(8,98+k*10,m->b[k],C_WHITE,1);}
+    else{m3_text(8,96,"OBJECTIVES",C_YEL,1);int n=0;for(int k=0;k<3;k++){if(m->mode!=MM_DOGGREEN&&!m->ob[k])continue;m3_text(8,106+n*9,cat3(itoa(n+1),". ",m->od[k]),C_WHITE,1);n++;}
+     if(m->flags&MF_ROE)m3_text(8,134,"ROE: DO NOT HARM CIVILIANS",C_RED,1);if(m->flags&MF_MORTAR)m3_text(8,134,"WARNING: ENEMY MORTARS ACTIVE",C_RED,1);
+     if(m->ob[0]==OB_TREACH)m3_text(8,134,cat3("TIDE WINDOW: ",itoa(m->arg[0])," SECONDS"),C_RED,1);}
+    m3_ctext(145,page==0?"A: NEXT   B: BACK":"A: BEGIN MISSION   B: BACK",C_GRAY,1);m3_present();redraw=0;}
    next_frame();
    if(pressed&(K_A|K_START)){sfx_ok();page++;break;}
    if(pressed&K_B){sfx_menu();if(page==0)return 0;page--;break;}}}

@@ -43,7 +43,7 @@ static void tut_text(int st,int ch,int mouth,int ok){static int lst=-1,lch=-1,lm
  if(fullp){m3_fill(0,104,240,56,C_PANEL);m3_box(0,104,240,56,2);m3_fill(5,108,50,50,RGB(36,54,104));m3_text(60,107,"KC",C_YEL,1);m3_text(78,107,KST[st].cap,C_GRAY,1);
   m3_text(132,151+1,ok==1?"NICE!  A: NEXT":ok==2?"A:NEXT START:SKIP":"      START:SKIP",ok==1?C_GREEN:C_GRAY,1);
   char pg[8];pg[0]='0'+(st+1)/10;pg[1]='0'+(st+1)%10;pg[2]='/';pg[3]='0'+NKST/10;pg[4]='0'+NKST%10;pg[5]=0;m3_text(60,152,pg,C_GRAY,1);lch=-1;lmo=-1;}
- if(mouth!=lmo){m3_fill(6,109,48,48,RGB(36,54,104));m3_kcport(6,109,mouth);}
+ if(mouth!=lmo){m3_burst(6,109,48,48,RGB(250,214,90),RGB(236,128,48));m3_kcport(6,109,mouth);}
  if(ch!=lch){int n=0,from=lch<0?0:lch;for(int k=0;k<4;k++){const char*s=KST[st].l[k];for(int j=0;s[j]&&j<30;j++,n++){if(n>=ch)break;if(n>=from){char b[2]={s[j],0};m3_text(60+j*6,117+k*8,b,C_WHITE,1);}}}}
  lst=st;lch=ch;lmo=mouth;lok=ok;}
 static void yfill(int x,int y,int w,int h,u16 c){if(y<3){h-=3-y;y=3;}if(y+h>101)h=101-y;if(x<0){w+=x;x=0;}if(x+w>240)w=240-x;if(w>0&&h>0)m3_fill(x,y,w,h,c);}

@@ -8,6 +8,11 @@ def outl(g,col=1):
             if g[y][x]==0 and any(0<=x+dx<w and 0<=y+dy<h and g[y+dy][x+dx] not in (0,col) for dx,dy in((1,0),(-1,0),(0,1),(0,-1))):o[y][x]=col
     return o
 def G(w,h):return [[0]*w for _ in range(h)]
+import colorsys
+def vivid(c,sm=1.28,vm=1.06):  # v1.3 SMW-style: brighter, more saturated palettes
+    r,g,b=[x/255 for x in c];h,s_,v=colorsys.rgb_to_hsv(r,g,b);s_=min(1,s_*sm);v=min(1,v*vm) if v>.18 else v
+    return tuple(int(round(x*255)) for x in colorsys.hsv_to_rgb(h,s_,v))
+def pal16v(cols):return pal16([cols[0]]+[vivid(c,1.18,1.03) for c in cols[1:]])
 def R(g,x0,y0,x1,y1,c):
     for y in range(max(0,y0),min(len(g),y1+1)):
         for x in range(max(0,x0),min(len(g[0]),x1+1)):g[y][x]=c
@@ -88,8 +93,8 @@ MISC=[(0,0,0),(28,24,40),(40,104,200),(70,150,226),(150,210,248),(240,252,255),(
 def rgb(c):return rgb15(c)
 pfpal=[]
 for w in range(NTH):
-    pfpal+=pal16([(0,0,0)]+TP[w])
-    pfpal+=pal16([(0,0,0)]+BP[w])
+    pfpal+=pal16([(0,0,0)]+[vivid(c,1.42,1.08) for c in TP[w]])
+    pfpal+=pal16([(0,0,0)]+[vivid(c,1.38,1.06) for c in BP[w]])
     pfpal+=pal16(MISC)
 emit("pf_pal",pfpal)
 # ---------------------------------------------------------------- metatiles (21), keyed by theme style
@@ -244,6 +249,13 @@ def backdrop(w):
             if tx<18:h=96 if (tx%6)<3 else 100          # tower with merlons
             elif (x//5)%2==0:h-=5                       # crenellated curtain wall
         elif st=='space':h=160-int(16*abs(math.sin(x/19.0)))
+        elif st in ('forest','jungle','arctic','pacific'):  # v1.3 SMW-style dome hills
+            h=200
+            for k in range(6):
+                cx=int(H(w,k,21)*256);r=34+int(H(w,k,22)*30)
+                for o in (-256,0,256):
+                    d=x-(cx+o)
+                    if abs(d)<r:h=min(h,150-int((r*r-d*d)**.5*0.8)+int(H(w,k,23)*20))
         else:h=128-int(38*abs(math.sin(x/40.0+w)))-int(10*math.sin(x/9.0))
         for y in range(h,256):g[y][x]=6 if y<h+3 else (7 if y<h+18 else 8)
         if st in ('arctic','mountain'):
@@ -254,6 +266,15 @@ def backdrop(w):
         if st=='ruins' and (x%10) in (2,7):
             for y in range(h+6,256,9):
                 if H(w,x,y)<.4:g[y][x]=15
+    if st in ('forest','jungle','arctic','pacific','mountain','castle','canyon','desert'):  # v1.3 puffy outlined clouds
+        for k in range(5):
+            cx=int(H(w,k,31)*256);cy=72+int(H(w,k,32)*34);n=3+int(H(w,k,33)*2)
+            for j in range(n):
+                bx=cx+j*9-n*4;by=cy-(5 if j in (1,n-2) else 0);r=8 if j in (1,n-2) else 6
+                for yy in range(by-r-1,by+r+2):
+                    for xx in range(bx-r-1,bx+r+2):
+                        d=(xx-bx)**2+(yy-by)**2
+                        if 0<=yy<256 and d<=(r+1)**2 and g[yy][xx%256]<9:g[yy][xx%256]=15 if d<=r*r and yy<by+r-2 else (4 if d<=r*r else 3)
     for x in range(256):
         if st=='mountain':h=176-int(10*math.sin(x/17.0))-(14 if (x//24)%4==1 and (x%24)<14 else 0)
         elif st in('canyon','mars'):h=172-int(18*abs(math.sin(x/23.0)))
@@ -444,7 +465,7 @@ upal=[];uspr=[]
 for i,u in enumerate(U):
     n,cty,sh,hg,hc,camo,wk,bd,skin=u
     sk2=tuple(max(0,int(c*.8)) for c in skin)
-    upal+=pal16([(0,0,0),(28,20,36),skin,sk2,camo[0],camo[1],camo[2],tuple(int(c*.7) for c in hc),hc,(60,52,44),(44,44,52),(110,110,124),bd[0],bd[1],(250,250,250),(60,200,90) if hg=='helmetnvg' else (40,40,44)])
+    upal+=pal16v([(0,0,0),(28,20,36),skin,sk2,camo[0],camo[1],camo[2],tuple(int(c*.7) for c in hc),hc,(60,52,44),(44,44,52),(110,110,124),bd[0],bd[1],(250,250,250),(60,200,90) if hg=='helmetnvg' else (40,40,44)])
     for f in range(7):uspr+=to_tiles(person(f,hg,i*31+7,wk),16,16)
 emit("pf_unit_pal",upal);emit("pf_unit_spr",uspr,"unsigned int")
 # ---------------------------------------------------------------- enemy factions (8 soldier frames, drone 2, light vehicle 2 (32x16), heavy vehicle 2 (32x16)) = 72 tiles
@@ -556,7 +577,7 @@ EP=[
 ep=[]
 for e in EP:
     sk,u0,u1,u2,h0,h1,gear,wpn,arm,acc,ex=e
-    ep+=pal16([(0,0,0),(28,20,36),sk,tuple(int(c*.8) for c in sk),u0,u1,u2,h0,h1,gear,wpn,(110,110,124),arm,acc,(240,240,240),ex])
+    ep+=pal16v([(0,0,0),(28,20,36),sk,tuple(int(c*.8) for c in sk),u0,u1,u2,h0,h1,gear,wpn,(110,110,124),arm,acc,(240,240,240),ex])
 emit("pf_en_pal",ep)
 # ---------------------------------------------------------------- boss library (64x32 x2 frames = 64 tiles; cmdr 32x32 x2 = 32 tiles)
 def boss(kind,f):

@@ -1,0 +1,7 @@
+#kc
+wait 100
+tap START
+wait 60
+shot v13_style_kc1
+wait 90
+shot v13_style_kc2

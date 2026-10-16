@@ -191,42 +191,42 @@ extern const unsigned int pf_tiles_14[1088];
 extern const unsigned int pf_tiles_15[1088];
 extern const unsigned int pf_tiles_16[1088];
 extern const unsigned int pf_tiles_17[1088];
-extern const unsigned int pf_bdt_0[1992];
+extern const unsigned int pf_bdt_0[2112];
 extern const unsigned short pf_bdm_0[1024];
-#define PF_BDN_0 249
-extern const unsigned int pf_bdt_1[1960];
+#define PF_BDN_0 264
+extern const unsigned int pf_bdt_1[2176];
 extern const unsigned short pf_bdm_1[1024];
-#define PF_BDN_1 245
-extern const unsigned int pf_bdt_2[1520];
+#define PF_BDN_1 272
+extern const unsigned int pf_bdt_2[1824];
 extern const unsigned short pf_bdm_2[1024];
-#define PF_BDN_2 190
-extern const unsigned int pf_bdt_3[2120];
+#define PF_BDN_2 228
+extern const unsigned int pf_bdt_3[2400];
 extern const unsigned short pf_bdm_3[1024];
-#define PF_BDN_3 265
+#define PF_BDN_3 300
 extern const unsigned int pf_bdt_4[1968];
 extern const unsigned short pf_bdm_4[1024];
 #define PF_BDN_4 246
-extern const unsigned int pf_bdt_5[2208];
+extern const unsigned int pf_bdt_5[2704];
 extern const unsigned short pf_bdm_5[1024];
-#define PF_BDN_5 276
-extern const unsigned int pf_bdt_6[1736];
+#define PF_BDN_5 338
+extern const unsigned int pf_bdt_6[2200];
 extern const unsigned short pf_bdm_6[1024];
-#define PF_BDN_6 217
-extern const unsigned int pf_bdt_7[2248];
+#define PF_BDN_6 275
+extern const unsigned int pf_bdt_7[2440];
 extern const unsigned short pf_bdm_7[1024];
-#define PF_BDN_7 281
-extern const unsigned int pf_bdt_8[1952];
+#define PF_BDN_7 305
+extern const unsigned int pf_bdt_8[2232];
 extern const unsigned short pf_bdm_8[1024];
-#define PF_BDN_8 244
-extern const unsigned int pf_bdt_9[2176];
+#define PF_BDN_8 279
+extern const unsigned int pf_bdt_9[2280];
 extern const unsigned short pf_bdm_9[1024];
-#define PF_BDN_9 272
+#define PF_BDN_9 285
 extern const unsigned int pf_bdt_10[1960];
 extern const unsigned short pf_bdm_10[1024];
 #define PF_BDN_10 245
-extern const unsigned int pf_bdt_11[2128];
+extern const unsigned int pf_bdt_11[2344];
 extern const unsigned short pf_bdm_11[1024];
-#define PF_BDN_11 266
+#define PF_BDN_11 293
 extern const unsigned int pf_bdt_12[2064];
 extern const unsigned short pf_bdm_12[1024];
 #define PF_BDN_12 258
@@ -239,12 +239,12 @@ extern const unsigned short pf_bdm_14[1024];
 extern const unsigned int pf_bdt_15[1656];
 extern const unsigned short pf_bdm_15[1024];
 #define PF_BDN_15 207
-extern const unsigned int pf_bdt_16[2104];
+extern const unsigned int pf_bdt_16[2400];
 extern const unsigned short pf_bdm_16[1024];
-#define PF_BDN_16 263
-extern const unsigned int pf_bdt_17[2224];
+#define PF_BDN_16 300
+extern const unsigned int pf_bdt_17[2688];
 extern const unsigned short pf_bdm_17[1024];
-#define PF_BDN_17 278
+#define PF_BDN_17 336
 extern const unsigned short pf_unit_pal[752];
 extern const unsigned int pf_unit_spr[10528];
 extern const unsigned int pf_eset_0[576];

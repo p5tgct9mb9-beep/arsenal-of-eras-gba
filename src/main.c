@@ -148,6 +148,7 @@ static int faction_select(int mode){int col=0,redraw=2;
   if(pressed&(K_A|K_START)){sfx_ok();save_write();return 1;}
   if(pressed&K_B){sfx_menu();return 0;}}}
 static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present();next_frame();}
+#include "portraits.inc"
 #include "camp2.inc"
 #include "char.inc"
 #include "world.inc"

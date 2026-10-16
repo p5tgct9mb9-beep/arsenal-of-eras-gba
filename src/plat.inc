@@ -536,7 +536,11 @@ static void pl_draw(void){oam_begin();int u=PS.unit;
   if(P.chute&&UAB(u)==AB_BREACH){for(int k=1;k<8;k++)sprf(sx+4,sy-k*8,OT_PROJ+4,0,0,4,1,0);}
   else if(P.chute||(UAB(u)==AB_GLIDE&&(keys&K_A)&&P.vy>0&&!P.on))sprf(sx,sy-14,OT_CHUTE,0,1,4,1,0);
   if(P.hookT>0){int hx=P.hx-camX,hy=P.hy-14-camY;for(int k=1;k<6;k++)sprf(sx+8+(hx-sx-8)*k/6-4,sy+6+(hy-sy-6)*k/6-4,OT_PROJ+4,0,0,4,1,0);}
-  if((UAB(u)==AB_STEALTH||UAB(u)==AB_RECON)&&P.abT>0&&(frame&1)){}else sprf(sx,sy,OT_PL+f*4,0,1,(UAB(u)==AB_SPY&&P.abT>0)?1:0,1,P.face<0);
+  if((UAB(u)==AB_STEALTH||UAB(u)==AB_RECON)&&P.abT>0&&(frame&1)){}else{static u8 wOn,sq;if(P.on&&!wOn&&!P.climb&&!P.swim)sq=8;wOn=P.on;if(sq)sq--; // v1.3 SMW-style squash on landing / stretch while rising
+   int kx=256,ky=256;if(sq){kx=256+sq*7;ky=256-sq*6;}else if(!P.on&&!P.climb&&!P.swim&&P.vy<-0x180){kx=226;ky=290;}
+   int pal=(UAB(u)==AB_SPY&&P.abT>0)?1:0;if((kx==256&&ky==256)||naff>=31||noam>=128)sprf(sx,sy,OT_PL+f*4,0,1,pal,1,P.face<0);
+   else{int k=naff++;s16 pa=(s16)(65536/kx)*(P.face<0?-1:1),pd=(s16)(65536/ky);oam[(k*4+0)*4+3]=(u16)pa;oam[(k*4+1)*4+3]=0;oam[(k*4+2)*4+3]=0;oam[(k*4+3)*4+3]=(u16)pd;
+    int yo=(16-16*ky/256)/2;u16*o=&oam[noam*4];o[0]=((sy+yo)&255)|(1<<8);o[1]=(sx&511)|(k<<9)|(1<<14);o[2]=(OT_PL+f*4)|(1<<10)|(pal<<12);noam++;}}
   if(P.jetT>0)sprf(sx+(P.face<0?8:0),sy+4,OT_PICK+6*4,0,1,4,1,P.face<0);}
  // entities
  for(int i=0;i<nPE;i++){PEnt*e=&PE[i];if(!e->alive)continue;int sx=(e->x>>8)-camX,sy=(e->y>>8)-camY;if(sx<-40||sx>280)continue;
