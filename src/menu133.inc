@@ -7,18 +7,18 @@
 static void ic_draw(int k,int x0,int y0){const u8*d=IC_DAT[k];for(int y=0;y<12;y++){u16*p=&fb[(y0+y)*240+x0];for(int x=0;x<12;x++){int v=(d[y*6+(x>>1)]>>((x&1)*4))&15;if(v)p[x]=IC_PAL[v];}}}
 static int md_icon(int md){
  static const u8 MI[MD_N]={IC_CAMP,IC_RIFLE,IC_TANK,IC_JET,IC_SHIP,IC_SWORD,IC_SPEC,IC_BRAD,IC_SNIPE,IC_EOD,IC_AA,IC_DRONE,IC_ROCKET,IC_FLIGHT,IC_LRRP,IC_FPS,IC_SPACE,IC_ASTRO,IC_MOON,IC_MARS,IC_ODEF,IC_RBUILD,IC_ASTER,IC_WHATIF,IC_HIST,IC_OVER,
-  IC_RACE,IC_TT,IC_FREE,IC_BUILD,IC_SAND,IC_INVADE,IC_VBM,IC_FIRE,IC_BOOT,IC_LOADOUT,IC_SETTINGS,IC_CREDITS,IC_CODES,IC_TROPHY,IC_LB,IC_PROFILE,IC_STORE};
+  IC_RACE,IC_TT,IC_FREE,IC_BUILD,IC_SAND,IC_INVADE,IC_VBM,IC_FIRE,IC_BOOT,IC_LOADOUT,IC_SETTINGS,IC_CREDITS,IC_CODES,IC_TROPHY,IC_LB,IC_PROFILE,IC_STORE,IC_INVADE};
  return md>=0&&md<MD_N?MI[md]:IC_WHATIF;}
 // short list names (<= 14 chars) so icons + NEW tags fit
 static const char*const MLN[MD_N]={"CAMPAIGN","INFANTRY 6V6","ARMOR 6V6","DOGFIGHT 6V6","NAVAL 6V6","SWORD FIGHT","SPEC OPS","BRADLEY OPS","SNIPER","EOD","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT",
  "LRRP RECON","FPS MISSIONS","SPACE PROGRAM","ASTRO EXPLORER","MOON BASE","MARS MISSION","ORBIT DEFENSE","ROCKET BUILDER","ASTEROIDS","WHAT-IF 1945","HISTORY TOUR","OVERFLIGHT",
- "GRAND PRIX","TIME TRIAL","FREE DRIVE","HANGAR BUILD","SANDBOX","INVADERS","VON BRAUN OPS","FIREFIGHTER","BOOT CAMP (KC)","LOADOUT","SETTINGS","CREDITS","SECRET CODES","ACHIEVEMENTS","LEADERBOARDS","PROFILE CARD","STORE"};
+ "GRAND PRIX","TIME TRIAL","FREE DRIVE","HANGAR BUILD","SANDBOX","INVADERS","VON BRAUN OPS","FIREFIGHTER","BOOT CAMP (KC)","LOADOUT","SETTINGS","CREDITS","SECRET CODES","ACHIEVEMENTS","LEADERBOARDS","PROFILE CARD","STORE","CABINET (12)"};
 static const char*mln(int md){if(md==MD_OVER&&!v131_over_unlocked())return "CLASSIFIED";return MLN[md];}
 // ---- NEW tags: content new since v1.3.1, shown until first opened (SRAM 0x26C0 'N')
 typedef struct{u8 seen[8];}NSeen;static NSeen NSN EWRAM;static int nsn_ld;
 static void nsn_load(void){if(nsn_ld)return;nsn_ld=1;if(!sv_get(0x26C0,'N',1,&NSN,sizeof NSN))memset(&NSN,0,sizeof NSN);}
-static int md_isnew(int md){static const u8 NEWM[8]={MD_FIRE,MD_INVADE,MD_GP,MD_TT,MD_FREE,MD_BUILD,MD_SAND,MD_VBM};if(LEGACY_MENU)return 0;
- for(int i=0;i<8;i++)if(NEWM[i]==md){nsn_load();return !((NSN.seen[md>>3]>>(md&7))&1);}return 0;}
+static int md_isnew(int md){static const u8 NEWM[9]={MD_FIRE,MD_INVADE,MD_GP,MD_TT,MD_FREE,MD_BUILD,MD_SAND,MD_VBM,MD_CABINET};if(LEGACY_MENU)return 0;
+ for(int i=0;i<9;i++)if(NEWM[i]==md){nsn_load();return !((NSN.seen[md>>3]>>(md&7))&1);}return 0;}
 static void md_seen(int md){if(md<0||md>=MD_N||!md_isnew(md))return;NSN.seen[md>>3]|=1<<(md&7);sv_put(0x26C0,'N',1,&NSN,sizeof NSN);}
 static int md_featured(int md){return md==MD_FIRE;}
 // ---- tiles
@@ -42,7 +42,7 @@ static const MCat MC3[TI_N]={
  {"SPEC OPS","GROUND OPERATIONS",6,{MD_FIRE,MD_SPEC,MD_BRAD,MD_SNIPE,MD_EOD,MD_LRRP},TR_JUNGLE},
  {"AIR","FLIGHT + AIR DEFENSE",5,{MD_AIR,MD_AA,MD_DRONE,MD_FLIGHT,MD_OVER},TR_COLD},
  {"SPACE","ROCKETS + EXPLORATION",8,{MD_LAUNCH,MD_SPACE,MD_ASTRO,MD_VBM,MD_MOON,MD_MARS,MD_ODEF,MD_ASTER},TR_SPACE},
- {"ARCADE","QUICK PLAY",4,{MD_INVADE,MD_GP,MD_TT,MD_FREE},TR_INVADE},
+ {"ARCADE","QUICK PLAY",5,{MD_CABINET,MD_INVADE,MD_GP,MD_TT,MD_FREE},TR_INVADE},
  {"LEARN","HISTORY + TRAINING",3,{MD_BOOT,MD_HIST,MD_WHATIF},TR_THEME},
  {"CREATE","BUILD YOUR OWN",4,{MD_BUILD,MD_RBUILD,MD_SAND,MD_LOADOUT},TR_HANGAR},
  {"STORE","MARS ROCKS",1,{MD_STORE},TR_THEME},
@@ -78,7 +78,7 @@ static void cat_screen_p(const MCat*C,int key,int bgc){static const char*const E
    if(MD_PSEUDO(md)){m3_text(144,38,foc?">":" ",C_GREEN,1);m3_text(150,38,"OPEN",C_GREEN,1);m3_text(144,56,"A: OPEN",C_GRAY,1);}
    else for(int i=0;i<no;i++){int y=38+i*13;int hi=foc&&i==os;m3_text(144,y,hi?">":" ",C_GREEN,1);m3_text(150,y,op_label(md,ops[i]),hi?C_GREEN:(i==0&&!foc?C_GREEN:C_WHITE),1);}
    if(!camp&&md_featured(md)){m3_fill(142,118,88,16,RGB(60,44,10));m3_fill(142,118,88,1,RGB(236,196,92));m3_text(146,123,"FEATURED MODE",RGB(236,196,92),1);}
-   else if(!camp&&md_isnew(md)){m3_fill(142,118,88,16,RGB(70,14,10));m3_fill(142,118,88,1,RGB(220,40,30));m3_text(146,123,"NEW IN V1.3.2",RGB(255,150,130),1);}
+   else if(!camp&&md_isnew(md)){m3_fill(142,118,88,16,RGB(70,14,10));m3_fill(142,118,88,1,RGB(220,40,30));m3_text(146,123,md==MD_CABINET?"NEW IN V1.3.4":"NEW IN V1.3.2",RGB(255,150,130),1);}
    m3_ctext(142,camp?ED[sel]:MDD[md],C_GRAY,1);m3_ctext(151,foc?"A: SELECT   B: BACK TO LIST":MD_PSEUDO(md)?"A: OPEN   B: BACK":"A: OPTIONS   B: BACK",C_GRAY,1);kl_poll();m3_present();redraw=0;}
   next_frame();
   if(!foc){if(pressed&K_UP){sel=(sel+nm-1)%nm;os=0;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%nm;os=0;redraw=1;sfx_menu();}
@@ -104,9 +104,10 @@ static void store_screen(void){int redraw=1;bgm_t(TR_THEME);
    m3_ctext(100,"AIRCRAFT, WEAPONS, ROCKETS,",C_WHITE,1);m3_ctext(110,"SATELLITES AND 16 ALLIED SOF UNITS",C_WHITE,1);m3_ctext(120,"ARRIVE IN THE NEXT UPDATE.",C_YEL,1);
    m3_ctext(138,"FIREFIGHTER CALLS PAY ROCKS NOW",C_GRAY,1);m3_ctext(148,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
-static void md_pseudo_open(int md){
+static int cab_screen(void);
+static void md_pseudo_open(int md){md_seen(md);
  switch(md){case MD_BOOT:tutorial(0);break;case MD_LOADOUT:{int era=0;loadout_hub(&era);break;}case MD_SETTINGS:settings_menu();break;case MD_CREDITS:credits_roll(0);break;
-  case MD_CODES:ov_code();break;case MD_STORE:store_screen();break;default:break;}
+  case MD_CODES:ov_code();break;case MD_STORE:store_screen();break;case MD_CABINET:cab_screen();break;default:break;}
  pressed=0;bgCached=-1;}
 // ---- main menu: 2 x 5 tiles in a wide translucent panel; the Earth, ISS and launches keep animating on the right
 static void mm4_tile(int i,int on){int x=7+(i&1)*75,y=32+(i>>1)*21;
@@ -116,11 +117,11 @@ static void mm4_tile(int i,int on){int x=7+(i&1)*75,y=32+(i>>1)*21;
  else m3_text(x+18,y+11,TL[i].tag,on?RGB(170,210,236):RGB(120,140,170),1);
  if(tile_new(i)>=0){m3_fill(x+66,y+1,5,5,RGB(230,40,30));m3_px(x+68,y+3,RGB(255,200,190));}}
 static int main_menu4(int sel){if(sel<0||sel>=TI_N)sel=0;
- mmPX1=156;bgCached=-1;mm_ls=0;mm_cs=0;mm_part=0;mmLn=0;mm_static();lfb=0;dma32(bigbuf,fb,240*160/2);vsync();dma32(bigbuf,MMV,240*160/2);REG_DISPCNT=3|(1<<10);int dirty=1;
+ mmPX1=156;bgCached=-1;mm_ls=0;mm_cs=0;mm_part=0;mmLn=0;mm_obj_init();mm_static();lfb=0;dma32(bigbuf,fb,240*160/2);vsync();dma32(bigbuf,MMV,240*160/2);mm_obj_frame();mm_obj_on();int dirty=1;
  int hx=(7+(sel&1)*75)<<4,hy=(32+(sel>>1)*21)<<4;
  for(;;){BEAT->screen=SCR_TILES;BEAT->menu=sel;
   next_frame();
-  mm_restore();
+  mm_obj_push();mm_restore();mm_stars();mm_kc(216,3);
   int tx=(7+(sel&1)*75)<<4,ty=(32+(sel>>1)*21)<<4;
   if(hx!=tx||hy!=ty){int dx=(tx-hx)/2,dy=(ty-hy)/2;if(!dx&&tx!=hx)dx=tx>hx?1:-1;if(!dy&&ty!=hy)dy=ty>hy?1:-1;hx+=dx;hy+=dy;if(iabs(tx-hx)<16&&iabs(ty-hy)<16){hx=tx;hy=ty;}dirty=1;}
   if(dirty){dirty=0;for(int y=MP_Y0;y<158;y++)dma32(&bigbuf[y*240+4],&fb[y*240+4],116);
@@ -132,11 +133,11 @@ static int main_menu4(int sel){if(sel<0||sel>=TI_N)sel=0;
    mm4_tile(sel,1);
    ltx(10,140,TL[sel].d1,RGB(200,220,236));{int nw=tile_new(sel);ltx(10,149,nw>=0?cat("NEW: ",MLN[nw]):TL[sel].d2,nw>=0?RGB(255,150,130):RGB(130,150,180));}
    for(int y=MP_Y0;y<158;y++)dma32(&fb[y*240+4],&MMV[y*240+4],116);}
-  {static const u8 PR[11]={0,104,112,119,126,132,138,143,148,154,160};mm_earth_rows(PR[mm_part],PR[mm_part+1],1);if(++mm_part>=10){mm_part=0;mm_ls=(mm_ls+1)&511;if(frame&8)mm_cs=(mm_cs+1)&511;}}
-  mm_stars();mm_iss();mm_launch();mm_kc(216,3);
+  {static const u8 PR[11]={0,104,112,119,126,132,138,143,148,154,160};mm_earth_rows(PR[mm_part],PR[mm_part+1],1);if(++mm_part>=10){mm_part=0;mm_ls=(mm_ls+1)&511;if(frame&8)mm_cs=(mm_cs+1)&511;}}mm_obj_build();
+
   if(pressed&K_UP){sel=(sel+TI_N-2)%TI_N;sfx_menu();dirty=1;}
   if(pressed&K_DOWN){sel=(sel+2)%TI_N;sfx_menu();dirty=1;}
   if(pressed&(K_LEFT|K_RIGHT)){sel^=1;sfx_menu();dirty=1;}
-  if(pressed&(K_A|K_START)){sfx_ok();bgCached=-1;mmPX1=122;return sel;}
-  if(pressed&K_B){bgCached=-1;mmPX1=122;return -1;}}}
+  if(pressed&(K_A|K_START)){sfx_ok();bgCached=-1;mmPX1=122;mm_obj_off();return sel;}
+  if(pressed&K_B){bgCached=-1;mmPX1=122;mm_obj_off();return -1;}}}
 static void tile_open(int t){if(t==TI_STORE){store_screen();bgCached=-1;return;}cat_screen_p(&MC3[t],CAT_N+t,TL[t].bg);}

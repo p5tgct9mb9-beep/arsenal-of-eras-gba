@@ -1305,6 +1305,33 @@ L=voice(R8("F5:2 A#5:2 D6:4 C6:2 A#5:2 | F5:4 G5:2 A5:2 A#5:8 | D#6:2 D6:2 C6:2 
 B=chordb("R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1",["A#1","D#2","D#2","F2","A#1","D#2","D#2","A#1"])
 Hm=voice(arp4([["A#3","D4","F4","D4"],["D#4","G4","A#4","G4"],["D#4","G4","A#4","G4"],["F4","A4","C5","A4"],["A#3","D4","F4","D4"],["D#4","G4","A#4","G4"],["D#4","G4","C5","G4"],["A#3","D4","F4","D4"]]),128)
 track("ENGINE ONE",4,1,L,B,Hm,drums("K.S.K.S.KKS.K.SS",128),duty=2,lenv=0,hduty=1,lvol=12,hvol=5,wave=0)
+# 54-65 v1.3.4 ARCADE CABINET - 12 short original chiptunes (8 bars, generated from chord tones with per-game rhythm + contour)
+import random as _r
+def _agtrack(name,seed,spd,chords,rhythm,contour,drum,duty,wave,hd=2):
+    g=_r.Random(seed);L=[];nm=[]
+    for bi,ch in enumerate(chords):
+        tones=[midi(n) for n in ch]+[midi(ch[0])+12,midi(ch[1])+12]
+        i=0
+        for k,d in enumerate(rhythm):
+            if d<0:L+=[1]+[0]*(-d-1);continue
+            c=contour[(k+bi)%len(contour)];i=max(0,min(len(tones)-1,i+c if g.random()<0.8 else g.randrange(len(tones))))
+            n=tones[i]+12;L+=[n]+[0]*(d-1)
+    tot=len(L);assert tot==16*len(chords),(name,tot)
+    B=chordb("R:2 O:1 R:1 F:2 O:2 R:2 O:1 R:1 F:2 O:2",[c[0][:-1]+str(int(c[0][-1])-2) for c in chords])
+    H=voice(arp4([[c[0],c[1],c[2],c[1]] for c in chords]),tot)
+    track(name,spd,1,L,B,H,drums(drum,tot),duty=duty,lenv=0,hduty=hd,lvol=11,hvol=5,wave=wave)
+_agtrack("DOME WATCH",101,4,[["A3","C4","E4"],["F3","A3","C4"],["G3","B3","D4"],["E3","G#3","B3"]]*2,[2,2,1,1,2,4,2,2],[1,1,-1,2,-1,-2,1,0],"K.H.S.HKK.H.S.HS",1,1)
+_agtrack("ORBITAL JANITOR",202,5,[["D4","F#4","A4"],["B3","D4","F#4"],["G3","B3","D4"],["A3","C#4","E4"]]*2,[3,1,2,2,4,2,2],[1,2,-1,1,-2,1,0],"K...S.H.K.K.S...",2,0)
+_agtrack("HOP ACROSS",303,4,[["C4","E4","G4"],["G3","B3","D4"],["A3","C4","E4"],["F3","A3","C4"]]*2,[1,1,2,1,1,2,2,2,4],[1,1,1,-2,1,-1,2,-2,0],"K.S.K.S.KKS.K.SS",2,0,1)
+_agtrack("TREAT RUN",404,4,[["E4","G4","B4"],["C4","E4","G4"],["D4","F#4","A4"],["B3","D#4","F#4"]]*2,[1,1,1,1,2,2,1,1,1,1,4],[1,1,1,-1,-2,1,2,-1,-1,1,0],"KHSHKHSHKHSHKKSH",1,1)
+_agtrack("WALL BREAKER",505,5,[["G3","B3","D4"],["E3","G3","B3"],["C4","E4","G4"],["D4","F#4","A4"]]*2,[2,2,2,2,4,4],[2,-1,1,-1,2,-3],"K..HS.H.K.KHS.H.",2,0)
+_agtrack("LOAD MASTER",606,6,[["A3","C4","E4"],["D4","F4","A4"],["E3","G#3","B3"],["A3","C4","E4"]]*2,[4,2,2,3,1,4],[1,1,-1,2,-1,-1],"K...S...K.K.S...",2,1)
+_agtrack("SUPPLY LINE",707,4,[["F3","A3","C4"],["A#3","D4","F4"],["C4","E4","G4"],["F3","A3","C4"]]*2,[2,1,1,2,2,2,2,4],[1,1,-1,1,1,-2,-1,0],"K.S.K.S.KKS.K.SS",2,0)
+_agtrack("ROTOR HOME",808,5,[["D4","F4","A4"],["A#3","D4","F4"],["C4","E4","G4"],["A3","C#4","E4"]]*2,[3,3,2,2,2,4],[1,-1,2,-1,1,-2],"K..SK.S.K..SK.SH",1,0)
+_agtrack("TOWER HOP",909,3,[["C4","E4","G4"],["A3","C4","E4"],["D4","F4","A4"],["G3","B3","D4"]]*2,[1,1,1,1,1,1,2,4,-4],[1,1,1,1,-2,-1,1,0,0],"K.HSK.HSK.HSKKHS",1,1)
+_agtrack("RICOCHET",1010,4,[["E4","G#4","B4"],["A3","C#4","E4"],["B3","D#4","F#4"],["E4","G#4","B4"]]*2,[2,2,2,2,2,2,4],[2,-2,2,-1,1,-1,0],"K.H.S.H.K.H.S.HH",2,1)
+_agtrack("ARMOR DUEL",1111,5,[["G3","A#3","D4"],["D#4","G4","A#4"],["F3","A3","C4"],["D4","F#4","A4"]]*2,[2,1,1,4,2,2,4],[1,1,1,-2,1,-1,0],"K.K.S..HK.K.S.S.",2,0)
+_agtrack("RED PLANET TILT",1212,4,[["B3","D4","F#4"],["G3","B3","D4"],["A3","C#4","E4"],["F#3","A#3","C#4"]]*2,[1,1,2,1,1,2,1,1,2,4],[1,1,1,-1,2,-2,1,1,-2,0],"KHS.KHS.KHSHKKS.",1,1)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)
 emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])

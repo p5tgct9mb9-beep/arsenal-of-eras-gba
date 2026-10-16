@@ -184,6 +184,7 @@ static void credits_roll(int after_campaign);
 #include "v132_stub.inc"
 #include "menu131.inc"
 #include "menu133.inc"
+#include "arcade.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
  for(;;){
