@@ -2,7 +2,7 @@
 // primary: 0 = unit default, 1.. = flat index into the all-era PRIM pool; secondary: 0 = none, 1.. = flat SEC pool
 // melee: MEL list; two equipment slots (L / DOWN+L); attachments use the MODERN-era lists from loadout.inc
 typedef struct{u8 prim,sec,mel,eq0,eq1,opt,muz,grip,mag;}SoLo;
-static SoLo SOL[PF_NU];
+static SoLo SOL[PF_NU] EWRAM;
 typedef struct{const char*n;u8 dmg,reach,rate;}Mel;
 #define NMEL 10
 static const Mel MEL[NMEL]={{"COMBAT KNIFE",2,16,14},{"BAYONET",3,20,18},{"CAVALRY SABRE",3,20,14},{"TOMAHAWK",3,16,12},{"MACHETE",3,18,14},{"ENTRENCHING TOOL",3,16,16},
@@ -17,13 +17,15 @@ static SoW SW[2];static int pWsel,pEq1n;
 static int so_unit_mel(int u){int wk=PF_UW[u];return wk==11?6:wk==12?7:wk==9?1:wk==13?7:0;}
 static void so_defaults(int u){SoLo d={0,0,(u8)so_unit_mel(u),EQ_FRAG,EQ_NONE,0,0,0,0};SOL[u]=d;}
 static int so_valid(const SoLo*l){return l->prim<=fsum(NPRIM)&&l->sec<=fsum(NSEC)&&l->mel<NMEL&&l->eq0<NEQ&&l->eq1<NEQ&&l->opt<NATL[0][2]&&l->muz<NATL[1][2]&&l->grip<NATL[2][2]&&l->mag<NATL[3][2];}
-#define SO_OFF 0x800
+#define SO_OFF 0x1000 // v1.3: moved from 0x800 (overlapped the AA record at 0x880)
 static void so_write(void){u8 sum=0x77;const u8*b=(const u8*)SOL;SRAM[SO_OFF]='A';SRAM[SO_OFF+1]='O';SRAM[SO_OFF+2]='E';SRAM[SO_OFF+3]='U';SRAM[SO_OFF+4]=1;SRAM[SO_OFF+5]=PF_NU;
  for(unsigned i=0;i<sizeof SOL;i++){SRAM[SO_OFF+6+i]=b[i];sum+=b[i]*(i+5);}SRAM[SO_OFF+6+sizeof SOL]=sum;}
-static void so_read(void){for(int u=0;u<PF_NU;u++)so_defaults(u);
- if(SRAM[SO_OFF]!='A'||SRAM[SO_OFF+1]!='O'||SRAM[SO_OFF+2]!='E'||SRAM[SO_OFF+3]!='U'||SRAM[SO_OFF+4]!=1)return;int n=SRAM[SO_OFF+5];if(n>PF_NU)n=PF_NU;
- u8 b[sizeof SOL];u8 sum=0x77;unsigned sz=n*sizeof(SoLo);for(unsigned i=0;i<sz;i++){b[i]=SRAM[SO_OFF+6+i];sum+=b[i]*(i+5);}if(sum!=SRAM[SO_OFF+6+sz])return;
- for(int u=0;u<n;u++){SoLo l;memcpy(&l,b+u*sizeof(SoLo),sizeof l);if(so_valid(&l))SOL[u]=l;}}
+static int so_read_at(int o){
+ if(SRAM[o]!='A'||SRAM[o+1]!='O'||SRAM[o+2]!='E'||SRAM[o+3]!='U'||SRAM[o+4]!=1)return 0;int n=SRAM[o+5];if(n>PF_NU)n=PF_NU;
+ u8 b[sizeof SOL];u8 sum=0x77;unsigned sz=n*sizeof(SoLo);for(unsigned i=0;i<sz;i++){b[i]=SRAM[o+6+i];sum+=b[i]*(i+5);}if(sum!=SRAM[o+6+sz])return 0;
+ for(int u=0;u<n;u++){SoLo l;memcpy(&l,b+u*sizeof(SoLo),sizeof l);if(so_valid(&l))SOL[u]=l;}return 1;}
+// v1.3: loadouts live at 0x1000; a pre-1.3 record at 0x800 (31 units) is migrated once if its checksum still holds
+static void so_read(void){for(int u=0;u<PF_NU;u++)so_defaults(u);if(so_read_at(SO_OFF))return;if(so_read_at(0x800))so_write();}
 // base stats of a unit's own weapon kind
 static const u8 WK_RATE[14]={10,6,5,9,24,10,10,10,13,42,22,16,10,9},WK_DMG[14]={1,1,1,1,3,1,1,1,1,4,2,3,2,1};
 static void so_calc(int u,int slot,SoW*s){const SoLo*l=&SOL[u];int wk=PF_UW[u];s->sup=(wk==3||wk==8);s->pel=1;s->spr=0;s->move=100;s->melee=0;s->wk=wk;

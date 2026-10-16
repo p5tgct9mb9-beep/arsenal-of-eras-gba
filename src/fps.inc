@@ -7,12 +7,17 @@ static const char FMAP_COMPOUND[24][25]={"########################","#P.....#...
 static const char FMAP_BUNKER[24][25]={"MMMMMMMMMMMMMMMMMMMMMMMM","MP...M.....E....M.....XM","M....M..........M......M","M....D....MMMM..D...E..M","M....M....M..M..M......M","MMDMMM....M.HM..MMMMDMMM","M.........MDMM.........M","M..E...............E...M","M......MMMMMMMMMM......M","MMMMD.MM........MM.DMMMM","M.....M..E....A..M.....M","M..A..D..........D..E..M","M.....M..........M.....M","MMMMD.MM...E....MM.DMMMM","M......MMMMMMMMMM......M","M..E...................M","M........#####.........M","MMMDMM...#...#....MMDMMM","M....M...D.W.#....M....M","M.E..M...#...#....M..E.M","M....D...#####....D....M","M....M.......H....M....M","M....M............M....M","MMMMMMMMMMMMMMMMMMMMMMMM"};
 static const char FMAP_VILLAGE[24][25]={"SSSSSSSSSSSSSSSSSSSSSSSS","S......................S","S.BBBB.....E.....BBBB..S","S.B..D...........D..B..S","S.B..B....SS.....B.EB..S","S.BBBB...........BBBB..S","S......................S","S...E.......H......E...S","S......BBBDBBB.........S","S......B.....B....SS...S","S..SS..B..X..B.........S","S......B.....B.........S","S......BBBBBBB...E.....S","S......................S","S.E........W...........S","S.....BBDBB.......BBDB.S","S.....B...B..A....B..B.S","S.....B.E.B.......B.EB.S","S.....BBBBB.......BBBB.S","S......................S","S..P.......E...........S","S..................H...S","S......................S","SSSSSSSSSSSSSSSSSSSSSSSS"};
 static const char(*const FMAPS[3])[25]={FMAP_COMPOUND,FMAP_BUNKER,FMAP_VILLAGE};
-typedef struct{const char*n,*sub,*l1,*l2;u8 map,dm,outdoor,need;}FMis;
-static const FMis FMI[4]={
- {"COMPOUND RAID","CLEAR THE COMPOUND, SEIZE THE INTEL","ELIMINATE ALL HOSTILES","THEN GRAB THE INTEL (X)",0,0,1,9},
- {"BUNKER SWEEP","UNDERGROUND COMMAND POST","SWEEP EVERY ROOM, GRAB THE INTEL","DOORS: B TO OPEN",1,0,0,10},
- {"VILLAGE CLEAR","HOUSE-TO-HOUSE","CLEAR ALL HOUSES, GRAB THE INTEL","WATCH THE WINDOWS",2,0,1,9},
- {"DEATHMATCH VS BOTS","VILLAGE - FIRST TO 15 KILLS","BOTS RESPAWN, YOU RESPAWN","PICK UP ENEMY WEAPONS",2,1,1,15}};
+typedef struct{const char*n,*sub,*l1,*l2;u8 map,dm,outdoor,need,night,exfil,surv;}FMis;
+#define FM_N 8
+static const FMis FMI[FM_N]={
+ {"COMPOUND RAID","CLEAR THE COMPOUND, SEIZE THE INTEL","ELIMINATE ALL HOSTILES","THEN GRAB THE INTEL (X)",0,0,1,9,0,0,0},
+ {"BUNKER SWEEP","UNDERGROUND COMMAND POST","SWEEP EVERY ROOM, GRAB THE INTEL","DOORS: B TO OPEN",1,0,0,10,0,0,0},
+ {"VILLAGE CLEAR","HOUSE-TO-HOUSE","CLEAR ALL HOUSES, GRAB THE INTEL","WATCH THE WINDOWS",2,0,1,9,0,0,0},
+ {"NIGHT RAID","COMPOUND AFTER DARK","SAME COMPOUND - NO MOON","CLEAR IT AND TAKE THE INTEL",0,0,1,9,1,0,0},
+ {"HOSTAGE RESCUE","BUNKER - ONE HOSTAGE","FIND THE HOSTAGE (X)","THEN EXFIL TO YOUR START POINT",1,0,0,0,0,1,0},
+ {"HOLDOUT","VILLAGE - SURVIVE 3 MINUTES","ENEMIES KEEP COMING","STAY ALIVE UNTIL EXFIL",2,1,1,0,0,0,1},
+ {"DEATHMATCH VS BOTS","VILLAGE - FIRST TO 15 KILLS","BOTS RESPAWN, YOU RESPAWN","PICK UP ENEMY WEAPONS",2,1,1,15,0,0,0},
+ {"BUNKER DEATHMATCH","CLOSE QUARTERS - FIRST TO 15","BOTS RESPAWN, YOU RESPAWN","SHOTGUN COUNTRY",1,1,0,15,0,0,0}};
 typedef struct{const char*n;u8 mag,rate,dmg,pel,spread,auto_;u16 res;}FWep;
 static const FWep FWP[5]={{"M9 PISTOL",15,14,26,1,0,0,60},{"M4 CARBINE",30,6,34,1,1,1,150},{"M870 SHOTGUN",6,40,14,8,10,0,30},{"AK-47 (PICKUP)",30,7,38,1,2,1,90},{"PKM (PICKUP)",100,5,36,1,3,1,100}};
 typedef struct{s32 x,y;s16 hp,cd,deadT,ang,alert;u8 alive,type,fr,shoot;s32 lkx,lky;u8 seen;}FBot;
@@ -41,11 +46,13 @@ static int fsn(int a){a&=1023;int i=a>>2,f=a&3;int s0=SIN(i&255),s1=SIN((i+1)&25
 static int fcs(int a){return fsn(a+256);}
 // ---------------------------------------------------------------- palette + textures
 static u16 f_rgb(int r,int g,int b){return RGB(clampi(r,0,255),clampi(g,0,255),clampi(b,0,255));}
+static int fNight EWRAM;
 static void f_palette(int outdoor){static const u8 WC[5][3]={{150,150,140},{170,90,60},{110,120,130},{170,150,100},{120,80,40}};
  for(int t=0;t<5;t++)for(int s=0;s<2;s++)for(int l=0;l<8;l++){int k=(l+1)*(s?22:32);PAL_BG[16+t*16+s*8+l]=f_rgb(WC[t][0]*k/256,WC[t][1]*k/256,WC[t][2]*k/256);}
  for(int i=0;i<16;i++){PAL_BG[96+i]=outdoor?f_rgb(60+i*8,110+i*6,190+i*3):f_rgb(20+i,20+i,24+i);PAL_BG[112+i]=outdoor?f_rgb(90+i*5,80+i*4,60+i*3):f_rgb(40+i*3,40+i*3,38+i*3);}
  static const u8 SC[16][3]={{0,0,0},{200,160,120},{70,90,50},{45,60,35},{30,30,30},{90,90,96},{60,70,40},{255,230,120},{150,40,40},{230,230,220},{60,60,180},{180,140,60},{40,120,40},{200,60,60},{120,90,60},{250,250,250}};
  for(int s=0;s<3;s++)for(int i=0;i<16;i++){int k=256-s*70;PAL_BG[128+s*16+i]=f_rgb(SC[i][0]*k/256,SC[i][1]*k/256,SC[i][2]*k/256);}
+ if(fNight)for(int i=16;i<176;i++){u16 c=PAL_BG[i];int r=(c&31)*2/5,g=((c>>5)&31)*2/5,b=((c>>10)&31)*3/5;if(i>=96&&i<112){r=1+(i-96)/8;g=1+(i-96)/8;b=3+(i-96)/5;}PAL_BG[i]=r|(g<<5)|(b<<10);}
  PAL_BG[0]=0;PAL_BG[1]=RGB(248,248,248);PAL_BG[2]=RGB(255,220,80);PAL_BG[3]=RGB(240,60,50);PAL_BG[4]=RGB(80,220,80);PAL_BG[5]=RGB(20,22,30);PAL_BG[6]=RGB(70,74,90);PAL_BG[7]=RGB(140,140,150);PAL_BG[8]=RGB(255,250,200);PAL_BG[9]=RGB(40,40,46);PAL_BG[10]=RGB(90,60,40);PAL_BG[11]=RGB(255,140,40);}
 static void f_textures(void){for(int t=0;t<5;t++)for(int y=0;y<16;y++)for(int x=0;x<16;x++){u32 h=xh(t*977+y*16+x);int v=(h&7)==0?1:0;
   if(t==0){v=(h%5==0)?1:0;if(y==0)v=2;}
@@ -78,13 +85,14 @@ static const char*const FSA[4][24]={
 {"......hhhh......",".....hhhhhh.....",".....hkkkkh.....","......kkkk......","......kkkk......",".......kk.......","....gggggggg....","...gggggggggg...","...gg.gggg.gg...","...gg.gggg.gg...","...kk.gggg.gg...","......gggg.kk...","......dddd......","......dddd......","......dddd......",".....dd...dd....","....dd....dd....","....dd.....dd...","...dd......dd...","...dd......dd...","...dd.......dd..","..bb........bb..","..bbb.......bbb.","................"},
 {"......hhhh......",".....hhhhhh.....",".....hkkkkh.....","......kkkk......","......kkkk......",".......kk.......","....gggggggg....","...gggwwwwggg...","...ggkwwwwkgg...","......wwww......","......wwww......",".....ffwwff.....","....ff.ff.ff....","......dddd......","......dddd......",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....dd..dd.....",".....bb..bb.....","....bbb..bbb...."},
 {"................","................","................","................","................","................","................","................","................","................","................","................","................","................","................","................","................","................","................","..........w.....","hh.ggggggdddbb..","hkkggggggdddbbb.","hh.ggggggdddbb..","..rrrr.....rr..."}};
-static const char*const FPA[6][8]={
+static const char*const FPA[7][8]={
 {"..1111..",".133331.","13311331","13311331","13333331",".133331.","..1111..","........"},
 {"........","..2222..",".255552.",".255552.",".255552.",".222222.","........","........"},
 {"........","........","wwwwwwww","wwbbwww.",".bb.....","........","........","........"},
 {"........","........","wwwwwwww","dd.wwbb.","...dd...","........","........","........"},
 {"........","..ccc...","wwwwwwww","wwwbbww.",".bb..b..","........","........","........"},
-{"........","..9999..",".9eeee9.",".9e99e9.",".9eeee9.","..9999..","........","........"}};
+{"........","..9999..",".9eeee9.",".9e99e9.",".9eeee9.","..9999..","........","........"},
+{"..kkkk..","..kkkk..",".gggggg.","kggggggk",".gggggg.","..dd.dd.","..dd.dd.","..bb.bb."}};
 static u8 f_spc(int ch){switch(ch){case 'k':return 1;case 'g':return 2;case 'd':return 3;case 'b':return 4;case 'w':return 5;case 'h':return 6;case 'f':return 7;case 'r':return 8;case 'c':return 11;case '1':return 9;case '3':return 13;case '2':return 14;case '5':return 12;case '9':return 9;case 'e':return 10;}return 0;}
 static void f_billboard(s32 wx,s32 wy,const char*const*art,int aw,int ah,int hfrac){int dx=fcs(FP.a),dy=fsn(FP.a);int sx=wx-FP.x,sy=wy-FP.y;int d=(sx*dx+sy*dy)>>8;if(d<40)return;int u=(sx*-dy+sy*dx)>>8;
  int col=60+(u*60*256)/(d*169);int full=FVH*256/d;int hs=full*hfrac>>8;int bot=FVH/2+full/2+FP.bob;int top=bot-hs;int wc=hs*aw/ah/2;if(wc<1)wc=1;int c0=col-wc/2;
@@ -105,7 +113,7 @@ static void f_msg(const char*m){F.msg=m;F.msgT=120;}
 static void f_load(int mi){const FMis*M=&FMI[mi];const char(*m)[25]=FMAPS[M->map];memset(&FP,0,sizeof FP);nFB=0;nFK=0;memset(FB,0,sizeof(FBot)*12);memset(FK,0,sizeof(FPk)*24);FP.mi=mi;
  for(int y=0;y<24;y++)for(int x=0;x<24;x++){char c=m[y][x];FM[y][x]=FW(c)?c:'.';s32 wx=(x<<8)+128,wy=(y<<8)+128;
   if(c=='P'){FP.x=wx;FP.y=wy;}else if(c=='E'&&nFB<12){FBot*b=&FB[nFB++];b->x=wx;b->y=wy;b->hp=100;b->alive=1;b->type=nFB%4==0?1:nFB%5==0?2:0;b->ang=rr(1024);b->cd=60+rr(60);}
-  else if(c=='H')f_pk(0,wx,wy);else if(c=='A')f_pk(1,wx,wy);else if(c=='W')f_pk(2,wx,wy);else if(c=='X'&&!M->dm)f_pk(5,wx,wy);}
+  else if(c=='H')f_pk(0,wx,wy);else if(c=='A')f_pk(1,wx,wy);else if(c=='W')f_pk(2,wx,wy);else if(c=='X'&&!M->dm)f_pk(M->exfil?6:5,wx,wy);}
  FP.hp=100;FP.wep=1;FP.have=3;for(int i=0;i<5;i++){FP.mag[i]=FWP[i].mag;FP.res[i]=0;}FP.res[0]=FWP[0].res;FP.res[1]=FWP[1].res;
  {int best=0,bd=0;for(int i=0;i<nFB;i++){int d=f_ang(FB[i].x-FP.x,FB[i].y-FP.y);(void)d;}(void)best;(void)bd;}
  FP.a=0;{int dirs[4]={0,256,512,768};int bl=0;for(int k=0;k<4;k++){int ok=0;s32 x=FP.x,y=FP.y;for(int s=0;s<6;s++){x+=fcs(dirs[k]);y+=fsn(dirs[k]);if(!f_pass(x>>8,y>>8))break;ok++;}if(ok>bl){bl=ok;FP.a=dirs[k];}}}
@@ -113,9 +121,10 @@ static void f_load(int mi){const FMis*M=&FMI[mi];const char(*m)[25]=FMAPS[M->map
 static int fLastHurt EWRAM;
 static void f_hurt(int d){FP.hp-=d;FP.hurt=10;fLastHurt=FP.t;sfx_hurt();}
 static void f_bot_spawn(FBot*b){for(int tries=0;tries<200;tries++){int x=1+rr(22),y=1+rr(22);if(!f_pass(x,y))continue;s32 wx=(x<<8)+128,wy=(y<<8)+128;if(idist(wx-FP.x,wy-FP.y)<8*256)continue;if(f_los(wx,wy,FP.x,FP.y))continue;b->x=wx;b->y=wy;b->hp=100;b->alive=1;b->alert=0;b->deadT=0;b->cd=90;return;}}
+static int f_alive(void);
 static void f_bots(void){const FMis*M=&FMI[FP.mi];
  for(int i=0;i<nFB;i++){FBot*b=&FB[i];if(b->shoot)b->shoot--;
-  if(!b->alive){if(M->dm){if(++b->deadT>300)f_bot_spawn(b);}continue;}
+  if(!b->alive){if(M->dm){if(++b->deadT>(M->surv?420:300)&&(!M->surv||f_alive()<3+FP.t/2700))f_bot_spawn(b);}continue;} // holdout: waves grow every 45 s
   int dx=FP.x-b->x,dy=FP.y-b->y;int dd=idist(dx,dy);int los=dd<14*256&&FP.hp>0&&f_los(b->x,b->y,FP.x,FP.y);
   if(los){if(!b->alert){b->alert=1;b->cd=50+rr(40);}b->lkx=FP.x;b->lky=FP.y;b->seen=1;}
   int sp=b->alert?11:5;int mvx=0,mvy=0;
@@ -133,10 +142,10 @@ static void f_fire(void){const FWep*W=&FWP[FP.wep];FP.mag[FP.wep]--;FP.cd=W->rat
   for(int i=0;i<nFB;i++){FBot*b=&FB[i];if(!b->alive)continue;int sx=b->x-FP.x,sy=b->y-FP.y;int d=(sx*dx+sy*dy)>>8;if(d<40||d>=bd)continue;int u=(sx*-dy+sy*dx)>>8;int c=60+(u*60*256)/(d*169);int full=FVH*256/d;int wc=(full*230>>8)*16/24/2;if(wc<2)wc=2;if(col>=c-wc/2&&col<c+wc/2){best=i;bd=d;}}
   if(best>=0){FBot*b=&FB[best];int dmg=W->dmg;if(bd>8*256)dmg=dmg*7/10;b->hp-=dmg;b->alert=1;hitAny=1;if(b->hp<=0){b->alive=0;b->deadT=0;FP.kills++;sfx_boom();f_pk(b->type==1?4:b->type==2?1:3,b->x+40,b->y);}}}
  FP.hits+=hitAny;}
-static const char*const FPKN[6]={"MEDKIT +40","AMMO","M870 SHOTGUN","AK-47 PICKED UP","PKM PICKED UP","INTEL SECURED"};
+static const char*const FPKN[7]={"MEDKIT +40","AMMO","M870 SHOTGUN","AK-47 PICKED UP","PKM PICKED UP","INTEL SECURED","HOSTAGE FREED - EXFIL TO START"};
 static void f_pickups(void){for(int i=0;i<nFK;i++){FPk*k=&FK[i];if(!k->on)continue;if(idist(k->x-FP.x,k->y-FP.y)>110)continue;int t=k->t;
   if(t==0){if(FP.hp>=100)continue;FP.hp=FP.hp+40>100?100:FP.hp+40;}else if(t==1){FP.res[FP.wep]+=FWP[FP.wep].mag*2;}
-  else{int w=t==2?2:t==3?3:t==4?4:-1;if(w>=0){if(FP.have&(1<<w))FP.res[w]+=FWP[w].mag;else{FP.have|=1<<w;FP.mag[w]=FWP[w].mag;FP.res[w]=FWP[w].mag;FP.wep=w;}}if(t==5)FP.intel=1;}
+  else{int w=t==2?2:t==3?3:t==4?4:-1;if(w>=0){if(FP.have&(1<<w))FP.res[w]+=FWP[w].mag;else{FP.have|=1<<w;FP.mag[w]=FWP[w].mag;FP.res[w]=FWP[w].mag;FP.wep=w;}}if(t>=5)FP.intel=1;}
   k->on=0;sfx_ok();f_msg(FPKN[t]);}}
 // ---------------------------------------------------------------- frame
 static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=136-(FP.cd>FWP[w].rate-3?3:0);const int G=131,S=129,K=9,M=6,L=7,W=10;
@@ -150,11 +159,11 @@ static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=136-(FP.cd>FWP[
   f_rect(bx+hw-6,by-18,12,10,S);f_rect(bx+hw-4,by-8,14,8,G);}
  if(FP.flash>0){int fy=by-(w==0?36:(w==4?54:w==2?52:50));f_rect(bx-7,fy-6,14,8,8);f_rect(bx-4,fy-10,8,6,2);f_rect(bx-10,fy-3,20,3,11);}}
 static u32*FHS EWRAM;
-static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)|((u32)FP.mag[FP.wep]<<8)|((u32)FP.res[FP.wep]<<16)|((u32)FP.wep<<26)|((u32)(FP.reload>0)<<29);sig^=(u32)(FP.kills*7919+f_alive()*104729+FP.intel*31+FP.fpsv*1299709+FP.deaths*15485863);int pg=fbk==(u16*)0x06000000?0:1;
+static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)+(u32)(FMI[FP.mi].surv?FP.t/60:0)*0x9E3779B1u|((u32)FP.mag[FP.wep]<<8)|((u32)FP.res[FP.wep]<<16)|((u32)FP.wep<<26)|((u32)(FP.reload>0)<<29);sig^=(u32)(FP.kills*7919+f_alive()*104729+FP.intel*31+FP.fpsv*1299709+FP.deaths*15485863);int pg=fbk==(u16*)0x06000000?0:1;
  if(FHS[pg]!=sig){FHS[pg]=sig;f_rect(0,136,240,24,5);f_rect(0,136,240,1,6);char b[48],*o;
  o=sp_put(b,"HP ");sp_int(o,FP.hp<0?0:FP.hp);f_text(2,139,b,FP.hp<30?3:4);f_rect(2,149,50,4,9);f_rect(2,149,(FP.hp<0?0:FP.hp)/2,4,FP.hp<30?3:4);
  f_text(60,139,FWP[FP.wep].n,1);o=sp_int(b,FP.mag[FP.wep]);o=sp_put(o,"/");sp_int(o,FP.res[FP.wep]);f_text(60,149,FP.reload?"RELOADING":b,FP.reload?2:7);
- if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"HOSTILES ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INTEL");}f_text(150,139,b,2);
+ if(M->surv){int r=180-FP.t/60;o=sp_put(b,"HOLD ");o=sp_int(o,r<0?0:r);o=sp_put(o,"S K");sp_int(o,FP.kills);}else if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"HOSTILES ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INTEL");}f_text(150,139,b,2);
  o=sp_int(b,FP.fpsv);sp_put(o," FPS");f_text(196,149,b,7);}
  int cx=120,cy=FVH/2;f_rect(cx-6,cy,4,1,4);f_rect(cx+3,cy,4,1,4);f_rect(cx,cy-6,1,4,4);f_rect(cx,cy+3,1,4,4);
  if(FP.hurt>0){f_rect(0,0,240,3,3);f_rect(0,133,240,3,3);f_rect(0,0,3,136,3);f_rect(237,0,3,136,3);}
@@ -174,18 +183,20 @@ static void f_auto(u16*ky,u16*pr){*ky=0;*pr=0;int best=-1,bd=1<<30;for(int i=0;i
  if(best>=0){FBot*b=&FB[best];int a=f_ang(b->x-FP.x,b->y-FP.y);int df=f_adiff(a,FP.a);if(df>6)*ky|=K_RIGHT;else if(df<-6)*ky|=K_LEFT;if(iabs(df)<16){*ky|=K_A;if(FWP[FP.wep].auto_==0&&(FP.t&3)==0)*pr|=K_A;}if(FP.mag[FP.wep]==0&&FP.res[FP.wep]==0)*pr|=K_SEL;return;}
  // navigate: goal = nearest alive bot by path distance, else intel, else start
  int gc=-1,gd=255;for(int i=0;i<nFB;i++)if(FB[i].alive){int c=(FB[i].y>>8)*24+(FB[i].x>>8);if(FD[c]<gd){gd=FD[c];gc=c;}}
- if(gc<0){for(int i=0;i<nFK;i++)if(FK[i].on&&(FK[i].t==5||(FK[i].t==0&&FP.hp<60))){int c=(FK[i].y>>8)*24+(FK[i].x>>8);if(FD[c]<gd){gd=FD[c];gc=c;}}}
+ if(gc<0){for(int i=0;i<nFK;i++)if(FK[i].on&&(FK[i].t>=5||(FK[i].t==0&&FP.hp<60))){int c=(FK[i].y>>8)*24+(FK[i].x>>8);if(FD[c]<gd){gd=FD[c];gc=c;}}}
+ if(FMI[FP.mi].exfil&&FP.intel){const char(*m)[25]=FMAPS[FMI[FP.mi].map];for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P')gc=y*24+x;}
+ if(FMI[FP.mi].exfil&&!FP.intel){for(int i=0;i<nFK;i++)if(FK[i].on&&FK[i].t==6)gc=(FK[i].y>>8)*24+(FK[i].x>>8);}
  if(gc<0)return;int c=gc;for(int s=0;s<80&&FD[c]>1;s++){int cx=c%24,cy=c/24;static const s8 NX[4]={1,-1,0,0},NY[4]={0,0,1,-1};int nb=c;for(int k=0;k<4;k++){int nx=cx+NX[k],ny=cy+NY[k];if((unsigned)nx>=24||(unsigned)ny>=24)continue;int n=ny*24+nx;if(FD[n]<FD[nb])nb=n;}if(nb==c)break;c=nb;}
  int tx=((c%24)<<8)+128,ty=((c/24)<<8)+128;if(FD[gc]<=1){tx=((gc%24)<<8)+128;ty=((gc/24)<<8)+128;}
  int a=f_ang(tx-FP.x,ty-FP.y);int df=f_adiff(a,FP.a);if(df>10)*ky|=K_RIGHT;else if(df<-10)*ky|=K_LEFT;if(iabs(df)<120)*ky|=K_UP;
  if(FM[c/24][c%24]=='D'&&(FP.t&15)==0)*pr|=K_B;
  static s32 lx EWRAM,ly EWRAM;static int st EWRAM;if(iabs(FP.x-lx)+iabs(FP.y-ly)<4)st++;else st=0;lx=FP.x;ly=FP.y;if(st>40){*ky|=(FP.t&64)?K_L:K_R;*ky&=~K_UP;if(st>80)st=0;}}
 // ---------------------------------------------------------------- mission loop
-typedef struct{u16 best[4];u8 stars[4];}FRec;static FRec FR EWRAM;
+typedef struct{u16 best[FM_N];u8 stars[FM_N];}FRec;static FRec FR EWRAM;
 static void fr_write(void){const u8*b=(const u8*)&FR;u8 s=0x46;SRAM[FP_OFF]='A';SRAM[FP_OFF+1]='O';SRAM[FP_OFF+2]='E';SRAM[FP_OFF+3]='F';for(int i=0;i<(int)sizeof FR;i++){SRAM[FP_OFF+4+i]=b[i];s+=b[i]*(i+1);}SRAM[FP_OFF+4+sizeof FR]=s;}
 static void fr_read(void){memset(&FR,0,sizeof FR);if(SRAM[FP_OFF]!='A'||SRAM[FP_OFF+1]!='O'||SRAM[FP_OFF+2]!='E'||SRAM[FP_OFF+3]!='F')return;u8*b=(u8*)&FR;u8 s=0x46;for(int i=0;i<(int)sizeof FR;i++){b[i]=SRAM[FP_OFF+4+i];s+=b[i]*(i+1);}if(s!=SRAM[FP_OFF+4+sizeof FR])memset(&FR,0,sizeof FR);}
 static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_isauto();
- for(int i=0;i<256;i++)FPALB[i]=PAL_BG[i];f_palette(M->outdoor);f_textures();for(int c=0;c<128;c++)FSPC[c]=f_spc(c);static u32 hsig[2] EWRAM;hsig[0]=hsig[1]=0xFFFFFFFF;FHS=hsig;
+ for(int i=0;i<256;i++)FPALB[i]=PAL_BG[i];fNight=M->night;f_palette(M->outdoor);f_textures();for(int c=0;c<128;c++)FSPC[c]=f_spc(c);static u32 hsig[2] EWRAM;hsig[0]=hsig[1]=0xFFFFFFFF;FHS=hsig;
  for(int y=0;y<FVH;y++){int c=y<FVH/2?96+y*16/(FVH/2):112+(y-FVH/2)*16/(FVH/2+1);if(c>127)c=127;if(y<FVH/2&&c>111)c=111;u16 v=c|(c<<8);if(y<FVH/2)FCEIL[y]=v;else FFLR[y]=v;}
  for(int y=0;y<FVH;y++){if(y<FVH/2)FFLR[y]=FCEIL[y];else FCEIL[y]=FFLR[y];}
  vsync();REG_DISPCNT=4|(1<<10);fbk=(u16*)0x0600A000;F.msgT=0;f_msg(M->l1);bgm_t(TR_MODERN);
@@ -204,8 +215,10 @@ static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_i
    prevA=ky&K_A;f_pickups();if(FP.hp<100&&FP.t-fLastHurt>240&&(FP.t%30)==0)FP.hp++;}
   if(FP.t%20==0)f_bfs();
   f_bots();
-  if(!res){if(M->dm){if(FP.kills>=15){res=1;endT=FP.t;}if(FP.hp<=0){if(!FP.respawn){FP.deaths++;FP.respawn=120;f_msg("KILLED - RESPAWNING");}else if(--FP.respawn==0){const char(*m)[25]=FMAPS[M->map];for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){FP.x=(x<<8)+128;FP.y=(y<<8)+128;}FP.hp=100;f_bfs();}}if(FP.deaths>=15){res=3;endT=FP.t;}}
-   else{if(FP.hp<=0){res=3;endT=FP.t;f_msg("YOU ARE DOWN - MISSION FAILED");}else if(!f_alive()&&FP.intel){res=1;endT=FP.t;f_msg("AREA SECURE - INTEL IN HAND");}else if(!f_alive()&&!FP.intel&&F.msgT==0)f_msg("ALL CLEAR - GRAB THE INTEL (X)");}}
+  if(!res){if(M->surv&&FP.t>=60*180&&FP.hp>0){res=1;endT=FP.t;f_msg("EXFIL HELO INBOUND - YOU HELD!");}if(M->surv&&FP.hp<=0){res=3;endT=FP.t;}
+   if(M->surv){}else if(M->dm){if(FP.kills>=15){res=1;endT=FP.t;}if(FP.hp<=0){if(!FP.respawn){FP.deaths++;FP.respawn=120;f_msg("KILLED - RESPAWNING");}else if(--FP.respawn==0){const char(*m)[25]=FMAPS[M->map];for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){FP.x=(x<<8)+128;FP.y=(y<<8)+128;}FP.hp=100;f_bfs();}}if(FP.deaths>=15){res=3;endT=FP.t;}}
+   else{if(FP.hp<=0){res=3;endT=FP.t;f_msg("YOU ARE DOWN - MISSION FAILED");}else if(M->exfil){if(FP.intel){const char(*m)[25]=FMAPS[M->map];int px=0,py=0;for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){px=x;py=y;}if((FP.x>>8)==px&&(FP.y>>8)==py){res=1;endT=FP.t;f_msg("HOSTAGE EXFILTRATED");}}}
+    else if(!f_alive()&&FP.intel){res=1;endT=FP.t;f_msg("AREA SECURE - INTEL IN HAND");}else if(!f_alive()&&!FP.intel&&F.msgT==0)f_msg("ALL CLEAR - GRAB THE INTEL (X)");}}
   if(res&&FP.t-endT>150)break;if(FP.t>60*60*8){res=3;break;}
   f_render();
   FP.fcnt++;{u32 el=vblN-FP.v0;if(el>=60){FP.fpsv=(FP.fcnt*60+el/2)/el;FP.fcnt=0;FP.v0=vblN;}}
@@ -225,7 +238,7 @@ static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_i
 static const char*fm_nm(int i){return FMI[i].n;}
 static const char*fm_rt(int i,char*b){char*o=b;for(int s=0;s<3;s++)*o++=s<FR.stars[i]?'*':'-';*o++=' ';sp_int(o,FR.best[i]);return b;}
 static void fps_ops(void){fr_read();spCatOv=CAT_MP+1;int sel=0;bgm_t(TR_MODERN);
- for(;;){int i=sp_list("FPS VS BOTS","RAYCAST 3D - MODERN ERA",4,fm_nm,fm_rt,sel,SCR_FPSEL);if(i<0){spCatOv=0;bgCached=-1;return;}sel=i;const FMis*M=&FMI[i];
+ for(;;){int i=sp_list("FPS VS BOTS","RAYCAST 3D - MODERN ERA",FM_N,fm_nm,fm_rt,sel,SCR_FPSEL);if(i<0){spCatOv=0;bgCached=-1;return;}sel=i;const FMis*M=&FMI[i];
   sp_brief(M->n,M->sub,M->l1,M->l2,"","UP/DOWN: MOVE  </>: TURN  L/R: STRAFE|A: FIRE  B: DOOR/RELOAD (HOLD: FAST TURN)|SELECT: SWITCH WEAPON  START: QUIT|ENEMIES DROP THEIR WEAPONS - TAKE THEM");
   BEAT->screen=SCR_FPSEL;BEAT->mode=i;if(sp_wait_ab(SCR_FPSEL))f_play(i);bgm_t(TR_MODERN);}}
-static void rec_fps(const char**L){fr_read();static char b[4][32] EWRAM;for(int i=0;i<4;i++){char t[16];char*o=sp_put(b[i],FMI[i].n);o=sp_put(o,": ");sp_put(o,fm_rt(i,t));L[i]=b[i];}L[4]="RAYCAST FPS VS BOTS";}
+static void rec_fps(const char**L){fr_read();static char b[4][32] EWRAM;int nd=0,ns=0;for(int i=0;i<FM_N;i++){nd+=FR.best[i]>0;ns+=FR.stars[i];}for(int i=0;i<3;i++){char t[16];char*o=sp_put(b[i],FMI[i].n);o=sp_put(o,": ");sp_put(o,fm_rt(i,t));L[i]=b[i];}{char*o=sp_put(b[3],"MISSIONS DONE ");o=sp_int(o,nd);o=sp_put(o,"/8  STARS ");sp_int(o,ns);L[3]=b[3];}L[4]="RAYCAST FPS VS BOTS";}

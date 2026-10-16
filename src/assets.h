@@ -212,8 +212,8 @@ extern const unsigned short pf_bdm_13[1024];
 extern const unsigned int pf_bdt_14[672];
 extern const unsigned short pf_bdm_14[1024];
 #define PF_BDN_14 84
-extern const unsigned short pf_unit_pal[496];
-extern const unsigned int pf_unit_spr[6944];
+extern const unsigned short pf_unit_pal[752];
+extern const unsigned int pf_unit_spr[10528];
 extern const unsigned int pf_eset_0[576];
 extern const unsigned int pf_eset_1[576];
 extern const unsigned int pf_eset_2[576];
