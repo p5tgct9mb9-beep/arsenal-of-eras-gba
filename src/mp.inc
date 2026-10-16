@@ -19,31 +19,40 @@ static void load_player(int era){Loadout*l=&LO[era];PW[0]=wcalc(era,l,0);PW[1]=w
 static void load_player6(void){Loadout lp;a6_build(&lp,&PW[0],0);a6_build(&lp,&PW[1],1);a6_build(&lp,&PW[2],2);pLaun=lp.laun;pPerk=lp.perk;pLeth=LETH6_SUB[g6.leth];pTact=TACT6_FX[g6.tact];{int i;p_gear(fdec(NPRIM,g6.pI,&i),&lp);}}
 static int mpMode,mpEra,score[2],mpTimer,msgT,msgB;static const char*msgS;static char msgBuf[32];
 static int worldPx(void){return mapW*16;}
-static int bulletTile(void){return mpEra<3?FX_BULLET:mpEra==3?FX_LASER:FX_PLASMA;}
+static int bulletTile(void){return !ERA_SCIFI(mpEra)?FX_BULLET:mpEra==3?FX_LASER:FX_PLASMA;}
 static void feed(const char*s,int b){int k=0;while(s[k]&&k<30){msgBuf[k]=s[k];k++;}msgBuf[k]=0;msgS=msgBuf;msgT=120;msgB=b;}
 // ---------------------------------------------------------------- map generation
 typedef struct{const char*n;const char*d;u8 layout,theme,seed;}MapDef;
 enum{LY_FIELD,LY_TOWN,LY_RIVER,LY_FOREST};enum{TH_NONE,TH_SNOW,TH_DESERT,TH_NIGHT,TH_DUSK};
 #define NMAPS 4
 // names from the game bible map catalogue; layouts are procedural with fixed seeds
-static const MapDef MAPS_INF[5][NMAPS]={
+static const MapDef MAPS_INF[NERA][NMAPS]={
  {{"CARENTAN STREETS","SHELLED VILLAGE SQUARE, NORMANDY",LY_TOWN,0,1},{"BOCAGE FARM","HEDGEROW FARMSTEAD LANES",LY_FIELD,0,2},{"ARDENNES CROSSROADS","SNOWBOUND HAMLET, PINE FOREST",LY_FOREST,TH_SNOW,3},{"TOBRUK HARBOUR","BOMBED QUAYS AND WAREHOUSES",LY_RIVER,TH_DESERT,4}},
  {{"CHECKPOINT CHARLIE","DIVIDED CITY AT NIGHT",LY_TOWN,TH_NIGHT,5},{"HIGHLAND LZ","LANDING ZONE IN THE HIGHLANDS",LY_FOREST,0,6},{"CHOSIN RIDGE","FROZEN RESERVOIR RIDGE",LY_RIVER,0,7},{"FULDA VILLAGE","BORDER VILLAGE FARMLAND",LY_FIELD,0,8}},
  {{"MARKET DISTRICT","DENSE MARKET STREETS",LY_TOWN,0,9},{"SANDSTORM OUTPOST","DESERT FORWARD OUTPOST",LY_FIELD,TH_DUSK,10},{"HARBOR FREIGHT","CONTAINER PORT AND CANAL",LY_RIVER,0,11},{"MOUNTAIN HAMLET","SNOWY MOUNTAIN VILLAGE",LY_FOREST,TH_SNOW,12}},
  {{"NEON MARKET","MEGACITY NIGHT MARKET",LY_TOWN,0,13},{"HAN RIVERSIDE","RIVERFRONT PROMENADE",LY_RIVER,0,14},{"VERTICAL FARM","HYDROPONIC TOWER GARDENS",LY_FOREST,0,15},{"PROVING GROUND","ROBOTICS TEST RANGE",LY_FIELD,TH_DUSK,16}},
- {{"LUNAR HAB","PRESSURISED HAB MODULES",LY_TOWN,0,17},{"REGOLITH QUARRY","OPEN-PIT LUNAR MINE",LY_FIELD,0,18},{"BELT MINE","ASTEROID MINE CHASMS",LY_RIVER,0,19},{"ICE CATHEDRAL","FROZEN MOON CAVERNS",LY_FOREST,TH_SNOW,20}}};
-static const MapDef MAPS_TANK[5][NMAPS]={
+ {{"LUNAR HAB","PRESSURISED HAB MODULES",LY_TOWN,0,17},{"REGOLITH QUARRY","OPEN-PIT LUNAR MINE",LY_FIELD,0,18},{"BELT MINE","ASTEROID MINE CHASMS",LY_RIVER,0,19},{"ICE CATHEDRAL","FROZEN MOON CAVERNS",LY_FOREST,TH_SNOW,20}},
+ {{"SOMME TRENCHES","MUDDY TRENCH LINES, NO MAN'S LAND",LY_FIELD,TH_DUSK,65},{"YPRES RUINS","SHELLED FLEMISH TOWN",LY_TOWN,0,66},{"ARGONNE FOREST","SHATTERED FOREST RAVINES",LY_FOREST,0,67},{"MARNE CROSSING","RIVER BRIDGES UNDER FIRE",LY_RIVER,0,68}},
+ {{"LEXINGTON GREEN","VILLAGE COMMON AT DAWN",LY_TOWN,0,69},{"BUNKER HILL","FARM FIELDS AND REDOUBT",LY_FIELD,0,70},{"DELAWARE CROSSING","ICY RIVER, CHRISTMAS NIGHT",LY_RIVER,TH_SNOW,71},{"SARATOGA WOODS","FREEMAN'S FARM FOREST",LY_FOREST,TH_DUSK,72}},
+ {{"AGINCOURT FIELD","MUDDY FIELD BETWEEN WOODS",LY_FIELD,0,73},{"CASTLE TOWN","WALLED MARKET TOWN",LY_TOWN,0,74},{"STIRLING BRIDGE","RIVER BRIDGE AND MARSH",LY_RIVER,0,75},{"SHERWOOD","GREENWOOD AMBUSH",LY_FOREST,TH_DUSK,76}}};
+static const MapDef MAPS_TANK[NERA][NMAPS]={
  {{"PROKHOROVKA FIELDS","WHEAT FIELDS, RAIL EMBANKMENT",LY_FIELD,0,21},{"RHINE BRIDGEHEAD","RIVER BRIDGES AND TOWNHOUSES",LY_RIVER,0,22},{"LIBYAN ESCARPMENT","DESERT WADIS AND PASSES",LY_FIELD,TH_DESERT,23},{"VOLGA RAILHEAD","SNOW-DRIFTED RUINED JUNCTION",LY_TOWN,TH_SNOW,24}},
  {{"FULDA PLAINS","FARMLAND, FORESTS, AUTOBAHN",LY_FOREST,0,25},{"CHOSIN PASS","FROZEN RESERVOIR CROSSING",LY_RIVER,0,26},{"IRON CURTAIN","BORDER TOWN AT NIGHT",LY_TOWN,TH_NIGHT,27},{"FULDA GAP","OPEN GAP, ARMOUR CLASH",LY_FIELD,0,28}},
  {{"DESERT HIGHWAY","NIGHT SANDSTORM HIGHWAY",LY_FIELD,TH_NIGHT,29},{"STEPPE CROSSING","OPEN STEPPE AND FORDS",LY_RIVER,0,30},{"MOUNTAIN PASS","VALLEY VILLAGES, SNOW",LY_FOREST,TH_SNOW,31},{"HARBOR CITY","PORT CITY BLOCKS",LY_TOWN,0,32}},
  {{"COASTAL PLAIN","DRONE-HEAVY ARMOUR PLAIN",LY_FIELD,0,33},{"DMZ 2055","HILLS AND RIVER CROSSING",LY_RIVER,0,34},{"FLOODED METRO","HALF-DROWNED CITY",LY_TOWN,TH_NIGHT,35},{"SOLAR PLANT","MIRROR FIELDS AT DUSK",LY_FOREST,TH_DUSK,36}},
- {{"MARE IMBRIUM","FLAT LUNAR MARE",LY_FIELD,0,37},{"LUNAR MINING CRATER","CRATER MINING RIGS",LY_TOWN,0,38},{"SHACKLETON RIM","POLAR CRATER CHASM",LY_RIVER,TH_SNOW,39},{"FAR SIDE","DARK SIDE BOULDER FIELD",LY_FOREST,TH_NIGHT,40}}};
-static const MapDef MAPS_AIR[5][NMAPS]={
+ {{"MARE IMBRIUM","FLAT LUNAR MARE",LY_FIELD,0,37},{"LUNAR MINING CRATER","CRATER MINING RIGS",LY_TOWN,0,38},{"SHACKLETON RIM","POLAR CRATER CHASM",LY_RIVER,TH_SNOW,39},{"FAR SIDE","DARK SIDE BOULDER FIELD",LY_FOREST,TH_NIGHT,40}},
+ {{"CAMBRAI","FIRST MASSED TANK ASSAULT",LY_FIELD,0,77},{"VILLERS-BRETONNEUX","FIRST TANK VS TANK, 1918",LY_TOWN,TH_DUSK,78},{"FLERS","SOMME VILLAGE, SEPT 1916",LY_FOREST,0,79},{"AMIENS","OPEN DOWNS, AUG 1918",LY_RIVER,0,80}},
+ {{"YORKTOWN SIEGE","REDOUBTS AND EARTHWORKS",LY_FIELD,0,81},{"TRENTON STREETS","HESSIAN BARRACKS AT DAWN",LY_TOWN,TH_SNOW,82},{"BRANDYWINE","CREEK FORDS AND HILLS",LY_RIVER,0,83},{"MONMOUTH","SUMMER FARMLAND",LY_FOREST,TH_DESERT,84}},
+ {{"CASTLE SIEGE","WALLS, GATEHOUSE, MOAT",LY_TOWN,0,85},{"ORLEANS","RIVER FORTS AND BRIDGE",LY_RIVER,0,86},{"CRECY RIDGE","WINDMILL RIDGE",LY_FIELD,TH_DUSK,87},{"BORDER MARCH","MOOR AND FOREST",LY_FOREST,0,88}}};
+static const MapDef MAPS_AIR[NERA][NMAPS]={
  {{"CHANNEL SKIES","CLIFFS AND COASTAL CONVOYS",0,0,41},{"PACIFIC CARRIER BATTLE","OPEN OCEAN AND ATOLLS",1,0,42},{"ABBEY HILL","MOUNTAIN VALLEYS, ITALY",2,0,43},{"ARDENNES WINTER","SNOWY FOREST HILLS",2,TH_SNOW,44}},
  {{"MIG ALLEY","RIVER VALLEYS",0,0,45},{"NORTH CAPE","FJORDS AND CLIFFS",2,TH_SNOW,46},{"KOLA FJORD","ARCTIC SEA",1,0,47},{"MEKONG DELTA","DELTA AT DUSK",1,TH_DUSK,48}},
  {{"GULF STRAIT","STRAIT ISLANDS, SHIPPING LANES",1,0,49},{"HORMUZ NARROWS","NARROW STRAIT AT DUSK",1,TH_DUSK,50},{"MOUNTAIN PASS","SNOWY PEAKS",2,TH_SNOW,51},{"DESERT HIGHWAY","OPEN DESERT",0,TH_DESERT,52}},
  {{"EQUATOR SPACEPORT","LAUNCH PADS AND COAST",0,0,53},{"TYPHOON FRONT","INSIDE THE STORM",1,TH_NIGHT,54},{"ISLAND CHAIN","CAUSEWAY ISLANDS",1,0,55},{"MEGADAM","CANYON RESERVOIR",2,0,56}},
- {{"RING DEBRIS FIELD","DRIFTING WRECKAGE",3,0,57},{"LUNAR ORBIT","LOW ORBIT OVER MARIA",0,0,58},{"BELT FIELD","DENSE ASTEROID BELT",2,0,59},{"FAR SIDE","DARK FAR SIDE",3,TH_NIGHT,60}}};
+ {{"RING DEBRIS FIELD","DRIFTING WRECKAGE",3,0,57},{"LUNAR ORBIT","LOW ORBIT OVER MARIA",0,0,58},{"BELT FIELD","DENSE ASTEROID BELT",2,0,59},{"FAR SIDE","DARK FAR SIDE",3,TH_NIGHT,60}},
+ {{"BLOODY APRIL","ARRAS FRONT SKIES, 1917",0,0,89},{"FLANDERS FIELDS","TRENCH-SCARRED PLAIN",2,TH_DUSK,90},{"VERDUN","CRATERED HILLS",2,0,91},{"CHANNEL COAST","DOVER CLIFFS PATROL",1,0,92}},
+ {{"BOSTON HARBOR","BALLOONS OVER THE BAY (FICTIONAL)",1,0,93},{"HUDSON VALLEY","RIVER VALLEY (FICTIONAL)",2,0,94},{"VALLEY FORGE","WINTER CAMP (FICTIONAL)",2,TH_SNOW,95},{"CHESAPEAKE","CAPES AT DUSK (FICTIONAL)",1,TH_DUSK,96}},
+ {{"FLORENCE","DA VINCI'S DREAM (FICTIONAL)",0,0,97},{"ALPINE PASS","SNOWY PEAKS (FICTIONAL)",2,TH_SNOW,98},{"TUSCAN HILLS","VINEYARDS (FICTIONAL)",0,TH_DUSK,99},{"ADRIATIC COAST","VENETIAN LAGOON (FICTIONAL)",1,0,100}}};
 static const MapDef MAPS_SEA[3][NMAPS]={
  {{"MIDWAY ATOLL","OPEN PACIFIC, CORAL ATOLLS",0,0,61},{"IRONBOTTOM SOUND","ISLAND CHANNEL AT NIGHT",1,TH_NIGHT,62},{"DENMARK STRAIT","ICE FLOES, GREY NORTH SEA",3,TH_SNOW,63},{"LEYTE GULF","ISLAND STRAITS AT DUSK",2,TH_DUSK,64}},
  {{"GIUK GAP","OPEN NORTH ATLANTIC",0,0,65},{"NORWEGIAN SEA","FJORD COAST, WINTER",3,TH_SNOW,66},{"BLOCKADE LINE","FICTIONAL ISLAND CHAIN",1,0,67},{"BARENTS NIGHT","ARCTIC SEA AT NIGHT",0,TH_NIGHT,68}},
@@ -162,7 +171,7 @@ static void inf_fire(int i){Unit*u=&U[i];if(u->cd>0||u->rl>0)return;Wstat w;
  else{const Wpn*b=&PRIM[mpMixed?u->ve:mpEra][u->wpn];w.dmg=b->dmg;w.rate=b->rate+4;w.spd16=b->spd16;w.spread=b->spread;w.pellets=b->pellets;w.life=b->life;}
  u->cd=w.rate;if(!u->isp){u->cd+=BD(u)->cd;if(u->cd<2)u->cd=2;}int jit=u->isp?0:BD(u)->jit;
  for(int p=0;p<w.pellets;p++){int a=(u->tur>>8)+(w.spread?rr(w.spread*2+1)-w.spread:0)+(jit?rr(jit*2+1)-jit:0);fire_bullet(i,a,w.spd16*16,w.dmg,w.life,K_BUL,0);}
- if(u->isp||idist(dxw(u->x,U[0].x),dyw(u->y,U[0].y))<150){if(mpEra>=3)sfx_laser();else sfx_shot(0);}
+ if(u->isp||idist(dxw(u->x,U[0].x),dyw(u->y,U[0].y))<150){if(ERA_SCIFI(mpEra))sfx_laser();else sfx_shot(0);}
  if(u->isp&&u->wpn==0){int a=u->tur>>8;
   if(PW[0].fl==1){for(int j=1;j<4;j++)fx_add((u->x>>8)+(SIN(a+rr(9)-4)*(10+j*9)>>8),(u->y>>8)-(COS(a+rr(9)-4)*(10+j*9)>>8),FXK_FLASH);}
   if(PF_(AF_BAYO)||PF_(AF_LIGHT))for(int k=0;k<NU;k++){Unit*e=&U[k];if(!e->alive||e->team==u->team||e->team>1)continue;int dx=dxw(e->x,u->x),dy=dyw(e->y,u->y);
@@ -342,7 +351,7 @@ static void sea_update(int i){Unit*u=&U[i];const ShipS*S=SV(u);if(u->cd>0)u->cd-
 // ---------------------------------------------------------------- air
 static void air_fire(int i){Unit*u=&U[i];const AirS*A=AV(u);if(u->cd>0)return;u->cd=A->rate+(u->isp?0:3+BD(u)->cd/3);if(u->cd<1)u->cd=1;u->anim^=1;int j=u->isp?0:(BD(u)->jit+1)/2;
  fire_bullet(i,(u->ang>>8)+(j?rr(j*2+1)-j:0),A->bspd,A->dmg,36,K_BUL,u->anim?6:-6);
- if(u->isp||idist(dxw(u->x,U[0].x),dyw(u->y,U[0].y))<140){if(mpEra>=3)sfx_laser();else sfx_shot(0);}}
+ if(u->isp||idist(dxw(u->x,U[0].x),dyw(u->y,U[0].y))<140){if(ERA_SCIFI(mpEra))sfx_laser();else sfx_shot(0);}}
 static void air_missile(int i){Unit*u=&U[i];const AirS*A=AV(u);if(u->ammo<=0||u->cd2>0)return;u->ammo--;u->cd2=40;
  if(A->sec==2){Shot*s=shot_new();if(!s)return;int a=u->ang>>8;int sp=u->vel+60;s->x=u->x;s->y=u->y;s->vx=SIN(a)*sp>>8;s->vy=-COS(a)*sp>>8;s->kind=K_GREN;s->sub=21;s->dmg=75;s->life=44;s->team=u->team;s->owner=i;
   sfx_whoosh();if(u->isp)feed("BOMBS AWAY",HB_YEL);return;}
@@ -427,14 +436,14 @@ static void shots_update(void){int W=worldPx();
 static void draw_shots(void){int bt=bulletTile();
  for(int i=0;i<NS;i++){Shot*s=&S[i];if(s->life<=0||s->tgt==-2)continue;int x=scrx(s->x),y=scry(s->y);
   switch(s->kind){case K_GREN:if(s->sub==20){spr_aff(x,y,OT_FX+FX_ROCKET,0,3,atan2i(s->vx,s->vy),0x100,1,0);break;}spr(x-4,y-4,OT_FX+FX_GRENADE,0,0,3,1);break;
-   case K_SHELL:spr(x-4,y-4,OT_FX+(mpEra>=3?FX_PLASMA:FX_SHELL),0,0,3,1);break;
+   case K_SHELL:spr(x-4,y-4,OT_FX+(ERA_SCIFI(mpEra)?FX_PLASMA:FX_SHELL),0,0,3,1);break;
    case K_MISSILE:spr_aff(x,y,OT_FX+FX_MISSILE,0,3,s->ang>>8,0x100,1,0);break;
    case K_ROCKET:spr_aff(x,y,OT_FX+FX_ROCKET,0,3,(atan2i(s->vx,s->vy)),0x100,1,0);break;
    default:spr(x-4,y-4,OT_FX+bt,0,0,3,1);}}}
 static void draw_radar(void){int W=worldPx(),Hp=mapH*16;hpanel(25,14,5,5);
  for(int k=NU-1;k>=0;k--){Unit*u=&U[k];if(!u->alive||u->team>1)continue;int x=200+1+(u->x>>8)*37/W,y=112+1+(u->y>>8)*37/Hp;
   spr(x,y,OT_FX+FX_RADAR+(k==0?2:u->team?1:0),0,0,3,0);}}
-static int plane_tile(Unit*u){if(!mpMixed)return OT_ERA+ES_PLANE+16*AV(u)->spr;return u->vt;}
+static int plane_tile(Unit*u){if(!mpMixed&&mpEra<5)return OT_ERA+ES_PLANE+16*AV(u)->spr;return u->vt;}
 static void draw_units(void){
  for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive)continue;if(u->inv>0&&(frame&4))continue;int x=scrx(u->x),y=scry(u->y);int pal=k==0?2:u->team?1:0;
   if(u->hurt>0)u->hurt--;
@@ -442,7 +451,7 @@ static void draw_units(void){
   if(mpMode==MM_SEA){if(u->role==R_WING)spr_aff(x,y,u->vt,2,pal,u->ang>>8,0x100,1,0);continue;}
   if(u->role==R_DISMOUNT){spr_aff(x,y,OT_ERA+ES_SOLDIER+((u->anim>>3)&1)*4,1,pal,u->tur>>8,0x100,1,0);continue;}
   if(mpMode==MM_INF){if(k==0&&CH.use)spr_aff(x,y,CH_TILE+((u->anim>>3)&1)*4,1,6,u->tur>>8,0x100,1,0);else spr_aff(x,y,OT_ERA+ES_SOLDIER+((u->anim>>3)&1)*4,1,pal,u->tur>>8,0x100,1,0);}
-  else if(mpMode==MM_TANK){int hb=mpMixed?u->vt:OT_ERA+ES_HULL;spr_aff(x,y,hb+16,2,pal,u->tur>>8,0x100,1,0);spr_aff(x,y,hb,2,pal,u->ang>>8,0x100,1,0);}
+  else if(mpMode==MM_TANK){int hb=(mpMixed||mpEra>=5)?u->vt:OT_ERA+ES_HULL;spr_aff(x,y,hb+16,2,pal,u->tur>>8,0x100,1,0);spr_aff(x,y,hb,2,pal,u->ang>>8,0x100,1,0);}
   else{int sx=0x100;if(u->roll>0){int ph=(28-u->roll)*256/28;sx=iabs(COS(ph/2))+24;if(sx>256)sx=256;}
    spr_aff(x,y,plane_tile(u),2,pal,u->ang>>8,sx,1,0);}}
  if(mpMode==MM_SEA){for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role==R_WING||(u->inv>0&&(frame&4)))continue;int x=scrx(u->x),y=scry(u->y);
@@ -486,21 +495,26 @@ static void mp_result(void){Unit*P=&U[0];int win=score[0]>score[1]?1:score[0]<sc
   oam_begin();present(mpMode==MM_AIR&&mpEra!=4,0,0);if(i>40&&(pressed&(K_A|K_START)))break;}
  music_stop();}
 static const MapDef*map_def(int mode,int era,int i){return mode==MM_SEA?&MAPS_SEA[era][i]:mode==MM_AIR?&MAPS_AIR[era][i]:mode==MM_TANK?&MAPS_TANK[era][i]:&MAPS_INF[era][i];}
-static const u32*arena_t(int e){return e==0?arena_tiles_0:e==1?arena_tiles_1:e==2?arena_tiles_2:e==3?arena_tiles_3:arena_tiles_4;}
-static const u16*arena_p(int e){return e==0?arena_pal_0:e==1?arena_pal_1:e==2?arena_pal_2:e==3?arena_pal_3:arena_pal_4;}
-static const u16*water_p(int e){return e==0?water_pal_0:e==1?water_pal_1:e==2?water_pal_2:e==3?water_pal_3:water_pal_4;}
-static const u32*sky_t(int e){return e==0?sky_tiles_0:e==1?sky_tiles_1:e==2?sky_tiles_2:e==3?sky_tiles_3:sky_tiles_4;}
-static const u16*sky_p(int e){return e==0?sky_pal_0:e==1?sky_pal_1:e==2?sky_pal_2:e==3?sky_pal_3:sky_pal_4;}
+static const u32*const ARENA_T[NERA]={arena_tiles_0,arena_tiles_1,arena_tiles_2,arena_tiles_3,arena_tiles_4,arena_tiles_5,arena_tiles_6,arena_tiles_7};
+static const u16*const ARENA_P[NERA]={arena_pal_0,arena_pal_1,arena_pal_2,arena_pal_3,arena_pal_4,arena_pal_5,arena_pal_6,arena_pal_7};
+static const u16*const WATER_P[NERA]={water_pal_0,water_pal_1,water_pal_2,water_pal_3,water_pal_4,water_pal_5,water_pal_6,water_pal_7};
+static const u32*const SKY_T[NERA]={sky_tiles_0,sky_tiles_1,sky_tiles_2,sky_tiles_3,sky_tiles_4,sky_tiles_5,sky_tiles_6,sky_tiles_7};
+static const u16*const SKY_P[NERA]={sky_pal_0,sky_pal_1,sky_pal_2,sky_pal_3,sky_pal_4,sky_pal_5,sky_pal_6,sky_pal_7};
+static const u32*arena_t(int e){return ARENA_T[e];}
+static const u16*arena_p(int e){return ARENA_P[e];}
+static const u16*water_p(int e){return WATER_P[e];}
+static const u32*sky_t(int e){return SKY_T[e];}
+static const u16*sky_p(int e){return SKY_P[e];}
 static void gen_map(int mode,int era,int mi){mpMode=mode;mpEra=era;curMap=map_def(mode,era,mi);if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);}
 static void mp_run(int mode,int era,int mapi){
  mpMode=mode;mpEra=era;BEAT->extra=mapi;BEAT->mode=mode;BEAT->era=era;if(mode==MM_SEA)bgm_t(TR_NAVAL);else bgm(mode==MM_AIR?3:2,era);if(!msOn)nU=12;
  int clouds=0;int te=era;
  if(msOn){te=msTEra;mpEra=te;curMap=msMap;if(mode==MM_SEA)gen_sea();else if(mode==MM_AIR)gen_sky();else gen_arena(mode==MM_TANK?56:40,mode==MM_TANK?56:40,mode==MM_TANK);mpEra=era;}else gen_map(mode,era,mapi);
  if(mode==MM_SEA){int ts=curMap->theme==TH_SNOW?1:0;setup_mode0(sky_t(ts),32*4*8,sky_p(ts),era,0);if(curMap->theme!=TH_SNOW)tint_bg(curMap->theme,1);shimmer=2;}
- else if(mode==MM_AIR){clouds=mpEra!=4;const u32*t=te==0?sky_tiles_0:te==1?sky_tiles_1:te==2?sky_tiles_2:te==3?sky_tiles_3:sky_tiles_4;
-  const u16*p=te==0?sky_pal_0:te==1?sky_pal_1:te==2?sky_pal_2:te==3?sky_pal_3:sky_pal_4;setup_mode0(t,32*4*8,p,era,clouds);tint_bg(curMap->theme,1);if(te<2)shimmer=2;}
- else{const u32*t=te==0?arena_tiles_0:te==1?arena_tiles_1:te==2?arena_tiles_2:te==3?arena_tiles_3:arena_tiles_4;
-  const u16*p=te==0?arena_pal_0:te==1?arena_pal_1:te==2?arena_pal_2:te==3?arena_pal_3:arena_pal_4;setup_mode0(t,AM_N*4*8,p,era,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(te)[i];tint_bg(curMap->theme,2);shimmer=1;}
+ else if(mode==MM_AIR){clouds=mpEra!=4;const u32*t=SKY_T[te];
+  const u16*p=SKY_P[te];setup_mode0(t,32*4*8,p,era,clouds);tint_bg(curMap->theme,1);if(te<2)shimmer=2;}
+ else{const u32*t=ARENA_T[te];
+  const u16*p=ARENA_P[te];setup_mode0(t,AM_N*4*8,p,era,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(te)[i];tint_bg(curMap->theme,2);shimmer=1;}
  memset(U,0,sizeof U);memset(S,0,sizeof S);memset(FXs,0,sizeof FXs);score[0]=score[1]=0;mpTimer=60*60*5;msgT=0;hintT=300;
  rs^=frame*2654435761u;
  if(mpMixed)load_player6();else load_player(era);pSpeed=290;
@@ -513,12 +527,14 @@ static void mp_run(int mode,int era,int mapi){
   U[i].wpn=i==0?0:rr(NPRIM_BOT[era]);if(era==0&&i>0)U[i].wpn=U[i].team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];spawn(&U[i],i);}
  if(mpMixed){ // balanced arsenal: bot k on each team draws from the same era
   int ncv[2]={0,0};
-  for(int k=0;k<6;k++){int e=rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0)e=1; // Warsaw Pact bots: Cold War kit
+  for(int k=0;k<6;k++){int e=(mpEra>=5&&mode!=MM_SEA)?mpEra:rr(mode==MM_SEA?3:5);for(int t=0;t<2;t++){int i=k+t*6;Unit*u=&U[i];int f=t?g6.fac1:g6.fac0;int ax=FAC[f].axis;int vi=0;int e0=e;if(f==FAC_WP&&i!=0&&mpEra<5)e=1; // v1.3: WW1/1776/medieval maps field that era's kit // Warsaw Pact bots: Cold War kit
     if(k==0){if(mode==MM_SEA)e=fdec(NSH,g6.shI,&vi);else if(mode==MM_TANK)e=fdec(NTK,g6.tkI,&vi);else if(mode==MM_AIR)e=fdec(NAIR,g6.aI,&vi);else e=fdec(NPRIM,g6.pI,&vi);}
     u->ve=e;
     if(i==0){u->veh=vi;}
     else if(mode==MM_SEA){int east=e==0?ax:(f==2||f==5||f==6||f==10);int pick[MAXSH],np=0;for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].axis==east&&!(SHIPV[e][q].cls==SC_CV&&ncv[t]))pick[np++]=q;
       if(!np)for(int q=0;q<NSH[e];q++)if(SHIPV[e][q].cls!=SC_CV)pick[np++]=q;u->veh=pick[rr(np)];}
+    else if(mode==MM_TANK&&e>=5){int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++)if(TANKV[e][q].axis==t)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NTK[e]);}
+    else if(mode==MM_AIR&&e>=5){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==t)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NAIR[e]);}
     else if(mode==MM_TANK){if(e==0){int pick[MAXTK],np=0;for(int q=0;q<NTK[0];q++)if(TANKV[0][q].axis==ax&&TANKV[0][q].cls!=VC_MINE&&(TANKV[0][q].cls!=VC_JEEP||rr(2)))pick[np++]=q;u->veh=pick[rr(np)];}else{int east=(f==2||f==5||f==6||f==10||f==FAC_WP);int pick[MAXTK],np=0;for(int q=0;q<NTK[e];q++){const char*vn=TANKV[e][q].n;if(f==FAC_WP?((vn[0]=='T'&&vn[1]=='-')||(vn[0]=='B'&&vn[1]=='M'&&vn[2]=='P')):TANKV[e][q].axis==east)pick[np++]=q;}u->veh=np&&e<=2?pick[rr(np)]:rr(NTK[e]);}}
     else if(mode==MM_AIR){if(e==0){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[0];q++)if(AIRV[0][q].side==ax)pick[np++]=q;u->veh=pick[rr(np)];}else if(f==FAC_WP){int pick[MAXAIR],np=0;for(int q=0;q<NAIR[e];q++)if(AIRV[e][q].side==1)pick[np++]=q;u->veh=np?pick[rr(np)]:rr(NAIR[e]);}else u->veh=rr(NAIR[e]);}
     else u->wpn=f==FAC_WP?(const u8[]){0,3,5,6,5,6}[rr(6)]:e==0?(ax?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM_BOT[e]);

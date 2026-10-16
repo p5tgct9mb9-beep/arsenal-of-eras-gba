@@ -176,12 +176,63 @@ TK2=[('M1A2 ABRAMS','MT',0,0,290,320,70,42,130,1450,0,dict(L=26,W=20,tur='h',ts=
 ]
 TK3=[('HOVER MBT','MT',0,0,350,420,55,34,105,1500,0,None),('RAIL WALKER','HT',0,0,220,300,80,60,140,2200,0,None)]
 TK4=[('GRAV TANK','MT',0,0,320,420,50,30,100,1600,0,None),('LUNAR CRAWLER','HT',0,0,240,320,65,42,140,1600,0,None)]
-TKS=[TK0,TK1,TK2,TK3,TK4]
+# v1.3 eras 5-7: WW1 armour (generic tk styles) + 1776 artillery/wagons + medieval siege engines (custom top-down art)
+TK5=[('MARK IV MALE','HT',0,0,110,180,110,40,160,1000,0,dict(L=28,W=22,tur='n',cas=(16,10),cy=9,gl=8,skirt=1)),
+ ('MARK V','HT',0,0,130,200,100,40,165,1000,0,dict(L=28,W=22,tur='n',cas=(16,12),cy=8,gl=8,skirt=1)),
+ ('A7V STURMPANZER','HT',1,0,120,170,110,44,170,1000,0,dict(L=27,W=20,tur='n',cas=(16,14),cy=6,gl=6)),
+ ('RENAULT FT','LT',0,0,170,280,90,30,90,1050,0,dict(L=18,W=13,tur='c',ts=(8,8),gl=7)),
+ ('WHIPPET MK A','MT',0,0,220,300,20,10,110,1300,0,dict(L=24,W=16,tur='n',cas=(12,8),cy=12,gl=4)),
+ ('SCHNEIDER CA1','MT',0,0,140,220,100,36,120,1000,0,dict(L=22,W=17,tur='n',cas=(12,8),cy=4,gl=6)),
+ ('ST CHAMOND','HT',0,0,130,200,100,44,140,1050,0,dict(L=28,W=18,tur='n',cas=(14,10),cy=3,gl=9)),
+ ('LK II','LT',1,0,200,280,80,28,90,1050,0,dict(L=20,W=14,tur='n',cas=(10,8),cy=10,gl=6)),
+ ('ROLLS-ROYCE AC','AC',0,0,300,340,14,10,80,1300,0,dict(L=22,W=14,wh=4,tur='c',ts=(9,9),gl=6)),
+ ('EHRHARDT E-V/4','AC',1,0,280,320,14,10,90,1300,0,dict(L=23,W=15,wh=4,tur='c',ts=(9,8),gl=6))]
+TK6=[('3-PDR GRASSHOPPER','TD',0,0,150,260,120,34,70,950,0,dict(custom='cannon',bar=8)),
+ ('6-PDR FIELD GUN','TD',0,0,130,240,130,40,80,950,0,dict(custom='cannon',bar=10)),
+ ('12-PDR FIELD GUN','TD',1,0,110,220,150,48,90,950,0,dict(custom='cannon',bar=12)),
+ ('ROYAL HOWITZER','SPG',1,0,100,200,170,56,90,800,0,dict(custom='cannon',bar=7,fat=1)),
+ ('SUPPLY WAGON','APC',0,0,200,260,40,8,100,1100,2,dict(custom='wagon'))]
+TK7=[('BATTERING RAM','HT',0,0,110,200,90,60,170,700,0,dict(custom='ram')),
+ ('RIBAULDEQUIN','TD',0,0,140,240,60,14,80,1000,0,dict(custom='cannon',bar=8,organ=1)),
+ ('WAR WAGON','IFV',0,0,150,220,50,16,140,1100,4,dict(custom='wagon',war=1)),
+ ('SIEGE TOWER','HT',1,0,90,160,70,20,200,900,0,dict(custom='tower')),
+ ('TREBUCHET','SPG',1,0,80,160,200,70,90,700,0,dict(custom='treb')),
+ ('BOMBARD CART','TD',1,0,110,220,160,58,90,850,0,dict(custom='cannon',bar=11,fat=1))]
+def custom_tank(sp):
+    k=sp['custom'];h=Cv(32,32);t=Cv(32,32);cx=16
+    if k=='cannon':   # carriage seen from above: 2 big wheels, trail behind, barrel on the turret layer
+        h.r(14,14,17,29,6 if False else 3);h.r(13,27,18,29,2)            # trail
+        for xa in (7,22):h.r(xa,10,xa+2,20,12);[h.l(xa,y,xa+2,y,13) for y in range(11,20,3)]
+        h.r(10,13,21,16,4);h.l(10,14,21,14,2)                             # axle
+        bl=sp.get('bar',10);fat=sp.get('fat',0)
+        if sp.get('organ'):
+            for gx in (11,13,15,17,19):t.r(gx,14-bl,gx,15,14)
+        else:t.r(15-fat,15-bl,16+fat,16,14);t.r(14-fat,15-bl,17+fat,16-bl,14);t.e(13-fat,13,18+fat,18,14)
+    elif k=='wagon':
+        h.r(8,6,23,27,3);h.r(9,7,22,26,4);[h.l(9,y,22,y,2) for y in range(9,26,4)]
+        for xa,ya in ((5,8),(24,8),(5,21),(24,21)):h.r(xa,ya,xa+2,ya+4,12)
+        h.l(15,0,15,5,2);h.l(16,0,16,5,2)                                 # tongue
+        if sp.get('war'):[h.px(8,y,14) for y in range(10,26,5)];[h.px(23,y,14) for y in range(10,26,5)];t.r(15,8,16,16,14);t.e(13,14,18,19,2)
+        else:t.e(10,9,21,24,15);t.l(12,12,19,12,4)
+    elif k=='ram':
+        h.p([(8,8),(23,8),(23,28),(8,28)],3);h.p([(16,6),(24,10),(24,27),(16,24),(7,27),(7,10)],4);h.l(16,6,16,24,2)
+        for xa,ya in ((5,10),(24,10),(5,22),(24,22)):h.r(xa,ya,xa+2,ya+4,12)
+        t.r(15,0,16,12,14);t.r(14,0,17,2,2)
+    elif k=='tower':
+        h.r(7,7,24,24,3);[h.l(7,y,24,y,2) for y in range(9,24,4)];[h.l(x,7,x,24,2) for x in (12,19)];h.r(9,9,22,22,4)
+        for xa,ya in ((4,8),(25,8),(4,20),(25,20)):h.r(xa,ya,xa+2,ya+4,12)
+        t.r(13,2,18,8,15);t.l(13,2,18,2,2)
+    elif k=='treb':
+        h.r(9,10,22,26,2);h.r(10,11,21,25,3);[h.r(xa,ya,xa+2,ya+3,12) for xa,ya in ((6,11),(23,11),(6,22),(23,22))]
+        t.r(15,0,16,22,14);t.r(13,18,18,24,2);t.e(14,0,17,3,15)
+    return h.grid(1),t.grid(1)
+TKS=[TK0,TK1,TK2,TK3,TK4,TK5,TK6,TK7]
 tank_t=[];gid=0;TKG={}
 for e,lst in enumerate(TKS):
     for i,row in enumerate(lst):
         sp=row[11]
         if sp is None:hg,tg=tank(e,'hull'),tank(e,'tur')
+        elif sp.get('custom'):hg,tg=custom_tank(sp)
         else:hg,tg=tk(sp)
         tank_t+=tiles4(hg,32,32)+tiles4(tg,32,32);TKG[(e,i)]=gid;gid+=1
 emit("tank_spr",tank_t,"unsigned int")
@@ -199,6 +250,12 @@ def heli(sp):
     return c.grid(1)
 def pg(sp):
     if sp.get('rotor') and sp.get('nose')=='glass':return heli(sp)
+    if sp.get('balloon') or sp.get('orni') or sp.get('screw'):
+        c=Cv(32,32)
+        if sp.get('balloon'):c.e(5,2,26,24,3);c.e(8,4,20,14,4);[c.l(x,3,x,23,2) for x in (11,16,21)];c.r(13,25,18,29,7);c.l(12,22,13,25,14);c.l(19,22,18,25,14);(c.r(14,26,17,28,9) if sp['balloon']==2 else None)
+        elif sp.get('orni'):c.p([(16,8),(1,4),(3,12),(8,16),(16,14)],3);c.p([(16,8),(30,4),(28,12),(23,16),(16,14)],3);[c.l(16,9,x,y,2) for x,y in ((2,5),(5,13),(29,5),(26,13))];c.e(14,6,17,24,7);c.p([(16,22),(12,29),(20,29)],4)
+        else:c.e(3,3,28,28,4);c.e(6,6,25,25,3);c.l(16,3,16,28,2);c.l(3,16,28,16,2);c.e(12,12,19,19,7);c.e(14,14,17,17,14)
+        return c.grid(1)
     c=Cv(32,32);k=sp.get('k','sef');span=sp.get('span',26);ch=sp.get('ch',5);wy=sp.get('wy',11);sw=sp.get('sw',0);tp=sp.get('tp',0.6)
     fl=sp.get('fl',24);fw=sp.get('fw',4);fy0=sp.get('fy',3);fy1=fy0+fl-1
     hx=span//2
@@ -427,7 +484,22 @@ ERA_AIR=[W0,
  [dict(n='NGAD 6TH-GEN',mn='SEEKERS',spd=600,turn=640,rate=4,dmg=9,bspd=1500,ammo=6,mturn=700,hp=100,side=0,sec=1,gunner=0,exp=0,fuel=0,sp=('era',3),cls='jet'),
   dict(n='X-90 ARROW',mn='SWARM',spd=640,turn=600,rate=4,dmg=8,bspd=1500,ammo=8,mturn=650,hp=90,side=1,sec=1,gunner=0,exp=0,fuel=0,sp=('era',3),cls='jet')],
  [dict(n='SF-1 STARFIGHTER',mn='TORPEDOES',spd=520,turn=700,rate=5,dmg=12,bspd=1300,ammo=8,mturn=700,hp=100,side=0,sec=1,gunner=0,exp=0,fuel=0,sp=('era',4),cls='jet'),
-  dict(n='VOID INTERCEPTOR',mn='PLASMA TORP',spd=580,turn=660,rate=4,dmg=10,bspd=1400,ammo=6,mturn=720,hp=95,side=1,sec=1,gunner=0,exp=0,fuel=0,sp=('era',4),cls='jet')]]
+  dict(n='VOID INTERCEPTOR',mn='PLASMA TORP',spd=580,turn=660,rate=4,dmg=10,bspd=1400,ammo=6,mturn=720,hp=95,side=1,sec=1,gunner=0,exp=0,fuel=0,sp=('era',4),cls='jet')],
+ # v1.3 WW1 biplanes / triplane / bombers
+ [A('SOPWITH CAMEL','sef',0,(-140,80,-30,-2),'20LB COOPER BOMBS',4,2,sp=S(bi=1,span=26,ch=4,wy=10,fl=18,fy=4,fw=4,nose='rad',ts=9)),
+  A('FOKKER DR.I','sef',1,(-160,120,-35,-2),'NONE',0,sp=S(bi=1,span=22,ch=4,wy=9,fl=17,fy=5,fw=4,nose='rad',ts=8)),
+  A('SPAD XIII','sef',0,(-110,20,-25,-1),'LE PRIEUR ROCKETS',4,0,sp=S(bi=1,span=24,ch=4,wy=10,fl=19,fy=4,fw=5,nose='int',ts=9)),
+  A('ALBATROS D.III','sef',1,(-130,40,-30,-2),'NONE',0,sp=S(bi=1,span=24,ch=4,wy=10,fl=19,fy=4,fw=4,nose='int',ts=9)),
+  A('SE5A','sef',0,(-110,30,-25,-1),'25LB BOMBS',4,2,sp=S(bi=1,span=24,ch=4,wy=10,fl=19,fy=4,fw=5,nose='int',ts=9)),
+  A('FOKKER D.VII','sef',1,(-110,50,-20,-1),'NONE',0,sp=S(bi=1,span=24,ch=4,wy=10,fl=19,fy=4,fw=5,nose='int',ts=9)),
+  A('NIEUPORT 17','sef',0,(-140,90,-40,-2),'LE PRIEUR ROCKETS',4,0,sp=S(bi=1,span=22,ch=3,wy=10,fl=17,fy=5,fw=4,nose='rad',ts=8)),
+  A('GOTHA G.IV','hb',1,(-150,-40,-120,-2),'50KG BOMBS',10,sp=S(bi=1,k='hb',span=32,ch=5,wy=10,fl=24,fy=3,fw=4,eng=[7],nose='glass',ts=12)),
+  A('HANDLEY PAGE O/400','hb',0,(-160,-50,-110,-2),'112LB BOMBS',12,sp=S(bi=1,k='hb',span=32,ch=5,wy=10,fl=24,fy=3,fw=4,eng=[7],nose='glass',ts=12))],
+ # 1776 / medieval: no real warplanes existed - fictional lighter-than-air & da Vinci concept craft (flagged EXPERIMENTAL)
+ [A('MONTGOLFIER BALLOON','db',0,(-200,-260,40,-4),'GRENADOES',8,2,exp=1,sp=S(balloon=1)),
+  A('CROWN OBS. BALLOON','db',1,(-210,-270,50,-4),'GRENADOES',8,2,exp=1,sp=S(balloon=2))],
+ [A('DA VINCI ORNITHOPTER','sef',0,(-170,40,-40,-4),'FIRE POTS',4,2,exp=1,sp=S(orni=1)),
+  A('DA VINCI AERIAL SCREW','db',1,(-220,120,30,-4),'FIRE POTS',6,2,exp=1,sp=S(screw=1))]]
 plane_t=[];AG={};gid=0
 for e,lst in enumerate(ERA_AIR):
     for i,a in enumerate(lst):
@@ -513,27 +585,27 @@ o=["// generated by tools/gen_vehicles.py - do not edit",
    "enum{"+",".join("VC_"+c for c in VC)+",VC_N};",
    "static const char*const VCLASS_N[VC_N]={"+",".join(q(VCN[c]) for c in VC)+"};"]
 mt=max(len(l) for l in TKS);o.append(f"#define MAXTK {mt}")
-o.append("static const u8 NTK[5]={"+",".join(str(len(l)) for l in TKS)+"};")
+o.append("static const u8 NTK[NERA]={"+",".join(str(len(l)) for l in TKS)+"};")
 o.append("typedef struct{const char*n;s16 spd,turn,reload,dmg,hp,sspd;u8 cls,gs,axis,exp,ammo2;}TankS;")
-o.append("static const TankS TANKV[5][MAXTK]={")
+o.append("static const TankS TANKV[NERA][MAXTK]={")
 for e,l in enumerate(TKS):
     o.append(" {"+",".join("{%s,%d,%d,%d,%d,%d,%d,VC_%s,%d,%d,%d,%d}"%(q(r[0]),r[4],r[5],r[6],r[7],r[8],r[9],r[1],TKG[(e,i)],r[2],r[3],r[10]) for i,r in enumerate(l))+"},")
 o.append("};")
 ma=max(len(l) for l in ERA_AIR);o.append(f"#define MAXAIR {ma}")
-o.append("static const u8 NAIR[5]={"+",".join(str(len(l)) for l in ERA_AIR)+"};")
+o.append("static const u8 NAIR[NERA]={"+",".join(str(len(l)) for l in ERA_AIR)+"};")
 ACL=['sef','tef','jet','db','tb','mb','hb','fb','jf','js','jb','cas','heli','gun']
 o.append("static const char*const ACLASS_N[14]={\"FIGHTER\",\"HEAVY FIGHTER\",\"JET / ROCKET\",\"DIVE BOMBER\",\"TORPEDO BOMBER\",\"MEDIUM BOMBER\",\"HEAVY BOMBER\",\"FLYING BOAT\",\"JET FIGHTER\",\"STRIKE JET\",\"JET BOMBER\",\"CLOSE SUPPORT\",\"ATTACK HELO\",\"GUNSHIP\"};")
 o.append("typedef struct{const char*n;const char*mn;s16 spd,turn;u8 rate,dmg;s16 bspd;u8 ammo;s16 mturn,hp;u8 side,sec,spr,gunner,gs,exp,fuel,cls;}AirS; // sec 0 rockets 1 missiles 2 bombs 3 torpedo")
-o.append("static const AirS AIRV[5][MAXAIR]={")
+o.append("static const AirS AIRV[NERA][MAXAIR]={")
 for e,l in enumerate(ERA_AIR):
     rows=[]
     for i,a in enumerate(l):
-        spr=i if (e==0 and i<14) else (i if e>0 and i<2 else 0)
+        spr=i if (e==0 and i<14) else (i if 0<e<5 and i<2 else 0)
         rows.append("{%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d}"%(q(a['n']),q(a['mn']),a['spd'],a['turn'],a['rate'],a['dmg'],a['bspd'],a['ammo'],a['mturn'],a['hp'],a['side'],a['sec'],spr,a['gunner'],AG[(e,i)],a['exp'],a['fuel'],ACL.index(a['cls'])))
     o.append(" {"+",".join(rows)+"},")
 o.append("};")
 ms=max(len(l) for l in SHS);o.append(f"#define MAXSH {ms}")
-o.append("static const u8 NSH[5]={"+",".join(str(len(l)) for l in SHS)+"};")
+o.append("static const u8 NSH[NERA]={"+",".join(str(len(l)) for l in SHS)+"};")
 o.append("enum{SC_BB,SC_CA,SC_DD,SC_CV};static const char*const SCLASS_N[4]={\"BATTLESHIP\",\"CRUISER\",\"DESTROYER\",\"CARRIER\"};")
 o.append("typedef struct{const char*n;u8 cls,axis;s16 spd,turn,reload,dmg,hp,sspd,life;u8 w2,ammo2,we,wi,gs;}ShipS;")
 o.append("static const ShipS SHIPV[3][MAXSH]={")

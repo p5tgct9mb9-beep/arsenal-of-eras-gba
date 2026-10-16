@@ -233,6 +233,7 @@ ARENA_PALS=[
 ]
 ERA_NAMES=["WW2","COLD","MODERN","FUTURE","SPACE"]
 def arena_set(era):  # v1.2: GBA-adventure style (chunky outlines, 3-tone cel shading, tufts/flowers)
+    be=era;era=0 if era>=5 else era
     out=[]
     def grass(cv,seed,tufts=4,flowers=0,tall=0):
         for y in range(16):
@@ -328,6 +329,22 @@ def arena_set(era):  # v1.2: GBA-adventure style (chunky outlines, 3-tone cel sh
     for y in range(0,16,4):cv.r(1,y,14,y+2,7);cv.l(1,y,14,y,9);cv.l(1,y+3,14,y+3,8)
     cv.l(0,0,0,15,8);cv.l(15,0,15,15,8);cv.l(1,0,1,15,6);cv.l(14,0,14,15,6)
     out.append(cv.grid())
+    if be==5:   # WW1: dead stump instead of a tree, barbed-wire picket instead of sandbags
+        cv=Cv(16,16);grass(cv,505,0);cv.e(1,2,14,14,14);cv.e(2,3,13,13,6);cv.r(6,1,9,12,14);cv.r(7,2,8,11,7);cv.l(9,4,12,1,14);out[7]=cv.grid()
+        cv=Cv(16,16);grass(cv,506,1);[cv.l(x,2,x,14,14) for x in (2,13)];[cv.l(0,y,15,y+1,13) for y in (4,8,12)];[cv.px(x,y,15) for x in range(1,16,3) for y in (4,8,12)];out[6]=cv.grid()
+    elif be==6: # 1776: split-rail fence, haystack instead of crate
+        cv=Cv(16,16);grass(cv,606,2);[cv.r(x,3,x+1,14,14) for x in (1,8,14)];[cv.r(0,y,15,y+1,7) for y in (5,10)];[cv.l(0,y,15,y,8) for y in (5,10)];out[6]=cv.grid()
+        cv=Cv(16,16);grass(cv,605,1);cv.e(1,3,14,15,14);cv.e(2,2,13,14,9);cv.e(4,3,10,8,15);[cv.l(x,4,x+2,13,8) for x in (4,8,11)];out[5]=cv.grid()
+    elif be==7: # medieval: crenellated castle wall, hay bale, sharpened stakes
+        cv=Cv(16,16);cv.r(0,0,15,15,14);cv.r(0,3,15,5,9);[cv.r(x,0,x+3,3,9) for x in (0,8)];[cv.r(x,0,x+3,0,15) for x in (0,8)];cv.r(0,6,15,14,8)
+        for row,y in enumerate((6,9,12)):
+            cv.l(0,y,15,y,7);off=0 if row%2==0 else 4
+            for x in range(off,16,8):cv.l(x,y,x,y+2,7)
+        out[4]=cv.grid()
+        cv=Cv(16,16);grass(cv,705,1);cv.e(1,3,14,15,14);cv.e(2,2,13,14,9);cv.e(4,3,10,8,15);[cv.l(x,4,x+2,13,8) for x in (4,8,11)];out[5]=cv.grid()
+        cv=Cv(16,16);grass(cv,706,1)
+        for x in range(1,16,4):cv.p([(x,14),(x+1,2),(x+2,14)],14);cv.p([(x,13),(x+1,4),(x+1,13)],8)
+        out[6]=cv.grid()
     tl=[]
     for g in out:tl+=meta_tiles(g)
     return tl
@@ -338,7 +355,10 @@ WATER_PALS=[
  [(0,0,0),(24,48,112),(32,72,152),(48,112,200),(80,220,240),(200,255,255),(64,64,96),(96,96,136),(40,40,64),(255,96,208),(255,255,255)],
  [(0,0,0),(16,24,48),(24,40,72),(40,60,104),(80,110,160),(160,190,230),(88,96,112),(128,136,156),(56,60,76),(176,186,206),(255,255,255)],
 ]
-for e in range(5):
+def _tint(pal,m):return [tuple(max(0,min(255,int(c*k))) for c,k in zip(col,m)) for col in pal]
+ARENA_PALS+= [_tint(ARENA_PALS[0],(1.0,0.86,0.66)),_tint(ARENA_PALS[0],(1.08,0.96,0.72)),_tint(ARENA_PALS[0],(0.9,1.04,0.86))]   # WW1 mud, 1776 autumn, medieval meadow
+WATER_PALS+=[_tint(WATER_PALS[0],(0.8,0.8,0.7)),WATER_PALS[0],_tint(WATER_PALS[0],(0.9,1.0,0.95))]
+for e in range(8):
     emit(f"arena_tiles_{e}",arena_set(e),"unsigned int");emit(f"arena_pal_{e}",pal16(ARENA_PALS[e]));emit(f"water_pal_{e}",pal16(WATER_PALS[e]))
 Hh.append("enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_WATER,AM_BRIDGE,AM_N};")
 
@@ -351,6 +371,7 @@ SKY_PALS=[
  [(6,6,20),(12,12,32),(44,20,64),(80,32,108),(130,60,150),(104,104,120),(150,148,160),(196,194,206),(236,236,246),(255,190,60),(100,220,255),(240,244,255),(176,186,206),(130,140,170),(0,0,0),(255,255,255)],
 ]
 def sky_set(era):
+    era=0 if era>=5 else era
     out=[]
     def base(seed,cols):
         cv=Cv(16,16)
@@ -420,7 +441,8 @@ def sky_set(era):
     tl=[]
     for g in out:tl+=meta_tiles(g)
     return tl
-for e in range(5):
+SKY_PALS+=[_tint(SKY_PALS[0],(0.82,0.84,0.86)),_tint(SKY_PALS[0],(1.02,0.98,0.9)),_tint(SKY_PALS[0],(0.96,1.0,0.96))]
+for e in range(8):
     emit(f"sky_tiles_{e}",sky_set(e),"unsigned int");emit(f"sky_pal_{e}",pal16(SKY_PALS[e]))
 
 # campaign (Omaha 1944) tileset
@@ -557,21 +579,25 @@ UNI={  # (dark, mid, light, helmet) per era per side
  2:{'A':[(140,112,68),(196,160,104),(236,212,152),(160,132,88)],'E':[(56,76,72),(88,116,108),(136,168,152),(70,92,88)]},
  3:{'A':[(50,62,90),(76,94,132),(110,134,176),(140,160,200)],'E':[(70,40,52),(110,60,80),(150,90,110),(160,110,130)]},
  4:{'A':[(150,156,172),(196,202,214),(236,240,248),(220,226,238)],'E':[(40,40,48),(66,66,78),(96,96,110),(80,80,96)]},
+ 5:{'A':[(92,84,52),(132,120,76),(176,164,112),(104,100,68)],'E':[(70,78,74),(104,112,104),(150,156,146),(84,90,86)]},          # WW1 khaki vs field grey
+ 6:{'A':[(30,44,92),(48,68,130),(84,108,170),(34,30,34)],'E':[(120,24,24),(176,40,36),(220,90,80),(34,30,34)]},                 # Continental blue vs redcoat, black tricorns
+ 7:{'A':[(110,30,34),(160,50,50),(214,176,96),(150,154,164)],'E':[(30,40,110),(50,70,160),(204,184,90),(150,154,164)]},        # English vs French tabards, steel helms
 }
-GLOW=[(240,220,140),(200,220,160),(120,255,140),(60,240,255),(80,200,255)]
+GLOW=[(240,220,140),(200,220,160),(120,255,140),(60,240,255),(80,200,255),(240,220,140),(240,230,200),(250,220,120)]
 def obj_pal(era,side,player=False):
     d,m,l,hlm=UNI[era]['A' if side=='A' else 'E']
     team=(70,150,255) if side=='A' else (230,50,40)
     if player:team=(255,220,40)
-    g=GLOW[era] if side=='A' else ((255,80,80) if era>=3 else GLOW[era])
-    return pal16([(0,0,0),(30,20,40),d,m,l,hlm,(248,196,150),(40,32,48),(170,120,72) if era<2 else (120,126,140),team,g,(248,248,240),(56,52,60),(104,100,96),(168,172,184),(255,208,72)])
+    g=GLOW[era] if side=='A' else ((255,80,80) if era in (3,4) else GLOW[era])
+    return pal16([(0,0,0),(30,20,40),d,m,l,hlm,(248,196,150),(40,32,48),(170,120,72) if (era<2 or era>=5) else (120,126,140),team,g,(248,248,240),(56,52,60),(104,100,96),(168,172,184),(255,208,72)])
 pals=[]
-for e in range(5):
+for e in range(8):
     for side,pl in (('A',0),('E',0),('A',1)):pals+=pal16_list if False else obj_pal(e,side,pl)
 emit("obj_team_pal",pals)   # [era][3 banks]
 FXP=[(0,0,0),(16,16,18),(60,60,64),(110,110,116),(170,170,176),(250,250,250),(255,236,90),(255,150,40),(230,60,30),(130,30,20),(80,240,255),(60,120,255),(255,80,220),(90,230,110),(80,160,255),(255,70,60)]
 emit("fx_pal",pal16(FXP))
 def soldier(era,frame):  # v1.2 chunky big-head style (top-down)
+    be=era;era=0 if era>=5 else era  # v1.3 eras 5-7 start from the WW2 body
     c=Cv(16,16)
     st=2 if frame else -2
     c.e(4,9+st//2,7,13+st//2,7);c.e(9,9-st//2,12,13-st//2,7)            # boots
@@ -591,8 +617,16 @@ def soldier(era,frame):  # v1.2 chunky big-head style (top-down)
     elif era==2:c.e(4,1,11,11,5);c.r(6,0,9,2,7);c.e(5,3,7,5,4)
     elif era==3:c.e(4,1,11,11,5);c.l(5,3,10,3,10);c.l(5,4,10,4,10)
     else:c.e(3,1,12,11,11);c.e(5,2,10,6,10);c.px(5,3,15)
+    if be==5:c.e(2,1,13,11,5);c.e(4,2,11,9,4);c.e(5,3,10,8,5)               # WW1 brodie / stahlhelm brim
+    elif be==6:                                                               # 1776 tricorn + long musket
+        c.r(4,11,11,13,11);c.l(4,11,11,13,11)                                 # white cross-belts
+        c.l(11,0,11,7,8);c.l(11,0,11,1,14);c.e(4,2,11,10,6);c.p([(2,2),(13,2),(8,11)],5);c.p([(4,3),(11,3),(8,8)],4)
+    elif be==7:                                                               # medieval kettle helm + tabard, bow stave
+        c.r(4,11,11,13,9);c.l(11,0,11,7,0);c.l(12,0,13,3,8);c.l(13,3,13,6,8);c.l(13,6,12,8,8);c.l(12,0,12,8,11)
+        c.e(1,1,14,11,14);c.e(3,2,12,10,5);c.e(5,3,10,8,4);c.px(8,1,15)
     return c.grid(1)
 def tank(era,part):
+    era=0 if era>=5 else era
     c=Cv(32,32)
     if part=='hull':
         if era<=2:
@@ -615,6 +649,7 @@ def tank(era,part):
         else:c.e(9,9,22,22,5);c.e(11,10,20,17,11);c.r(15,0,16,9,14);c.r(14,0,17,0,10);c.e(14,13,17,16,10);c.px(11,19,9);c.px(20,19,9)
     return c.grid(1)
 def plane(era):
+    era=0 if era>=5 else era
     c=Cv(32,32)
     if era==0:   # prop fighter
         c.r(15,4,16,27,3);c.e(14,3,17,9,3)
@@ -703,7 +738,7 @@ def carrier():
     for y in (8,14,20,26):c.px(14,y,5);c.px(18,y,5)
     return c.grid(1)
 spr=[]
-for e in range(5):
+for e in range(8):
     t=[]
     t+=tiles4(soldier(e,0),16,16);t+=tiles4(soldier(e,1),16,16)
     t+=tiles4(tank(e,'hull'),32,32);t+=tiles4(tank(e,'tur'),32,32)

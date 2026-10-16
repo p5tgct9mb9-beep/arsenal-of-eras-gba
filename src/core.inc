@@ -101,7 +101,7 @@ static const char*const TRK_NAME[NTRK]={"BUGLE CALL","DOG GREEN","HEDGEROW MARCH
 static void bgm(int ctx,int era){if(SET.track==NTRK-1+1){music_stop();return;} // last option = OFF
  int t;if(SET.track>0)t=SET.track-1;
  else if(ctx==0)t=TR_THEME;else if(ctx==1)t=TR_BUGLE;else if(ctx==4)t=TR_OMAHA;
- else{static const u8 G[5]={TR_MARCH,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE};t=(ctx==3&&era==0)?TR_SWING:G[era];}
+ else{static const u8 G[8]={TR_MARCH,TR_COLD,TR_MODERN,TR_FUTURE,TR_SPACE,TR_TRENCH,TR_REVOL,TR_MEDIEV};t=(ctx==3&&era==0)?TR_SWING:G[era];}
  music_play(t);}
 static void bgm_t(int t){if(SET.track==NTRK){music_stop();return;}music_play(SET.track>0?SET.track-1:t);}
 static void music_jingle(int t){if(SET.musVol&&SET.track!=NTRK){musOn=0;musTrk=-1;music_play(t);}}
@@ -272,8 +272,8 @@ static void setup_mode0(const u32*tiles,int ntilewords,const u16*pal,int era,int
  for(int b=0;b<6;b++)dma32(hud_pal+b*16,PAL_BG+(15-b)*16,8);
  dma32(tiles,CHARBLOCK(1),ntilewords);for(int i=0;i<16;i++)PAL_BG[i]=pal[i];
  dma32(fx_tiles,OBJ_TILES,sizeof(fx_tiles)/4);
- const u32*es=era==0?era_spr_0:era==1?era_spr_1:era==2?era_spr_2:era==3?era_spr_3:era_spr_4;
- dma32(es,OBJ_TILES+64*8,(era==0?ES_N0:era==2?ES_N2:ES_N1)*8);
+ static const u32*const ESP[8]={era_spr_0,era_spr_1,era_spr_2,era_spr_3,era_spr_4,era_spr_5,era_spr_6,era_spr_7};static const u16 ESN[8]={ES_N0,ES_N1,ES_N2,ES_N3,ES_N4,ES_N5,ES_N6,ES_N7};const u32*es=ESP[era];
+ dma32(es,OBJ_TILES+64*8,ESN[era]*8);
  char_upload();
  for(int i=0;i<48;i++)PAL_OBJ[i]=obj_team_pal[era*48+i];for(int i=0;i<16;i++)PAL_OBJ[48+i]=fx_pal[i];
  for(int i=0;i<16;i++)PAL_OBJ[4*16+i]=RGB(8,8,16);

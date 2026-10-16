@@ -68,5 +68,10 @@ shot v13_so_med_trebuchet_2
 wait 1200
 shot v13_so_med_trebuchet_3
 wait 3000
+shot v13_so_med_trebuchet_5
+wait 4000
+shot v13_so_med_trebuchet_6
+wait 4000
+shot v13_so_med_trebuchet_7
 shot v13_so_med_trebuchet_4
 beat end

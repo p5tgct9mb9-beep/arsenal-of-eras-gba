@@ -1,20 +1,23 @@
-static const char*const TEAMN[5][2]={{"ALLIES","AXIS"},{"NATO","PACT"},{"BLUFOR","OPFOR"},{"UNION","SYNDIC"},{"TERRAN","VOID"}};
+#define NERA 8 // v1.3: 0 WW2 1 COLD WAR 2 MODERN 3 FUTURE 4 SPACE 5 WW1 6 REV WAR 7 MEDIEVAL (appended so flat arsenal indices stay stable)
+#define ERA_SCIFI(e) ((e)==3||(e)==4)
+#define ERA_OLD(e) ((e)>=6) // muskets / bows: no autofire, no modern optics
+static const char*const TEAMN[NERA][2]={{"ALLIES","AXIS"},{"NATO","PACT"},{"BLUFOR","OPFOR"},{"UNION","SYNDIC"},{"TERRAN","VOID"},{"ENTENTE","CENTRAL"},{"PATRIOTS","CROWN"},{"ENGLAND","FRANCE"}};
 // ===================================================================== LOADOUT / CUSTOMIZE (+ SRAM save)
 typedef struct{const char*n;u8 dmg,rate,spd16,spread,pellets,life,mag,reload,move;}Wpn;
 typedef struct{int dmg,rate,spd16,spread,pellets,life,mag,reload,move,kind,fl;const char*n;}Wstat;
 #include "sniperdb.inc"
 #define MAXPRIM MAXPRIM_ALL
 #define MAXSEC 8
-static const u8 NPRIM[5]=NPRIM_ALL;static const u8 NPRIM_BOT[5]=NPRIM_LIT; // v1.3: sniper rifles appended per era (bots keep the classic pools)
-static const u8 NPRIM_V5[5]={35,5,30,4,4},NSEC_V5[5]={8,2,6,2,2},NL_V5[5]={4,2,6,2,2},NTK_V5[5]={55,6,40,2,2},NAIR_V5[5]={93,17,28,2,2},NSH_V5[5]={10,6,7,0,0}; // v1.2 layouts (save migration v5 -> v6)
-static const u8 NPRIM_V4[5]={17,5,5,4,4},NSEC_V4[5]={5,2,2,2,2},NL_V4[5]={3,2,2,2,2},NTK_V4[5]={55,6,6,2,2}; // v1.2-pre layouts (save migration)
+static const u8 NPRIM[NERA]=NPRIM_ALL;static const u8 NPRIM_BOT[NERA]=NPRIM_LIT; // v1.3: sniper rifles appended per era (bots keep the classic pools)
+static const u8 NPRIM_V5[NERA]={35,5,30,4,4},NSEC_V5[NERA]={8,2,6,2,2},NL_V5[NERA]={4,2,6,2,2},NTK_V5[NERA]={55,6,40,2,2},NAIR_V5[NERA]={93,17,28,2,2},NSH_V5[NERA]={10,6,7,0,0}; // v1.2 layouts (save migration v5 -> v6)
+static const u8 NPRIM_V4[NERA]={17,5,5,4,4},NSEC_V4[NERA]={5,2,2,2,2},NL_V4[NERA]={3,2,2,2,2},NTK_V4[NERA]={55,6,6,2,2}; // v1.2-pre layouts (save migration)
 #define PRIM_EXP0 15 // WW2 primaries 15..16 are tagged EXPERIMENTAL
 #define PRIM_ISEXP(i) ((i)>=PRIM_EXP0&&(i)<17)
 #define PRIM_FLAME 34 // WW2 M2 flamethrower
 #define PRIM_DELISLE 29
-static const u8 NSEC[5]={8,2,6,2,2};
+static const u8 NSEC[NERA]={8,2,6,2,2,6,4,4};
 #define SEC_WELROD 7
-static const Wpn PRIM[5][MAXPRIM]={
+static const Wpn PRIM[NERA][MAXPRIM]={
  {{"M1 GARAND",50,20,84,2,1,42,8,90,100},{"THOMPSON M1A1",20,6,72,7,1,30,30,110,104},{"BAR M1918",32,8,84,5,1,42,20,130,92},{"KAR98K",95,40,100,1,1,50,5,120,98},
   {"STG 44",26,7,84,5,1,38,30,110,100},{"M1 CARBINE",30,10,80,3,1,36,15,85,104},{"MP40",19,7,72,6,1,30,32,100,105},{"MG42",24,3,84,10,1,40,50,255,84},
   {"PPSH-41",16,3,72,9,1,28,71,150,103},{"MOSIN-NAGANT",92,42,100,1,1,50,5,125,98},{"LEE-ENFIELD NO4",70,24,96,2,1,46,10,110,99},{"STEN MK II",18,6,70,8,1,28,32,95,106},
@@ -25,35 +28,48 @@ static const Wpn PRIM[5][MAXPRIM]={
  {{"M4A1",26,5,96,4,1,40,30,95,102},{"HK416",28,5,96,3,1,42,30,100,100},{"AK-12",30,6,96,4,1,42,30,100,99},{"SCAR-H",40,8,100,4,1,46,20,110,96},{"BARRETT M82",120,45,140,1,1,56,10,160,88},
   {"M27 IAR",27,4,96,4,1,42,30,110,98},{"M7 (XM7 NGSW)",36,6,104,3,1,48,20,105,97},{"M250 (XM250)",32,4,100,7,1,46,100,230,85},{"MK 18 CQBR",25,5,90,5,1,36,30,90,104},{"REMINGTON ACR",27,5,96,4,1,42,30,100,101},{"TAVOR X95",26,5,92,4,1,40,30,95,104},{"GALIL ACE",29,6,94,4,1,42,35,105,99},{"FN F2000",26,5,94,4,1,42,30,100,102},{"FAMAS",24,4,92,5,1,40,25,100,102},{"HK433",27,5,96,4,1,42,30,100,101},{"QBZ-191",27,5,96,4,1,42,30,100,101},{"AK-15",32,6,96,4,1,44,30,105,98},{"AK-308",40,8,100,4,1,46,20,110,96},{"AN-94",30,4,100,2,1,44,30,110,98},{"SR-25",62,16,112,1,1,52,20,115,96},{"M2010 ESR",100,40,130,0,1,56,5,130,92},{"CHEYTAC M200",125,48,145,0,1,58,7,150,88},{"AWM",110,44,135,0,1,56,5,140,90},{"AI AX50",130,50,140,1,1,58,5,160,87},{"KS-23",24,36,72,15,6,18,4,160,98},{"BENELLI M4",16,14,78,12,6,18,7,140,100},{"AA-12",14,7,76,13,5,18,20,170,96},{"FN P90",19,3,84,6,1,30,50,110,107},{"HK UMP45",23,5,80,6,1,32,25,95,106},{"PP-19 BIZON",18,4,78,7,1,30,64,120,105} SNP_E2},
  {{"SMART RIFLE",30,6,104,1,1,44,30,100,100},{"RAILGUN",110,42,170,0,1,46,5,150,92},{"LASER CARBINE",22,3,140,2,1,36,60,140,100},{"PULSE SMG",18,3,96,6,1,30,45,90,108} SNP_E3},
- {{"PLASMA RIFLE",32,7,90,4,1,40,30,110,100},{"COILGUN",85,30,150,1,1,52,8,130,94},{"GAUSS SMG",18,3,100,6,1,30,50,95,108},{"ION REPEATER",22,4,96,7,1,40,80,200,90} SNP_E4}};
+ {{"PLASMA RIFLE",32,7,90,4,1,40,30,110,100},{"COILGUN",85,30,150,1,1,52,8,130,94},{"GAUSS SMG",18,3,100,6,1,30,50,95,108},{"ION REPEATER",22,4,96,7,1,40,80,200,90} SNP_E4},
+ {{"LEE-ENFIELD SMLE",72,24,96,2,1,46,10,110,99},{"GEWEHR 98",92,40,100,1,1,50,5,120,98},{"SPRINGFIELD M1903",90,38,100,1,1,50,5,118,98},{"LEBEL M1886",86,40,98,2,1,48,8,140,97},
+  {"MOSIN M1891",90,42,100,1,1,50,5,125,98},{"MP 18",19,6,72,7,1,28,32,110,104},{"CHAUCHAT",28,8,82,8,1,40,20,150,90},{"LEWIS GUN",26,5,84,8,1,42,47,220,86},
+  {"MG 08/15",25,4,84,9,1,42,100,250,82},{"BAR M1918 (WW1)",32,8,84,5,1,42,20,130,92},{"WINCHESTER M1897",16,34,76,14,6,18,5,170,100} SNP_E5},
+ {{"BROWN BESS MUSKET",70,70,70,5,1,36,1,150,98},{"CHARLEVILLE M1766",68,70,70,5,1,36,1,150,98},{"KENTUCKY LONG RIFLE",95,90,90,1,1,52,1,190,98},{"FERGUSON RIFLE",85,50,88,2,1,48,1,110,98},
+  {"BLUNDERBUSS",14,70,64,16,7,16,1,160,98},{"JAEGER RIFLE",92,85,90,1,1,50,1,180,97},{"MUSKETOON",60,60,66,6,1,30,1,130,102} SNP_E6},
+ {{"ENGLISH LONGBOW",62,30,80,2,1,52,24,90,100},{"CROSSBOW",80,60,90,1,1,50,1,100,98},{"ARBALEST",100,80,96,0,1,54,1,140,96},{"SHORTBOW",40,18,76,3,1,40,24,80,104},
+  {"HAND CANNON",90,100,64,8,1,34,1,200,94},{"LONGSWORD",70,22,64,8,1,6,99,0,104},{"POLEAXE",85,30,62,6,1,7,99,0,98},{"WAR HAMMER",80,28,60,6,1,5,99,0,100},{"HALBERD",80,30,62,6,1,8,99,0,98} SNP_E7}};
 static const u8 AXIS_PRIM[11]={3,4,6,7,20,21,22,23,24,25,26}; // WW2 bots on the Axis side carry these
 static const u8 ALLY_PRIM[21]={0,1,2,5,8,9,10,11,12,13,14,17,18,19,27,28,30,31,32,33,29};
-static const Wpn SEC[5][MAXSEC]={
+static const Wpn SEC[NERA][MAXSEC]={
  {{"M1911",34,12,72,4,1,26,7,70,106},{"LUGER P08",30,10,72,3,1,26,8,70,106},{"WALTHER P38",31,11,72,3,1,26,8,70,106},{"WEBLEY MK VI",42,16,70,4,1,24,6,95,106},{"TOKAREV TT-33",29,9,80,4,1,26,8,70,106},{"NAGANT M1895",32,14,70,4,1,24,7,140,106},{"NAMBU TYPE 14",26,11,70,4,1,24,8,75,106},{"WELROD MK I",40,30,64,3,1,22,6,110,106}},
  {{"MAKAROV PM",28,10,72,4,1,26,8,65,106},{"M1911A1",34,12,72,4,1,26,7,70,106}},
  {{"GLOCK 17",25,8,80,4,1,26,17,60,106},{"M870 SHOTGUN",18,30,80,12,5,18,8,150,100},{"SIG M17",27,8,82,3,1,26,17,62,106},{"SIG M18",26,8,82,3,1,26,17,58,107},{"FN FIVE-SEVEN",24,7,90,3,1,28,20,62,106},{"HK USP",30,9,80,3,1,26,12,62,106}},
  {{"SMART PISTOL",26,9,90,1,1,28,12,60,106},{"ARC PISTOL",40,18,100,3,1,24,6,70,106}},
- {{"NEEDLER",16,4,90,5,1,26,24,70,106},{"ARC SCATTER",22,30,90,10,4,22,6,100,100}}};
+ {{"NEEDLER",16,4,90,5,1,26,24,70,106},{"ARC SCATTER",22,30,90,10,4,22,6,100,100}},
+ {{"COLT M1911 (WW1)",34,12,72,4,1,26,7,70,106},{"WEBLEY MK VI (WW1)",42,16,70,4,1,24,6,95,106},{"LUGER P08 (WW1)",30,10,72,3,1,26,8,70,106},{"MAUSER C96",30,8,76,4,1,28,10,90,106},{"NAGANT M1895 (WW1)",32,14,70,4,1,24,7,140,106},{"TRENCH KNIFE",60,20,60,6,1,5,99,0,108}},
+ {{"FLINTLOCK PISTOL",50,60,66,5,1,22,1,140,106},{"DRAGOON PISTOL",56,60,68,4,1,24,1,140,106},{"CUTLASS",55,18,60,8,1,5,99,0,108},{"TOMAHAWK",60,22,60,6,1,5,99,0,108}},
+ {{"ARMING SWORD",55,18,62,8,1,5,99,0,108},{"DAGGER",40,10,60,8,1,4,99,0,110},{"MACE",62,24,60,6,1,5,99,0,106},{"THROWING AXES",50,30,64,4,1,22,6,90,106}}};
 // launchers: dmg, rate(frames between shots), spd16, spread, pellets, life, ammo, reload(unused), move
-static const u8 NL[5]={4,2,6,2,2}; // launchers per era (excluding NONE)
+static const u8 NL[NERA]={4,2,6,2,2,3,2,2}; // launchers per era (excluding NONE)
 #define LAUN_EXP0 3 // WW2 launcher index 3 is EXPERIMENTAL
-static const Wpn LAUN[5][7]={
+static const Wpn LAUN[NERA][7]={
  {{"NONE",0,0,0,0,0,0,0,0,100},{"BAZOOKA M1A1",90,90,56,2,1,70,3,0,96},{"PANZERSCHRECK",110,110,52,2,1,70,2,0,95},{"FLIEGERFAUST",34,100,64,9,4,46,2,0,97},{"PIAT",100,110,48,3,1,66,2,0,94}},
  {{"NONE",0,0,0,0,0,0,0,0,100},{"M72 LAW",90,60,60,2,1,64,2,0,98},{"RPG-7",100,100,58,3,1,70,3,0,95}},
  {{"NONE",0,0,0,0,0,0,0,0,100},{"AT4",110,80,64,1,1,64,2,0,97},{"CARL GUSTAF",100,90,62,1,1,72,3,0,94},{"CARL GUSTAF M4",105,80,64,1,1,74,4,0,96},{"NLAW",115,95,60,1,1,64,1,0,96},{"FIM-92 STINGER",80,100,90,0,1,80,2,0,95},{"RPG-29",120,110,58,2,1,70,2,0,94}},
  {{"NONE",0,0,0,0,0,0,0,0,100},{"SMART LAUNCHER",90,70,70,0,1,64,3,0,96},{"PLASMA LANCE",120,110,80,0,1,60,2,0,95}},
- {{"NONE",0,0,0,0,0,0,0,0,100},{"GRAV LANCE",100,80,72,1,1,64,3,0,96},{"ION MORTAR",90,70,60,3,1,70,4,0,95}}};
+ {{"NONE",0,0,0,0,0,0,0,0,100},{"GRAV LANCE",100,80,72,1,1,64,3,0,96},{"ION MORTAR",90,70,60,3,1,70,4,0,95}},
+ {{"NONE",0,0,0,0,0,0,0,0,100},{"RIFLE GRENADE (VB)",70,90,50,4,1,60,4,0,98},{"STOKES MORTAR",95,110,48,4,1,74,3,0,94},{"TANKGEWEHR M1918",110,100,110,0,1,70,5,0,92}},
+ {{"NONE",0,0,0,0,0,0,0,0,100},{"SWIVEL GUN",60,110,60,12,5,40,2,0,94},{"COEHORN MORTAR",90,120,46,5,1,74,2,0,92}},
+ {{"NONE",0,0,0,0,0,0,0,0,100},{"FIRE ARROWS",55,70,78,3,3,48,6,0,98},{"BOMBARD",130,140,44,4,1,70,1,0,88}}};
 #define MAXLE 10
 #define MAXTA 11
-static const char*const LETG_N[15]={"MK2 FRAG","STIELHANDGRANATE","GAMMON BOMB","FRAG","SEMTEX","CLUSTER","M18 CLAYMORE","C4 CHARGE","THERMITE","MOLOTOV","THROWING KNIFE","TOMAHAWK","SATCHEL CHARGE","IMPACT FRAG","NO.36 MILLS BOMB"};
-static const u8 LETG_SUB[15]={0,3,4,0,1,2,5,6,7,8,9,9,6,4,0};
-static const u8 NLE[5]={7,8,10,6,6};static const u8 LEL[5][MAXLE]={{0,1,2,14,12,9,10},{3,4,5,6,7,9,11,13},{3,4,5,6,7,8,9,10,11,13},{3,4,5,7,8,13},{3,4,5,7,8,13}};
+static const char*const LETG_N[18]={"MK2 FRAG","STIELHANDGRANATE","GAMMON BOMB","FRAG","SEMTEX","CLUSTER","M18 CLAYMORE","C4 CHARGE","THERMITE","MOLOTOV","THROWING KNIFE","TOMAHAWK","SATCHEL CHARGE","IMPACT FRAG","NO.36 MILLS BOMB","GRENADO","FIRE POT","THROWING AXE"};
+static const u8 LETG_SUB[18]={0,3,4,0,1,2,5,6,7,8,9,9,6,4,0,0,8,9};
+static const u8 NLE[NERA]={7,8,10,6,6,5,3,3};static const u8 LEL[NERA][MAXLE]={{0,1,2,14,12,9,10},{3,4,5,6,7,9,11,13},{3,4,5,6,7,8,9,10,11,13},{3,4,5,7,8,13},{3,4,5,7,8,13},{14,1,12,10,9},{15,11,10},{16,17,10}};
 static const char*const LETH_D[10]={"4 SEC FUSE, BIG BLAST","SHORT FUSE, STICKS TO WALLS","3 SMALLER BLASTS","LONG THROW (STICK), FRAG BLAST","IMPACT FUSE, HUGE BLAST","PLACED MINE - TRIGGERS ON PROXIMITY","STICKY, 1.5 SEC, VERY BIG BLAST","STICKY, BURNS AN AREA 2 SEC","IMPACT, FIRE POOL 2.5 SEC","SILENT FAST THROW, 1 TARGET"};
 #define LETH_N_(e,i) LETG_N[LEL[e][i]]
 #define LETH_SUB_(e,i) LETG_SUB[LEL[e][i]]
-static const char*const TACG_N[17]={"FLASHBANG","SMOKE","STIM","CS GAS","DECOY","EMP GRENADE","MED KIT","AMMO CRATE","DEPLOY COVER","TROPHY SYSTEM","RECON DRONE","M15 SMOKE","MORPHINE","STUN GRENADE","SANDBAG COVER","AMMO CACHE","FIELD MED KIT"};
-static const u8 TACG_FX[17]={0,1,2,3,4,5,6,7,8,9,10,1,2,0,8,7,6};
-static const u8 NTACT[5]={5,7,11,8,8};static const u8 TAL[5][MAXTA]={{11,12,16,15,14},{13,1,2,3,6,7,8},{0,1,2,3,4,5,6,7,8,9,10},{0,1,2,4,5,8,9,10},{0,1,2,4,5,8,9,10}};
+static const char*const TACG_N[22]={"FLASHBANG","SMOKE","STIM","CS GAS","DECOY","EMP GRENADE","MED KIT","AMMO CRATE","DEPLOY COVER","TROPHY SYSTEM","RECON DRONE","M15 SMOKE","MORPHINE","STUN GRENADE","SANDBAG COVER","AMMO CACHE","FIELD MED KIT","FIELD DRESSING","CARTRIDGE BOX","PAVISE SHIELD","WAR HORN","SMOKE POT"};
+static const u8 TACG_FX[22]={0,1,2,3,4,5,6,7,8,9,10,1,2,0,8,7,6,2,7,8,0,1};
+static const u8 NTACT[NERA]={5,7,11,8,8,5,4,4};static const u8 TAL[NERA][MAXTA]={{11,12,16,15,14},{13,1,2,3,6,7,8},{0,1,2,3,4,5,6,7,8,9,10},{0,1,2,4,5,8,9,10},{0,1,2,4,5,8,9,10},{11,12,16,15,14},{17,18,21,14},{17,19,20,21}};
 static const char*const TACD[11]={"STUNS ENEMIES 2.5 SEC","BLOCKS ENEMY LINE OF SIGHT","INSTANT +60 HP","GAS CLOUD DAMAGES OVER TIME","FAKE GUNFIRE DISTRACTS BOTS","STUNS ALL ENEMIES IN RADIUS","FULL HEAL","REFILLS AMMO, +1 LETHAL","BULLET-PROOF BARRIER 10 SEC","SHOOTS DOWN ENEMY GRENADES/ROCKETS","MARKS ENEMIES: +25% DAMAGE 10 SEC"};
 #define TACT_N_(e,i) TACG_N[TAL[e][i]]
 #define TACT_FX_(e,i) TACG_FX[TAL[e][i]]
@@ -61,33 +77,34 @@ static const char*const PERKN[5]={"SPRINTER","FLAK JACKET","SCAVENGER","SLEIGHT 
 static const char*const PERKD[5]={"MOVE SPEED +12%","EXPLOSIVE DAMAGE -50%","KILLS REFILL AMMO + LETHAL","RELOAD -40%","130 HP, MOVE -6%"};
 #include "vehdb.inc"
 typedef struct{u8 prim,sec,opt,muz,grip,mag,leth,tact,perk,laun;}Loadout;
-static Loadout LO[5];static u8 tankSel[5],airSel[5];
+static Loadout LO[NERA];static u8 tankSel[NERA],airSel[NERA];
 static const char save_tag[] __attribute__((used,aligned(4)))="SRAM_V113";
 #define SRAM ((volatile u8*)0x0E000000)
 // v1.2 attachments: slots 0 optic 1 muzzle 2 underbarrel 3 magazine 4 barrel 5 laser/light 6 stock 7 ammo 8 armor
 typedef struct{const char*n,*d;s8 dmg,rate,spr,life,mag,rel,mv,hp;u8 fx;}Att;
-static const Att ATTG[56]={{"IRON SIGHTS","NO CHANGE",0,0,0,0,0,0,0,0,0},{"RED DOT","RECOIL -1",0,0,-1,0,0,0,0,0,0},{"4X SCOPE","RECOIL -2 RANGE +15% MOB -3",0,0,-2,15,0,0,-3,0,0},{"REFLEX SIGHT","RECOIL -1, MOB +1",0,0,-1,0,0,0,1,0,0},{"HOLOGRAPHIC","RECOIL -1, RANGE +5%",0,0,-1,5,0,0,0,0,0},{"LPVO 1-6X","RECOIL -2, RANGE +10%, MOB -2",0,0,-2,10,0,0,-2,0,0},{"ACOG 4X","RECOIL -2, RANGE +12%, MOB -2",0,0,-2,12,0,0,-2,0,0},{"THERMAL SIGHT","DAMAGE +10% (SPOTTING), MOB -3",10,0,0,0,0,0,-3,0,0},{"NIGHT VISION","DAMAGE +5%, RECOIL -1, MOB -2",5,0,-1,0,0,0,-2,0,0},{"HYBRID 1X/3X","RECOIL -2, RANGE +12%, MOB -1",0,0,-2,12,0,0,-1,0,0},{"SCOPE MOUNT 4X","RECOIL -2 RANGE +20% ROF -10% MOB -4",0,10,-2,20,0,0,-4,0,0},{"STANDARD","NO CHANGE",0,0,0,0,0,0,0,0,0},{"SUPPRESSOR","BOTS SPOT YOU LATER, RANGE -15%",0,0,0,-15,0,0,0,0,1},{"COMPENSATOR","RECOIL -2, FIRE RATE -10%",0,10,-2,0,0,0,0,0,0},{"MUZZLE BRAKE","RECOIL -2, MOB -2",0,0,-2,0,0,0,-2,0,0},{"FLASH HIDER","NO FLASH, BOTS SPOT YOU LATE",0,0,0,0,0,0,0,0,2},{"HEAVY SUPPR.","STEALTHIEST, RANGE -20%, DMG -10%",-10,0,0,-20,0,0,-1,0,3},{"COMPACT SUPPR","STEALTH, RANGE -8%, MOB -1",0,0,0,-8,0,0,-1,0,1},{"BAYONET","POINT-BLANK STAB +45 DAMAGE",0,0,0,0,0,0,-1,0,4},{"RIFLE GRENADE","+2 LETHALS, THROWN 2X FARTHER",0,0,0,0,0,0,-2,0,5},{"NONE","NO CHANGE",0,0,0,0,0,0,0,0,0},{"VERTICAL GRIP","RECOIL -1",0,0,-1,0,0,0,0,0,0},{"ANGLED GRIP","RELOAD -15%",0,0,0,0,0,-15,0,0,0},{"BIPOD","RECOIL -3, MOB -6",0,0,-3,0,0,0,-6,0,0},{"M203 GL","+2 LETHALS, MOB -3",0,0,0,0,0,0,-3,0,6},{"GP-25 GL","+2 LETHALS, MOB -3",0,0,0,0,0,0,-3,0,6},{"MASTERKEY SG","L: UNDERBARREL SHOTGUN IF NO LAUNCHER",0,0,0,0,0,0,-3,0,7},{"HANDSTOP","RECOIL -1, MOB +1",0,0,-1,0,0,0,1,0,0},{"STANDARD MAG","NO CHANGE",0,0,0,0,0,0,0,0,0},{"EXTENDED MAG","MAG +50%, RELOAD +15%, MOB -3",0,0,0,0,50,15,-3,0,0},{"FAST MAG","RELOAD -35%",0,0,0,0,0,-35,0,0,0},{"DRUM MAG","MAG +100%, RELOAD +35%, MOB -5",0,0,0,0,100,35,-5,0,0},{"STD BARREL","NO CHANGE",0,0,0,0,0,0,0,0,0},{"SHORT BARREL","RANGE -15%, RECOIL +1, MOB +3",0,0,1,-15,0,0,3,0,0},{"LONG BARREL","RANGE +15%, DMG +5%, MOB -2",5,0,0,15,0,0,-2,0,0},{"HEAVY BARREL","DMG +8%, RECOIL -1, MOB -4",8,0,-1,0,0,0,-4,0,0},{"NONE","NO CHANGE",0,0,0,0,0,0,0,0,0},{"LASER SIGHT","RECOIL -1, MOB +1",0,0,-1,0,0,0,1,0,0},{"FLASHLIGHT","BLINDS (STUNS) CLOSE ENEMIES",0,0,0,0,0,0,0,0,8},{"IR LASER","RECOIL -1",0,0,-1,0,0,0,0,0,0},{"LASER+LIGHT","RECOIL -1, BLINDS CLOSE ENEMIES, MOB -1",0,0,-1,0,0,0,-1,0,8},{"STD STOCK","NO CHANGE",0,0,0,0,0,0,0,0,0},{"FOLDING STOCK","MOB +4, RECOIL +1",0,0,1,0,0,0,4,0,0},{"HEAVY STOCK","RECOIL -1, MOB -3",0,0,-1,0,0,0,-3,0,0},{"NO STOCK","MOB +7, RECOIL +2, RELOAD -10%",0,0,2,0,0,-10,7,0,0},{"FMJ ROUNDS","STANDARD BALL AMMO",0,0,0,0,0,0,0,0,0},{"ARMOR-PIERCING","DMG +6%, RANGE +5%",6,0,0,5,0,0,0,0,0},{"HOLLOW POINT","DMG +18%, RANGE -10%",18,0,0,-10,0,0,0,0,0},{"INCENDIARY","25% OF HITS IGNITE, DMG -5%",-5,0,0,0,0,0,0,0,9},{"NO ARMOR","NO CHANGE",0,0,0,0,0,0,0,0,0},{"PLATES LVL I","+15 HP, MOB -2",0,0,0,0,0,0,-2,15,0},{"PLATES LVL II","+30 HP, MOB -4",0,0,0,0,0,0,-4,30,0},{"PLATES LVL III","+50 HP, MOB -7",0,0,0,0,0,0,-7,50,0},{"GHILLIE SUIT","BOTS SPOT YOU ONLY UP CLOSE, MOB -3",0,0,0,0,0,0,-3,0,12},{"NVG","MARKS TARGETS: +10% DMG, RECOIL -1",0,0,-1,0,0,0,-1,0,13},{"BALLIST SHLD","FRONTAL DAMAGE -60%, MOB -8",0,0,0,0,0,0,-8,0,14}};
+static const Att ATTG[59]={{"IRON SIGHTS","NO CHANGE",0,0,0,0,0,0,0,0,0},{"RED DOT","RECOIL -1",0,0,-1,0,0,0,0,0,0},{"4X SCOPE","RECOIL -2 RANGE +15% MOB -3",0,0,-2,15,0,0,-3,0,0},{"REFLEX SIGHT","RECOIL -1, MOB +1",0,0,-1,0,0,0,1,0,0},{"HOLOGRAPHIC","RECOIL -1, RANGE +5%",0,0,-1,5,0,0,0,0,0},{"LPVO 1-6X","RECOIL -2, RANGE +10%, MOB -2",0,0,-2,10,0,0,-2,0,0},{"ACOG 4X","RECOIL -2, RANGE +12%, MOB -2",0,0,-2,12,0,0,-2,0,0},{"THERMAL SIGHT","DAMAGE +10% (SPOTTING), MOB -3",10,0,0,0,0,0,-3,0,0},{"NIGHT VISION","DAMAGE +5%, RECOIL -1, MOB -2",5,0,-1,0,0,0,-2,0,0},{"HYBRID 1X/3X","RECOIL -2, RANGE +12%, MOB -1",0,0,-2,12,0,0,-1,0,0},{"SCOPE MOUNT 4X","RECOIL -2 RANGE +20% ROF -10% MOB -4",0,10,-2,20,0,0,-4,0,0},{"STANDARD","NO CHANGE",0,0,0,0,0,0,0,0,0},{"SUPPRESSOR","BOTS SPOT YOU LATER, RANGE -15%",0,0,0,-15,0,0,0,0,1},{"COMPENSATOR","RECOIL -2, FIRE RATE -10%",0,10,-2,0,0,0,0,0,0},{"MUZZLE BRAKE","RECOIL -2, MOB -2",0,0,-2,0,0,0,-2,0,0},{"FLASH HIDER","NO FLASH, BOTS SPOT YOU LATE",0,0,0,0,0,0,0,0,2},{"HEAVY SUPPR.","STEALTHIEST, RANGE -20%, DMG -10%",-10,0,0,-20,0,0,-1,0,3},{"COMPACT SUPPR","STEALTH, RANGE -8%, MOB -1",0,0,0,-8,0,0,-1,0,1},{"BAYONET","POINT-BLANK STAB +45 DAMAGE",0,0,0,0,0,0,-1,0,4},{"RIFLE GRENADE","+2 LETHALS, THROWN 2X FARTHER",0,0,0,0,0,0,-2,0,5},{"NONE","NO CHANGE",0,0,0,0,0,0,0,0,0},{"VERTICAL GRIP","RECOIL -1",0,0,-1,0,0,0,0,0,0},{"ANGLED GRIP","RELOAD -15%",0,0,0,0,0,-15,0,0,0},{"BIPOD","RECOIL -3, MOB -6",0,0,-3,0,0,0,-6,0,0},{"M203 GL","+2 LETHALS, MOB -3",0,0,0,0,0,0,-3,0,6},{"GP-25 GL","+2 LETHALS, MOB -3",0,0,0,0,0,0,-3,0,6},{"MASTERKEY SG","L: UNDERBARREL SHOTGUN IF NO LAUNCHER",0,0,0,0,0,0,-3,0,7},{"HANDSTOP","RECOIL -1, MOB +1",0,0,-1,0,0,0,1,0,0},{"STANDARD MAG","NO CHANGE",0,0,0,0,0,0,0,0,0},{"EXTENDED MAG","MAG +50%, RELOAD +15%, MOB -3",0,0,0,0,50,15,-3,0,0},{"FAST MAG","RELOAD -35%",0,0,0,0,0,-35,0,0,0},{"DRUM MAG","MAG +100%, RELOAD +35%, MOB -5",0,0,0,0,100,35,-5,0,0},{"STD BARREL","NO CHANGE",0,0,0,0,0,0,0,0,0},{"SHORT BARREL","RANGE -15%, RECOIL +1, MOB +3",0,0,1,-15,0,0,3,0,0},{"LONG BARREL","RANGE +15%, DMG +5%, MOB -2",5,0,0,15,0,0,-2,0,0},{"HEAVY BARREL","DMG +8%, RECOIL -1, MOB -4",8,0,-1,0,0,0,-4,0,0},{"NONE","NO CHANGE",0,0,0,0,0,0,0,0,0},{"LASER SIGHT","RECOIL -1, MOB +1",0,0,-1,0,0,0,1,0,0},{"FLASHLIGHT","BLINDS (STUNS) CLOSE ENEMIES",0,0,0,0,0,0,0,0,8},{"IR LASER","RECOIL -1",0,0,-1,0,0,0,0,0,0},{"LASER+LIGHT","RECOIL -1, BLINDS CLOSE ENEMIES, MOB -1",0,0,-1,0,0,0,-1,0,8},{"STD STOCK","NO CHANGE",0,0,0,0,0,0,0,0,0},{"FOLDING STOCK","MOB +4, RECOIL +1",0,0,1,0,0,0,4,0,0},{"HEAVY STOCK","RECOIL -1, MOB -3",0,0,-1,0,0,0,-3,0,0},{"NO STOCK","MOB +7, RECOIL +2, RELOAD -10%",0,0,2,0,0,-10,7,0,0},{"FMJ ROUNDS","STANDARD BALL AMMO",0,0,0,0,0,0,0,0,0},{"ARMOR-PIERCING","DMG +6%, RANGE +5%",6,0,0,5,0,0,0,0,0},{"HOLLOW POINT","DMG +18%, RANGE -10%",18,0,0,-10,0,0,0,0,0},{"INCENDIARY","25% OF HITS IGNITE, DMG -5%",-5,0,0,0,0,0,0,0,9},{"NO ARMOR","NO CHANGE",0,0,0,0,0,0,0,0,0},{"PLATES LVL I","+15 HP, MOB -2",0,0,0,0,0,0,-2,15,0},{"PLATES LVL II","+30 HP, MOB -4",0,0,0,0,0,0,-4,30,0},{"PLATES LVL III","+50 HP, MOB -7",0,0,0,0,0,0,-7,50,0},{"GHILLIE SUIT","BOTS SPOT YOU ONLY UP CLOSE, MOB -3",0,0,0,0,0,0,-3,0,12},{"NVG","MARKS TARGETS: +10% DMG, RECOIL -1",0,0,-1,0,0,0,-1,0,13},{"BALLIST SHLD","FRONTAL DAMAGE -60%, MOB -8",0,0,0,0,0,0,-8,0,14},{"CHAIN MAIL","HP +, MOBILITY -",0,0,0,0,0,0,-2,15,0},{"PLATE ARMOR","HP ++, MOBILITY --",0,0,0,0,0,0,-4,30,0},{"KITE SHIELD","BLOCKS FRONTAL SHOTS",0,0,0,0,0,0,-8,0,14}};
 #define MAXATL 10
-static const u8 NATL[9][5]={{4,6,10,6,6},{6,7,8,5,5},{4,6,8,5,5},{4,4,4,4,4},{4,4,4,4,4},{1,2,5,4,4},{4,4,4,4,4},{3,4,4,4,4},{2,4,7,6,6}};
-static const u8 ATL[9][5][MAXATL]={{{0,1,2,10},{0,1,2,10,6,8},{0,1,2,3,4,5,6,7,8,9},{0,1,2,4,7,9},{0,1,2,4,7,9}},{{11,12,13,18,19,15},{11,12,13,14,15,18,19},{11,12,13,14,15,16,17,18},{11,12,13,14,15},{11,12,13,14,15}},{{20,21,22,23},{20,21,22,23,24,25},{20,21,22,23,24,25,26,27},{20,21,22,23,27},{20,21,22,23,27}},{{28,29,30,31},{28,29,30,31},{28,29,30,31},{28,29,30,31},{28,29,30,31}},{{32,33,34,35},{32,33,34,35},{32,33,34,35},{32,33,34,35},{32,33,34,35}},{{36},{36,38},{36,37,38,39,40},{36,37,38,40},{36,37,38,40}},{{41,42,43,44},{41,42,43,44},{41,42,43,44},{41,42,43,44},{41,42,43,44}},{{45,46,48},{45,46,47,48},{45,46,47,48},{45,46,47,48},{45,46,47,48}},{{49,53},{49,50,53,54},{49,50,51,52,53,54,55},{49,50,51,52,54,55},{49,50,51,52,54,55}}};
+static const u8 NATL[9][NERA]={{4,6,10,6,6,2,1,1},{6,7,8,5,5,3,2,1},{4,6,8,5,5,2,1,1},{4,4,4,4,4,3,1,1},{4,4,4,4,4,3,2,1},{1,2,5,4,4,1,1,1},{4,4,4,4,4,2,1,1},{3,4,4,4,4,3,1,2},{2,4,7,6,6,2,1,4}};
+static const u8 ATL[9][NERA][MAXATL]={{{0,1,2,10},{0,1,2,10,6,8},{0,1,2,3,4,5,6,7,8,9},{0,1,2,4,7,9},{0,1,2,4,7,9},{0,10},{0},{0}},{{11,12,13,18,19,15},{11,12,13,14,15,18,19},{11,12,13,14,15,16,17,18},{11,12,13,14,15},{11,12,13,14,15},{11,18,19},{11,18},{11}},{{20,21,22,23},{20,21,22,23,24,25},{20,21,22,23,24,25,26,27},{20,21,22,23,27},{20,21,22,23,27},{20,23},{20},{20}},{{28,29,30,31},{28,29,30,31},{28,29,30,31},{28,29,30,31},{28,29,30,31},{28,29,31},{28},{28}},{{32,33,34,35},{32,33,34,35},{32,33,34,35},{32,33,34,35},{32,33,34,35},{32,33,34},{32,34},{32}},{{36},{36,38},{36,37,38,39,40},{36,37,38,40},{36,37,38,40},{36},{36},{36}},{{41,42,43,44},{41,42,43,44},{41,42,43,44},{41,42,43,44},{41,42,43,44},{41,43},{41},{41}},{{45,46,48},{45,46,47,48},{45,46,47,48},{45,46,47,48},{45,46,47,48},{45,46,48},{45},{45,48}},{{49,53},{49,50,53,54},{49,50,51,52,53,54,55},{49,50,51,52,54,55},{49,50,51,52,54,55},{49,53},{49},{49,56,57,58}}};
 enum{AF_SUP=1,AF_HIDER,AF_HSUP,AF_BAYO,AF_RGREN,AF_UGL,AF_MKEY,AF_LIGHT,AF_INC,AF_GHIL=12,AF_NVG,AF_SHIELD};
-typedef struct{u8 bar,las,stk,amo,arm;}LoX;static LoX LX[5];
+typedef struct{u8 bar,las,stk,amo,arm;}LoX;static LoX LX[NERA];
 static u8*att_fld(int e,int s){Loadout*l=&LO[e];LoX*x=&LX[e];switch(s){case 0:return &l->opt;case 1:return &l->muz;case 2:return &l->grip;case 3:return &l->mag;case 4:return &x->bar;case 5:return &x->las;case 6:return &x->stk;case 7:return &x->amo;}return &x->arm;}
 static const Att*att_of(int e,const Loadout*l,int s){int v=s==0?l->opt:s==1?l->muz:s==2?l->grip:s==3?l->mag:((u8*)&LX[e])[s-4];if(v>=NATL[s][e])v=0;return &ATTG[ATL[s][e][v]];}
 static u32 att_fx(int e,const Loadout*l){u32 m=0;for(int s=0;s<9;s++){int f=att_of(e,l,s)->fx;if(f)m|=1u<<f;}return m;}
 #define LX_OFF 0x680
-static void lx_write(void){u8 sum=0x33;SRAM[LX_OFF]='A';SRAM[LX_OFF+1]='O';SRAM[LX_OFF+2]='E';SRAM[LX_OFF+3]='X';u8*b=(u8*)LX;for(int i=0;i<(int)sizeof LX;i++){SRAM[LX_OFF+4+i]=b[i];sum+=b[i]*(i+3);}SRAM[LX_OFF+4+sizeof LX]=sum;}
-static void lx_read(void){memset(LX,0,sizeof LX);if(SRAM[LX_OFF]!='A'||SRAM[LX_OFF+1]!='O'||SRAM[LX_OFF+2]!='E'||SRAM[LX_OFF+3]!='X')return;u8 sum=0x33;u8 b[sizeof LX];
- for(int i=0;i<(int)sizeof LX;i++){b[i]=SRAM[LX_OFF+4+i];sum+=b[i]*(i+3);}if(sum!=SRAM[LX_OFF+4+sizeof LX])return;memcpy(LX,b,sizeof LX);
+#define LXN ((int)(5*sizeof(LoX))) // legacy LX record covers eras 0-4; eras 5-7 are in the AOE8 record
+static void lx_write(void){u8 sum=0x33;SRAM[LX_OFF]='A';SRAM[LX_OFF+1]='O';SRAM[LX_OFF+2]='E';SRAM[LX_OFF+3]='X';u8*b=(u8*)LX;for(int i=0;i<(int)LXN;i++){SRAM[LX_OFF+4+i]=b[i];sum+=b[i]*(i+3);}SRAM[LX_OFF+4+LXN]=sum;}
+static void lx_read(void){memset(LX,0,sizeof LX);if(SRAM[LX_OFF]!='A'||SRAM[LX_OFF+1]!='O'||SRAM[LX_OFF+2]!='E'||SRAM[LX_OFF+3]!='X')return;u8 sum=0x33;u8 b[LXN];
+ for(int i=0;i<(int)LXN;i++){b[i]=SRAM[LX_OFF+4+i];sum+=b[i]*(i+3);}if(sum!=SRAM[LX_OFF+4+LXN])return;memcpy(LX,b,LXN);
  for(int e=0;e<5;e++)for(int s=4;s<9;s++)if(*att_fld(e,s)>=NATL[s][e])*att_fld(e,s)=0;}
 #define LO_F 10
 // ---------------------------------------------------------------- 6v6 ARSENAL: one pool across all eras + factions
 typedef struct{u8 pI,sI,lI,leth,tact,tkI,aI,fac0,fac1,shI;}G6;
 static G6 g6={0,0,0,0,0,0,0,0,6,0};
-static const u8 N2_V3[5]={2,2,2,2,2};static const u8 NAIR_V3[5]={13,2,2,2,2}; // v3 save index layouts (migration)
-static const char*const ERA_TAG[5]={"WW2","COLD WAR","MODERN","FUTURE","SPACE"};
-static int fsum(const u8*n){int s=0;for(int e=0;e<5;e++)s+=n[e];return s;}
-static int fdec(const u8*n,int idx,int*o){for(int e=0;e<5;e++){if(idx<n[e]){*o=idx;return e;}idx-=n[e];}*o=0;return 0;}
+static const u8 N2_V3[NERA]={2,2,2,2,2};static const u8 NAIR_V3[NERA]={13,2,2,2,2}; // v3 save index layouts (migration)
+static const char*const ERA_TAG[NERA]={"WW2","COLD WAR","MODERN","FUTURE","SPACE","WW1","1776","MEDIEVAL"};
+static int fsum(const u8*n){int s=0;for(int e=0;e<NERA;e++)s+=n[e];return s;}
+static int fdec(const u8*n,int idx,int*o){for(int e=0;e<NERA;e++){if(idx<n[e]){*o=idx;return e;}idx-=n[e];}*o=0;return 0;}
 static int fenc(const u8*n,int e,int i){int s=0;for(int k=0;k<e;k++)s+=n[k];return s+i;}
 #define NLETH6 14
 #define NTACT6 12
@@ -109,15 +126,28 @@ static void fac_pal(int bank,int f,int player){volatile u16*p=PAL_OBJ+bank*16;co
 #define SAVE_N (SAVE_N2+10+20+1)
 #define SAVE_V 6
 static u32 campUnlock=1;static u8 droneSel,droneCall;
-static void lo_defaults(void){campUnlock=1;droneSel=0;droneCall=0;{G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}SET.bot=1;{Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}memset(LO,0,sizeof LO);memset(tankSel,0,5);memset(airSel,0,5);}
+static void lo_defaults(void){campUnlock=1;droneSel=0;droneCall=0;{G6 d={0,0,0,0,0,0,0,0,6,0};g6=d;}SET.bot=1;{Chr c={"SOLDIER",1,0,0,0,0,1,1,0,1};CH=c;}memset(LO,0,sizeof LO);memset(tankSel,0,NERA);memset(airSel,0,NERA);}
 static int lo_valid(void){for(int e=0;e<5;e++){Loadout*l=&LO[e];if(l->prim>=NPRIM[e]||l->sec>=NSEC[e]||l->opt>=NATL[0][e]||l->muz>=NATL[1][e]||l->grip>=NATL[2][e]||l->mag>=NATL[3][e]||l->leth>=NLE[e]||l->tact>=NTACT[e]||l->perk>4||l->laun>NL[e]||tankSel[e]>=NTK[e]||airSel[e]>=NAIR[e])return 0;}return 1;}
+static void ne_write(void);
 static void save_write(void){u8 b[SAVE_N];for(int e=0;e<5;e++){u8*p=&LO[e].prim;for(int k=0;k<LO_F;k++)b[e*LO_F+k]=p[k];b[5*LO_F+e]=tankSel[e];b[5*LO_F+5+e]=airSel[e];}
  {u8*q=&SET.track;for(int k=0;k<6;k++)b[5*LO_F+10+k]=q[k];for(int k=0;k<4;k++)b[5*LO_F+16+k]=campUnlock>>(8*k);b[5*LO_F+20]=droneSel;b[5*LO_F+21]=droneCall;}
  {u8*q=&g6.pI;for(int k=0;k<10;k++)b[SAVE_N2+k]=q[k];u8*c=(u8*)&CH;for(int k=0;k<20;k++)b[SAVE_N2+10+k]=c[k];b[SAVE_N2+30]=SET.bot;}
  u8 sum=0x5A;SRAM[0]='A';SRAM[1]='O';SRAM[2]='E';SRAM[3]='L';SRAM[4]=SAVE_V;
- for(int i=0;i<SAVE_N;i++){SRAM[5+i]=b[i];sum+=b[i]*(i+1);}SRAM[5+SAVE_N]=sum;}
+ for(int i=0;i<SAVE_N;i++){SRAM[5+i]=b[i];sum+=b[i]*(i+1);}SRAM[5+SAVE_N]=sum;ne_write();}
+// v1.3 eras 5-7 (WW1 / 1776 / medieval) live in their own record so the v6 main save layout is unchanged
+#define NE_OFF 0xD00
+static void ne_write(void){u8 sum=0x4E;SRAM[NE_OFF]='A';SRAM[NE_OFF+1]='O';SRAM[NE_OFF+2]='E';SRAM[NE_OFF+3]='8';int k=4;
+ for(int e=5;e<NERA;e++){u8*p=&LO[e].prim;for(int i=0;i<LO_F;i++){SRAM[NE_OFF+k]=p[i];sum+=p[i]*(k+1);k++;}SRAM[NE_OFF+k]=tankSel[e];sum+=tankSel[e]*(k+1);k++;SRAM[NE_OFF+k]=airSel[e];sum+=airSel[e]*(k+1);k++;u8*x=(u8*)&LX[e];for(int i=0;i<5;i++){SRAM[NE_OFF+k]=x[i];sum+=x[i]*(k+1);k++;}}
+ SRAM[NE_OFF+k]=sum;}
+static void ne_read(void){for(int e=5;e<NERA;e++){memset(&LO[e],0,sizeof LO[e]);tankSel[e]=airSel[e]=0;}
+ if(SRAM[NE_OFF]!='A'||SRAM[NE_OFF+1]!='O'||SRAM[NE_OFF+2]!='E'||SRAM[NE_OFF+3]!='8')return;u8 b[(NERA-5)*(LO_F+7)];u8 sum=0x4E;int n=(NERA-5)*(LO_F+7);
+ for(int i=0;i<n;i++){b[i]=SRAM[NE_OFF+4+i];sum+=b[i]*(i+5);}if(sum!=SRAM[NE_OFF+4+n])return;
+ for(int e=5,k=0;e<NERA;e++){Loadout l;u8*p=&l.prim;for(int i=0;i<LO_F;i++)p[i]=b[k++];int ts=b[k++],as=b[k++];LoX x;memcpy(&x,b+k,5);k+=5;LX[e]=x;for(int sl=4;sl<9;sl++)if(*att_fld(e,sl)>=NATL[sl][e])*att_fld(e,sl)=0;
+  if(l.prim<NPRIM[e]&&l.sec<NSEC[e]&&l.opt<NATL[0][e]&&l.muz<NATL[1][e]&&l.grip<NATL[2][e]&&l.mag<NATL[3][e]&&l.leth<NLE[e]&&l.tact<NTACT[e]&&l.perk<=4&&l.laun<=NL[e]){LO[e]=l;}
+  tankSel[e]=ts<NTK[e]?ts:0;airSel[e]=as<NAIR[e]?as:0;}}
 static int saveLoaded; // 0 none/defaults, 1 v4, 2 migrated from v1, 3 migrated from v2, 4 migrated from v3
-static int save_load(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!='O'||SRAM[2]!='E'||SRAM[3]!='L')return 0;
+static int save_load0(void);static int save_load(void){int r=save_load0();ne_read();return r;}
+static int save_load0(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!='O'||SRAM[2]!='E'||SRAM[3]!='L')return 0;
  int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:v==3?SAVE_N3:SAVE_N;if(v<1||v>6)return 0;
  u8 b[SAVE_N];u8 sum=0x5A;for(int i=0;i<n;i++){b[i]=SRAM[5+i];sum+=b[i]*(i+1);}if(sum!=SRAM[5+n])return 0;
  for(int e=0;e<5;e++){u8*p=&LO[e].prim;for(int k=0;k<nf;k++)p[k]=b[e*nf+k];tankSel[e]=b[5*nf+e];airSel[e]=b[5*nf+5+e];}
@@ -128,7 +158,7 @@ static int save_load(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!=
    int op=g6.pI;e=fdec(NPRIM,op,&i);(void)e;
    if(g6.lI){int oe=(g6.lI-1)/2,ok=(g6.lI-1)%2;g6.lI=1+fenc(NL,oe,ok);}
    e=fdec(N2_V3,g6.tkI,&i);g6.tkI=fenc(NTK,e,i);e=fdec(NAIR_V3,g6.aI,&i);g6.aI=fenc(NAIR,e,i);g6.shI=0;
-   {int pe=fdec((const u8[]){15,5,5,4,4},op,&i);g6.pI=fenc(NPRIM,pe,i);}e=fdec(NSEC_V4,g6.sI,&i);g6.sI=fenc(NSEC,e,i);SET.bot=1;}
+   {int pe=fdec((const u8[NERA]){15,5,5,4,4},op,&i);g6.pI=fenc(NPRIM,pe,i);}e=fdec(NSEC_V4,g6.sI,&i);g6.sI=fenc(NSEC,e,i);SET.bot=1;}
   else SET.bot=b[SAVE_N2+30]>3?1:b[SAVE_N2+30];
   if(v==4){int i,e; // v1.2-pre -> v1.2: weapon pools grew at era ends; vehicles grew too
    e=fdec(NPRIM_V4,g6.pI,&i);g6.pI=fenc(NPRIM,e,i);e=fdec(NSEC_V4,g6.sI,&i);g6.sI=fenc(NSEC,e,i);
@@ -158,7 +188,7 @@ static int rslot(int r){return r>=R_OPT&&r<=R_MAG?r-R_OPT:r>=R_BAR&&r<=R_ARM?r-R
 static const char*const RLAB[20]={"ERA","PRIMARY","SIDEARM","LAUNCHER","OPTIC","MUZZLE","UNDERBRL","MAGAZINE","LETHAL","TACTICAL","PERK","VEHICLE","AIRCRAFT","SHIP","BARREL","LASER","STOCK","AMMO","ARMOR",""};
 static int rslot(int r);
 static char wnb[14];static const char*trunc12(const char*s){int k=0;while(s[k]&&k<12){wnb[k]=s[k];k++;}wnb[k]=0;return wnb;}
-static const char*const ERA_NAME[5]={"WORLD WAR II","COLD WAR","MODERN","FUTURISTIC","SPACE"};
+static const char*const ERA_NAME[NERA]={"WORLD WAR II","COLD WAR","MODERN","FUTURISTIC","SPACE","WORLD WAR I","AMERICAN REVOLUTION","MEDIEVAL"};
 static void m3_fill(int x0,int y0,int w,int h,u16 c){for(int y=y0;y<y0+h;y++){u16*p=&fb[y*240+x0];if(!(x0&1)&&!(w&1)&&w>=8)fill32(p,c|(c<<16),w/2);else for(int x=0;x<w;x++)p[x]=c;}}
 static void m3_bar(int x,int y,const char*lab,int v,int max,u16 col){m3_text(x,y,lab,C_GRAY,1);int w=70;int f=max>0?v*w/max:0;f=clampi(f,1,w);
  m3_fill(x,y+8,w,4,RGB(40,46,70));m3_fill(x,y+8,f,4,col);}
@@ -208,7 +238,7 @@ static int loadout_menu(int ctx,int era){
   if(pressed&K_UP){sel=(sel+nr-1)%nr;redraw=1;sfx_menu();}
   if(pressed&K_DOWN){sel=(sel+1)%nr;redraw=1;sfx_menu();}
   int dir=0;if(pressed&K_LEFT)dir=-1;if(pressed&K_RIGHT)dir=1;if((pressed&K_A)&&r!=R_DONE)dir=1;
-  if(ctx==0&&(pressed&(K_L|K_R))){e=(e+((pressed&K_R)?1:4))%5;redraw=1;sfx_menu();}
+  if(ctx==0&&(pressed&(K_L|K_R))){e=(e+((pressed&K_R)?1:NERA-1))%NERA;redraw=1;sfx_menu();}
   if(dir&&r!=R_DONE){int n=lo_optcount(r,e);if(r==R_ERA)e=(e+n+dir)%n;else{u8*f=lo_field(r,e);*f=(*f+n+dir)%n;}redraw=1;sfx_menu();}
   if((pressed&(K_A|K_START))&&(r==R_DONE||(pressed&K_START))){save_write();lx_write();sfx_ok();return 1;}
   if(pressed&K_B){save_write();lx_write();sfx_menu();return 0;}}}

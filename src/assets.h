@@ -24,6 +24,15 @@ extern const unsigned short water_pal_3[16];
 extern const unsigned int arena_tiles_4[416];
 extern const unsigned short arena_pal_4[16];
 extern const unsigned short water_pal_4[16];
+extern const unsigned int arena_tiles_5[416];
+extern const unsigned short arena_pal_5[16];
+extern const unsigned short water_pal_5[16];
+extern const unsigned int arena_tiles_6[416];
+extern const unsigned short arena_pal_6[16];
+extern const unsigned short water_pal_6[16];
+extern const unsigned int arena_tiles_7[416];
+extern const unsigned short arena_pal_7[16];
+extern const unsigned short water_pal_7[16];
 enum{AM_G0,AM_G1,AM_G2,AM_PATH,AM_WALL,AM_CRATE,AM_BAGS,AM_TREE,AM_CRATER,AM_BORDER,AM_SPAWN,AM_WATER,AM_BRIDGE,AM_N};
 extern const unsigned int sky_tiles_0[1024];
 extern const unsigned short sky_pal_0[16];
@@ -35,10 +44,16 @@ extern const unsigned int sky_tiles_3[1024];
 extern const unsigned short sky_pal_3[16];
 extern const unsigned int sky_tiles_4[1024];
 extern const unsigned short sky_pal_4[16];
+extern const unsigned int sky_tiles_5[1024];
+extern const unsigned short sky_pal_5[16];
+extern const unsigned int sky_tiles_6[1024];
+extern const unsigned short sky_pal_6[16];
+extern const unsigned int sky_tiles_7[1024];
+extern const unsigned short sky_pal_7[16];
 enum{CM_DEEP,CM_WATER,CM_SURF,CM_WET,CM_SAND,CM_SAND2,CM_HEDGEHOG,CM_CRATER,CM_SHINGLE,CM_WIRE,CM_WIREB,CM_GRASS,CM_GRASS2,CM_TRENCH,CM_BAGS,CM_BK_TL,CM_BK_T,CM_BK_TR,CM_BK_BL,CM_BK_EMB,CM_BK_BR,CM_RUBBLE,CM_BOAT_L,CM_BOAT_R,CM_BOAT_F,CM_BOAT_RAMP,CM_BOAT_ST,CM_DIRT,CM_CONC,CM_BLUFF,CM_N};
 extern const unsigned int camp_tiles[960];
 extern const unsigned short camp_pal[16];
-extern const unsigned short obj_team_pal[240];
+extern const unsigned short obj_team_pal[384];
 extern const unsigned short fx_pal[16];
 extern const unsigned int era_spr_0[2240];
 #define ES_N0 280
@@ -50,6 +65,12 @@ extern const unsigned int era_spr_3[576];
 #define ES_N3 72
 extern const unsigned int era_spr_4[576];
 #define ES_N4 72
+extern const unsigned int era_spr_5[576];
+#define ES_N5 72
+extern const unsigned int era_spr_6[576];
+#define ES_N6 72
+extern const unsigned int era_spr_7[576];
+#define ES_N7 72
 #define ES_SOLDIER 0
 #define ES_HULL 8
 #define ES_TUR 24
@@ -130,8 +151,8 @@ extern const unsigned char trk_meta[468];
 extern const unsigned char*const trk_data[39];
 #define NTRK 39
 extern const unsigned char wave_shapes[32];
-extern const unsigned int tank_spr[27392];
-extern const unsigned int plane_spr[18176];
+extern const unsigned int tank_spr[32768];
+extern const unsigned int plane_spr[19840];
 extern const unsigned int ship_spr[3200];
 extern const unsigned short world_pal[64];
 extern const unsigned int world_tiles[1600];

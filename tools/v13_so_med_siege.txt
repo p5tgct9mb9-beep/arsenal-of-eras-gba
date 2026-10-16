@@ -72,5 +72,10 @@ shot v13_so_med_siege_2
 wait 1200
 shot v13_so_med_siege_3
 wait 3000
+shot v13_so_med_siege_5
+wait 4000
+shot v13_so_med_siege_6
+wait 4000
+shot v13_so_med_siege_7
 shot v13_so_med_siege_4
 beat end

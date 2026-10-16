@@ -70,5 +70,10 @@ shot v13_so_rev_frigate_2
 wait 1200
 shot v13_so_rev_frigate_3
 wait 3000
+shot v13_so_rev_frigate_5
+wait 4000
+shot v13_so_rev_frigate_6
+wait 4000
+shot v13_so_rev_frigate_7
 shot v13_so_rev_frigate_4
 beat end

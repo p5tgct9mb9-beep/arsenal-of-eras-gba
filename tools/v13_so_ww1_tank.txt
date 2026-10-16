@@ -68,5 +68,10 @@ shot v13_so_ww1_tank_2
 wait 1200
 shot v13_so_ww1_tank_3
 wait 3000
+shot v13_so_ww1_tank_5
+wait 4000
+shot v13_so_ww1_tank_6
+wait 4000
+shot v13_so_ww1_tank_7
 shot v13_so_ww1_tank_4
 beat end

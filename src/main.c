@@ -63,21 +63,22 @@ static int main_menu(int sel){
   if(pressed&K_B)return -1;}}
 static int era_select(int mode,int *era){
  static const char*const MN[4]={"","6V6 INFANTRY","6V6 TANKS","6V6 DOGFIGHT"};
- static const char*const ED[5]={"NORMANDY HEDGEROWS 1944","FROZEN FRONT 1968","DESERT CITY 2026","NEON MEGACITY 2089","LUNAR BASE 2140"};
- static const u16 EC[5]={RGB(150,170,100),RGB(200,214,232),RGB(220,190,130),RGB(80,240,255),RGB(200,170,255)};
- int e=*era,redraw=1;
+ static const char*const ED[NERA]={"NORMANDY HEDGEROWS 1944","FROZEN FRONT 1968","DESERT CITY 2026","NEON MEGACITY 2089","LUNAR BASE 2140","WESTERN FRONT 1917","COLONIES 1776","AGINCOURT 1415"};
+ static const u8 ORD[NERA]={7,6,5,0,1,2,3,4}; // chronological display order
+ static const u16 EC[NERA]={RGB(150,170,100),RGB(200,214,232),RGB(220,190,130),RGB(80,240,255),RGB(200,170,255),RGB(190,170,120),RGB(130,160,230),RGB(230,190,110)};
+ int e=*era,redraw=1;int pos=0;for(int k=0;k<NERA;k++)if(ORD[k]==e)pos=k;
  for(;;){BEAT->screen=SCR_ERA;BEAT->era=e;BEAT->mode=mode;
   if(redraw){m3_title(1);m3_fill(12,8,216,146,C_PANEL);m3_box(12,8,216,146,2);m3_ctext(14,MN[mode],C_YEL,2);m3_ctext(32,"SELECT ERA",C_GRAY,1);
-   for(int k=0;k<5;k++)m3_text(30,46+k*12,cat(k==e?"> ":"  ",ERA_NAME[k]),k==e?EC[k]:C_WHITE,1);
-   m3_text(130,46+e*12,TEAMN[e][0],C_BLUE,1);m3_text(172,46+e*12,TEAMN[e][1],C_RED,1);
-   m3_ctext(110,ED[e],EC[e],1);
-   if(mode==MM_INF){m3_ctext(122,cat("PRIMARY: ",PRIM[e][LO[e].prim].n),C_WHITE,1);m3_ctext(132,cat("SIDEARM: ",SEC[e][LO[e].sec].n),C_WHITE,1);}
-   if(mode==MM_TANK){m3_ctext(122,cat("YOUR TANK: ",TANKV[e][tankSel[e]].n),C_WHITE,1);m3_ctext(132,cat("ENEMY: ",TANKV[e][1-tankSel[e]].n),C_WHITE,1);}
-   if(mode==MM_AIR){m3_ctext(122,cat(e==0?"YOUR PLANE: ":"YOUR JET: ",AIRV[e][airSel[e]].n),C_WHITE,1);if(e==0)m3_ctext(132,AIRV[0][airSel[0]].side?"AXIS VS ALLIED AIRCRAFT":"ALLIED VS AXIS AIRCRAFT",C_WHITE,1);else m3_ctext(132,cat("ENEMY: ",AIRV[e][(airSel[e]+1)%NAIR[e]].n),C_WHITE,1);}
-   m3_ctext(144,"A: LOADOUT   B: BACK",C_GRAY,1);redraw=0;m3_present();}
+   for(int k=0;k<NERA;k++){int q=ORD[k];m3_text(22,44+k*9,cat(q==e?"> ":"  ",ERA_NAME[q]),q==e?EC[q]:C_WHITE,1);}
+   m3_text(150,44+pos*9,TEAMN[e][0],C_BLUE,1);m3_text(196,44+pos*9,TEAMN[e][1],C_RED,1);
+   m3_ctext(116,ED[e],EC[e],1);
+   if(mode==MM_INF){m3_ctext(126,cat("PRIMARY: ",PRIM[e][LO[e].prim].n),C_WHITE,1);m3_ctext(135,cat("SIDEARM: ",SEC[e][LO[e].sec].n),C_WHITE,1);}
+   if(mode==MM_TANK){m3_ctext(126,cat("YOUR TANK: ",TANKV[e][tankSel[e]].n),C_WHITE,1);m3_ctext(135,cat("ENEMY: ",TANKV[e][1-tankSel[e]].n),C_WHITE,1);}
+   if(mode==MM_AIR){m3_ctext(126,cat(e==0||e>=5?"YOUR AIRCRAFT: ":"YOUR JET: ",AIRV[e][airSel[e]].n),C_WHITE,1);if(e==0)m3_ctext(135,AIRV[0][airSel[0]].side?"AXIS VS ALLIED AIRCRAFT":"ALLIED VS AXIS AIRCRAFT",C_WHITE,1);else m3_ctext(135,cat("ENEMY: ",AIRV[e][(airSel[e]+1)%NAIR[e]].n),C_WHITE,1);}
+   m3_ctext(145,"A: LOADOUT   B: BACK",C_GRAY,1);redraw=0;m3_present();}
   next_frame();
-  if((pressed&(K_UP|K_LEFT))&&e>0){e--;redraw=1;sfx_menu();}
-  if((pressed&(K_DOWN|K_RIGHT))&&e<4){e++;redraw=1;sfx_menu();}
+  if((pressed&(K_UP|K_LEFT))&&pos>0){pos--;e=ORD[pos];redraw=1;sfx_menu();}
+  if((pressed&(K_DOWN|K_RIGHT))&&pos<NERA-1){pos++;e=ORD[pos];redraw=1;sfx_menu();}
   if(pressed&(K_A|K_START)){sfx_ok();*era=e;return 1;}
   if(pressed&K_B){sfx_menu();return 0;}}}
 
@@ -104,7 +105,7 @@ static int drone_hangar(int*mis){int sel=0,redraw=2;static const char*const RL[4
   if((pressed&(K_A|K_START))&&(sel==3||(pressed&K_START))){save_write();sfx_ok();return 1;}
   if(pressed&K_B){save_write();sfx_menu();return 0;}}}
 static int map_select(int mode,int*era){ // all maps of the mode across every era (+ RANDOM); returns map index, *era = map's era
- static int lastm[5];int last=lastm[mode];int N=(mode==MM_SEA?3:5)*NMAPS;int sel=last,redraw=2,top=0;
+ static int lastm[5];int last=lastm[mode];int N=(mode==MM_SEA?3:NERA)*NMAPS;int sel=last,redraw=2,top=0;
  for(;;){BEAT->screen=SCR_MAPSEL;BEAT->menu=sel;BEAT->mode=mode;
   if(sel<top)top=sel;if(sel>top+7)top=sel-7;
   if(redraw){m3_title(1);m3_fill(4,4,232,152,C_PANEL);m3_box(4,4,232,152,2);
