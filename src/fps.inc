@@ -60,7 +60,8 @@ static void f_palette(int outdoor){ // v1.3: per wall type 4 texel colours x 4 l
  static const u8 SC[16][3]={{0,0,0},{200,160,120},{70,90,50},{45,60,35},{30,30,30},{90,90,96},{60,70,40},{255,230,120},{150,40,40},{230,230,220},{60,60,180},{180,140,60},{40,120,40},{200,60,60},{120,90,60},{250,250,250}};
  for(int s=0;s<3;s++)for(int i=0;i<16;i++){int k=256-s*70;PAL_BG[128+s*16+i]=f_rgb(SC[i][0]*k/256,SC[i][1]*k/256,SC[i][2]*k/256);}
  if(fNight)for(int i=16;i<176;i++){u16 c=PAL_BG[i];int r=(c&31)*2/5,g=((c>>5)&31)*2/5,b=((c>>10)&31)*3/5;if(i>=96&&i<112){r=1+(i-96)/8;g=1+(i-96)/8;b=3+(i-96)/5;}PAL_BG[i]=r|(g<<5)|(b<<10);}
- PAL_BG[0]=0;PAL_BG[1]=RGB(248,248,248);PAL_BG[2]=RGB(255,220,80);PAL_BG[3]=RGB(240,60,50);PAL_BG[4]=RGB(80,220,80);PAL_BG[5]=RGB(20,22,30);PAL_BG[6]=RGB(70,74,90);PAL_BG[7]=RGB(140,140,150);PAL_BG[8]=RGB(255,250,200);PAL_BG[9]=RGB(40,40,46);PAL_BG[10]=RGB(90,60,40);PAL_BG[11]=RGB(255,140,40);}
+ PAL_BG[0]=0;PAL_BG[1]=RGB(248,248,248);PAL_BG[2]=RGB(255,220,80);PAL_BG[3]=RGB(240,60,50);PAL_BG[4]=RGB(80,220,80);PAL_BG[5]=RGB(20,22,30);PAL_BG[6]=RGB(70,74,90);PAL_BG[7]=RGB(140,140,150);PAL_BG[8]=RGB(255,250,200);PAL_BG[9]=RGB(40,40,46);PAL_BG[10]=RGB(90,60,40);PAL_BG[11]=RGB(255,140,40);
+ PAL_BG[12]=RGB(214,168,124);PAL_BG[13]=RGB(166,120,84);PAL_BG[14]=RGB(104,70,48);PAL_BG[15]=RGB(84,104,56);PAL_BG[176]=RGB(54,70,36);PAL_BG[177]=RGB(140,30,30);} // v1.3 HUD face colours (never night-dimmed)
 static void f_textures(void){for(int t=0;t<5;t++)for(int y=0;y<16;y++)for(int x=0;x<16;x++){u32 h=xh(t*977+y*16+x);int v=0;
   if(t==0){v=(x==0||y==0||y==8)?1:(x==1||y==1||y==9)?2:((h&7)==0||(y>11&&(h&3)==0&&x>4&&x<11)||(x==4+(y>>2)&&y>3&&y<11))?3:0;}                       // concrete panels + water stains
   else if(t==1){int off=(y/4)&1?4:0;if((y&3)==3||((x+off)&7)==7)v=1;else if((y&3)==0||((x+off)&7)==0)v=3;else v=(h%4==0)?2:(h%11==0)?1:0;} // running-bond brick
@@ -180,7 +181,7 @@ static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=138-(FP.cd>FWP[
  if(FP.flash>0){int fy=by-(w==0?42:(w==4?66:w==2?62:60));f_rect(bx-9,fy-7,18,10,8);f_rect(bx-5,fy-12,10,7,2);f_rect(bx-13,fy-3,26,4,11);f_rect(bx-2,fy-15,4,4,1);}}
 // v1.3 Doom-style reacting face portrait in the HUD (original pixel art, procedural)
 static int f_facest(void){int hp=FP.hp<0?0:FP.hp;int band=hp>=70?0:hp>=40?1:hp>0?2:3;int look=FP.hurt>0?3:((FP.t>>6)%3);return band*4+look;}
-static void f_face(int x,int y,int st){int band=st>>2,look=st&3;const int SK=129,SD=145,SX=161,K=9,WH=1,RD=3,DR=136,HG=130,HD=131;
+static void f_face(int x,int y,int st){int band=st>>2,look=st&3;const int SK=12,SD=13,SX=14,K=9,WH=1,RD=3,DR=177,HG=15,HD=176;
  f_rect(x,y,20,22,5);f_rect(x+3,y+5,14,15,SK);f_rect(x+12,y+6,5,13,SD);f_rect(x+4,y+18,12,3,SD);       // face + cel shadow + jaw
  f_rect(x+2,y+1,16,6,HG);f_rect(x+1,y+5,18,2,HD);f_rect(x+12,y+1,6,5,HD);f_rect(x+4,y+2,4,1,7);            // helmet + rim + sheen
  if(band<3){int ey=y+9,dx=look==1?-1:look==2?1:0;

@@ -7,9 +7,54 @@ It's a personal build, made to be played in an emulator such as Delta on iPhone.
 Download it from the GitHub release, then use *Open in… → Delta*. Saves from v1.0, v1.1 WIP and v1.1 (v3) are migrated automatically. Arsenal picks are re-mapped onto the bigger v1.2 lists (tested with a real v1.1 save), and Bot Difficulty starts at Regular. Spec Ops progress, the KC tutorial flag and the new attachment slots each live in their own checksummed SRAM blocks.
 
 ## Main menu
-CAMPAIGN · 6V6 INFANTRY · 6V6 ARMOR · 6V6 DOGFIGHT · 6V6 NAVAL · DRONE OPS · WORLD FLIGHT · SPEC OPS · LOADOUT · SETTINGS · TUTORIAL · SPACE LAUNCH (two columns; Left/Right switches column)
+Categories: **CAMPAIGN · BATTLES** (6v6 Infantry / Armor / Dogfight / Naval, Sword Fight 1v1) **· SPEC OPS** (Spec Ops, Bradley Ops) **· SPECIALIST** (Sniper, EOD, Anti-Aircraft, Drone Ops, LRRP, FPS) **· EXPLORE** (Space Launch, World Flight, Space Program, Astronaut Explorer) **· LOADOUT · SETTINGS · BOOT CAMP (KC)**. Every mode is finished: none is marked IN TRAINING any more.
 
 ## What's new in v1.3
+* **Saves:** v1.2 saves migrate automatically (tested with a real v1.2 save).
+  * Spec Ops progress block v1 → v2: stars are kept and the new worlds start at zero.
+  * The old *UKRAINIAN SOF* unit becomes the **3rd Separate SOF Regt** on the new UA tab.
+  * Campaign unlocks are bridged, so a player who had finished the old 14 missions also gets FULDA GAP and GUNS OF TEXAS.
+* **Campaign: 14 → 27 missions.**
+  * New: FULDA GAP (what-if), GUNS OF TEXAS (naval gunnery), TORA BORA, MEDUSA, MOSHTARAK, HOSTOMEL, IRPIN BRIDGE, OLD CITY (Mosul), LAKE CITY (Marawi), KHARKIV DASH (armour), LAST FLIGHTS (Kabul evacuation), BLACK SEA SKIES (flight) and IRON CURTAIN 2035 (what-if, future era).
+  * Modern missions now open the modern loadout. They used to show the WW2 title and guns.
+* **Bot AI and buildings (campaign + 6v6):**
+  * Bots need line of sight to fire, except at point-blank range, and hurt bots retreat into buildings.
+  * Allies without a role follow you in formation.
+  * Buildings can be entered: plank floors, second doors, and farmhouses on field and forest maps. Standing inside gives **25% cover** (*INDOORS - COVER*).
+* **Enemy weapon pickup:** fallen enemies drop their guns.
+  * 6v6/campaign: **L** takes the weapon (*L: TAKE x*).
+  * Spec Ops: drops are a captured AK / PKM / RPG-7 / SVD (*SEL SWAPS*).
+  * FPS: AK-47 and PKM pickups.
+* **Three new eras: WW1, American Revolution and Medieval.**
+  * Each era has its own weapons, vehicles, aircraft and maps: Somme, Cambrai, Lexington, Yorktown, Agincourt, Castle Siege and more.
+  * In 6v6, choosing a period map equips both teams with period kit, for example Lee-Enfield, Mark IV, English Longbow and Battering Ram.
+* **Spec Ops:**
+  * **UA tab** with 17 Ukrainian units (3rd/8th Separate SOF Regt, 4th Ranger Regt, 7th SOF Regt, 140th/144th SOC, 73rd Naval SOC, Omega, HUR, Bureviy, Harmash, Azov, Chervona Kalyna, Kara Dag, Lubart, Pilum, Forge).
+    * Each unit has its own sprite, default weapons and loadout, with generic badges only.
+    * The unit grid scrolls. 47 units in total.
+  * **Worlds 11–13:**
+    * Western Front 1917: trenches, barbed wire, A7V boss.
+    * Colonial War 1776: Delaware, frigate boss.
+    * Castle Siege: dungeon, trebuchet and siege-tower bosses.
+    * Each world has its own trench or castle backdrop.
+* **LRRP** (jungle patrol) and **FPS vs Bots** (raycast 3D, 8 missions) are complete.
+  * The FPS renderer was rewritten in ARM/IWRAM with a reciprocal LUT. It went from 16–19 fps to **~26 fps on average (range 22–29)** in mGBA-equivalent timing.
+  * New wall textures: concrete, brick, riveted metal, sandbags and doors.
+* **Art pass, original art blending three GBA-era styles** (see `shots/v13/v13_style_*.png`, before/after):
+  * **Platformer style** (Spec Ops, Bradley Ops, menus, world maps): brighter, more saturated palettes, round dome hills, puffy parallax clouds, and squash-and-stretch on the player's jumps and landings.
+  * **Anime action-RPG style** (campaign, 6v6, sword fight):
+    * Cel-shaded briefing portraits in a dialogue-box layout: 42 variants by era, role, gender and skin tone. KC's boot-camp portrait also gets a speed-line burst.
+    * Energy-style muzzle flashes, star impact sparks, and explosions with a white core and radial speed lines.
+    * Sword fight: energy slash arcs, hit starbursts, dodge speed lines and screen shake.
+  * **Gritty FPS style:** a HUD face that reacts to damage (bruises, blood, grimace when hit, glances around), chunkier outlined guns, and darker, grimier textures.
+* **Bugs fixed in v1.3:**
+  * Deaths in tunnel gaps.
+  * A freeze when a new boss appeared, and the A7V named "MERC CONVOY".
+  * Period 6v6 maps showing WW2/modern kit.
+  * Worlds 11/13 using generic city/mountain art.
+  * The WW2 loadout appearing on modern campaign missions.
+  * Lost menu taps on slow redraws (test scripts).
+  * IWRAM overflow, fixed by moving the AA/Bradley pools to EWRAM.
 * **Space Launch (new main-menu mode):** 35 real launch vehicles from 6 agencies. You fly the countdown (TR_ASCENT theme), the ascent (throttle, pitch, stage separation, max-Q stress), booster landings, a debris field and docking. Best scores are saved to SRAM. See [Space Launch](#space-launch) below.
 * **Spec Ops enemy factions per world:** worlds 1–6 are renamed and rethemed, and each has its own enemy sprites, colours, vehicles and boss. W1 Border Towns are held by cartels, W2 Desert Compounds by proxy militias, W3 The DMZ by the KPA, W4 Mountain Bases by the CSTO, W5 Arctic City by Russian forces and W6 Island Fortress by the PLA (carrier finale). W7 Wagner, W8 NVA/VC + Warsaw Pact, W9 Axis and W10 aliens are unchanged.
 * **4 Israeli units:** Sayeret Matkal, Shayetet 13, Unit 669 and a Mossad operative. That makes 25 units.
@@ -69,7 +114,7 @@ CAMPAIGN · 6V6 INFANTRY · 6V6 ARMOR · 6V6 DOGFIGHT · 6V6 NAVAL · DRONE OPS 
 * **WORLD FLIGHT**, a new mode: fly the X-15 around the world (details below).
 * **SPEC OPS**, a new mode: a side-scrolling run-and-gun platformer (details below).
 
-## Campaign (14 missions, WW2 → Modern)
+## Campaign (27 missions, WW2 → Modern + what-if)
 You pick a mission, see two briefing cards (story, then objectives) and finish on a stats screen showing time, objectives, enemies downed, times downed, civilians and a 1–3 star rating.
 * **Unlocks:** finishing a mission unlocks the next one, and progress is saved to SRAM.
 * **Test/cheat:** hold **L+R** and press **SELECT** on the mission select screen to unlock everything. Inside a mission the same combo completes the objectives.
@@ -91,13 +136,26 @@ You pick a mission, see two briefing cards (story, then objectives) and finish o
 | 12 | Relief Column | Mogadishu, Oct 1993 | convoy + civilians | clear roadblocks, guide the UN column, secure the site | no (civilians) |
 | 13 | Shah-i-Kot | Mar 2002 | infantry, mortars | hold blocking position, climb to the crash site, hold | no |
 | 14 | Phantom Fury | Fallujah, Nov 2004 | infantry, ROE | clear district, evacuate the family, seize the cache | no (civilians) |
+| 15 | Fulda Gap | West Germany (what-if) | armour | hold the treeline until the reinforcements cross | – |
+| 16 | Guns of Texas | Omaha / Pointe du Hoc, 6 Jun 1944 | naval gunnery | close the beach, shell the bluffs, clear the sky | – |
+| 17 | Tora Bora | White Mountains, Dec 2001 | infantry, mortars | burn the caches, clear the ridge | – |
+| 18 | Medusa | Panjwayi, Sep 2006 | infantry | cross the riverbed, strongpoints, hold the school | – |
+| 19 | Moshtarak | Marjah, Feb 2010 | infantry, ROE | clear the road, secure the bazaar | no (civilians) |
+| 20 | Hostomel | Antonov Airport, 24 Feb 2022 | infantry | hold the runway edge, wreck equipment | – |
+| 21 | Irpin Bridge | Irpin river, Mar 2022 | infantry + civilians | hold the bank, guide families to the buses | no (civilians) |
+| 22 | Old City | West Mosul, Jun 2017 | infantry, ROE | clear the alleys, evacuate, seize caches | no (civilians) |
+| 23 | Lake City | Marawi, Jul 2017 | infantry | clear the market block, knock out sniper nests, hold the bridge | – |
+| 24 | Kharkiv Dash | Balakliia axis, Sep 2022 | armour | break the forward line, reach the Oskil river | – |
+| 25 | Last Flights | Kabul airport, Aug 2021 | infantry + civilians | escort evacuees to the gate, hold the perimeter, reach the last aircraft | no (civilians) |
+| 26 | Black Sea Skies | NW Black Sea, spring 2022 | flight | protect the city, break the strike package | – |
+| 27 | Iron Curtain 2035 | Suwalki Gap (fictional what-if) | armour, night | hold the corridor, stop the robot vanguard | – |
 
 **Side choice:** 9 missions offer a second perspective with mirrored objectives (attack ↔ defend). Uniform colours are swapped, and every faction uses generic markings with no insignia. The alternate side is never offered in missions that include civilians. Missions with civilians enforce ROE: harming 2 civilians fails the mission.
 
 **Left out:** East Berlin "Checkpoint" (needs stealth systems that aren't built) and a flamethrower.
 
 ## 6v6 (Infantry / Armor / Dogfight / Naval)
-The flow is **Choose side → Arsenal → Map → match**. There's no era select.
+The flow is **Choose side → Arsenal → Map → match**. There's no era select: picking a WW1, Revolution or Medieval map gives both teams period kit.
 * **Factions (11):** USA, UK, USSR, Germany, Japan, China, Russia, NATO, Coalition, Federation, Syndicate. Each team is coloured by its faction, and the bots fight on the other side.
 * **Arsenal:** one pool across all eras.
   * 35 primaries (including the StG 44 *Vampir* night scope and the *Krummlauf* curved barrel), 13 sidearms, 11 launchers plus none (including the Fliegerfaust), 6 lethals, 4 tacticals, 71 land vehicles, 104 aircraft and 23 warships.
