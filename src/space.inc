@@ -509,16 +509,18 @@ typedef struct{float x,z,vx,vz,dv;int t,warp,kos,ae,viol;float hx,hz;}SPR1;
 static SPR1 RV EWRAM;
 #define CWN 0.00113f
 static int sp_rendezvous(int vi){const SPiv*V=&SPI[vi];memset(&RV,0,sizeof RV);RV.x=-9000;RV.z=-1500;RV.vx=1.5f*CWN*1500;RV.vz=0;int au=sp_isauto();
- RV.hx=V->app==0?200:0;RV.hz=V->app==1?200:V->app==2?-200:0;int held=0;
+ RV.hx=V->app==0?250:0;RV.hz=V->app==1?250:V->app==2?-250:0;int held=0;
  for(;;RV.t++){next_frame();u16 ky=keys,pr=pressed;float r=fsqr(RV.x*RV.x+RV.z*RV.z),rate=(RV.x*RV.vx+RV.z*RV.vz)/(r>1?r:1);
   float dx=RV.hx-RV.x,dz=RV.hz-RV.z,dh=fsqr(dx*dx+dz*dz);
-  if(au){ky=0;pr=0;float vmax=dh>3000?8:dh>800?3:dh>200?1.0f:0.3f;float k=vmax/(dh>1?dh:1);if(k>0.004f)k=0.004f;float tvx=dx*k*(dh>1?1:0),tvz=dz*k;if(dh<vmax*250){tvx=dx*0.004f;tvz=dz*0.004f;}
-   // route around the keep-out sphere: stay outside 260 m until on the approach axis
-   if(r<300&&dh>60){float ox=RV.x/r,oz=RV.z/r;tvx+=ox*0.4f;tvz+=oz*0.4f;}
-   float ex=tvx-RV.vx,ez=tvz-RV.vz;if(ex>0.03f)ky|=K_RIGHT;if(ex<-0.03f)ky|=K_LEFT;if(ez>0.03f)ky|=K_UP;if(ez<-0.03f)ky|=K_DOWN;RV.warp=dh>1500?2:dh>300?1:0;}
+  if(au){ky=0;pr=0;}
   if(pr&K_B){RV.warp=(RV.warp+1)%3;sfx_menu();}
-  float a=0.05f;int th=0;if(ky&K_RIGHT){RV.vx+=a;RV.dv+=a;th=1;}if(ky&K_LEFT){RV.vx-=a;RV.dv+=a;th=1;}if(ky&K_UP){RV.vz+=a;RV.dv+=a;th=1;}if(ky&K_DOWN){RV.vz-=a;RV.dv+=a;th=1;}
-  static const u8 WS[3]={1,5,20};int ss=WS[RV.warp];for(int i=0;i<ss;i++){float ax=-2*CWN*RV.vz,az=2*CWN*RV.vx+3*CWN*CWN*RV.z;RV.vx+=ax;RV.vz+=az;RV.x+=RV.vx;RV.z+=RV.vz;}
+  static const u8 WS[3]={1,5,20};int ss=WS[RV.warp];int th=0;u16 ky0=ky;for(int i=0;i<ss;i++){ky=ky0;
+   if(au){ky=0;r=fsqr(RV.x*RV.x+RV.z*RV.z);dx=RV.hx-RV.x;dz=RV.hz-RV.z;dh=fsqr(dx*dx+dz*dz);float vmax=dh>3000?8:dh>800?3:dh>200?1.0f:0.3f;float k=vmax/(dh>1?dh:1);if(k>0.004f)k=0.004f;float tvx=dx*k*(dh>1?1:0),tvz=dz*k;if(dh<vmax*250){tvx=dx*0.004f;tvz=dz*0.004f;}
+   // route around the keep-out sphere: stay outside 260 m until on the approach axis
+   if(r<235&&dh>40){float ox=RV.x/r,oz=RV.z/r;tvx+=ox*0.4f;tvz+=oz*0.4f;}
+   float ex=tvx-RV.vx,ez=tvz-RV.vz;if(ex>0.03f)ky|=K_RIGHT;if(ex<-0.03f)ky|=K_LEFT;if(ez>0.03f)ky|=K_UP;if(ez<-0.03f)ky|=K_DOWN;if(i==0)RV.warp=dh>1500?2:dh>300?1:0;}
+   float a=0.05f;if(ky&K_RIGHT){RV.vx+=a;RV.dv+=a;th=1;}if(ky&K_LEFT){RV.vx-=a;RV.dv+=a;th=1;}if(ky&K_UP){RV.vz+=a;RV.dv+=a;th=1;}if(ky&K_DOWN){RV.vz-=a;RV.dv+=a;th=1;}
+   float ax=-2*CWN*RV.vz,az=2*CWN*RV.vx+3*CWN*CWN*RV.z;RV.vx+=ax;RV.vz+=az;RV.x+=RV.vx;RV.z+=RV.vz;}
   r=fsqr(RV.x*RV.x+RV.z*RV.z);float ae=(RV.x*RV.x)/(2000.0f*2000)+(RV.z*RV.z)/(1000.0f*1000);
   if(ae<1&&!RV.ae){RV.ae=1;spf_msg("ENTERED APPROACH ELLIPSOID");}
   if(r<200&&!RV.kos){RV.kos=1;}if(r<190&&dh>40){RV.viol++;if((RV.viol&63)==1)spf_msg("KEEP-OUT SPHERE: NOT ON AXIS!");}
