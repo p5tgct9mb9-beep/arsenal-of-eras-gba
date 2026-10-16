@@ -13,8 +13,8 @@ static const u16 IVC[3][2]={{RGB(120,255,140),RGB(255,255,255)},{RGB(255,120,220
 static void iv_blit(int x,int y,const char*const*a,int w,int h,u16 c1,u16 c2){lf(x,y,0,0,0);if(lfN>=0&&lfN<384){LRect*r=&lfR[lfN++];r->x=clampi(x,0,239);r->y=clampi(y,0,159);r->w=w;r->h=h;}
  for(int j=0;j<h;j++){int yy=y+j;if(yy<0||yy>=160)continue;const char*s=a[j];for(int i=0;i<w;i++){int xx=x+i;if(xx<0||xx>=240)continue;char ch=s[i];if(ch=='#')fb[yy*240+xx]=c1;else if(ch=='+')fb[yy*240+xx]=c2;}}}
 typedef struct{const char*n,*d;s16 spd,rate,hp,spread,w;u16 c;}IvShip;
-static const IvShip IVSH[4]={{"FALCON 9","BALANCED. ONE FAST SHOT.",3,14,1,0,5,RGB(236,238,242)},{"FALCON HEAVY","SPREAD SHOT: 3 CORES FIRE.",2,20,1,1,9,RGB(236,238,242)},
- {"STARSHIP","BIG STEEL SHIP, 3 HITS PER LIFE.",2,18,3,0,9,RGB(196,200,210)},{"DRAGON","FAST AND NIMBLE CAPSULE.",4,12,1,0,5,RGB(240,240,250)}};
+static const IvShip IVSH[4]={{"FALCON 9","BALANCED. ONE FAST SHOT.",3,14,1,0,5,RGB(236,238,242)},{"FALCON HEAVY","TRIPLE SHOT: 3 CORES FIRE.",2,22,1,1,9,RGB(236,238,242)},
+ {"STARSHIP","BIG STEEL SHIP, 4 HITS PER LIFE.",3,15,4,0,9,RGB(196,200,210)},{"DRAGON","FAST AND NIMBLE CAPSULE.",4,12,1,0,5,RGB(240,240,250)}};
 #define IV_COLS 9
 #define IV_ROWS 5
 typedef struct{s16 x,y,vx,vy;u8 on,k;}IvB;
@@ -25,7 +25,8 @@ static void iv_shields(int wave){u16 bg=RGB(4,6,20);for(int s=0;s<4;s++){int x0=
   ivSh[s][y][x]=on;u16 c=on?((wave&1)?((y&3)==0?RGB(160,160,170):RGB(110,112,124)):((x/5)&1?RGB(60,90,170):RGB(200,210,230))):bg;fb[(y0+y)*240+x0+x]=c;}}}
 static int iv_shield_hit(int x,int y,int r){for(int s=0;s<4;s++){int x0=24+s*56,y0=118;int lx=x-x0,ly=y-y0;if(lx<0||lx>=22||ly<0||ly>=16)continue;if(!ivSh[s][ly][lx])continue;
   u16 bg=RGB(4,6,20);for(int dy=-r;dy<=r;dy++)for(int dx=-r;dx<=r;dx++){int qx=lx+dx,qy=ly+dy;if(qx<0||qx>=22||qy<0||qy>=16)continue;if(dx*dx+dy*dy>r*r+1||rr(3)==0)continue;ivSh[s][qy][qx]=0;bigbuf[(y0+qy)*240+x0+qx]=bg;lf(x0+qx,y0+qy,1,1,bg);}return 1;}return 0;}
-static int invaders_run(int ship){const IvShip*S=&IVSH[ship];int au=FR_AUTO,bad=vb_fail();int px=120,lives=3,hp=S->hp,score=0,wave=1,fr=0,cd=0,inv=0,over=0,endT=0;
+static int invaders_run(int ship){{volatile u32*sd=(volatile u32*)0x0203FFC4;if(FR_AUTO&&*sd){rs^=*sd;if(!rs)rs=1;*sd=0;}} // test-only RNG seed mailbox
+const IvShip*S=&IVSH[ship];int au=FR_AUTO,bad=vb_fail();int px=120,lives=3,hp=S->hp,score=0,wave=1,fr=0,cd=0,inv=0,over=0,endT=0;
  int rapid=0,laser=0,ufoX=-40,ufoD=0,ufoT=600,stepT=0,step=0,anim=0,dir=1,ox=0,oy=0,boss=0,bossHp=0,bossX=120,bossD=1,bossMax=1,msgT=0;const char*msg="";int kills=0,pus=0,ufos=0;
  #define IVNEW() do{memset(ivPB,0,sizeof ivPB);memset(ivEB,0,sizeof ivEB);memset(ivPU,0,sizeof ivPU);memset(ivDeb,0,sizeof ivDeb);boss=wave%5==0;ox=0;oy=wave>1?((wave-1)%5)*4:0;dir=1;\
   for(int r=0;r<IV_ROWS;r++)for(int c=0;c<IV_COLS;c++)ivA[r][c]=!boss;if(boss){bossMax=bossHp=40+wave*12;bossX=120;}\
@@ -46,7 +47,7 @@ static int invaders_run(int ship){const IvShip*S=&IVSH[ship];int au=FR_AUTO,bad=
    if(L)px-=S->spd;if(R)px+=S->spd;px=clampi(px,8,232);
    if(cd>0)cd--;if(F&&cd==0&&!laser){int rt=rapid?S->rate/3:S->rate;cd=rt;int n=S->spread?3:1;for(int k=0;k<n;k++)for(int i=0;i<8;i++)if(!ivPB[i].on){ivPB[i]=(IvB){px+(n>1?(k-1)*5:0),138,(s16)(n>1?(k-1):0),-5,1,0};break;}sfx1(0,0x9,1,2,1950,4);}
    // ---- player shots
-   for(int i=0;i<8;i++)if(ivPB[i].on){IvB*b=&ivPB[i];b->y+=b->vy;b->x+=b->vx;if(b->y<10){b->on=0;continue;}if(iv_shield_hit(b->x,b->y,1)){b->on=0;continue;}
+   for(int i=0;i<8;i++)if(ivPB[i].on){IvB*b=&ivPB[i];b->y+=b->vy;if(fr&1)b->x+=b->vx;/* v1.3.3: narrower Falcon Heavy spread so all 3 cores can reach the Hive Queen */if(b->y<10){b->on=0;continue;}if(iv_shield_hit(b->x,b->y,1)){b->on=0;continue;}
     if(boss){if(iabs(b->x-bossX)<22&&b->y<40&&b->y>14){b->on=0;bossHp--;score+=10;if(bossHp<=0){score+=5000;boss=0;fsp_add(bossX,28,24,RGB(255,200,80));sfx_boom();shake(14);msg="HIVE QUEEN DESTROYED!";msgT=120;}}continue;}
     int c=(b->x-12-ox)/16,r=(b->y-20-oy)/12;if(c>=0&&c<IV_COLS&&r>=0&&r<IV_ROWS&&ivA[r][c]){int ax=12+c*16+ox,ay=20+r*12+oy;if(b->x>=ax&&b->x<ax+11&&b->y>=ay&&b->y<ay+8){ivA[r][c]=0;b->on=0;kills++;score+=(r==0?30:r<3?20:10)*(1+wave/6);fsp_add(ax+5,ay+4,6,IVC[r==0?0:r<3?1:2][0]);sfx1((1<<4)|3,0xA,2,1,1200,6);
       if(rr(14)==0)for(int q=0;q<3;q++)if(!ivPU[q].on){ivPU[q]=(IvB){ax+5,ay,0,1,1,(u8)rr(3)};break;}}}
@@ -65,13 +66,13 @@ static int invaders_run(int ship){const IvShip*S=&IVSH[ship];int au=FR_AUTO,bad=
    if(fr%rate==0){int sx=-1,sy=0;if(boss){sx=bossX+rr(30)-15;sy=40;}else{int c=rr(IV_COLS);for(int r=IV_ROWS-1;r>=0;r--)if(ivA[r][c]){sx=12+c*16+ox+5;sy=20+r*12+oy+8;break;}}
     if(sx>=0)for(int i=0;i<12;i++)if(!ivEB[i].on){ivEB[i]=(IvB){sx,sy,(s16)(boss?rr(3)-1:0),(s16)(2+wave/8),1,0};break;}}
    for(int i=0;i<12;i++)if(ivEB[i].on){IvB*b=&ivEB[i];if(fr&1)b->x+=b->vx;b->y+=b->vy;if(b->y>154){b->on=0;continue;}if(iv_shield_hit(b->x,b->y,2)){b->on=0;continue;}
-    if(inv==0&&b->y>136&&b->y<150&&iabs(b->x-px)<S->w){b->on=0;if(--hp<=0){lives--;hp=S->hp;inv=120;fsp_add(px,142,16,RGB(255,180,60));sfx_boom();shake(10);}else{inv=40;sfx_hurt();}}}
+    if(inv==0&&b->y>136&&b->y<150&&iabs(b->x-px)<(ship==2?7:S->w)){b->on=0;if(--hp<=0){lives--;hp=S->hp;inv=120;fsp_add(px,142,16,RGB(255,180,60));sfx_boom();shake(10);}else{inv=40;sfx_hurt();}}}
    if(inv>0)inv--;
    // ---- debris drifting down (destructible, 5 pts) and power-ups
    if(fr%240==120)for(int i=0;i<4;i++)if(!ivDeb[i].on){ivDeb[i]=(IvB){(s16)(20+rr(200)),12,(s16)(rr(3)-1),1,1,0};break;}
    for(int i=0;i<4;i++)if(ivDeb[i].on){IvB*d=&ivDeb[i];if((fr&1)==0){d->y++;d->x+=d->vx*((fr&7)==0);}if(d->y>150){d->on=0;continue;}
     for(int k=0;k<8;k++)if(ivPB[k].on&&iabs(ivPB[k].x-d->x)<4&&iabs(ivPB[k].y-d->y)<4){ivPB[k].on=0;d->on=0;score+=5;fsp_add(d->x,d->y,4,RGB(160,150,140));}
-    if(d->on&&inv==0&&d->y>136&&iabs(d->x-px)<S->w){d->on=0;if(--hp<=0){lives--;hp=S->hp;inv=120;sfx_boom();}else{inv=40;sfx_hurt();}}}
+    if(d->on&&inv==0&&d->y>136&&iabs(d->x-px)<(ship==2?7:S->w)){d->on=0;if(--hp<=0){lives--;hp=S->hp;inv=120;sfx_boom();}else{inv=40;sfx_hurt();}}}
    for(int i=0;i<3;i++)if(ivPU[i].on){IvB*p=&ivPU[i];p->y++;if(p->y>150){p->on=0;continue;}if(p->y>134&&iabs(p->x-px)<S->w+3){p->on=0;sfx_ok();pus++;
      if(p->k==0){rapid=600;msg="RAPTOR RAPID FIRE";}else if(p->k==1){lives++;msg="MECHAZILLA CATCH! +1 LIFE";}else{laser=300;msg="STARLINK LASER";}msgT=90;}}
    // ---- UFO mothership

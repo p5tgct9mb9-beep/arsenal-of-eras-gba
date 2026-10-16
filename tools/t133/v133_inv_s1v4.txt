@@ -1,0 +1,252 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFC4 28B123D3
+poke32 0x0203FFD8 52490001
+tap A
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+wait 120
+beat
+end

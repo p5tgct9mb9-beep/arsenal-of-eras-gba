@@ -40,7 +40,9 @@ static inline int ang16(int dx,int dy){ // atan2 in 16-bit units (0 = -y, clockw
 static inline int ad16(int a,int b){return (s16)(u16)(a-b);}
 // ---- race state
 #define RQ 12
-typedef struct{s32 x,y,vx,vy;u16 h;s16 z,vz;u8 car,ai,air,surf,drift,boost,fin,place,cp,resp;s16 lane,driftT;int wp,lap,finT,lapStart,lastLap,bestLap,bat,respT,skill,boostT,stuck;int prog;}RC;
+typedef struct{s32 x,y,vx,vy;u16 h;s16 z,vz;u8 car,ai,air,surf,drift,boost,fin,place,cp,resp;s16 lane,driftT;int wp,lap,finT,lapStart,lastLap,bestLap,bat,respT,skill,boostT,stuck;int prog;s16 line,ovr,band;}RC;
+static int rcDiff=1; // v1.3.3 GP difficulty 0 EASY 1 NORMAL 2 HARD (saved in RS.pad as diff+1)
+static const char*const RC_DN[3]={"EASY","NORMAL","HARD"};
 static RC rc[8] EWRAM;static int rcN,rcTrk,rcMode,rcT,rcPhase,rcLaps,rcNW,rcHalf,rcMsgT,rcPlayerCar,rcSpacex,rcRecLap;static const char*rcMsg;static const short*rcW;static const u8*rcS;
 static const u8*rcSurf;static s32 camX,camY;static u16 camH;static int rcOrder[8];static int rcPts[8];static int rcAutoQuit;
 typedef struct{s16 pa,pb,pc,pd;s32 x,y;}HLine;
@@ -96,30 +98,48 @@ static void rc_track_wp(RC*c){int nw=rcNW;int px=c->x>>RQ,py=c->y>>RQ;
     if(rcMode!=RM_FREE&&c->lap>rcLaps&&!c->fin){c->fin=1;c->finT=rcT;int p=1;for(int j=0;j<rcN;j++)if(&rc[j]!=c&&rc[j].fin)p++;c->place=p;}}}
   else break;}
  int a=c->wp,b=(a+nw-1)%nw;if(idist(rcW[b*2]-px,rcW[b*2+1]-py)+6<idist(rcW[a*2]-px,rcW[a*2+1]-py)&&a!=0)c->wp=b;}
-static void rc_ai(RC*c,int*thr,int*brk,int*steer,int*drift,int*boost){int nw=rcNW;int look=3;int t=(c->wp+look)%nw;
- int tx=rcW[t*2],ty=rcW[t*2+1];int t2=(t+1)%nw;int hx=rcW[t2*2]-tx,hy=rcW[t2*2+1]-ty;int hh=ang16(hx,hy);
- tx+=rcos(hh)*c->lane>>8;ty+=rsin(hh)*c->lane>>8;
- int want=ang16(tx-(c->x>>RQ),ty-(c->y>>RQ));int e=ad16(want,c->h);*steer=clampi(e/24,-256,256);
- int sp=255;for(int k=1;k<6;k++){int v=rcS[(c->wp+k)%nw];if(v<sp)sp=v;}
- const RCar*C=&RCARS[c->car];s32 tgt=(C->vmax*sp>>8)*c->skill>>8;
- // corners: cars with weaker handling must slow down more
- if(sp<240)tgt=tgt*(200+C->hand/12)/256;if(tgt>C->vmax)tgt=C->vmax;
+// v1.3.3 AI: racing line (outside -> apex -> outside), speed-scaled look-ahead, straight-line boost use with a battery
+// reserve, difficulty-scaled corner commitment; the AUTO test driver (rc[0] under FR_AUTO) uses the HARD line as a
+// stand-in for a skilled human.
+// v1.3.3 pace: rivals' top speed + accel are pulled toward the player's car (so a fast pick doesn't trivialise the cup)
+static void rc_pace(const RC*c,s32*vmax,int*acc){const RCar*C=&RCARS[c->car];*vmax=C->vmax;*acc=C->acc;if(c==&rc[0])return;const RCar*P=&RCARS[rc[0].car];
+ static const u8 K[3]={100,220,256};static const s16 M[3]={246,266,276};int k=K[rcDiff];
+ s32 v=C->vmax+((P->vmax-C->vmax)*k>>8);int a=C->acc+((P->acc-C->acc)*k>>8);if(v<C->vmax&&rcDiff)v=C->vmax;if(a<C->acc&&rcDiff)a=C->acc;*vmax=(v*M[rcDiff]>>8)*(256+c->band/2)>>8;*acc=a*M[rcDiff]>>8;}
+static void rc_ai(RC*c,int*thr,int*brk,int*steer,int*drift,int*boost){int nw=rcNW;
+ int me=c==&rc[0];int D=me?2:rcDiff;
  int vf=(c->vx*rsin(c->h)-c->vy*rcos(c->h))>>8;
+ int look=2+clampi(vf/3200,0,3);int t=(c->wp+look)%nw;
+ int tx=rcW[t*2],ty=rcW[t*2+1];int t2=(t+1)%nw;int hx=rcW[t2*2]-tx,hy=rcW[t2*2+1]-ty;int hh=ang16(hx,hy);
+ // racing line: sign of the heading change over the next few waypoints = turn direction (positive = right)
+ {int a0=(c->wp+1)%nw,a1=(c->wp+2)%nw,b0=(c->wp+6)%nw,b1=(c->wp+7)%nw;
+  int dh=ad16(ang16(rcW[b1*2]-rcW[b0*2],rcW[b1*2+1]-rcW[b0*2+1]),ang16(rcW[a1*2]-rcW[a0*2],rcW[a1*2+1]-rcW[a0*2+1]));
+  int hw=rc_halfw[rcTrk]*11/20;int str=D==0?0:D==1?7:10;int tl=clampi(dh*hw/5000,-hw,hw)*str/10;
+  c->line+=(tl-c->line)/6;if(c->ovr>0)c->ovr--;else if(c->ovr<0)c->ovr++;}
+ int lane=(D==0?c->lane:c->lane/3)+c->line+c->ovr;
+ tx+=rcos(hh)*lane>>8;ty+=rsin(hh)*lane>>8;
+ int want=ang16(tx-(c->x>>RQ),ty-(c->y>>RQ));int e=ad16(want,c->h);*steer=clampi(e/(D==2?20:24),-256,256);
+ int sp=255;for(int k=1;k<6;k++){int v=rcS[(c->wp+k)%nw];if(v<sp)sp=v;}
+ const RCar*C=&RCARS[c->car];s32 pv;int pa;rc_pace(c,&pv,&pa);(void)pa;s32 tgt=(pv*sp>>8)*c->skill>>8;
+ // corners: weaker handling slows more; harder drivers commit more corner speed
+ if(sp<240)tgt=tgt*(200+C->hand/12+D*8)/256;if(tgt>pv)tgt=pv;
  *thr=vf<tgt;*brk=vf>tgt+900;*drift=0;*boost=0;
- if(sp>=245&&c->bat>320&&!c->boostT&&rr(60)==0)c->boostT=45;
+ // boost on straights; keep a reserve (EASY rarely boosts)
+ {static const s16 RES[3]={420,220,120};static const u8 ODD[3]={90,14,5};int strt=1;for(int k=1;k<9;k++)if(rcS[(c->wp+k)%nw]<238){strt=0;break;}
+  if(strt&&c->bat>RES[D]&&!c->boostT&&rr(ODD[D])==0)c->boostT=D==0?30:50;}
  if(c->boostT){c->boostT--;*boost=1;}
  if(iabs(e)>9000&&vf>6000)*brk=1;
- // overtaking: shift lane away from a car close ahead
+ // overtaking: move off the line away from a car close ahead
  for(int j=0;j<rcN;j++){RC*o=&rc[j];if(o==c)continue;int dx=(o->x-c->x)>>RQ,dy=(o->y-c->y)>>RQ;if(iabs(dx)>40||iabs(dy)>40)continue;
   int fwd=(dx*rsin(c->h)-dy*rcos(c->h))>>8,lat=(dx*rcos(c->h)+dy*rsin(c->h))>>8;
-  if(fwd>4&&fwd<34&&iabs(lat)<12){int hw=rc_halfw[rcTrk]*6/10;c->lane+=lat>0?-2:2;c->lane=clampi(c->lane,-hw,hw);}}
+  if(fwd>4&&fwd<34&&iabs(lat)<12){int hw=rc_halfw[rcTrk]*6/10;c->ovr=clampi(c->ovr+(lat>0?-3:3),-hw,hw);if(D==2&&fwd<20&&c->bat>80&&!c->boostT)c->boostT=20;}
+  if(D==0){if(fwd>4&&fwd<34&&iabs(lat)<12){int hw=rc_halfw[rcTrk]*6/10;c->lane+=lat>0?-2:2;c->lane=clampi(c->lane,-hw,hw);}}}
  if(c->stuck>40){*steer=e>0?256:-256;}}
 static void rc_physics(RC*c,int thr,int brk,int steer,int drift,int boost,int me){const RCar*C=&RCARS[c->car];
  if(c->resp){if(--c->respT<=0){c->resp=0;int w=c->wp,w2=(w+1)%rcNW;c->x=rcW[w*2]<<RQ;c->y=rcW[w*2+1]<<RQ;c->h=ang16(rcW[w2*2]-rcW[w*2],rcW[w2*2+1]-rcW[w*2+1]);c->vx=c->vy=0;c->z=0;c->air=0;}return;}
  int fx=rsin(c->h),fy=-rcos(c->h),rx=rcos(c->h),ry=rsin(c->h);
  s32 vf=((s64)c->vx*fx+(s64)c->vy*fy)>>8,vl=((s64)c->vx*rx+(s64)c->vy*ry)>>8;
  int sf=c->air?SF_ROAD_:rsurf(c->x,c->y);c->surf=sf;
- s32 vmax=C->vmax;int acc=C->acc;
+ s32 vmax;int acc;rc_pace(c,&vmax,&acc);
  if(sf==SF_OFF_){vmax=vmax*56/100;}
  int boosting=0;if(boost&&c->bat>0){boosting=1;int sx=(me&&c->car==0&&rcSpacex);c->bat-=sx?9:7;vmax=vmax*(sx?135:125)/100;acc=acc*(sx?27:22)/10;if(c->bat<0)c->bat=0;}
  c->boost=boosting;
@@ -212,7 +232,7 @@ static int rc_pause(void){int sel=0;static const char*const PO[3]={"RESUME","RES
 static int rc_race(int trk,int mode,int car,int nAI){
  rcTrk=trk;rcMode=mode;rcLaps=mode==RM_FREE?99:3;rcW=rc_wpv[trk];rcS=rc_spdv[trk];rcNW=rc_nwp[trk];rcHalf=rcNW/2;rcSurf=rc_surfv[trk];rcN=1+nAI;
  rc[0].car=car;rc[0].ai=FR_AUTO?1:0;int k=1;for(int i=0;i<RC_NCAR&&k<rcN;i++)if(i!=car){rc[k].car=i;rc[k].ai=1;k++;}
- static const u8 SK[4]={232,240,246,252};for(int i=0;i<rcN;i++){rc[i].skill=SK[SET.bot&3]+((i*7)%9)-4;}rc[0].skill=250;
+ static const s16 SK[3]={234,250,260};for(int i=0;i<rcN;i++){rc[i].skill=SK[rcDiff]+((i*7)%9)-4;rc[i].line=0;rc[i].ovr=0;rc[i].band=0;}rc[0].skill=256;
  rc_place();rc_setup(trk);rcT=-180;rcPhase=0;rcMsgT=0;rcMsg=0;rcRecLap=0;int endT=0;
  camH=rc[0].h;camX=rc[0].x-(rsin(camH)*CAMD<<(RQ-8));camY=rc[0].y+(rcos(camH)*CAMD<<(RQ-8));rc_table();hlb^=1;rc_table();
  bgm_t(trk>=2?TR_RACE2:TR_RACE);
@@ -227,8 +247,9 @@ static int rc_race(int trk,int mode,int car,int nAI){
    if(!FR_AUTO&&(pressed&K_START)){int r=rc_pause();if(r==1){rc_stop();return 2;}if(r==2){rc_stop();return 0;}}}
   if(rcPhase>=1){rc_physics(p,thr,brk,steer,drift,boost,1);
    for(int i=1;i<rcN;i++){int t_,b_,s_,d_,o_;rc_ai(&rc[i],&t_,&b_,&s_,&d_,&o_);
-    // gentle rubber band so the pack stays close
-    int gap=rc[0].prog-rc[i].prog;rc[i].skill=(SK[SET.bot&3]+((i*7)%9)-4)+(gap>rcNW/5?10:gap<-rcNW/4?-10:0);
+    // v1.3.3 rubber band (continuous): cars behind the player push harder (+battery trickle), cars ahead ease off
+    {int gap=rc[0].prog-rc[i].prog;static const u8 UPB[3]={6,16,22},DNB[3]={18,10,4};int adj=gap>0?clampi(gap*48/rcNW,0,UPB[rcDiff]):-clampi(-gap*48/rcNW,0,DNB[rcDiff]);
+     rc[i].skill=SK[rcDiff]+((i*7)%9)-4+adj;rc[i].band=adj;if(gap>rcNW/8&&rcDiff&&(rcT&3)==0&&rc[i].bat<600)rc[i].bat++;}
     rc_physics(&rc[i],t_,b_,s_,d_,o_,0);}
    rc_collide();for(int i=0;i<rcN;i++)rc_track_wp(&rc[i]);rc_rank();}
   // lap messages / finish
@@ -296,7 +317,7 @@ static void rc_results(int mode,int trk,int*pts,int newLap,int newRace){int ord[
  if(rcN==1){m3_text(12,54,cat("BEST LAP ",rtime(rc[0].bestLap)),C_WHITE,1);}
  if(rcN>1)m3_text(12,128,"GRAY = ESTIMATED FINISH",C_GRAY,1);m3_ctext(137,newLap&&newRace?"NEW RACE + LAP RECORD!":newLap?"NEW LAP RECORD!":newRace?"NEW RACE RECORD!":"",C_GREEN,1);
  m3_ctext(147,"A: CONTINUE",C_GRAY,1);m3_present();
- for(int t=0;;t++){BEAT->screen=SCR_RRES;BEAT->phase=3;BEAT->scoreA=rc[0].place;BEAT->scoreB=rc[0].finT;BEAT->mode=trk;BEAT->kills=rc[ord[0]].car;next_frame();if((pressed&(K_A|K_START))||(FR_AUTO&&t>150))break;}
+ for(int t=0;;t++){BEAT->screen=SCR_RRES;BEAT->phase=3;BEAT->scoreA=rc[0].place;BEAT->scoreB=rc[0].finT;BEAT->mode=trk;BEAT->kills=rc[ord[0]].car;{int b=0;for(int i=1;i<rcN;i++)if(!b||rc[i].finT<b)b=rc[i].finT;BEAT->hp=b;BEAT->era=rcDiff;}next_frame();if((pressed&(K_A|K_START))||(FR_AUTO&&t>150))break;}
  sfx_ok();}
 static int rc_record(int trk){int nl=0,nr=0;RC*p=&rc[0];if(p->bestLap&&(!RS.bestLap[trk]||(u32)p->bestLap<RS.bestLap[trk])){RS.bestLap[trk]=p->bestLap;nl=1;}
  if(p->fin==1&&rcMode!=RM_FREE&&(!RS.bestRace[trk]||(u32)p->finT<RS.bestRace[trk])){RS.bestRace[trk]=p->finT;nr=1;}RS.races++;RS.lastCar=p->car;RS.spacex=rcSpacex;rs_save();return nl|(nr<<1);}
@@ -307,10 +328,21 @@ static void rc_gp_stand(int*pts,int race,int fin){int ord[8];for(int i=0;i<rcN;i
   if(!RS.gpBest||myp<RS.gpBest)RS.gpBest=myp;if(myp==1)RS.gpWins++;rs_save();if(myp<=3)music_jingle(TR_VICTORY);}
  m3_ctext(147,"A: CONTINUE",C_GRAY,1);m3_present();
  for(int t=0;;t++){BEAT->screen=SCR_RRES;BEAT->phase=fin?5:4;BEAT->scoreA=myp;BEAT->scoreB=pts[0];next_frame();if((pressed&(K_A|K_START))||(FR_AUTO&&t>150))break;}sfx_ok();}
+static int rc_diff_select(void){int sel=rcDiff,redraw=1;static const char*const DD[3]={"RELAXED RIVALS, LOTS OF ROOM","RIVALS FIGHT BACK - GRAND PRIX DEFAULT","RACING LINES, SMART BOOSTS, NO MERCY"};
+ for(;;){BEAT->screen=SCR_RCAR;BEAT->menu=sel;BEAT->phase=7;
+  if(redraw){redraw=0;rc_bg(1);m3_fill(4,4,232,22,RGB(10,12,24));m3_box(4,4,232,22,2);m3_ctext(8,"GRAND PRIX DIFFICULTY",C_YEL,2);
+   m3_fill(20,40,200,96,RGB(10,12,24));m3_box(20,40,200,96,0);
+   for(int i=0;i<3;i++){int y=52+i*22;if(i==sel)m3_fill(28,y-4,184,16,RGB(16,60,110));m3_text(36,y,RC_DN[i],i==sel?C_YEL:C_WHITE,2);}
+   m3_ctext(122,DD[sel],C_GRAY,1);m3_ctext(146,"UP/DOWN  A: START  B: BACK",C_GRAY,1);m3_present();}
+  next_frame();if(FR_AUTO)return 1;
+  if(pressed&K_UP){sel=(sel+2)%3;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%3;redraw=1;sfx_menu();}
+  if(pressed&(K_A|K_START)){sfx_ok();rcDiff=sel;RS.pad=(RS.pad&~3)|(sel+1);rs_save();pressed=0;return 1;}if(pressed&K_B){sfx_menu();pressed=0;return 0;}}}
 static void race_mode(int md){rs_load();int mode=md==MD_GP?RM_GP:md==MD_TT?RM_TT:RM_FREE;int car=RS.lastCar;rcSpacex=RS.spacex;static int trk=0;
- u32 j=FR_JUMP;int jumped=0;if((j>>16)==0x5243){FR_JUMP=0;mode=(j>>8)&3;trk=(j>>4)&3;car=j&7;jumped=1;}
+ rcDiff=(RS.pad&3)?(RS.pad&3)-1:1;if(rcDiff>2)rcDiff=1;
+ u32 j=FR_JUMP;int jumped=0;if((j>>16)==0x5243){FR_JUMP=0;mode=(j>>8)&3;trk=(j>>4)&3;car=j&7;jumped=1;if((j>>12)&3)rcDiff=((j>>12)&3)-1;}
  for(;;){
   if(!jumped){bgm_t(TR_RACE);if(!rc_car_select(&car))return;}
+  if(mode==RM_GP&&!jumped&&!rc_diff_select())continue;
   if(mode==RM_GP){int pts[8]={0};int quit=0;
    for(int r=0;r<4&&!quit;r++){loading(cat3("GRAND PRIX ",itoa(r+1),cat("/4: ",RC_TN[r])));int res;do res=rc_race(r,RM_GP,car,7);while(res==2);if(!res){quit=1;break;}
     int rec=rc_record(r);for(int i=0;i<rcN;i++)pts[i]+=GPPTS[rc[i].place-1];rc_results(RM_GP,r,pts,rec&1,rec>>1);rc_gp_stand(pts,r,r==3);}

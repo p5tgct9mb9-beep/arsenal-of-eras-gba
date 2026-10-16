@@ -136,10 +136,10 @@ static int hg_build(HDes*d){static const char*const RL[10]={"CLASS","BODY","",""
 // ---- test flight: real dogfight engine; RANGE = enemy aircraft are unarmed targets
 static void hg_photo(int i){Unit*u=&U[i];int a=u->ang>>8;for(int k=0;k<NU;k++){Unit*e=&U[k];if(!e->alive||e->team==u->team)continue;int dx=dxw(e->x,u->x),dy=dyw(e->y,u->y);
   if(idist(dx,dy)<240&&iabs(angd(atan2i(dx,dy),a))<64){hgPhotos++;feed(cat("RECON PHOTO LOGGED: ",itoa(hgPhotos)),HB_GREEN);sfx_ok();return;}}feed("NO TARGET IN FRAME",HB_GRAY);}
-static void hg_fly(HDes*d,int range){hg_make_air(d);hg_draw(d);hgOn=1;hgRange=range;hgPhotos=0;int ok0=U[0].kills;(void)ok0;
+static void hg_fly(HDes*d,int range){hg_make_air(d);hg_draw(d);hgOn=1;hgHov=d->cls==HC_HELI||(d->cls==HC_DRONE&&d->body!=3);hgAlt=30;hgVx=hgVy=0;hgRange=range;hgPhotos=0;int ok0=U[0].kills;(void)ok0;
  loading(cat(range?"TARGET RANGE: ":"6V6 DOGFIGHT: ",d->name));mpMixed=1;mp_run(MM_AIR,2,0);mpMixed=0;REG_BLDCNT=0;REG_BLDY=0;
  hs_load();HS.flights++;HS.photos+=hgPhotos;HS.kills+=U[0].kills;hs_save();BEAT->kills=U[0].kills;BEAT->deaths=hgPhotos;
- hgOn=0;hgRange=0;hgCam=0;bgCached=-1;}
+ hgOn=0;hgHov=0;hgRange=0;hgCam=0;bgCached=-1;}
 static void hangar_mode(void){hs_load();int sel=0;bgm_t(TR_HANGAR);
  for(;;){static char it[5][40] EWRAM;const char*items[5];
   for(int i=0;i<3;i++){HDes*d=&HS.d[i];char*o=sp_put(it[i],"SLOT ");o=sp_int(o,i+1);o=sp_put(o,": ");if(d->used){o=sp_put(o,d->name);o=sp_put(o," (");o=sp_put(o,HCLS[d->cls]);sp_put(o,")");}else sp_put(o,"- EMPTY -");items[i]=it[i];}

@@ -3,6 +3,7 @@ enum{MM_INF=1,MM_TANK=2,MM_AIR=3,MM_SEA=4};
 static u8 mpMixed; // 6v6 arsenal: per-unit equipment era (u->ve)
 #define TV(u) (&TANKV[mpMixed?(u)->ve:mpEra][(u)->veh])
 static u8 sbOn,sbEra[2],sbMix,sbCnt[2],sbWin,sbBench[12];static int sbTarget,sbTime;static AirS hgAir;static u8 hgOn,hgRange,hgCam;static int hgPhotos;static u32 hgSpr[128] EWRAM;static void hg_photo(int i);
+static u8 hgHov;static s16 hgAlt;static s32 hgVx,hgVy; // v1.3.3 hover flight model for custom helicopters + multirotor drones
 #define AV(u) ((hgOn&&(u)->isp)?(const AirS*)&hgAir:&AIRV[mpMixed?(u)->ve:mpEra][(u)->veh])
 #define SV(u) (&SHIPV[(u)->ve][(u)->veh])
 static Wstat PW[3];static int pSpeed,pPerk,pLeth,pTact,pLaun,stealth,stealthR=130,pArmHP,pArmK,pMkey,pMark;static u32 pFX;
@@ -394,8 +395,20 @@ static void air_move(Unit*u,int target_spd){const AirS*A=AV(u);if(u->vel<target_
 static void air_gunner(int i){Unit*u=&U[i];if((frame+i)%9)return;if(hgRange&&!u->isp)return;int tail=((u->ang>>8)+128)&255;
  for(int k=0;k<NU;k++){Unit*e=&U[k];if(!e->alive||e->team==u->team)continue;int dx=dxw(e->x,u->x),dy=dyw(e->y,u->y);if(idist(dx,dy)>130)continue;int a=atan2i(dx,dy);
   if(iabs(angd(a,tail))<(AV(u)->gunner==2?128:44)){fire_bullet(i,a+rr(7)-3,1000,5,34,K_BUL,0);if(u->isp||idist(dxw(u->x,U[0].x),dyw(u->y,U[0].y))<140)sfx_shot(0);return;}}}
+// v1.3.3 HOVER (hangar helicopters + multirotor drones): D-pad UP/DOWN = forward/back thrust (let go = hover in place),
+// LEFT/RIGHT = yaw, L/R = strafe, SELECT+UP/DOWN = climb/descend (0-60 M). Low altitude (under 15 M) hides from missile locks.
+static void air_hover(int i,const AirS*A,int burn){Unit*u=&U[i];int a=u->ang>>8;int vmax=A->spd*(burn?40:90)/100;
+ int sel=(keys&K_SEL)!=0;int yaw=A->turn*3/2;if(keys&K_LEFT)u->ang-=yaw;if(keys&K_RIGHT)u->ang+=yaw;a=u->ang>>8;
+ int f=0,st=0;if(!sel){if(keys&K_UP)f=vmax;else if(keys&K_DOWN)f=-vmax/3;}if(keys&K_L)st=-vmax/2;if(keys&K_R)st=vmax/2;
+ if(sel){if((keys&K_UP)&&hgAlt<60&&(frame&1))hgAlt++;if((keys&K_DOWN)&&hgAlt>0&&(frame&1))hgAlt--;}
+ s32 tx=(SIN(a)*f>>8)+(COS(a)*st>>8),ty=(-(COS(a)*f)>>8)+(SIN(a)*st>>8);
+ hgVx+=(tx-hgVx)/(f||st?14:22);hgVy+=(ty-hgVy)/(f||st?14:22); // gentle accel; drag brings it to a hover
+ int W=worldPx()<<8;u->x=(u->x+hgVx)&(W-1);u->y=(u->y+hgVy)&(W-1);u->vel=idist(hgVx,hgVy);u->roll=0;
+ if(hgAlt==0&&u->vel>40){hgAlt=1;}
+ if(keys&K_A)air_fire(i);if(pressed&K_B)air_missile(i);}
 static void air_update(int i){Unit*u=&U[i];const AirS*A=AV(u);if(u->cd>0)u->cd--;if(u->cd2>0)u->cd2--;if(msOn&&u->role&&ms_role(i))return;if(A->gunner)air_gunner(i);
  int burn=A->fuel&&u->fuel<=0;if(A->fuel&&u->fuel>0){if(--u->fuel==0&&u->isp)feed(hgOn?"BINGO FUEL - REDUCED POWER":"ROCKET BURNOUT - GLIDING",HB_RED);}
+ if(u->isp&&hgHov){air_hover(i,A,burn);return;}
  if(u->isp){if(keys&K_LEFT)u->ang-=A->turn;if(keys&K_RIGHT)u->ang+=A->turn;int ts=A->spd;if(keys&K_UP)ts=ts*21/16;if(keys&K_DOWN)ts=(hgOn&&A->cls>=12)?ts/6:ts*11/16;
   if((pressed&(K_L|K_R))&&u->rollcd==0){u->roll=28;u->rollcd=140;u->wang=(pressed&K_R)?1:0;sfx_whoosh();}
   if(burn){ts=ts*45/100;}air_move(u,ts);if(keys&K_A)air_fire(i);if(pressed&K_B)air_missile(i);return;}
@@ -410,7 +423,7 @@ static void air_update(int i){Unit*u=&U[i];const AirS*A=AV(u);if(u->cd>0)u->cd--
   if(iabs(angd(u->ang>>8,aim))<7&&d<170)air_fire(i);
   if(A->sec==2){if(u->ammo>0&&d<90&&iabs(angd(u->ang>>8,aim))<20&&rr(20)==0)air_missile(i);}
   else if(A->sec==3){if(u->ammo>0&&d<260&&d>60&&iabs(angd(u->ang>>8,aim))<12&&rr(30)==0)air_missile(i);}
-  else if(u->ammo>0&&d<300&&d>70&&iabs(angd(u->ang>>8,aim))<24&&rr(110)==0)air_missile(i);}
+  else if(u->ammo>0&&d<300&&d>70&&iabs(angd(u->ang>>8,aim))<24&&rr(110)==0&&!(hgHov&&u->tgt==0&&hgAlt<15))air_missile(i);}
  if(burn)ts=ts*45/100;air_move(u,ts);}
 // ---------------------------------------------------------------- shots
 static int trophy_hit(Shot*s,int gx,int gy){if(s->sub>=10&&s->sub<20)return 0;for(int z=0;z<6;z++){Zone*q=&zn[z];if(q->t>0&&q->k==ZK_TROPHY&&q->team!=s->team&&q->n&&idist(gx-q->x,gy-q->y)<46){q->n--;if(!q->n)q->t=1;s->life=0;s->kind=K_BUL;fx_add(gx,gy,FXK_SMALL);sfx_shot(0);return 1;}}return 0;}
@@ -485,7 +498,8 @@ static void draw_units(void){
    if(k==0){int t=u->tur>>8;spr(x+(SIN(t)*72>>8)-8,y-(COS(t)*72>>8)-8,OT_FX+FX_RETICLE,0,1,3,0);}
    spr_aff(x,y,u->vt,2,k==0?2:u->team?1:0,u->ang>>8,0x81,1,0);if(u->vel>40&&((frame+k)&15)==0)fx_add((u->x>>8)-(SIN(u->ang>>8)*30>>8),(u->y>>8)+(COS(u->ang>>8)*30>>8),FXK_SPARK);}
   for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role!=R_WING)continue;spr_aff(scrx(u->x)+8,scry(u->y)+12,u->vt,2,4,u->ang>>8,0x100,2,1);}}
- if(mpMode==MM_AIR&&mpEra!=4)for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role||(u->inv>0&&(frame&4)))continue;spr_aff(scrx(u->x)+10,scry(u->y)+16,plane_tile(u),2,4,u->ang>>8,0x100,2,1);}}
+ if(mpMode==MM_AIR&&mpEra!=4)for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role||(u->inv>0&&(frame&4)))continue;{int ox=10,oy=16;if(k==0&&hgHov){ox=2+hgAlt/5;oy=3+hgAlt/4;}spr_aff(scrx(u->x)+ox,scry(u->y)+oy,plane_tile(u),2,4,u->ang>>8,0x100,2,1);}}}
+static const char*u_spdtag(Unit*P){return P->vel<30?"M HOVER":"M";}
 static void inf_hud(Unit*P){htxt(7,19,trunc12(PW[P->wpn].n),HB_WHITE);{int d=wd_near(P);if(d>=0){htxt(7,18,cat("L: TAKE ",trunc12(PRIM[WD[d].e][WD[d].w].n)),HB_GREEN);}}
  if(P->wpn==2){hput(19,19,HT_ICON+1,15);htxt(20,19,itoa(P->mag[2]),P->mag[2]?HB_YEL:HB_RED);}else if(P->rl>0)htxt(20,19,"RLD",(frame&8)?HB_RED:HB_YEL);else htxt(20,19,itoa(P->mag[P->wpn]),P->mag[P->wpn]*4<PW[P->wpn].mag?HB_RED:HB_WHITE);
  hput(24,19,HT_ICON,15);htxt(25,19,itoa(P->gren),HB_WHITE);{static const char TL[]="FS+GDEMACTR";char tb[2]={TL[pTact<11?pTact:0],0};htxt(27,19,tb,HB_GREEN);}htxt(28,19,itoa(P->tact),HB_WHITE);}
@@ -502,12 +516,12 @@ static void draw_hud(void){Unit*P=&U[0];
  else if(mpMode==MM_SEA){const ShipS*S=SV(P);htxt(7,19,trunc12(S->n),HB_WHITE);hbar(20,19,3,S->reload-P->cd,S->reload);
   static const char*const TG[5]={"R","0","1","2","3"};htxt(24,19,TG[P->mode+1],HB_YEL);
   if(S->w2==1||S->w2==2){hput(26,19,HT_ICON+1,15);htxt(27,19,itoa(P->ammo),HB_WHITE);}else if(S->w2==3){htxt(26,19,P->cd2?"..":"AIR",P->cd2?HB_GRAY:HB_GREEN);}}
- else{if(AV(P)->fuel){htxt(7,18,P->fuel>0?cat("FUEL ",itoa(P->fuel/60)):"BURNOUT",P->fuel>300?HB_YEL:HB_RED);}htxt(7,19,AV(P)->n,HB_WHITE);hput(7+slen(AV(P)->n)+1,19,HT_ICON+1,15);htxt(7+slen(AV(P)->n)+2,19,itoa(P->ammo),HB_WHITE);}
+ else{if(AV(P)->fuel){htxt(7,18,P->fuel>0?cat("FUEL ",itoa(P->fuel/60)):"BURNOUT",P->fuel>300?HB_YEL:HB_RED);}if(hgHov){htxt(7,17,cat3("ALT ",itoa(hgAlt),hgAlt<15?"M LOW":u_spdtag(P)),hgAlt<15?HB_GREEN:HB_WHITE);}htxt(7,19,AV(P)->n,HB_WHITE);hput(7+slen(AV(P)->n)+1,19,HT_ICON+1,15);htxt(7+slen(AV(P)->n)+2,19,itoa(P->ammo),HB_WHITE);}
  if(!P->alive)hctxt(8,cat("RESPAWN IN ",itoa(P->resp/60+1)),HB_YEL,0);
  if(msgT>0){msgT--;hctxt(2,msgS,msgB,0);}
  if(SET.hints&&hintT>0){hintT--;hctxt(3,mpMode==MM_INF?"A FIRE B GRENADE L SWAP":mpMode==MM_TANK?"A GUN B MG/ATGM L/R TURRET":mpMode==MM_SEA?"A MAIN GUNS B SECONDARY":"A GUNS B ROCKET L/R ROLL",HB_GRAY,0);
   hctxt(4,mpMode==MM_INF?"R STRAFE SEL TACTICAL":mpMode==MM_TANK?"UP/DN DRIVE SEL SQUAD/CENTER":mpMode==MM_SEA?"UP/DN TELEGRAPH L/R TURRETS":"UP FAST DN SLOW SEL SCORE",HB_GRAY,0);}
- if(keys&K_SEL&&mpMode==MM_AIR){hpanel(4,4,22,8);hctxt(5,"SCOREBOARD",HB_YEL,1);
+ if(keys&K_SEL&&mpMode==MM_AIR&&!(hgHov&&(keys&(K_UP|K_DOWN)))){hpanel(4,4,22,8);hctxt(5,"SCOREBOARD",HB_YEL,1);
   hptxt(6,7,cat(TNAME(0),"  "),HB_BLUE);hptxt(16,7,itoa(score[0]),HB_WHITE);hptxt(6,8,TNAME(1),HB_RED);hptxt(16,8,itoa(score[1]),HB_WHITE);
   hptxt(6,10,cat("YOU  K ",itoa(P->kills)),HB_WHITE);hptxt(16,10,cat("D ",itoa(P->deaths)),HB_WHITE);}
  draw_radar();}
@@ -576,7 +590,7 @@ static void mp_run(int mode,int era,int mapi){memset(WD,0,sizeof WD);memset(hide
  int scr=mode==MM_INF?SCR_INF:mode==MM_TANK?SCR_TANK:mode==MM_SEA?SCR_SEA:SCR_AIR;int over=0;
  if(sbOn){mpTimer=sbTime;for(int i=0;i<12;i++){int t=i<6?0:1,k=i%6;sbBench[i]=k>=sbCnt[t];if(sbBench[i]){U[i].alive=0;U[i].resp=32000;}}if(sbBench[0]){sbBench[0]=0;}}
  for(;;){
-  BEAT->screen=scr;BEAT->hp=U[0].hp;BEAT->scoreA=score[0];BEAT->scoreB=score[1];BEAT->timer=mpTimer;BEAT->kills=U[0].kills;BEAT->deaths=U[0].deaths;BEAT->x=U[0].x>>8;BEAT->y=U[0].y>>8;
+  BEAT->screen=scr;BEAT->hp=U[0].hp;BEAT->scoreA=score[0];BEAT->scoreB=score[1];BEAT->timer=mpTimer;BEAT->kills=U[0].kills;BEAT->deaths=U[0].deaths;BEAT->x=U[0].x>>8;BEAT->y=U[0].y>>8;if(hgHov)BEAT->menu=hgAlt|(U[0].vel<<8);
   if(pressed&K_START){if(pause_menu())return;}
   if((keys&(K_L|K_R))==(K_L|K_R)&&(pressed&K_SEL)&&!over){if(msOn)ms_skip();else mpTimer=1;} // debug: end match now
   if(over){if(--over==0){if(msOn)ms_result(msWin);else mp_result();return;}}

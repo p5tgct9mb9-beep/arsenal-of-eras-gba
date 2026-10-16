@@ -1,0 +1,62 @@
+wait 100
+tap START
+wait 20
+tap B
+wait 25
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+tap A
+wait 20
+tap A
+wait 220
+shot plane_0
+beat
+hold UP 90
+beat
+shot plane_fwd
+wait 150
+beat
+wait 60
+beat
+shot plane_hover
+hold SELECT+UP 50
+beat
+shot plane_climb
+hold SELECT+DOWN 70
+beat
+shot plane_low
+hold L 70
+beat
+wait 120
+beat
+hold R 70
+beat
+shot plane_strafe
+hold DOWN 60
+beat
+hold LEFT+A 60
+beat
+shot plane_fire
+end
