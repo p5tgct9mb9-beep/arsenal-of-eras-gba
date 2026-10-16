@@ -155,24 +155,16 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "launch.inc"
 #include "duel.inc"
 #include "aa.inc"
+#include "menu.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
  for(;;){
   title_screen();
   if(!kc_done()){ps_read();tutorial(1);}
   int sel=0,era=0;
-  for(;;){bgm(1,0);sel=main_menu(sel);if(sel<0)break;
-   if(sel==13){anti_air();}
-   else if(sel==12){sword_fight();}
-   else if(sel==11){space_launch();}
-   else if(sel==10){tutorial(0);}
-   else if(sel==9){settings_menu();}
-   else if(sel==8){loadout_hub(&era);}
-   else if(sel==7){spec_ops();}
-   else if(sel==6){flight_menu();}
-   else if(sel==5){static int dm=0;if(drone_hangar(&dm)){loading(cat("LAUNCHING: ",DRN[droneSel].n));drone_run(dm);}}
-   else if(sel==0){mission_select();}
-   else if(faction_select(sel)){if(arsenal_menu(sel)){int me=0;int mi=map_select(sel,&me);if(mi>=0){loading(cat("DEPLOYING: ",map_def(sel,me,mi)->n));mpMixed=1;mp_run(sel,me,mi);mpMixed=0;}}}
+  for(;;){bgm(1,0);sel=main_menu2(sel);if(sel<0)break;
+   if(sel==CAT_LOAD)loadout_hub(&era);else if(sel==CAT_SET)settings_menu();else if(sel==CAT_KC)tutorial(0);else category(sel);
+   pressed=0;
    }
  }
 }

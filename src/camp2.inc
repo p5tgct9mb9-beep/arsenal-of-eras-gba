@@ -285,7 +285,8 @@ static void mission_run(int i,int side){cmIdx=i;cm=mis_for(i,side);msAlt=side;ca
  msNob=0;while(msNob<3&&cm->ob[msNob])msNob++;msReady=0;
  ms_role=ms_role_fn;ms_draw=ms_draw_fn;ms_death=ms_death_fn;ms_init=ms_init_fn;ms_tick=ms_tick_fn;ms_hud=ms_hud_fn;ms_spawn=ms_spawn_fn;ms_result=ms_result_fn;ms_skip=ms_skip_fn;
  msOn=1;nU=MAXU;mp_run(cm->mode,cm->sEra,0);msOn=0;msReady=0;nU=12;}
-static void mission_select(void){static int sel=0;campUnlock|=(1u<<14)|(1u<<15); // v1.3 what-if bonus mission is always open
+static int msel_jump=-1;
+static void mission_select(void){static int sel=0;if(msel_jump>=0){sel=msel_jump;msel_jump=-1;}campUnlock|=(1u<<14)|(1u<<15); // v1.3 what-if bonus mission is always open
 int redraw=2,top=0;bgm(1,0);
  for(;;){BEAT->screen=SCR_MSEL;BEAT->menu=sel;BEAT->extra=campUnlock;
   if(sel<top)top=sel;if(sel>top+7)top=sel-7;
