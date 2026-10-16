@@ -815,51 +815,96 @@ preview_planes()
 # ------------------------------------------------------------------ title illustration (mode 3, 240x160, RGB15)
 W,Hh_=240,160
 im=Image.new('RGB',(W,Hh_));px=im.load()
+# v1.3: KC on a golden-hour hilltop, soldiers of every era on the ridge behind her
 for y in range(Hh_):
-    t=y/Hh_
-    if t<.55:c0,c1,tt=(14,16,44),(120,46,60),t/.55
-    else:c0,c1,tt=(120,46,60),(236,130,50),(t-.55)/.45
+    t=y/90.0
+    if t<.5:c0,c1,tt=(26,34,84),(150,84,104),t/.5
+    elif t<1:c0,c1,tt=(150,84,104),(255,190,100),(t-.5)/.5
+    else:c0,c1,tt=(255,190,100),(255,210,130),0
     col=tuple(int(c0[i]+(c1[i]-c0[i])*tt) for i in range(3))
     for x in range(W):
-        d=((x+y)&1)*3
-        px[x,y]=tuple(min(255,v+d) for v in col)
-for i in range(90):
-    x=int(H(500,i)*W);y=int(H(501,i)*70);b=int(120+H(502,i)*135)
+        d_=((x+y)&1)*3
+        px[x,y]=tuple(min(255,v+d_) for v in col)
+for i in range(50):
+    x=int(H(500,i)*W);y=int(H(501,i)*34);b=int(150+H(502,i)*100)
     px[x,y]=(b,b,min(255,b+20))
 d=ImageDraw.Draw(im)
-d.ellipse((150,96,206,152),fill=(255,190,90));d.ellipse((156,102,200,146),fill=(255,214,120))
-for y in range(100,150,5):d.line((140,y,216,y),fill=(236,130,50) if y>120 else (210,110,60))
-SIL=(18,12,22);SIL2=(44,22,34)
-# far hills / city / moon base skyline
-pts=[(0,128)]+[(x,122-int(8*math.sin(x/23)+5*math.sin(x/9))) for x in range(0,241,6)]+[(240,160),(0,160)]
-d.polygon(pts,fill=SIL2)
-for x in range(170,240,9):h=int(8+H(600,x)*16);d.rectangle((x,124-h,x+6,128),fill=SIL2)
-d.polygon([(0,140)]+[(x,136-int(4*math.sin(x/17))) for x in range(0,241,8)]+[(240,160),(0,160)],fill=SIL)
-# hedgehogs silhouettes
-for hx in (22,64):
-    d.line((hx-6,140,hx+6,128),fill=SIL,width=2);d.line((hx+6,140,hx-6,128),fill=SIL,width=2);d.line((hx,126,hx,141),fill=SIL,width=2)
-# tank silhouette
-d.rectangle((88,124,138,138),fill=SIL);d.polygon([(84,138),(142,138),(136,146),(90,146)],fill=SIL)
-d.ellipse((100,112,126,128),fill=SIL);d.rectangle((124,117,160,120),fill=SIL)
-for wx in range(92,138,8):d.ellipse((wx,138,wx+6,145),fill=SIL2)
-# soldier silhouette with rifle
-sx=40;d.ellipse((sx-4,96,sx+4,104),fill=SIL);d.polygon([(sx-6,104),(sx+6,104),(sx+5,124),(sx-5,124)],fill=SIL)
-d.polygon([(sx-5,123),(sx-1,123),(sx-6,142),(sx-10,142)],fill=SIL);d.polygon([(sx+1,123),(sx+5,123),(sx+9,142),(sx+5,142)],fill=SIL)
-d.line((sx-2,112,sx+20,98),fill=SIL,width=3);d.ellipse((sx-6,94,sx+6,100),fill=SIL)
-# future trooper silhouette right
-sx=212;d.ellipse((sx-5,94,sx+5,104),fill=SIL);d.rectangle((sx-7,104,sx+7,124),fill=SIL);d.rectangle((sx-6,124,sx-2,142),fill=SIL);d.rectangle((sx+2,124,sx+6,142),fill=SIL)
-d.line((sx-3,98,sx+3,98),fill=(80,240,255));d.line((sx-14,112,sx+4,110),fill=SIL,width=3)
-# planes in sky
-def splane(cx,cy,s,kind):
-    if kind==0:
-        d.polygon([(cx-14*s,cy),(cx+14*s,cy),(cx+12*s,cy+3*s),(cx-12*s,cy+3*s)],fill=SIL);d.ellipse((cx-3*s,cy-6*s,cx+3*s,cy+12*s),fill=SIL)
-        d.polygon([(cx-5*s,cy+10*s),(cx+5*s,cy+10*s),(cx,cy+8*s)],fill=SIL)
-    else:
-        d.polygon([(cx,cy-10*s),(cx+2*s,cy-2*s),(cx+12*s,cy+6*s),(cx+2*s,cy+5*s),(cx+4*s,cy+10*s),(cx,cy+9*s),(cx-4*s,cy+10*s),(cx-2*s,cy+5*s),(cx-12*s,cy+6*s),(cx-2*s,cy-2*s)],fill=SIL)
-splane(196,92,1,0);splane(26,72,1,1)
-d.line((26,84,10,118),fill=(150,80,80))
-# spaceship
-d.polygon([(128,88),(148,84),(160,88),(148,92)],fill=SIL2);d.line((120,88,128,88),fill=(80,200,255))
+d.ellipse((178,52,214,88),fill=(255,214,120));d.ellipse((182,56,210,84),fill=(255,236,170))   # setting sun
+for y in range(66,90,4):d.line((160,y,230,y),fill=(255,190,100))
+SIL=(30,20,34);SIL2=(96,58,64);RIM=(255,170,80)
+# distant ridge with tank + helicopter silhouettes
+d.polygon([(0,82)]+[(x,78-int(3*math.sin(x/19)+2*math.sin(x/7))) for x in range(0,241,6)]+[(240,160),(0,160)],fill=SIL2)
+d.rectangle((118,71,146,77),fill=SIL2);d.polygon([(114,77),(150,77),(146,81),(118,81)],fill=SIL2);d.ellipse((124,66,138,74),fill=SIL2);d.rectangle((137,68,158,69),fill=SIL2)
+d.ellipse((206,24,224,31),fill=SIL2);d.polygon([(206,27),(190,26),(190,29),(206,30)],fill=SIL2);d.line((192,22,236,22),fill=SIL2);d.line((215,22,215,25),fill=SIL2);d.line((188,24,188,30),fill=SIL2)
+d.rectangle((208,32,222,32),fill=SIL2)
+# near ridge the soldiers stand on
+d.polygon([(40,86)]+[(x,82-int(2*math.sin(x/13))) for x in range(40,241,5)]+[(240,160),(40,160)],fill=SIL)
+def trooper(x,base,era):
+    h=base-20
+    d.rectangle((x-2,h+5,x+2,h+14),fill=SIL)                      # torso
+    d.rectangle((x-2,h+14,x-1,base),fill=SIL);d.rectangle((x+1,h+14,x+2,base),fill=SIL)   # legs
+    d.ellipse((x-2,h+1,x+2,h+5),fill=SIL)                          # head
+    if era==0:d.rectangle((x-5,h+1,x+5,h+1),fill=SIL);d.rectangle((x-2,h,x+2,h),fill=SIL);d.line((x+3,h+13,x+5,h-6),fill=SIL);d.line((x+5,h-6,x+5,h-10),fill=(200,190,180))  # Brodie + rifle + bayonet
+    elif era==1:d.ellipse((x-3,h,x+3,h+3),fill=SIL);d.line((x-3,h+5,x+4,h+15),fill=SIL)     # M1 helmet, slung rifle
+    elif era==2:d.ellipse((x-3,h,x+3,h+3),fill=SIL);d.line((x+1,h+8,x+8,h+4),fill=SIL,width=2)  # M16 at port arms
+    elif era==3:d.ellipse((x-3,h,x+3,h+3),fill=SIL);d.rectangle((x+2,h,x+4,h+1),fill=SIL);d.rectangle((x-3,h+5,x+3,h+11),fill=SIL);d.line((x+2,h+10,x+9,h+11),fill=SIL,width=2)  # NVG mount, plates, carbine low-ready
+    else:d.ellipse((x-3,h,x+3,h+4),fill=SIL);d.line((x,h+2,x+3,h+2),fill=(80,240,255));d.rectangle((x-5,h+5,x-3,h+12),fill=SIL);d.line((x+2,h+9,x+10,h+7),fill=SIL,width=2)  # visor + pack + rifle
+    d.line((x+3,h+1,x+3,h+4),fill=RIM)                             # sunset rim light
+for k,x in enumerate((78,108,138,168,198)):trooper(x,81-int(2*math.sin(x/13)),k)
+d.line((228,46,228,80),fill=SIL);d.polygon([(228,46),(212,49),(216,51),(212,54),(228,56)],fill=(196,150,70))   # plain pennant, no emblem
+# KC's hill (left, front)
+d.polygon([(0,74),(18,71),(34,70),(52,72),(70,80),(86,90),(90,160),(0,160)],fill=(58,92,44))
+for gx in range(0,80,3):
+    gy=71+(0 if gx<50 else (gx-50)//2)+int(H(610,gx)*2)
+    d.line((gx,gy,gx+1,gy-2),fill=(214,190,96));d.line((gx+1,gy+3,gx+2,gy+1),fill=(120,150,60))
+# KC: standing proud, facing right (palette as tools/gen_kc.py)
+G=[[0]*48 for _ in range(46)]
+def kp(x,y,c):
+    if 0<=y<46 and 0<=x<48:G[y][x]=c
+def ke(x0,y0,x1,y1,c):
+    cx=(x0+x1)/2;cy=(y0+y1)/2;rx=(x1-x0)/2+.5;ry=(y1-y0)/2+.5
+    for yy in range(y0,y1+1):
+        for xx in range(x0,x1+1):
+            if ((xx-cx)/rx)**2+((yy-cy)/ry)**2<=1:kp(xx,yy,c)
+def kr(x0,y0,x1,y1,c):
+    for yy in range(y0,y1+1):
+        for xx in range(x0,x1+1):kp(xx,yy,c)
+def kt(a,b,c_,col):
+    xs=[a[0],b[0],c_[0]];ys=[a[1],b[1],c_[1]]
+    for yy in range(min(ys),max(ys)+1):
+        for xx in range(min(xs),max(xs)+1):
+            def sg(p,q,r):return (p[0]-r[0])*(q[1]-r[1])-(q[0]-r[0])*(p[1]-r[1])
+            P=(xx,yy);d1=sg(P,a,b);d2=sg(P,b,c_);d3=sg(P,c_,a)
+            if not ((d1<0 or d2<0 or d3<0) and (d1>0 or d2>0 or d3>0)):kp(xx,yy,col)
+B,BH,MZ,MZL,WH,EY,NO,IN,CO,TG=2,3,5,6,7,8,9,10,11,12
+for i,(x,y) in enumerate([(10,21),(7,23),(5,26),(4,29),(4,32),(5,35)]):r_=2+min(i,3)//2;ke(x-r_-1,y-r_,x+r_+1,y+r_,B)   # bushy tail, hanging low
+ke(1,33,7,38,BH)
+ke(9,19,34,31,B);ke(11,19,30,23,BH)                         # body + back highlight
+ke(7,21,18,34,B)                                             # haunch
+kr(9,32,12,43,B);kr(14,31,17,42,B);kr(9,43,12,44,4);kr(14,42,17,43,4)       # rear legs + paws
+ke(27,16,38,33,B)                                            # chest
+kr(29,30,32,43,B);kr(34,30,37,43,B);kr(29,43,32,44,4);kr(34,43,37,44,4)     # front legs
+kt((27,20),(33,8),(39,18),B)                                 # neck, head held high
+ke(32,7,42,17,B)                                             # head
+ke(38,11,47,17,MZ);ke(40,12,46,16,MZL);kr(45,11,47,12,NO);kr(41,16,46,16,1)  # grey muzzle, nose, mouth
+kt((31,10),(33,0),(37,9),B);kt((36,9),(41,0),(42,11),B)       # big pointy ears
+kt((33,8),(33,3),(36,8),IN);kt((38,8),(40,3),(41,9),IN)
+kp(40,10,EY);kp(41,10,EY);kp(41,9,WH);kp(38,9,MZ);kp(39,9,MZ)               # eye + grey brow
+ke(33,22,36,27,WH)                                           # white chest patch
+kr(31,17,36,18,CO);kp(35,19,TG);kp(35,20,TG)                 # olive collar + gold tag
+KPAL={1:(12,10,16),2:(34,32,42),3:(70,64,82),4:(92,88,104),5:(146,144,152),6:(206,204,212),7:(244,244,248),8:(96,58,34),9:(8,8,10),10:(120,78,92),11:(84,112,60),12:(250,206,70)}
+O=[r[:] for r in G]
+for yy in range(46):
+    for xx in range(48):
+        if not G[yy][xx] and any(0<=xx+a<48 and 0<=yy+b<46 and G[yy+b][xx+a] for a,b in((1,0),(-1,0),(0,1),(0,-1))):O[yy][xx]=1
+KX,KY=4,27
+for yy in range(46):
+    for xx in range(48):
+        c=O[yy][xx]
+        if not c:continue
+        col=KPAL[c]
+        if c in(2,3) and xx+1<48 and not G[yy][xx+1]:col=(150,96,70)        # warm sunset rim on her right side
+        px[KX+xx,KY+yy]=col
 # title text
 def big_text(s,cx,y,sc,top,bot,out=(20,10,8)):
     wch=6*sc;x0=cx-(len(s)*wch-sc)//2
@@ -884,8 +929,9 @@ def big_text(s,cx,y,sc,top,bot,out=(20,10,8)):
                         t=(gy*sc+oy)/(7*sc);col=tuple(int(top[k]+(bot[k]-top[k])*t) for k in range(3))
                         if oy==0 and gy>0 and not g[gy-1][gx]:col=(255,250,220)
                         px[X+ox,Y+oy]=col
-big_text("ARSENAL",120,10,4,(255,236,150),(214,110,30))
-big_text("OF ERAS",120,46,4,(255,236,150),(214,110,30))
+big_text("ARSENAL",128,8,3,(255,236,150),(214,110,30))
+big_text("OF ERAS",128,34,3,(255,236,150),(214,110,30))
+im.resize((720,480),Image.NEAREST).save(os.path.join(ROOT,"build","title_preview.png"))
 title=[rgb15(px[x,y]) for y in range(Hh_) for x in range(W)]
 emit("title_bmp",title)
 emit("title_dim",[((v>>1)&0x3DEF) for v in title])

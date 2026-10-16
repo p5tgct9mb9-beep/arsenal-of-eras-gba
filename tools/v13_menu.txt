@@ -1,7 +1,11 @@
 wait 100
 tap START
 wait 15
+tap DOWN
+wait 6
 shot v13_menu_main
+tap UP
+wait 6
 tap A
 wait 20
 shot v13_menu_campaign
@@ -11,10 +15,14 @@ tap DOWN
 wait 4
 tap A
 wait 20
+tap DOWN
+wait 6
 shot v13_menu_battles
 tap A
-wait 20
-shot v13_menu_hub_infantry
+wait 10
+shot v13_menu_battles_options
+tap DOWN
+tap DOWN
 tap DOWN
 tap DOWN
 tap DOWN
@@ -32,7 +40,7 @@ wait 10
 shot v13_menu_records
 tap B
 wait 6
-tap B
+tap LEFT
 wait 6
 tap B
 wait 10
@@ -53,7 +61,7 @@ tap DOWN
 tap DOWN
 wait 4
 tap A
-wait 20
+wait 10
 tap DOWN
 tap DOWN
 tap DOWN
@@ -62,7 +70,8 @@ tap A
 wait 10
 shot v13_menu_records_aa
 tap B
-tap B
+wait 6
+tap LEFT
 wait 6
 tap B
 wait 10

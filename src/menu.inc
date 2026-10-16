@@ -6,6 +6,7 @@
 #define SCR_OPT 57
 enum{MD_CAMP,MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_SPEC,MD_BRAD,MD_SNIPE,MD_EOD,MD_AA,MD_DRONE,MD_LAUNCH,MD_FLIGHT,MD_LRRP,MD_FPS,MD_N};
 static const char*const MDN[MD_N]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","SPEC OPS: BRADLEY","SNIPER","EOD - BOMB DISPOSAL","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS"};
+static const char*const MSN[MD_N+2]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","BRADLEY OPS","SNIPER","EOD","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS"};
 static const char*const MDD[MD_N]={"MISSIONS ACROSS EVERY ERA","PICK A FACTION, ANY-ERA ARSENAL","TANKS, TDS, IFVS, HALFTRACKS, JEEPS","AIR SUPERIORITY - GUNS + MISSILES","BATTLESHIPS, CARRIERS, DESTROYERS",
  "KNIGHT, SAMURAI, VIKING... BEST OF 3","PLATFORMER: WORLDS OF COURSES","M2 BRADLEY VEHICLE PLATFORMER","LONG RANGE: DROP, WIND, BREATH","FIND, APPROACH, DEFUSE",
  "GUNS + SAMS VS PLANES AND DRONES","MODERN UAV STRIKES - MQ-9, TB2","35 REAL ROCKETS: ASCENT, LAND, DOCK","FREE ROAM IN THE X-15, LANDMARKS","VIETNAM 1966-70: 6-MAN RECON TEAM","FIRST-PERSON: MISSIONS, FFA, SURVIVAL"};
@@ -57,14 +58,18 @@ static void cat_bg(int c){
  default:{m3_fill(0,0,240,160,RGB(4,6,16));mstars(80,160,RGB(220,220,255));for(int y=110;y<160;y++){int w=(y-110)*4+40;m3_fill(120-w,y,2*w,1,y<114?RGB(120,180,255):RGB(30,70,150));}
    m3_fill(60,40,4,30,RGB(230,230,236));m3_fill(59,70,6,4,RGB(200,80,40));for(int i=0;i<6;i++)m3_fill(60+(i&1),74+i*3,2+(i&1),3,RGB(255,190-i*20,80));break;}}}
 static int bgCached=-1;
-static void cat_bgc(int c){if(bgCached==c){dma32(dl_bg,fb,240*160/2);return;}cat_bg(c);dma32(fb,dl_bg,240*160/2);bgCached=c;}
+static void chrome(int c,int lay){int key=c*4+lay;if(bgCached==key){dma32(dl_bg,fb,240*160/2);return;}cat_bg(c);
+ if(lay==1){m3_fill(0,2,240,22,RGB(24,36,90));m3_box(0,2,240,22,2);m3_box(6,30,128,108,0);m3_box(138,30,96,108,0);m3_fill(0,140,240,20,RGB(10,12,24));}
+ else if(lay==2)m3_box(8,40,224,112,0);
+ dma32(fb,dl_bg,240*160/2);bgCached=key;}
+static void cat_bgc(int c){chrome(c,0);}
 static void banner(const char*t,const char*sub,u16 c){m3_fill(0,4,240,30,RGB(10,12,24));m3_fill(0,4,240,1,c);m3_fill(0,33,240,1,c);m3_ctext(8,t,C_YEL,2);if(sub)m3_ctext(24,sub,C_GRAY,1);}
 // ---- stubs for modes still being built
 static void bradley_ops(void);static void sniper_ops(void);static void eod_ops(void);static void lrrp_ops(void);static void fps_ops(void);
 static int mode_avail(int md){return md!=MD_BRAD&&md!=MD_SNIPE&&md!=MD_EOD&&md!=MD_LRRP&&md!=MD_FPS;}
 // ---- per-mode pages
 static void how_to(int md,int c){int redraw=1;for(;;){BEAT->screen=SCR_HOW;BEAT->mode=md;
-  if(redraw){cat_bgc(c);m3_box(8,40,224,112,0);banner(MDN[md],"HOW TO PLAY",C_YEL);for(int i=0;i<6;i++)m3_text(16,50+i*13,HOW[md][i],C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
+  if(redraw){chrome(c,2);banner(MDN[md],"HOW TO PLAY",C_YEL);for(int i=0;i<6;i++)m3_text(16,50+i*13,HOW[md][i],C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
 static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5;i++)L[i]="";
  #define SB(k,s) {const char*_s=(s);int _n=0;while(_s[_n]&&_n<38){b[k][_n]=_s[_n];_n++;}b[k][_n]=0;L[k]=b[k];}
@@ -76,11 +81,11 @@ static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5
  #undef SB
 }
 static void records(int md,int c){const char*L[5];rec_lines(md,L);int redraw=1;for(;;){BEAT->screen=SCR_REC;BEAT->mode=md;
-  if(redraw){cat_bgc(c);m3_box(8,40,224,112,0);banner(MDN[md],"HIGH SCORES / PROGRESS",C_YEL);for(int i=0;i<5;i++)m3_text(16,54+i*14,L[i],i==0?C_YEL:C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
+  if(redraw){chrome(c,2);banner(MDN[md],"HIGH SCORES / PROGRESS",C_YEL);for(int i=0;i<5;i++)m3_text(16,54+i*14,L[i],i==0?C_YEL:C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
 static void mode_options(int md,int c){int sel=0,redraw=1;int n=md>=MD_INF&&md<=MD_SEA?3:2;
  for(;;){BEAT->screen=SCR_OPT;BEAT->mode=md;BEAT->menu=sel;
-  if(redraw){static const char*const BN[4]={"EASY","NORMAL","HARD","ELITE"};cat_bgc(c);m3_box(8,40,224,112,0);banner(MDN[md],"OPTIONS",C_YEL);
+  if(redraw){static const char*const BN[4]={"EASY","NORMAL","HARD","ELITE"};chrome(c,2);banner(MDN[md],"OPTIONS",C_YEL);
    const char*R[3]={cat("BOT DIFFICULTY: ",BN[SET.bot&3]),SET.hints?"BUTTON HINTS: ON":"BUTTON HINTS: OFF","FACTIONS..."};
    static char r0[32];{int k=0;const char*s=R[0];while(*s&&k<30)r0[k++]=*s++;r0[k]=0;R[0]=r0;}
    for(int i=0;i<n;i++)m3_text(24,58+i*16,cat(i==sel?">":" ",R[i]),i==sel?C_YEL:C_WHITE,1);
@@ -106,45 +111,47 @@ static void mode_play(int md){
  case MD_FLIGHT:flight_menu();break;}
  pressed=0;bgCached=-1;}
 static void mode_loadout(int md){int era=0;if(md==MD_SPEC){ps_read();so_read();so_menu(PS.unit);}else loadout_hub(&era);pressed=0;bgCached=-1;}
-static void mode_hub(int md,int c){int sel=0,redraw=1;static const char*const IT[6]={"PLAY","OPTIONS","LOADOUT","RECORDS / PROGRESS","HOW TO PLAY","BACK"};
- static const char*const ID[6]={"START THE MODE","DIFFICULTY, HINTS, MODE SETTINGS","KITS, ARSENAL, CHARACTER","YOUR BEST RESULTS","CONTROLS + TIPS","RETURN TO THE CATEGORY"};
- for(;;){BEAT->screen=SCR_HUB;BEAT->mode=md;BEAT->menu=sel;
-  if(redraw){cat_bgc(c);banner(MDN[md],MDD[md],C_YEL);m3_box(8,42,140,96,0);
-   for(int i=0;i<6;i++)m3_text(16,50+i*14,cat(i==sel?">":" ",IT[i]),i==sel?C_YEL:C_WHITE,1);
-   m3_box(152,42,80,96,0);m3_text(158,50,"MODE",C_GRAY,1);
-   {const char*s=MDN[md];static char l[3][14];int li=0,k=0;while(*s&&li<3){if(*s==' '&&k>8){l[li][k]=0;li++;k=0;s++;continue;}if(k<13)l[li][k++]=*s;s++;}if(li<3)l[li][k]=0;for(int i=li+1;i<3;i++)l[i][0]=0;for(int i=0;i<3;i++)m3_text(158,62+i*11,l[i],C_WHITE,1);}
-   if(!mode_avail(md))m3_text(158,100,"IN TRAINING",C_RED,1);
-   m3_fill(0,140,240,20,RGB(10,12,24));m3_ctext(146,ID[sel],C_GRAY,1);m3_present();redraw=0;}
+// ---- category screen (mockup layout): title bar, mode list left, options panel right
+static s8 mpPickI[5]={-1,-1,-1,-1,-1},mpPickE[5];
+enum{OP_PLAY,OP_MAP,OP_SIDE,OP_BOTS,OP_LOAD,OP_REC,OP_HOW};
+static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
+ if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP)o[n++]=OP_BOTS;if(md!=MD_CAMP)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
+static const char*op_label(int md,int op){static char b[24];static const char*const BN[4]={"EASY","NORMAL","VETERAN","ELITE"};const char*v=0;const char*k="";
+ switch(op){case OP_PLAY:return "PLAY";case OP_LOAD:return "LOADOUT";case OP_REC:return md==MD_CAMP?"PROGRESS":"HIGH SCORES";case OP_HOW:return "HOW TO PLAY";
+ case OP_MAP:k="MAP: ";v=mpPickI[md]<0?"PICK":map_def(md,mpPickE[md],mpPickI[md])->n;break;
+ case OP_SIDE:k="SIDE: ";v=FAC[g6.fac0].n;break;case OP_BOTS:k="BOTS: ";v=BN[SET.bot&3];break;}
+ int n=0;while(*k)b[n++]=*k++;while(*v&&n<14)b[n++]=*v++;b[n]=0;return b;}
+static void play_6v6(int md){if(!arsenal_menu(md))return;int me=mpPickE[md],mi=mpPickI[md];if(mi<0){me=0;mi=map_select(md,&me);}if(mi>=0){loading(cat("DEPLOYING: ",map_def(md,me,mi)->n));mpMixed=1;mp_run(md,me,mi);mpMixed=0;}}
+static void cat_screen(int c){const MCat*C=&MC[c];static const char*const EN[4]={"WORLD WAR II","COLD WAR","MODERN","WHAT-IF"};static const char*const ED[4]={"1942-1945: MIDWAY TO OMAHA","1950-1985: KOREA, VIETNAM, FULDA","1993-2026","FICTIONAL SCENARIOS"};
+ int camp=c==CAT_CAMP;int nm=camp?4:C->nm;static u8 last[CAT_N];int sel=last[c]<nm?last[c]:0,foc=0,os=0,redraw=1;bgm_t(C->trk);
+ for(;;){int md=camp?MD_CAMP:C->m[sel];u8 ops[8];int no=mode_ops(md,ops);if(os>=no)os=no-1;
+  BEAT->screen=foc?SCR_HUB:SCR_CAT;BEAT->mode=camp?0:md;BEAT->menu=sel;BEAT->phase=os;
+  if(redraw){chrome(c,1);m3_ctext(6,camp?"CAMPAIGN":C->n,C_YEL,2);
+   for(int i=0;i<nm;i++){const char*t=camp?EN[i]:MDN[C->m[i]];int y=40+i*(nm>5?15:17);m3_text(14,y,i==sel?">":" ",C_YEL,1);m3_text(20,y,camp?t:MSN[C->m[i]],i==sel?C_YEL:(camp||mode_avail(C->m[i])?C_WHITE:C_GRAY),1);}
+   for(int i=0;i<no;i++){int y=38+i*13;int hi=foc&&i==os;m3_text(144,y,hi?">":" ",C_GREEN,1);m3_text(150,y,op_label(md,ops[i]),hi?C_GREEN:(i==0&&!foc?C_GREEN:C_WHITE),1);}
+   if(!camp&&!mode_avail(md))m3_text(144,38+no*13,"IN TRAINING",C_RED,1);
+   m3_ctext(142,camp?ED[sel]:MDD[md],C_GRAY,1);m3_ctext(151,foc?"A: SELECT   B: BACK TO LIST":"A: OPTIONS   B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();
-  if(pressed&K_UP){sel=(sel+5)%6;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%6;redraw=1;sfx_menu();}
-  if(pressed&(K_A|K_START)){sfx_ok();pressed=0;if(sel==0){mode_play(md);bgm_t(MC[c].trk);}else if(sel==1)mode_options(md,c);else if(sel==2)mode_loadout(md);else if(sel==3)records(md,c);else if(sel==4)how_to(md,c);else return;redraw=1;}
-  if(pressed&K_B){sfx_menu();pressed=0;return;}}}
-static void campaign_cat(void){int sel=0,redraw=1;static const char*const EN[4]={"WORLD WAR II","COLD WAR","MODERN","WHAT-IF"};static const char*const ED[4]={"1942-1945: MIDWAY TO OMAHA","1950-1985: KOREA, VIETNAM","1993-2026","FICTIONAL SCENARIOS"};
- bgm_t(TR_OMAHA);
- for(;;){BEAT->screen=SCR_CAT;BEAT->mode=CAT_CAMP;BEAT->menu=sel;
-  if(redraw){cat_bgc(CAT_CAMP);banner("CAMPAIGN","CHOOSE AN ERA",C_YEL);m3_box(8,42,224,96,0);
-   for(int i=0;i<4;i++){int n=0;for(int k=0;k<NCM;k++)n+=CM[k].grp==i;m3_text(16,50+i*14,cat(i==sel?">":" ",EN[i]),i==sel?C_YEL:C_WHITE,1);m3_text(150,50+i*14,cat3(itoa(n)," MISSIONS",""),C_GRAY,1);}
-   m3_text(16,50+4*14,sel==4?">HOW TO PLAY":" HOW TO PLAY",sel==4?C_YEL:C_WHITE,1);m3_text(16,50+5*14,sel==5?">PROGRESS":" PROGRESS",sel==5?C_YEL:C_WHITE,1);
-   m3_fill(0,140,240,20,RGB(10,12,24));m3_ctext(146,sel<4?ED[sel]:"B: BACK",C_GRAY,1);m3_present();redraw=0;}
-  next_frame();
-  if(pressed&K_UP){sel=(sel+5)%6;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%6;redraw=1;sfx_menu();}
-  if(pressed&(K_A|K_START)){sfx_ok();pressed=0;if(sel<4){for(int k=0;k<NCM;k++)if(CM[k].grp==sel){msel_jump=k;break;}mission_select();bgCached=-1;bgm_t(TR_OMAHA);}else if(sel==4)how_to(MD_CAMP,CAT_CAMP);else records(MD_CAMP,CAT_CAMP);redraw=1;}
-  if(pressed&K_B){sfx_menu();pressed=0;return;}}}
-static void category(int c){if(c==CAT_CAMP){campaign_cat();return;}
- const MCat*C=&MC[c];int sel=0,redraw=1;bgm_t(C->trk);
- for(;;){BEAT->screen=SCR_CAT;BEAT->mode=c;BEAT->menu=sel;
-  if(redraw){cat_bgc(c);banner(C->n,C->sub,C_YEL);m3_box(8,42,224,96,0);
-   for(int i=0;i<C->nm;i++){int md=C->m[i];m3_text(16,50+i*14,cat(i==sel?">":" ",MDN[md]),i==sel?C_YEL:(mode_avail(md)?C_WHITE:C_GRAY),1);}
-   m3_fill(0,140,240,20,RGB(10,12,24));m3_ctext(146,MDD[C->m[sel]],C_GRAY,1);m3_present();redraw=0;}
-  next_frame();
-  if(pressed&K_UP){sel=(sel+C->nm-1)%C->nm;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%C->nm;redraw=1;sfx_menu();}
-  if(pressed&(K_A|K_START)){sfx_ok();pressed=0;mode_hub(C->m[sel],c);bgm_t(C->trk);redraw=1;}
-  if(pressed&K_B){sfx_menu();pressed=0;return;}}}
-static int main_menu2(int sel){int redraw=1;
+  if(!foc){if(pressed&K_UP){sel=(sel+nm-1)%nm;os=0;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%nm;os=0;redraw=1;sfx_menu();}
+   if(pressed&(K_A|K_RIGHT|K_START)){foc=1;os=0;redraw=1;sfx_ok();}if(pressed&K_B){sfx_menu();pressed=0;last[c]=sel;return;}}
+  else{if(pressed&K_UP){os=(os+no-1)%no;redraw=1;sfx_menu();}if(pressed&K_DOWN){os=(os+1)%no;redraw=1;sfx_menu();}
+   if(pressed&(K_B|K_LEFT)){foc=0;redraw=1;sfx_menu();pressed=0;continue;}
+   int op=ops[os];
+   if(op==OP_BOTS&&(pressed&(K_A|K_RIGHT))){SET.bot=(SET.bot+1)&3;save_write();redraw=1;sfx_menu();continue;}
+   if(pressed&(K_A|K_START)){sfx_ok();pressed=0;
+    switch(op){case OP_PLAY:if(camp){for(int k=0;k<NCM;k++)if(CM[k].grp==sel){msel_jump=k;break;}mission_select();pressed=0;}else if(md>=MD_INF&&md<=MD_SEA){if(faction_select(md))play_6v6(md);pressed=0;}else mode_play(md);bgCached=-1;bgm_t(C->trk);break;
+     case OP_MAP:{int me=0;int mi=map_select(md,&me);if(mi>=0){mpPickI[md]=mi;mpPickE[md]=me;}else mpPickI[md]=-1;pressed=0;bgCached=-1;break;}
+     case OP_SIDE:faction_select(md);pressed=0;bgCached=-1;break;
+     case OP_LOAD:mode_loadout(md);break;case OP_REC:records(md,c);break;case OP_HOW:how_to(md,c);break;}
+    redraw=1;}}}}
+static void category(int c){cat_screen(c);}
+static int main_menu2(int sel){int redraw=1;static const char*const MN[CAT_N]={"CAMPAIGN","BATTLES","SPEC OPS","SPECIALIST","EXPLORE","LOADOUT","SETTINGS","BOOT CAMP (KC)"};
+ static const char*const L1[CAT_N]={"WW2 - COLD WAR - MODERN","6V6 INFANTRY - ARMOR - DOGFIGHT","SPEC OPS PLATFORMER","SNIPER - EOD - LRRP","SPACE LAUNCH","KITS - 6V6 ARSENAL - CHARACTER","MUSIC - VOLUME - DIFFICULTY","CONTROLS + EVERY MODE"};
+ static const char*const L2[CAT_N]={"WHAT-IF SCENARIOS","NAVAL - SWORD FIGHT 1V1 - FPS","SPEC OPS: BRADLEY","ANTI-AIRCRAFT - DRONE OPS","WORLD FLIGHT","","BOT SKILL - HINTS","WITH KC THE DOG"};
  for(;;){BEAT->screen=SCR_MENU;BEAT->menu=sel;
-  if(redraw){m3_title(0);m3_fill(4,74,232,84,C_PANEL);m3_box(4,74,232,84,2);
-   for(int k=0;k<CAT_N;k++){int col=k/4,row=k%4;m3_text(8+col*114,82+row*14,k==sel?">":" ",C_YEL,1);m3_text(14+col*114,82+row*14,MC[k].n,k==sel?C_YEL:C_WHITE,1);}
-   m3_ctext(141,MC[sel].sub,C_GRAY,1);redraw=0;m3_present();}
+  if(redraw){m3_title(0);m3_fill(10,82,220,76,C_PANEL);m3_box(10,82,220,76,2);
+   for(int k=0;k<CAT_N;k++){int col=k/4,row=k%4;m3_text(18+col*104,88+row*11,k==sel?">":" ",C_YEL,1);m3_text(24+col*104,88+row*11,MN[k],k==sel?C_YEL:C_WHITE,1);}
+   m3_fill(14,133,212,1,RGB(236,196,92));m3_text(18,137,L1[sel],C_GRAY,1);m3_text(18,146,L2[sel],C_GRAY,1);redraw=0;m3_present();}
   next_frame();
   if(pressed&K_UP){sel=(sel+CAT_N-1)%CAT_N;redraw=1;sfx_menu();}
   if(pressed&K_DOWN){sel=(sel+1)%CAT_N;redraw=1;sfx_menu();}
