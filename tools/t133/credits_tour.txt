@@ -1,0 +1,230 @@
+#newmenu
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 16
+tap A
+wait 50
+tap DOWN
+wait 8
+tap A
+wait 60
+hold A 40
+beat
+shot cr_1
+hold A 40
+beat
+shot cr_2
+hold A 40
+beat
+shot cr_3
+hold A 40
+beat
+shot cr_4
+hold A 40
+beat
+shot cr_5
+hold A 40
+beat
+shot cr_6
+hold A 40
+beat
+shot cr_7
+hold A 40
+beat
+shot cr_8
+hold A 40
+beat
+shot cr_9
+hold A 40
+beat
+shot cr_10
+hold A 40
+beat
+shot cr_11
+hold A 40
+beat
+shot cr_12
+hold A 40
+beat
+shot cr_13
+hold A 40
+beat
+shot cr_14
+hold A 40
+beat
+shot cr_15
+hold A 40
+beat
+shot cr_16
+hold A 40
+beat
+shot cr_17
+hold A 40
+beat
+shot cr_18
+hold A 40
+beat
+shot cr_19
+hold A 40
+beat
+shot cr_20
+hold A 40
+beat
+shot cr_21
+hold A 40
+beat
+shot cr_22
+hold A 40
+beat
+shot cr_23
+hold A 40
+beat
+shot cr_24
+hold A 40
+beat
+shot cr_25
+hold A 40
+beat
+shot cr_26
+hold A 40
+beat
+shot cr_27
+hold A 40
+beat
+shot cr_28
+hold A 40
+beat
+shot cr_29
+hold A 40
+beat
+shot cr_30
+hold A 40
+beat
+shot cr_31
+hold A 40
+beat
+shot cr_32
+hold A 40
+beat
+shot cr_33
+hold A 40
+beat
+shot cr_34
+hold A 40
+beat
+shot cr_35
+hold A 40
+beat
+shot cr_36
+hold A 40
+beat
+shot cr_37
+hold A 40
+beat
+shot cr_38
+hold A 40
+beat
+shot cr_39
+hold A 40
+beat
+shot cr_40
+hold A 40
+beat
+shot cr_41
+hold A 40
+beat
+shot cr_42
+hold A 40
+beat
+shot cr_43
+hold A 40
+beat
+shot cr_44
+hold A 40
+beat
+shot cr_45
+hold A 40
+beat
+shot cr_46
+hold A 40
+beat
+shot cr_47
+hold A 40
+beat
+shot cr_48
+hold A 40
+beat
+shot cr_49
+hold A 40
+beat
+shot cr_50
+hold A 40
+beat
+shot cr_51
+hold A 40
+beat
+shot cr_52
+hold A 40
+beat
+shot cr_53
+hold A 40
+beat
+shot cr_54
+hold A 40
+beat
+shot cr_55
+hold A 40
+beat
+shot cr_56
+hold A 40
+beat
+shot cr_57
+hold A 40
+beat
+shot cr_58
+hold A 40
+beat
+shot cr_59
+hold A 40
+beat
+shot cr_60
+hold A 40
+beat
+shot cr_61
+hold A 40
+beat
+shot cr_62
+hold A 40
+beat
+shot cr_63
+hold A 40
+beat
+shot cr_64
+hold A 40
+beat
+shot cr_65
+hold A 40
+beat
+shot cr_66
+hold A 40
+beat
+shot cr_67
+hold A 40
+beat
+shot cr_68
+hold A 40
+beat
+shot cr_69
+wait 600
+shot cr_end
+end

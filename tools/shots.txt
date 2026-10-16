@@ -1,27 +1,11 @@
-#newmenu
-# translated from the v1.3.2 menu by tools/menu133_xlate.py
 # ---- title / menu
 wait 100
 shot 01_title
 tap START
 wait 15
-tap DOWN
-wait 6
-tap DOWN
-wait 6
-tap DOWN
-wait 6
 tap RIGHT
-wait 6
-wait 10
-tap A
-wait 50
 tap DOWN
-wait 6
-tap DOWN
-wait 6
-tap DOWN
-wait 6
+wait 4
 tap A
 wait 10
 shot 20_loadout_ww2_default

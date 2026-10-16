@@ -1,0 +1,28 @@
+#newmenu
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 16
+tap A
+wait 50
+tap DOWN
+wait 6
+tap A
+wait 12
+shot gp_ops
+tap A
+wait 60
+shot gp_next1
+tap A
+wait 40
+shot gp_next2
+tap A
+wait 40
+shot gp_next3
+beat
+end

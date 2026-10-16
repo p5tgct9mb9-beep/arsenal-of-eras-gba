@@ -12,7 +12,7 @@ if '#newmenu' not in t:
     parts=re.split(r'(?m)^(?=corereset\s*$)',t);o=[]
     for p in parts:
         m=re.search(r'^tap (START|A)\n',p,re.M)
-        if m:p=p[:m.end()]+"poke32 0x0203FFC8 5943474C\n"+p[m.end():]
+        if m:p=p[:m.start()]+"poke32 0x0203FFC8 5943474C\n"+p[m.start():]
         o.append(p)
     t="".join(o)
 sys.stdout.write(t)

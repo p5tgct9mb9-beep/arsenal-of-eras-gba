@@ -2,14 +2,18 @@
 #define SCR_CRED 97
 typedef struct{const char*s;u8 kind;}CrLine; // kind: 0 heading(2x gold) 1 white 2 gray 3 cyan 4 KC portrait 5 gap 6 card break
 static const CrLine CRL[]={
- {"ARSENAL OF ERAS",0},{"FIELD EDITION V1.3.2",3},{"",6},
+ {"ARSENAL OF ERAS",0},{"FIELD EDITION V1.3.3",3},{"",6},
  {"CREATED BY",2},{"LT VASQUEZ",0},{"GAME DIRECTOR",1},{"DESIGNER - IDEAS",1},{"",6},
  {"BUILT WITH",2},{"KC, AI ASSISTANT",0},{"(GROK BOT)",3},{"PROGRAMMING - ART - MUSIC",1},{"",6},
  {"TUTORIAL GUIDE",2},{"KC THE DOG",0},{"",4},{"BLACK SHEPHERD MIX, BIG EARS,",1},{"GREY MUZZLE, WHITE CHEST.",1},{"GOOD GIRL. BEST SERGEANT.",3},{"",6},
  {"SPECIAL THANKS",2},{"DAD",0},{"DEDICATED TO MY DAD,",0},{"A REAL HERO. - LT",0},{"",6},
  {"THANK YOU ELON MUSK",0},{"FOR BEING THE BIGGEST",1},{"INSPIRATION FOR ME.",1},{"- LT",3},{"",6},
- {"MORSE TIP FROM THE RADIO ROOM:",2},{"... --- ...",3},{"",6},{"",7},
- {"THANKS FOR PLAYING!",0}};
+ {"MORSE TIP FROM THE RADIO ROOM:",2},{"... --- ...",3},{"",6},
+ {"THANK YOU",0},{"TO ALL ACTIVE-DUTY AND VETERAN",1},{"MEMBERS OF THE ARMED FORCES.",1},{"",6},
+ {"THANK YOU",0},{"TO THE U.S. ARMY, U.S. NAVY,",1},{"U.S. AIR FORCE, U.S. MARINE CORPS",1},{"AND U.S. SPACE FORCE.",1},{"",6},
+ {"THANK YOU",0},{"SPACEX, TESLA AND ANDURIL INDUSTRIES",1},{"FOR THE INSPIRATION.",1},{"",6},{"",7},
+ {"THANKS FOR PLAYING!",0},{"",5},
+ {"ARSENAL OF ERAS IS A FAN-MADE PERSONAL",2},{"PROJECT AND IS NOT AFFILIATED WITH OR",2},{"ENDORSED BY ANY COMPANY OR MILITARY",2},{"BRANCH MENTIONED.",2}};
 #define CR_N (int)(sizeof CRL/sizeof CRL[0])
 static int cr_h(int k){switch(k){case 7:return 0;case 0:return 20;case 4:return 54;case 5:return 10;case 6:return 34;default:return 11;}}
 static void cr_dim(int x0,int y0,int w,int h){if(y0<0){h+=y0;y0=0;}if(y0+h>160)h=160-y0;for(int y=y0;y<y0+h;y++){u16*p=&fb[y*240+x0];for(int x=0;x<w;x++){u16 c=p[x];p[x]=((c>>1)&0x3DEF);}}}

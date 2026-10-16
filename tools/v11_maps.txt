@@ -1,4 +1,3 @@
-# legacy-menu script (multi-visit navigation): runs with the v1.3.2 menu test flag
 corereset
 wait 100
 tap START

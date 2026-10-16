@@ -330,7 +330,7 @@ static void rc_gp_stand(int*pts,int race,int fin){int ord[8];for(int i=0;i<rcN;i
  for(int t=0;;t++){BEAT->screen=SCR_RRES;BEAT->phase=fin?5:4;BEAT->scoreA=myp;BEAT->scoreB=pts[0];next_frame();if((pressed&(K_A|K_START))||(FR_AUTO&&t>150))break;}sfx_ok();}
 static int rc_diff_select(void){int sel=rcDiff,redraw=1;static const char*const DD[3]={"RELAXED RIVALS, LOTS OF ROOM","RIVALS FIGHT BACK - GRAND PRIX DEFAULT","RACING LINES, SMART BOOSTS, NO MERCY"};
  for(;;){BEAT->screen=SCR_RCAR;BEAT->menu=sel;BEAT->phase=7;
-  if(redraw){redraw=0;rc_bg(1);m3_fill(4,4,232,22,RGB(10,12,24));m3_box(4,4,232,22,2);m3_ctext(8,"GRAND PRIX DIFFICULTY",C_YEL,2);
+  if(redraw){redraw=0;rc_bg(1);m3_fill(4,4,232,22,RGB(10,12,24));m3_box(4,4,232,22,2);m3_ctext(8,"RACE DIFFICULTY",C_YEL,2);
    m3_fill(20,40,200,96,RGB(10,12,24));m3_box(20,40,200,96,0);
    for(int i=0;i<3;i++){int y=52+i*22;if(i==sel)m3_fill(28,y-4,184,16,RGB(16,60,110));m3_text(36,y,RC_DN[i],i==sel?C_YEL:C_WHITE,2);}
    m3_ctext(122,DD[sel],C_GRAY,1);m3_ctext(146,"UP/DOWN  A: START  B: BACK",C_GRAY,1);m3_present();}
