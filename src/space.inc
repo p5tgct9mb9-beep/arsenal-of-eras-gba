@@ -183,7 +183,7 @@ static int sp_isauto(void){return *(volatile u32*)0x0203FFD0==0x4F545541u;}
 // ---------------------------------------------------------------- flight state
 typedef struct{s16 x,y,vx,vy,life,r;u8 k;}SPpart;   // x,y in 1/16 px (y world = altitude px)
 typedef struct{s16 x,y,vx,vy,life,w,h;u16 c;u8 k;}SPdeb;
-typedef struct{int tq,warp,ei,st,fl,roll,pitch,thr,thrT,score,guid,gerr,gn,maxq,auto_,iT,ign,lastEv,msgT,inset,insY,insV,landT,qwarn,done;const char*msg;u8 gr[20];s8 dt[20];}SPF;
+typedef struct{u32 lv;int fc,fv,fps,tq,warp,ei,st,fl,roll,pitch,thr,thrT,score,guid,gerr,gn,maxq,auto_,iT,ign,lastEv,msgT,inset,insY,insV,landT,qwarn,done;const char*msg;u8 gr[20];s8 dt[20];}SPF;
 static SPF F EWRAM;static SPpart SPP[56] EWRAM;static SPdeb SPD[8] EWRAM;
 static void spf_msg(const char*s){F.msg=s;F.msgT=150;}
 // interpolate profile at time tq (1/60 s): alt m, vel km/h, dr km, g x10
@@ -193,7 +193,7 @@ static void sp_prof(const SPm*m,int tq,int*alt,int*vel,int*dr,int*g){const SPp*p
  if(tq<=0){*alt=0;*vel=0;*dr=0;*g=10;}}
 // guidance pitch reference (deg from vertical) derived from the profile: atan2(horizontal, vertical speed)
 static int sp_pitchref(const SPm*m,int tq){if(tq<10*60)return 0;int a0,v0,d0,g0,a1,v1,d1,g1;sp_prof(m,tq-60,&a0,&v0,&d0,&g0);sp_prof(m,tq+60,&a1,&v1,&d1,&g1);
- int vz=(a1-a0)/2;int v=(v0+v1)/2*10/36;if(v<1)v=1;int vh2=v*v-vz*vz;int vh=vh2>0?isq(vh2):0;int ang=atan2i(vh,vz<1?1:vz);int deg=ang*360/256;if(deg>90)deg=90;if(deg<0)deg=0;return deg;}
+ int vz=(a1-a0)/2;int v=(v0+v1)/2*10/36;if(v<1)v=1;int vh2=v*v-vz*vz;int vh=vh2>0?isq(vh2):0;int ang=atan2i(vh,-(vz<1?1:vz));int deg=ang*360/256;if(deg>90)deg=90;if(deg<0)deg=0;return deg;}
 static int sp_stage_of_event(const SPm*m,int ei){int s=0;for(int i=0;i<ei&&i<m->ne;i++)if(m->e[i].ev==EV_STAGE)s=m->e[i].arg;return s;}
 // fuel % for stage k at time t: burns from its ignition to its cutoff (from event table)
 static int sp_fuel(const SPm*m,int k,int tq){int t0=0,t1=-1;int cur=0;for(int i=0;i<m->ne;i++){const SPe*e=&m->e[i];if(e->ev==EV_STAGE){if(cur==k){t1=e->t;break;}cur=e->arg;if(cur==k)t0=e->t;}}
@@ -302,7 +302,7 @@ static void sp_fly_draw(const SPm*m,int alt,int vel,int g,int dAlt){
    if(ak<25&&(F.tq&1)&&(ty[k]==PL_SRB||ty[k]==PL_RP1)&&F.tq>0)sp_puff((120+xo[k]+rr(5)-2)<<4,(by+L)<<4,rr(9)-4,8,140,ty[k]==PL_SRB?5:3,0);}
   if(F.tq>-60&&alt<30&&(F.tq&1)){for(int s=-1;s<=1;s+=2)sp_puff((120+s*20)<<4,(gy-4)<<4,s*(16+rr(16)),-rr(6),200,4,1);}}
  sp_inset(m);}
-static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);memset(SPP,0,sizeof SPP);memset(SPD,0,sizeof SPD);F.tq=m->cd*60;F.warp=1;F.roll=-1;F.thrT=0;F.auto_=sp_isauto();bgm_t(TR_ASCENT);
+static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);F.lv=vblN;memset(SPP,0,sizeof SPP);memset(SPD,0,sizeof SPD);F.tq=m->cd*60;F.warp=1;F.roll=-1;F.thrT=0;F.auto_=sp_isauto();bgm_t(TR_ASCENT);
  int prevAlt=0,endT=0,ri=-1,rollT=-1,rollG=0;
  for(;;){next_frame();int alt,vel,dr,g;
   // input
@@ -322,11 +322,11 @@ static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);memset(SPP,
    if(F.warp==1&&(F.tq%90)==0&&!F.auto_)F.pitch+=rr(3)-1;F.pitch=clampi(F.pitch,0,95);if((F.tq%60)==0&&F.warp==1){F.gerr+=fabsi(F.pitch-sp_pitchref(m,F.tq));F.gn++;}}
   if(F.ign&&F.thrT==0)F.thrT=100;if(F.done)F.thrT=0;if(F.thr<F.thrT&&(F.tq&1))F.thr++;if(F.thr>F.thrT&&(F.tq&1))F.thr--;if(F.thr<F.thrT-30)F.thr+=3;
   // advance time
-  if(!F.done)F.tq+=F.warp;else endT++;
+  {int el=(int)(vblN-F.lv);F.lv=vblN;if(el<1)el=1;if(el>4)el=4;F.fc++;F.fv+=el;if(F.fv>=60){F.fps=F.fc;F.fc=0;F.fv=0;}if(!F.done)F.tq+=F.warp*el;else endT+=el;}
   sp_prof(m,F.tq,&alt,&vel,&dr,&g);int dA=(alt-prevAlt)*4/5;if(dA<0)dA=0;if(dA>200)dA=200;prevAlt=alt;
   if(F.inset){if(F.landT){F.insY+=F.insY<2600?(2600-F.insY)/30+4:0;if(F.insY>2600)F.insY=2600;}else F.insY+=F.insY<1800?6:0;}
   if(F.msgT>0)F.msgT--;
-  BEAT->screen=SCR_SPFLY;BEAT->mode=mi;BEAT->timer=F.tq<0?0:F.tq/60;BEAT->scoreA=F.score<0?0:F.score;BEAT->phase=F.done?2:F.tq>0?1:0;BEAT->x=alt/100;BEAT->y=vel;BEAT->extra=F.st|(F.ei<<4)|(F.thr<<12)|(g<<20);
+  BEAT->screen=SCR_SPFLY;BEAT->mode=mi;BEAT->timer=F.tq<0?0:F.tq/60;BEAT->kills=F.fps;BEAT->scoreA=F.score<0?0:F.score;BEAT->phase=F.done?2:F.tq>0?1:0;BEAT->x=alt/100;BEAT->y=vel;BEAT->extra=F.st|(F.ei<<4)|(F.thr<<12)|(g<<20);
   lfb=0;sp_fly_draw(m,alt,vel,g,F.done?0:dA*F.warp/ (F.warp?F.warp:1));sp_hud(m,alt,vel,dr,g);
   if(F.done){lf(30,64,180,26,RGB(8,10,20));ltc(68,"ORBIT ACHIEVED",RGB(140,255,160));ltc(78,m->orb,C_WHITE);}
   m3_present();

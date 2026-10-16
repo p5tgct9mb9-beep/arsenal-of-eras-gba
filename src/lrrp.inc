@@ -33,7 +33,7 @@ static LEn LE[16] EWRAM;static int nLE;
 typedef struct{s16 x,y;u8 zone,hid,typ,hit;}LTr;static LTr LTR[8] EWRAM;static int nLTR;
 typedef struct{s16 x,y,on;}LCl;static LCl LCL[3] EWRAM;static int nLCL;
 static s16 lrTX[64] EWRAM,lrTY[64] EWRAM;static int lrTH;static s16 lrHP[6] EWRAM;static const char*const LRN[6]={"PT","TL","RTO","M79","AS","RS"};
-static s32 lrX,lrY;static int lrZone,lrProne,lrDet,lrComp,lrT,lrScore,lrMsgT,lrHud,lrFail,lrDone,lrWpn,lrM79,lrObsT,lrHuey,lrHueyT,lrHueyX,lrHueyY,lrFace,lrBoard,lrQRF,lrCiv,lrKills,lrPh[5],lrDone_o[6],lrFFx,lrFFy,lrFFt,lrFFk,lrFFeff,lrClack,lrAmbT,lrNight;
+__attribute__((section(".ewram"))) static s32 lrX,lrY;__attribute__((section(".ewram"))) static int lrZone,lrProne,lrDet,lrComp,lrT,lrScore,lrMsgT,lrHud,lrFail,lrDone,lrWpn,lrM79,lrObsT,lrHuey,lrHueyT,lrHueyX,lrHueyY,lrFace,lrBoard,lrQRF,lrCiv,lrKills,lrPh[5],lrDone_o[6],lrFFx,lrFFy,lrFFt,lrFFk,lrFFeff,lrClack,lrAmbT,lrNight;
 static int lr_ghost(void);
 static const char*lrMsg;static char lrMsgB[44] EWRAM;
 static void lr_msg(const char*s){int k=0;while(s[k]&&k<42){lrMsgB[k]=s[k];k++;}lrMsgB[k]=0;lrMsg=lrMsgB;lrMsgT=180;lrHud=1;}
