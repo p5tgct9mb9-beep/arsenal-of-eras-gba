@@ -4,12 +4,12 @@
 #define SCR_HOW 55
 #define SCR_REC 56
 #define SCR_OPT 57
-enum{MD_CAMP,MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_SPEC,MD_BRAD,MD_SNIPE,MD_EOD,MD_AA,MD_DRONE,MD_LAUNCH,MD_FLIGHT,MD_LRRP,MD_FPS,MD_SPACE,MD_ASTRO,MD_N};
-static const char*const MDN[MD_N]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","SPEC OPS: BRADLEY","SNIPER","EOD - BOMB DISPOSAL","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS","SPACE PROGRAM","ASTRONAUT EXPLORER"};
-static const char*const MSN[MD_N+2]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","BRADLEY OPS","SNIPER","EOD","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS","SPACE PROGRAM","ASTRONAUT EXPLORER"};
+enum{MD_CAMP,MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_SPEC,MD_BRAD,MD_SNIPE,MD_EOD,MD_AA,MD_DRONE,MD_LAUNCH,MD_FLIGHT,MD_LRRP,MD_FPS,MD_SPACE,MD_ASTRO,MD_MOON,MD_MARS,MD_ODEF,MD_RBUILD,MD_ASTER,MD_WHATIF,MD_HIST,MD_OVER,MD_N};
+static const char*const MDN[MD_N]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","SPEC OPS: BRADLEY","SNIPER","EOD - BOMB DISPOSAL","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS","SPACE PROGRAM","ASTRONAUT EXPLORER","MOON BASE","MARS MISSION","ORBITAL DEFENSE","ROCKET BUILDER","ASTEROID MINING","WHAT-IF SPACE RACE 1945","SPACE HISTORY","OVERFLIGHT"};
+static const char*const MSN[MD_N+2]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","SWORD FIGHT 1V1","SPEC OPS","BRADLEY OPS","SNIPER","EOD","ANTI-AIRCRAFT","DRONE OPS","SPACE LAUNCH","WORLD FLIGHT","LRRP","FPS","SPACE PROGRAM","ASTRONAUT EXPLORER","MOON BASE","MARS MISSION","ORBITAL DEFENSE","ROCKET BUILDER","ASTEROID MINING","WHAT-IF 1945","HISTORY TOUR","CLASSIFIED"};
 static const char*const MDD[MD_N]={"MISSIONS ACROSS EVERY ERA","PICK A FACTION, ANY-ERA ARSENAL","TANKS, TDS, IFVS, HALFTRACKS, JEEPS","AIR SUPERIORITY - GUNS + MISSILES","BATTLESHIPS, CARRIERS, DESTROYERS",
  "KNIGHT, SAMURAI, VIKING... BEST OF 3","PLATFORMER: WORLDS OF COURSES","M2 BRADLEY VEHICLE PLATFORMER","LONG RANGE: DROP, WIND, BREATH","FIND, APPROACH, DEFUSE",
- "GUNS + SAMS VS PLANES AND DRONES","MODERN UAV STRIKES - MQ-9, TB2","35 REAL ROCKETS: ASCENT, LAND, DOCK","FREE ROAM IN THE X-15, LANDMARKS","VIETNAM 1966-70: 6-MAN RECON TEAM","FIRST-PERSON: MISSIONS, FFA, SURVIVAL","REAL PROFILES, SATS, ISS DOCKING, EVA","PLANETS, MOONS, STARS: GRAVITY LAB"};
+ "GUNS + SAMS VS PLANES AND DRONES","MODERN UAV STRIKES - MQ-9, TB2","35 REAL ROCKETS: ASCENT, LAND, DOCK","FREE ROAM IN THE X-15, LANDMARKS","VIETNAM 1966-70: 6-MAN RECON TEAM","FIRST-PERSON: MISSIONS, FFA, SURVIVAL","REAL PROFILES, SATS, ISS DOCKING, EVA","PLANETS, MOONS, STARS: GRAVITY LAB","LAND, BUILD HAB + SOLAR + ISRU, ROVE","EDL: HEAT SHIELD, CHUTE, SKYCRANE","CLEAR DEBRIS, ROGUE SATS, SUN GUN","STACK ENGINES + TANKS: REAL DELTA-V","MINE ORE, DART-STYLE REDIRECT","FICTIONAL ALT-HISTORY CHAIN","WERNHER VON BRAUN GUIDES THE TOUR","COLD WAR RECON 1956-68 (FICTIONAL)"};
 static const char*const HOW[MD_N][6]={
  {"PICK A MISSION FROM ANY ERA.","EACH HAS 1-3 OBJECTIVES SHOWN","AT THE TOP OF THE SCREEN.","FOLLOW THE MINIMAP MARKERS.","CLEARING A MISSION UNLOCKS THE NEXT.","SOME MISSIONS LET YOU PLAY BOTH SIDES"},
  {"A FIRE   B GRENADE   L SWAP","R STRAFE   SELECT TACTICAL","FIRST TEAM TO 30 KILLS WINS.","FACTIONS SET COLOURS + BOT KIT.","THE ARSENAL MIXES WEAPONS","FROM EVERY ERA."},
@@ -28,15 +28,23 @@ static const char*const HOW[MD_N][6]={
  {"MOVE SLOW - THE METER IS NOISE.","A ACT/FIRE  B PRONE  R SPRINT","L RADIO: FIRE MISSION, ADJUST","SELECT: SENSOR/CLAYMORE/STROBE","SNATCH FROM BEHIND. SPARE CIVS.","BREAK CONTACT, RUN FOR THE LZ."},
  {"UP/DOWN MOVE  LEFT/RIGHT TURN","L/R STRAFE   A FIRE","B OPENS DOORS / RELOADS","SELECT SWAPS WEAPON  START QUITS","WALK OVER DROPS TO TAKE WEAPONS.","3 RAIDS + DEATHMATCH VS BOTS."},
  {"PROFILES: HIT EACH CUE (A/SEL/L/R)","AT THE REAL T+ TIME. B = TIME WARP.","SATS: BURN PROGRADE AT PERIGEE TO","RAISE APOGEE. ISS: SLOW + STRAIGHT,","UNDER 0.25 M/S AT CONTACT. EVA:","CLIP YOUR TETHER BEFORE YOU MOVE."},
- {"PICK A WORLD: </> BODY, R WARP.","LAND GENTLY: UP = ENGINE, SEL CHUTE","SURFACE: SELECT PICKS EXPERIMENT,","A RUNS IT, UP JUMPS, DOWN SAMPLES.","JOURNAL (L) COMPARES VS EARTH 9.81","3 SAMPLES UNLOCK THE WARP DRIVE."}};
-typedef struct{const char*n;const char*sub;u8 nm;u8 m[6];u8 trk;}MCat;
+ {"PICK A WORLD: </> BODY, R WARP.","LAND GENTLY: UP = ENGINE, SEL CHUTE","SURFACE: SELECT PICKS EXPERIMENT,","A RUNS IT, UP JUMPS, DOWN SAMPLES.","JOURNAL (L) COMPARES VS EARTH 9.81","3 SAMPLES UNLOCK THE WARP DRIVE."},
+ {"LANDER: UP THRUST, L/R TILT.","BASE: L/R PICK A PLOT, UP/DN PART,","A BUILDS, START ADVANCES A SOL.","SOLAR ONLY WORKS IN LUNAR DAY -","STORE POWER FOR THE 14-DAY NIGHT.","ROVER: A GAS, B BRAKE, UP HOPS."},
+ {"ENTRY: UP/DN BANK - KEEP THE HEAT","IN THE GREEN, DON'T SKIP OUT.","A: CHUTE IN THE MACH WINDOW,","B: DROP THE HEAT SHIELD,","SKYCRANE: UP THRUST, A LOWERS","THE ROVER, R CUTS THE BRIDLE."},
+ {"D-PAD FLY  A FIRE  B NET / BOMB","SHOOT DEBRIS - BIG PIECES SPLIT.","ROGUE SATS FIRE BACK.","L/R SHIELD PULSE (ENERGY).","SUN GUN: BREAK THE MIRROR PANELS","BEFORE THE FOCUS BEAM CHARGES."},
+ {"UP/DN PICK A SLOT, L/R CHANGE IT.","EACH STAGE: ENGINE, COUNT, TANK.","DV = ISP x 9.81 x LN(M0/MF)","TWR AT LIFTOFF MUST BE > 1.2","A ON LAUNCH: FLY YOUR DESIGN","(SELECT IN FLIGHT = AUTOPILOT)."},
+ {"UP THRUST  L/R ROTATE  B BRAKE","HOLD A NEAR A ROCK TO DRILL.","DOCK AT THE DEPOT TO SELL ORE.","DART: STEER THE IMPACTOR WITH","L/R, HIT DEAD CENTRE AT SPEED","TO SHIFT THE MOONLET'S ORBIT."},
+ {"A FICTIONAL 1945 WHERE THE ROCKET","PROJECTS CONTINUE. GENERIC","MARKINGS, NO REAL INSIGNIA.","FLY THE ALLIED + SOVIET COUNTERS,","SKIP-GLIDE, DODGE THE SAMS,","AND STOP THE SUN GUN."},
+ {"A: NEXT CARD   B: SKIP","THE GUIDE IS A HISTORICAL","DEPICTION - ALL DIALOGUE IS","PARAPHRASED GAME TEXT, NOT REAL","QUOTES. NOT ENDORSED BY HIS","ESTATE, NASA OR ANY AGENCY."},
+ {"D-PAD STEER  A CAMERA SHUTTER","B THROTTLE / CLIMB  L ECM","R CHANGE CAMERA  SELECT MAP","PHOTOGRAPH TARGETS IN THE SWATH.","AVOID RADAR + SAM RINGS + MIGS.","RETURN TO BASE TO DEVELOP FILM."}};
+typedef struct{const char*n;const char*sub;u8 nm;u8 m[12];u8 trk;}MCat;
 enum{CAT_CAMP,CAT_MP,CAT_SPEC,CAT_SPECIAL,CAT_EXPLORE,CAT_LOAD,CAT_SET,CAT_KC,CAT_N};
 static const MCat MC[CAT_N]={
  {"CAMPAIGN","CAMPAIGN BY ERA",4,{0},TR_OMAHA},
  {"BATTLES / BOTS","6V6, 1V1 AND FPS VS BOTS",6,{MD_INF,MD_TANK,MD_AIR,MD_SEA,MD_SWORD,MD_FPS},TR_MARCH},
  {"SPEC OPS","SIDE-SCROLLING OPERATIONS",2,{MD_SPEC,MD_BRAD},TR_JUNGLE},
- {"SPECIALIST","ONE JOB. DO IT RIGHT.",5,{MD_SNIPE,MD_EOD,MD_LRRP,MD_AA,MD_DRONE},TR_COLD},
- {"EXPLORE","ROCKETS, SPACE + FLIGHT",4,{MD_SPACE,MD_ASTRO,MD_LAUNCH,MD_FLIGHT},TR_SPACE},
+ {"SPECIALIST","ONE JOB. DO IT RIGHT.",6,{MD_SNIPE,MD_EOD,MD_LRRP,MD_AA,MD_DRONE,MD_OVER},TR_COLD},
+ {"EXPLORE","ROCKETS, SPACE + FLIGHT",11,{MD_SPACE,MD_ASTRO,MD_LAUNCH,MD_FLIGHT,MD_MOON,MD_MARS,MD_ODEF,MD_RBUILD,MD_ASTER,MD_WHATIF,MD_HIST},TR_SPACE},
  {"LOADOUT/CHARACTER","KITS, ARSENAL, CHARACTER",0,{0},0},
  {"SETTINGS","MUSIC, VOLUME, DIFFICULTY",0,{0},0},
  {"BOOT CAMP WITH KC","CONTROLS + EVERY MODE",0,{0},0}};
@@ -73,7 +81,7 @@ static int mode_avail(int md){(void)md;return 1;}
 static void how_to(int md,int c){int redraw=1;for(;;){BEAT->screen=SCR_HOW;BEAT->mode=md;
   if(redraw){chrome(c,2);banner(MDN[md],"HOW TO PLAY",C_YEL);for(int i=0;i<6;i++)m3_text(16,50+i*13,HOW[md][i],C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
-static void rec_brad(const char**L);static void rec_snipe(const char**L);static void rec_eod(const char**L);static void rec_lrrp(const char**L);static void rec_space(const char**L);static void rec_astro(const char**L);static void rec_fps(const char**L);
+static void rec_brad(const char**L);static void rec_v131(int md,const char**L);static void v131_play(int md);static int v131_over_unlocked(void);static const char*msn_label(int md);static void v131_cat_enter(int c);static void rec_snipe(const char**L);static void rec_eod(const char**L);static void rec_lrrp(const char**L);static void rec_space(const char**L);static void rec_astro(const char**L);static void rec_fps(const char**L);
 static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5;i++)L[i]="";
  #define SB(k,s) {const char*_s=(s);int _n=0;while(_s[_n]&&_n<38){b[k][_n]=_s[_n];_n++;}b[k][_n]=0;L[k]=b[k];}
  switch(md){
@@ -87,11 +95,11 @@ static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5
  case MD_SPACE:rec_space(L);break;
  case MD_ASTRO:rec_astro(L);break;
  case MD_FPS:rec_fps(L);break;
- default:L[0]="NO SAVED RECORDS FOR THIS MODE YET.";L[1]="RESULTS ARE SHOWN AFTER EACH MATCH.";}
+ default:if(md>=MD_MOON){rec_v131(md,L);break;}L[0]="NO SAVED RECORDS FOR THIS MODE YET.";L[1]="RESULTS ARE SHOWN AFTER EACH MATCH.";}
  #undef SB
 }
 static void records(int md,int c){const char*L[5];rec_lines(md,L);int redraw=1;for(;;){BEAT->screen=SCR_REC;BEAT->mode=md;
-  if(redraw){chrome(c,2);banner(MDN[md],"HIGH SCORES / PROGRESS",C_YEL);for(int i=0;i<5;i++)m3_text(16,54+i*14,L[i],i==0?C_YEL:C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
+  if(redraw){chrome(c,2);banner(MDN[md],md==MD_HIST?"CREDITS + NOTES":"HIGH SCORES / PROGRESS",C_YEL);for(int i=0;i<5;i++)m3_text(16,54+i*14,L[i],i==0?C_YEL:C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
 static void mode_options(int md,int c){int sel=0,redraw=1;int n=md>=MD_INF&&md<=MD_SEA?3:2;
  for(;;){BEAT->screen=SCR_OPT;BEAT->mode=md;BEAT->menu=sel;
@@ -120,26 +128,27 @@ static void mode_play(int md){
  case MD_LAUNCH:space_launch();break;
  case MD_SPACE:space_program();break;
  case MD_ASTRO:astro_explorer();break;
- case MD_FLIGHT:flight_menu();break;}
+ case MD_FLIGHT:flight_menu();break;
+ default:v131_play(md);break;}
  pressed=0;bgCached=-1;}
 static void mode_loadout(int md){int era=0;if(md==MD_SPEC){ps_read();so_read();so_menu(PS.unit);}else loadout_hub(&era);pressed=0;bgCached=-1;}
 // ---- category screen (mockup layout): title bar, mode list left, options panel right
 static s8 mpPickI[5]={-1,-1,-1,-1,-1},mpPickE[5];
 enum{OP_PLAY,OP_MAP,OP_SIDE,OP_BOTS,OP_LOAD,OP_REC,OP_HOW};
-static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
+static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(md>=MD_MOON){if(md!=MD_HIST)o[n++]=OP_REC;else o[n++]=OP_REC;o[n++]=OP_HOW;return n;}if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
  if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_BOTS;if(md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO&&md!=MD_FPS)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
 static const char*op_label(int md,int op){static char b[24];static const char*const BN[4]={"EASY","NORMAL","VETERAN","ELITE"};const char*v=0;const char*k="";
- switch(op){case OP_PLAY:return "PLAY";case OP_LOAD:return "LOADOUT";case OP_REC:return md==MD_CAMP?"PROGRESS":"HIGH SCORES";case OP_HOW:return "HOW TO PLAY";
+ switch(op){case OP_PLAY:return md==MD_HIST?"START TOUR":md==MD_OVER&&!v131_over_unlocked()?"ENTER CODE":"PLAY";case OP_REC:if(md==MD_HIST)return "CREDITS";return md==MD_CAMP?"PROGRESS":"HIGH SCORES";case OP_LOAD:return "LOADOUT";case OP_HOW:return "HOW TO PLAY";
  case OP_MAP:k="MAP: ";v=mpPickI[md]<0?"PICK":map_def(md,mpPickE[md],mpPickI[md])->n;break;
  case OP_SIDE:k="SIDE: ";v=FAC[g6.fac0].n;break;case OP_BOTS:k="BOTS: ";v=BN[SET.bot&3];break;}
  int n=0;while(*k)b[n++]=*k++;while(*v&&n<14)b[n++]=*v++;b[n]=0;return b;}
 static void play_6v6(int md){if(!arsenal_menu(md))return;int me=mpPickE[md],mi=mpPickI[md];if(mi<0){me=0;mi=map_select(md,&me);}if(mi>=0){loading(cat("DEPLOYING: ",map_def(md,me,mi)->n));mpMixed=1;mp_run(md,me,mi);mpMixed=0;}}
 static void cat_screen(int c){const MCat*C=&MC[c];static const char*const EN[4]={"WORLD WAR II","COLD WAR","MODERN","WHAT-IF"};static const char*const ED[4]={"1942-1945: MIDWAY TO OMAHA","1950-1985: KOREA, VIETNAM, FULDA","1993-2026","FICTIONAL SCENARIOS"};
- int camp=c==CAT_CAMP;int nm=camp?4:C->nm;static u8 last[CAT_N];int sel=last[c]<nm?last[c]:0,foc=0,os=0,redraw=1;bgm_t(C->trk);
+ int camp=c==CAT_CAMP;int nm=camp?4:C->nm;v131_cat_enter(c);static u8 last[CAT_N];int sel=last[c]<nm?last[c]:0,foc=0,os=0,redraw=1;bgm_t(C->trk);
  for(;;){int md=camp?MD_CAMP:C->m[sel];u8 ops[8];int no=mode_ops(md,ops);if(os>=no)os=no-1;
   BEAT->screen=foc?SCR_HUB:SCR_CAT;BEAT->mode=camp?0:md;BEAT->menu=sel;BEAT->phase=os;
   if(redraw){chrome(c,1);m3_ctext(6,camp?"CAMPAIGN":C->n,C_YEL,2);
-   for(int i=0;i<nm;i++){const char*t=camp?EN[i]:MDN[C->m[i]];int y=40+i*(nm>5?15:17);m3_text(14,y,i==sel?">":" ",C_YEL,1);m3_text(20,y,camp?t:MSN[C->m[i]],i==sel?C_YEL:(camp||mode_avail(C->m[i])?C_WHITE:C_GRAY),1);}
+   for(int i=0;i<nm;i++){const char*t=camp?EN[i]:MDN[C->m[i]];int y=nm>8?36+i*9:40+i*(nm>5?15:17);m3_text(14,y,i==sel?">":" ",C_YEL,1);m3_text(20,y,camp?t:msn_label(C->m[i]),i==sel?C_YEL:(camp||mode_avail(C->m[i])?C_WHITE:C_GRAY),1);}
    for(int i=0;i<no;i++){int y=38+i*13;int hi=foc&&i==os;m3_text(144,y,hi?">":" ",C_GREEN,1);m3_text(150,y,op_label(md,ops[i]),hi?C_GREEN:(i==0&&!foc?C_GREEN:C_WHITE),1);}
    if(!camp&&!mode_avail(md))m3_text(144,38+no*13,"IN TRAINING",C_RED,1);
    m3_ctext(142,camp?ED[sel]:MDD[md],C_GRAY,1);m3_ctext(151,foc?"A: SELECT   B: BACK TO LIST":"A: OPTIONS   B: BACK",C_GRAY,1);m3_present();redraw=0;}

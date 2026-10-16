@@ -143,6 +143,41 @@ def preview(path,ls=0,cs=0):
             if t==6 and (sh&15)!=0:t=2
             px[x0+i,y]=EC[(t*16+(sh&15))*4+(sh>>4)]
     im.save(path)
+
+# ---------------------------------------------------------------- space guide portrait (48x48 x2 frames, bit15 = clear)
+# Original pixel art: a 1960s engineer in a civilian charcoal suit, white shirt, thin tie. No uniforms, no insignia.
+from PIL import Image,ImageDraw
+def guide_portrait(talk):
+    W=48;OUT=(16,12,18);im=Image.new('RGBA',(W,W),(0,0,0,0));d=ImageDraw.Draw(im)
+    SK0,SK1=(232,186,150),(200,150,118);HR0,HR1=(84,62,44),(58,42,30);SU0,SU1=(62,66,76),(44,46,54)
+    d.polygon([(2,47),(6,37),(16,32),(32,32),(42,37),(46,47)],fill=SU0,outline=OUT)        # suit
+    d.polygon([(26,33),(32,32),(42,37),(46,47),(28,47)],fill=SU1)
+    d.polygon([(18,32),(24,44),(30,32)],fill=(240,240,236),outline=OUT)                   # shirt V
+    d.polygon([(23,35),(25,35),(26,44),(24,46),(22,44)],fill=(46,58,96),outline=OUT)        # thin tie
+    d.polygon([(16,32),(22,42),(19,47),(12,40)],fill=SU1,outline=OUT);d.polygon([(32,32),(26,42),(29,47),(36,40)],fill=SU1,outline=OUT) # lapels
+    d.polygon([(33,40),(37,40),(37,41),(33,41)],fill=(236,236,232))                          # pocket square
+    d.rectangle([19,26,29,33],fill=SK1,outline=OUT)                                         # neck
+    face=[(13,7),(35,7),(37,22),(34,29),(27,33),(21,33),(14,29),(11,22)]
+    d.polygon(face,fill=SK0,outline=OUT);d.polygon([(28,10),(36,12),(37,22),(34,29),(27,33),(29,24)],fill=SK1);d.line(face+[face[0]],fill=OUT)
+    d.ellipse([9,17,13,24],fill=SK1,outline=OUT);d.ellipse([35,17,39,24],fill=SK1,outline=OUT)  # ears
+    # swept-back hair, side part, slight receding temples
+    d.polygon([(11,15),(12,6),(18,2),(28,1),(35,4),(38,10),(37,16),(34,11),(28,9),(20,9),(15,11),(13,16)],fill=HR0,outline=OUT)
+    d.line([(17,5),(30,3)],fill=(120,92,66));d.line([(16,8),(33,6)],fill=HR1);d.line([(20,9),(15,5)],fill=HR1)
+    for ex in (18,30):
+        d.rectangle([ex-3,19,ex+2,21],fill=(250,250,248));d.rectangle([ex-1,19,ex,21],fill=(70,90,120));d.point((ex-1,19),fill=(255,255,255))
+        d.line([(ex-4,18),(ex+2,18)],fill=OUT);d.line([(ex-4,16),(ex+2,15)],fill=HR1,width=1)     # heavy brows
+    d.line([(24,20),(25,25),(23,26)],fill=(170,120,96))                                     # nose
+    d.line([(15,24),(16,27)],fill=(212,166,132));d.line([(33,24),(32,27)],fill=(186,138,108))  # cheek lines (smile)
+    if talk:d.polygon([(20,28),(28,28),(26,31),(22,31)],fill=(120,40,40),outline=OUT);d.line([(21,28),(27,28)],fill=(250,250,250))
+    else:d.line([(20,28),(24,29),(28,28)],fill=OUT);d.point((19,27),fill=OUT);d.point((29,27),fill=OUT)
+    return im
+GP=[]
+for t in (0,1):
+    im=guide_portrait(t);im.resize((144,144),Image.NEAREST).save('/tmp/guide_%d.png'%t)
+    for y in range(48):
+        for x in range(48):
+            r,g,b,a=im.getpixel((x,y));GP.append(0x8000 if a<128 else rgb(r,g,b))
+emit("guide_px",GP,"unsigned short")
 #@@PARTS@@
 if __name__=="__main__":
     preview('/tmp/earth_prev.png')

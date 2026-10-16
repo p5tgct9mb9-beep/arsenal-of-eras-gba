@@ -9,10 +9,16 @@ typedef struct{const char*n,*f;u8 ag,ns,nb,top,craft,land,kind;u8 w[3],h[3];u16 
 #include "rocketdb.inc"
 enum{LK_ORBIT,LK_SUB,LK_HOP,LK_LUNAR};enum{LL_NONE,LL_SHIP,LL_SIDE,LL_TOWER,LL_HOP};
 static u16 lbest[NRK];static u8 lbonus[NRK];
-static void ls_load(void){if(!(SRAM[LS_OFF]=='A'&&SRAM[LS_OFF+1]=='O'&&SRAM[LS_OFF+2]=='E'&&SRAM[LS_OFF+3]=='S'&&SRAM[LS_OFF+4]==1)){for(int i=0;i<NRK;i++)lbest[i]=lbonus[i]=0;return;}
- for(int i=0;i<NRK;i++){lbest[i]=SRAM[LS_OFF+8+i*2]|(SRAM[LS_OFF+9+i*2]<<8);lbonus[i]=SRAM[LS_OFF+8+NRK*2+i];}}
-static void ls_save(void){SRAM[LS_OFF]='A';SRAM[LS_OFF+1]='O';SRAM[LS_OFF+2]='E';SRAM[LS_OFF+3]='S';SRAM[LS_OFF+4]=1;
- for(int i=0;i<NRK;i++){SRAM[LS_OFF+8+i*2]=lbest[i]&255;SRAM[LS_OFF+9+i*2]=lbest[i]>>8;SRAM[LS_OFF+8+NRK*2+i]=lbonus[i];}}
+#define NRK_V1 35
+static void ls_load(void){for(int i=0;i<NRK;i++)lbest[i]=lbonus[i]=0;
+ if(!(SRAM[LS_OFF]=='A'&&SRAM[LS_OFF+1]=='O'&&SRAM[LS_OFF+2]=='E'&&SRAM[LS_OFF+3]=='S'))return;int v=SRAM[LS_OFF+4];
+ if(v==1){for(int i=0;i<NRK_V1;i++){lbest[i]=SRAM[LS_OFF+8+i*2]|(SRAM[LS_OFF+9+i*2]<<8);lbonus[i]=SRAM[LS_OFF+8+NRK_V1*2+i];}return;} // v1.3 layout (35 rockets)
+ if(v!=2)return;int n=SRAM[LS_OFF+5];if(n>NRK)n=NRK;
+ for(int i=0;i<n;i++){lbest[i]=SRAM[LS_OFF+8+i*3]|(SRAM[LS_OFF+9+i*3]<<8);lbonus[i]=SRAM[LS_OFF+10+i*3];}}
+static void ls_save(void){SRAM[LS_OFF]='A';SRAM[LS_OFF+1]='O';SRAM[LS_OFF+2]='E';SRAM[LS_OFF+3]='S';SRAM[LS_OFF+4]=2;SRAM[LS_OFF+5]=NRK; // v2: 3 bytes/rocket, fits 0x700-0x87F
+ for(int i=0;i<NRK;i++){SRAM[LS_OFF+8+i*3]=lbest[i]&255;SRAM[LS_OFF+9+i*3]=lbest[i]>>8;SRAM[LS_OFF+10+i*3]=lbonus[i];}}
+static void launch_tip_overlay(const Rk*r,int cd);static void launch_tip_card(const Rk*r);
+static int rk_tgt(const Rk*r){return r->pad?r->pad*2:187;}
 // ---------------------------------------------------------------- drawing helpers (clipped)
 static u16*lfb=0; // null = fb
 #define IWCODE __attribute__((section(".iwram.code"),target("arm"),noinline,long_call))
@@ -57,7 +63,12 @@ static void draw_rk(const Rk*r,int cx,int by,int cur,int thr){
   case 5:cone(cx,y,tw,8,r->craft==2?RGB(44,44,48):RGB(236,236,232));break;
   case 6:body(cx-tw/2-1,y-14,tw+2,14,RGB(150,156,136));cone(cx,y-14,tw+2,6,RGB(150,156,136));lf(cx,y-26,1,6,RGB(200,200,200));break;
   case 8:body(cx-tw/2,y-6,tw,6,RGB(236,236,232));cone(cx,y-6,tw,7,RGB(236,236,232));lf(cx,y-23,1,10,RGB(200,200,200));lf(cx-1,y-14,3,2,RGB(200,200,200));break;
-  case 9:cone(cx,y,tw,4,RGB(200,200,206));for(int k=-1;k<=1;k+=2)lf(cx+k*(tw/2+1),by-6,1,6,RGB(60,60,66));break;}}
+  case 9:cone(cx,y,tw,4,RGB(200,200,206));for(int k=-1;k<=1;k+=2)lf(cx+k*(tw/2+1),by-6,1,6,RGB(60,60,66));break;
+  case 10:{u16 g=RGB(60,62,70),w=RGB(200,204,210);cone(cx,y,tw,6,w);for(int j=0;j<10;j++)lf(cx-1-j/2,y-6-10+j,2+j,1,j&1?w:g);lf(cx,y-20,1,4,w);break;} // delta glider on top
+  case 11:{u16 g=r->c[r->ns-1];cone(cx,y,tw+2,12,lit(g));lf(cx-2,y-14,4,2,RGB(200,200,200));break;} // Vostok-style payload shroud
+  case 12:{u16 B=RGB(30,30,34),W=RGB(236,236,232);cone(cx,y,tw,12,W);int h=r->h[cur<r->ns?cur:0];int b0=by;
+   if(cur==0){for(int j=0;j<4;j++){lf(cx-tw/2,b0-h+j*h/4,tw/2,h/8,B);lf(cx,b0-h+j*h/4+h/8,tw/2,h/8,B);}
+    for(int j=0;j<7;j++){lf(cx-tw/2-1-j/2,b0-7+j,1+j/2,1,B);lf(cx+tw/2,b0-7+j,1+j/2,1,B);}}break;}}}
 // craft for the orbit phase, nose to the right, centred on (x,y)
 static void draw_craft(int k,int x,int y){u16 W=RGB(236,236,232),B=RGB(44,44,48),G=RGB(220,180,60),P=RGB(60,90,170),S=RGB(150,156,136);
  switch(k){
@@ -70,6 +81,12 @@ static void draw_craft(int k,int x,int y){u16 W=RGB(236,236,232),B=RGB(44,44,48)
   case 6:case 7:lf(x-12,y-3,8,7,S);lf(x-16,y-1,4,3,P);lf(x-16,y-6,4,4,P);lf(x-16,y+3,4,4,P);for(int j=0;j<5;j++)lf(x-4+j,y-3+j/3,1,7-j/2,S);lf(x+1,y-2,4,5,k==7?RGB(200,200,190):S);break;
   case 8:lf(x-10,y-3,8,7,W);lf(x-12,y-7,4,14,P);for(int j=0;j<7;j++)lf(x-2+j,y-4+j/2,1,9-j,RGB(200,200,206));break;
   case 9:lf(x-18,y-3,30,7,RGB(192,198,206));for(int j=0;j<6;j++)lf(x+12+j,y-3+j/2,1,7-j,RGB(192,198,206));lf(x-18,y-5,3,2,B);lf(x-18,y+4,3,2,B);lf(x+8,y-5,2,2,B);lf(x+8,y+4,2,2,B);lf(x-10,y-1,16,1,RGB(150,156,166));break;
+  case 12:for(int j=-3;j<=3;j++){int w=7-iabs(j)*2/3;lf(x-1-w/2,y+j,w,1,RGB(200,204,200));}lf(x-10,y-2,6,5,S);for(int j=0;j<3;j++)lf(x-13+j,y-1-j,1,3+j*2,S);lf(x-1,y-1,2,2,RGB(40,60,90));break; // Vostok sphere + service
+  case 13:lf(x-18,y-3,30,7,W);lf(x-18,y-1,30,1,RGB(170,170,176));for(int k=0;k<2;k++){lf(x-12+k*14,y-12,6,8,P);lf(x-12+k*14,y+5,6,8,P);}lf(x+12,y-2,5,5,RGB(200,200,206));break; // station module
+  case 14:for(int j=0;j<12;j++)lf(x-8+j,y-j/3,1,1+j*2/3,RGB(60,62,70));lf(x-8,y,14,2,RGB(40,40,46));lf(x+4,y-1,4,2,W);break; // X-20 glider
+  case 15:lf(x-10,y-2,16,5,W);for(int j=0;j<5;j++)lf(x+6+j,y-2+j/2,1,5-j,W);lf(x-10,y+2,16,1,B);lf(x-10,y-5,2,3,W);lf(x-10,y+3,3,3,W);lf(x-6,y-1,8,1,RGB(60,90,170));break; // Dream Chaser
+  case 16:lf(x-11,y-3,8,7,RGB(190,194,200));lf(x-11,y-1,8,1,RGB(60,90,170));for(int j=0;j<6;j++)lf(x-3+j,y-3+j/2,1,7-j,W);lf(x-14,y-6,3,12,P);break; // Starliner
+  case 17:lf(x-16,y-1,28,3,RGB(150,156,150));for(int j=0;j<10;j++)lf(x-14+j,y+2,1,j/2,RGB(120,124,120));for(int j=0;j<6;j++)lf(x+12+j,y-1+j/3,1,3-j/2,RGB(150,156,150));break; // skip glider
   default:lf(x-6,y-3,9,7,G);lf(x-14,y-1,8,3,P);lf(x+3,y-1,4,3,RGB(170,170,176));lf(x+7,y,2,1,W);break;}}
 static void stars(int sc,int n){for(int i=0;i<n;i++){int x=((i*97+sc*(1+(i&3)))%240+240)%240,y=(i*53)%150+4;fb[y*240+x]=(i&7)?RGB(150,150,170):RGB(255,255,255);}}
 static void earth_limb(int e){if(e<=0)return;for(int x=0;x<240;x++){int dx=x-120;int t=160-e+dx*dx/(1600+e*20);if(t>=160)continue;lf(x,t,1,160-t,RGB(30,80,170));fb[t*240+x]=RGB(140,200,255);if(t+1<160)fb[(t+1)*240+x]=RGB(80,150,230);}}
@@ -230,7 +247,7 @@ static int l_ascent(const Rk*r,int ri){
    BEAT->scoreB=q;
    if(lStress>=1600){res=0;endT=fr;lmsg(r->top==3?"RTLS ABORT - ORBITER SAFE":r->top==2||r->top==6||r->top==8?"LAUNCH ESCAPE - CREW SAFE":"RANGE SAFETY ABORT",200);}
    if(!suborb&&am>=150000&&(vh>>6)>=7700){res=1;endT=fr;lmsg(r->ns>1?"ORBIT INSERTION - ENGINE CUTOFF":"ORBIT!",150);sfx_ok();}
-   if(suborb&&st>=r->ns-1&&fuel<=0&&vv<0&&am>1000){res=apo>=187000?1:2;endT=fr;lmsg(apo>=187000?"APOGEE 187 KM - SPLASHDOWN!":"SUBORBITAL HOP - SPLASHDOWN",160);}
+   if(suborb&&st>=r->ns-1&&fuel<=0&&vv<0&&am>1000){int tg=rk_tgt(r)*1000;res=apo>=tg?1:2;endT=fr;static char am_[32];{const char*a=cat3("APOGEE ",itoa(apo/1000)," KM");int k=0;while(a[k]&&k<30){am_[k]=a[k];k++;}am_[k]=0;}lmsg(apo>=tg?am_:"SUBORBITAL HOP - SHORT OF TARGET",160);}
    if(!suborb&&st==r->ns-1&&fuel<=0&&res<0){if(am>100000&&(vh>>6)>6800){res=1;lmsg("LOW ORBIT - TRIM WITH RCS",150);}else{res=2;lmsg(r->top==2||r->top==5||r->top==6||r->top==8?"SUBORBITAL - CAPSULE SPLASHDOWN, CREW SAFE":"SUBORBITAL - SAFE REENTRY",200);}endT=fr;}
    if(fr>30&&alt<0){alt=0;vv=0;if(ign&&burn>40){res=0;endT=fr;lmsg("ABORT - CREW/VEHICLE SAFE",200);}}
    if(alt<0)alt=0,vv=vv<0?0:vv;}
@@ -262,6 +279,7 @@ static int l_ascent(const Rk*r,int ri){
    for(int k=0;k<14;k++){m3_px(ox+(SIN(deg2a(pitch))*k>>8),oy-(COS(deg2a(pitch))*k>>8),C_WHITE);}
    if(!suborb){int gp=lGp;m3_px(ox+(SIN(deg2a(gp))*16>>8),oy-(COS(deg2a(gp))*16>>8),C_YEL);m3_px(ox+(SIN(deg2a(gp))*17>>8),oy-(COS(deg2a(gp))*17>>8),C_YEL);}
    ltx(196,52,cat("P ",itoa(pitch)),C_WHITE);
+   launch_tip_overlay(r,cd);
    if(cd>0){m3_ctext(40,cat("T-",itoa((cd+119)/120)),C_YEL,2);ltc(60,cd<=40?"A: IGNITION!":"A AT T-0: IGNITION  START: SKIP",cd<=20?C_GREEN:C_GRAY);}
    else if(fr<300&&res<0)ltc(150-0,"",C_GRAY);
    if(cd==0&&fr<420&&res<0){ltc(30,"UP/DN THR  L/R PITCH  A STAGE",C_GRAY);ltc(39,"FOLLOW THE YELLOW GUIDE TICK",C_GRAY);}
@@ -298,11 +316,14 @@ static void launch_run(int ri){const Rk*r=&RK[ri];lScore=0;lAuto=0;lIgn=0;lHull=
 // ---------------------------------------------------------------- select screen
 static void space_launch(void){ls_load();static int ag=0,sel=0;int redraw=1;
  bgm_t(TR_ASCENT);
- for(;;){int idx[20],n=0;for(int i=0;i<NRK;i++)if(RK[i].ag==ag)idx[n++]=i;if(sel>=n)sel=n-1;int ri=idx[sel];const Rk*r=&RK[ri];
+ int top=0;
+ for(;;){int idx[40],n=0;for(int i=0;i<NRK;i++)if(RK[i].ag==ag)idx[n++]=i;if(sel>=n)sel=n-1;int ri=idx[sel];const Rk*r=&RK[ri];
   BEAT->screen=SCR_LSEL;BEAT->menu=sel;BEAT->era=ag;BEAT->extra=ri;
   if(redraw){redraw=0;lf(0,0,240,160,RGB(6,8,22));stars(0,40);m3_box(2,2,236,156,0);
    m3_text(8,7,"SPACE LAUNCH",C_YEL,1);m3_text(88,7,cat3("< ",AGN[ag]," >"),C_BLUE,1);
-   for(int k=0;k<n;k++){int y=17+k*8;m3_text(8,y,k==sel?">":" ",C_YEL,1);const char*nm=RK[idx[k]].n;m3_text(14,y,nm,k==sel?C_YEL:C_WHITE,1);if(lbonus[idx[k]]&1)m3_px(126,y+3,C_GREEN);}
+   if(sel<top)top=sel;if(sel>=top+16)top=sel-15;if(top>n-16)top=n-16>0?n-16:0;
+   if(top>0)m3_text(116,17,"^",C_GRAY,1);if(top+16<n)m3_text(116,137,"V",C_GRAY,1);
+   for(int k=top;k<n&&k<top+16;k++){int y=17+(k-top)*8;m3_text(8,y,k==sel?">":" ",C_YEL,1);const char*nm=RK[idx[k]].n;m3_text(14,y,nm,k==sel?C_YEL:C_WHITE,1);if(lbonus[idx[k]]&1)m3_px(126,y+3,C_GREEN);}
    lf(130,18,104,108,RGB(10,14,34));lf(130,120,104,6,RGB(70,74,80));
    
    m3_text(132,128,cat("STAGES ",itoa(r->ns-(r->nb&&r->h[0]==0?1:0))),C_WHITE,1);if(r->nb)m3_text(186,128,cat("+",cat(itoa(r->nb)," BSTR")),C_GRAY,1);
@@ -311,11 +332,12 @@ static void space_launch(void){ls_load();static int ag=0,sel=0;int redraw=1;
    m3_text(132,20,cat("HI ",itoa(lbest[ri]*10)),lbest[ri]?C_YEL:C_GRAY,1);
    if(r->land||r->kind==LK_LUNAR)m3_text(132,29,r->land==LL_TOWER?"CATCH":r->land==LL_HOP?"HOP+LAND":r->land==LL_SIDE?"2X LAND":r->kind==LK_LUNAR?"LUNAR LM":"LANDING",C_GREEN,1);
    draw_rk(r,206,120,0,0);
-   m3_text(8,147,"L/R:AGENCY A:GO",C_GRAY,1);m3_present();}
+   m3_text(8,147,"<>AGENCY A:GO SEL:TIP",C_GRAY,1);m3_present();}
   next_frame();
   if(pressed&K_UP){sel=(sel+n-1)%n;redraw=1;sfx_menu();}
   if(pressed&K_DOWN){sel=(sel+1)%n;redraw=1;sfx_menu();}
-  if(pressed&(K_L|K_LEFT)){ag=(ag+NAGY-1)%NAGY;sel=0;redraw=1;sfx_menu();}
-  if(pressed&(K_R|K_RIGHT)){ag=(ag+1)%NAGY;sel=0;redraw=1;sfx_menu();}
+  if(pressed&(K_L|K_LEFT)){ag=(ag+NAGY-1)%NAGY;sel=0;top=0;redraw=1;sfx_menu();}
+  if(pressed&(K_R|K_RIGHT)){ag=(ag+1)%NAGY;sel=0;top=0;redraw=1;sfx_menu();}
   if(pressed&(K_A|K_START)){sfx_ok();launch_run(ri);bgm_t(TR_ASCENT);redraw=1;}
+  if(pressed&K_SEL){launch_tip_card(r);redraw=1;}
   if(pressed&K_B){sfx_menu();return;}}}

@@ -2,7 +2,7 @@
 // Static layer (bigbuf): deep-space gradient, atmosphere glow, metallic logo, translucent HUD panel; the Earth disc is
 // re-rendered progressively (a quarter per frame) from a precomputed sphere LUT so continents + clouds scroll.
 // Per frame on top: parallax twinkling stars, the ISS drifting by, periodic launches (Falcon 9 / Saturn V / Shuttle / Soyuz).
-#include "v131db.inc"
+
 #define MP_X1 122
 #define MP_Y0 30
 #define MP_Y1 136
