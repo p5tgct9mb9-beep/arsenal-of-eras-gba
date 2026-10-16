@@ -12,3 +12,33 @@ int ds_ui_query(int scr,int key,int idx,const char**l1,const char**l2){
   else *l1=mln(C->m[idx]);
   return nm;}
  return 0;}
+
+// ---- tactical panel (bottom screen) for the shared-unit arena modes: infantry, armor, air, naval, campaign
+typedef struct{s16 x,y;u8 team,kind;u16 ang;}DsBlip;
+typedef struct{int mw,mh,camx,camy,maxhp,hp,gren,fuel,alive,resp,ang,nb;const char*wpn;}DsTac;
+int ds_tac(int scr,DsTac*t,DsBlip*b,int max){
+ if(!(scr==SCR_INF||scr==SCR_TANK||scr==SCR_AIR||scr==SCR_SEA||scr==SCR_CAMP))return 0;
+ if(mapW<=0||mapH<=0||mapW>MAXW||mapH>64)return 0;
+ Unit*P=&U[0];t->mw=mapW;t->mh=mapH;t->camx=camX;t->camy=camY;t->maxhp=P->maxhp;t->hp=P->hp;t->gren=P->gren;t->fuel=P->fuel;
+ t->alive=P->alive;t->resp=P->resp;t->ang=P->ang;t->wpn=0;
+ if((scr==SCR_INF||scr==SCR_CAMP)&&P->wpn<3)t->wpn=PW[P->wpn].n;
+ int n=0;for(int k=0;k<NU&&n<max;k++){Unit*u=&U[k];if(!u->alive||u->team>1)continue;
+  b[n].x=u->x>>8;b[n].y=u->y>>8;b[n].team=k==0?2:u->team;b[n].kind=0;b[n].ang=u->ang;n++;}
+ t->nb=n;return 1;}
+// cell id at (cx,cy) and the average colour of each map metatile, read back from the BG tiles and palette
+// actually on screen (falls back to flag colours when the map layer cannot be identified)
+int ds_tac_cell(int cx,int cy){return map[cy*MAXW+cx]&31;}
+int ds_tac_flags(int t){return tflag[t&31];}
+int ds_tac_colours(u16*col){
+ int px=(U[0].x>>8)>>4,py=(U[0].y>>8)>>4;if(px<0||py<0||px>=mapW||py>=mapH)return 0;
+ int t=map[py*MAXW+px];
+ for(int bg=0;bg<4;bg++){u16 cnt=REG_BGCNT(bg);int sb=(cnt>>8)&31,cb=(cnt>>2)&3;
+  volatile u16*S=(volatile u16*)(0x06000000+sb*0x800);u16 e=S[((py*2)&31)*32+((px*2)&31)];
+  if((e&0x3FF)!=(u16)(t*4))continue;
+  int bank=(e>>12)-mtBank[t&31];
+  for(int m=0;m<32;m++){int r=0,g=0,bl=0,nn=0;int pb=(bank+mtBank[m])&15;
+   for(int q=0;q<4;q++){volatile u32*T=(volatile u32*)(0x06000000+cb*0x4000+(m*4+q)*32);
+    for(int w=0;w<8;w++){u32 v=T[w];for(int s=0;s<8;s+=2){int ix=(v>>(s*4))&15;if(!ix)continue;u16 c=PAL_BG[pb*16+ix];r+=c&31;g+=(c>>5)&31;bl+=(c>>10)&31;nn++;}}}
+   col[m]=nn?(u16)((r/nn)|((g/nn)<<5)|((bl/nn)<<10)):PAL_BG[0];}
+  return 1;}
+ return 0;}
