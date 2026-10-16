@@ -180,7 +180,7 @@ static void drone_run(int mis){
  dNW=0;for(int k=0;k<3;k++)if(Dr->w[k]!=255&&Dr->c[k]){dW[dNW]=Dr->w[k];dAmmo[dNW]=Dr->c[k];dCd[dNW]=0;dNW++;}
  if(droneCall){dW[dNW]=droneCall==1?DW_ARTY:DW_AC130;dAmmo[dNW]=droneCall==1?2:1;dCd[dNW]=0;dNW++;}
  d_setup(mis);
- if(mis==DM_SUPPORT){xdmg=damage;for(int i=0;i<NU;i++){U[i].team=i<6?0:1;U[i].isp=0;U[i].think=i;U[i].wpn=rr(NPRIM[2]);spawn(&U[i],i);}mpTimer=60*60*4;}
+ if(mis==DM_SUPPORT){xdmg=damage;for(int i=0;i<NU;i++){U[i].team=i<6?0:1;U[i].isp=0;U[i].think=i;U[i].wpn=rr(NPRIM_BOT[2]);spawn(&U[i],i);}mpTimer=60*60*4;}
  feed(DMS[mis],HB_YEL);
  int scr=SCR_DRONE;int enemyDroneT=900;
  for(;;){

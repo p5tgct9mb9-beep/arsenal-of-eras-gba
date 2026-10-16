@@ -95,7 +95,7 @@ static void ms_init_fn(void){Unit*P=&U[0];int ne=cm->nEnemy,na=cm->nAlly;
   else if(mpMode==MM_AIR)u->veh=msAlt?(u->team?((i&1)?13:2):11):(u->team?11:2);
   else if(mpEra==0&&msAlt)u->wpn=u->team?ALLY_PRIM[rr(21)]:AXIS_PRIM[rr(11)];
   else if(mpEra==0)u->wpn=u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)];
-  else u->wpn=mpEra==0?(u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM[mpEra]);
+  else u->wpn=mpEra==0?(u->team?AXIS_PRIM[rr(11)]:ALLY_PRIM[rr(21)]):rr(NPRIM_BOT[mpEra]);
   if(mpMode==MM_SEA){u->ve=0;u->veh=u->team?SH_SBOOT:SH_FLETCHER;}
   spawn(u,i);}
  for(int i=msX0;i<MAXU;i++)memset(&U[i],0,sizeof(Unit));

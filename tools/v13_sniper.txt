@@ -1,0 +1,46 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap A
+wait 6
+tap A
+wait 30
+shot v13_sniper_missions
+tap A
+wait 30
+shot v13_sniper_brief
+tap R
+wait 10
+shot v13_sniper_brief_rifle
+tap L
+wait 10
+tap A
+wait 60
+shot v13_sniper_naked
+hold LEFT 40
+shot v13_sniper_naked2
+tap R
+wait 20
+shot v13_sniper_scope
+tap SELECT
+wait 10
+shot v13_sniper_lase
+press B
+wait 20
+tap A+B
+wait 60
+release
+shot v13_sniper_shot
+tap L
+wait 10
+shot v13_sniper_zoom
+hold RIGHT 60
+wait 30
+shot v13_sniper_pan
+beat end

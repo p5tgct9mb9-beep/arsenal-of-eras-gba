@@ -1170,9 +1170,29 @@ L=voice(R8("E5:2 E5:2 B4:2 E5:2 F#5:2 G#5:2 F#5:4 | E5:2 D5:2 B4:4 D5:4 E5:4 | E
 B=chordb("R:1 R:1 O:1 R:1 R:1 F:1 O:1 R:1 R:1 R:1 O:1 R:1 F:1 F:1 O:1 F:1",["E2","D2","E2","A1","E2","D2","A1","E2"])
 Hm=voice("B4:16 A4:16 B4:16 A4:16 G#4:16 F#4:16 E4:16 G#4:16",128)
 track("IRON CAVALRY",5,1,L,B,Hm,drums("K.S.KKS.K.S.KKSS",128),duty=2,hduty=1,lvol=12,hvol=6)
-# 33 DEFEAT (one-shot)
+# 33 LONG SHOT - Sniper, slow A minor, sparse heartbeat drums
+L=voice(R8("A4:8 C5:4 B4:4 | A4:4 E4:4 A4:8 | C5:8 D5:4 E5:4 | D5:4 C5:4 B4:8 | A4:8 E5:4 D5:4 | C5:4 B4:4 A4:8 | F4:8 G4:4 A4:4 | G#4:8 E4:8"),128)
+B=chordb("R:4 .:4 R:4 .:4",["A1","A1","F1","E1","A1","A1","F1","E1"])
+Hm=voice("E4:16 E4:16 A4:16 G#4:16 E4:16 E4:16 C4:16 B3:16",128)
+track("LONG SHOT",8,1,L,B,Hm,drums("K.......K.......",128),duty=1,lenv=1,hduty=0,henv=2,lvol=10,hvol=5)
+# 34 RED WIRE - EOD, ticking clock pulse, chromatic tension
+L=voice(R8("E5:2 .:2 E5:2 .:2 F5:2 .:2 E5:2 .:2 | D#5:4 E5:4 .:8 | G5:2 .:2 G5:2 .:2 G#5:2 .:2 G5:2 .:2 | F#5:4 G5:4 .:8 | E5:2 F5:2 F#5:2 G5:2 G#5:2 A5:2 A#5:2 B5:2 | C6:4 B5:4 A#5:8 | E5:2 .:2 D#5:2 .:2 E5:2 .:2 B4:2 .:2 | E5:8 .:8"),128)
+B=chordb("R:2 R:2 R:2 R:2 R:2 R:2 O:2 R:2",["E2","E2","E2","E2","C2","C2","B1","E2"])
+Hm=voice("B4:16 B4:16 B4:16 B4:16 G4:16 G4:16 F#4:16 B4:16",128)
+track("RED WIRE",6,1,L,B,Hm,drums("H.H.H.H.H.H.H.H.",128),duty=0,lenv=0,hduty=1,lvol=10,hvol=4)
+# 35 JUNGLE PATROL - LRRP, D dorian with low tom pulse
+L=voice(R8("D5:4 F5:2 G5:2 A5:8 | G5:4 F5:2 E5:2 D5:8 | C5:4 D5:2 F5:2 E5:4 C5:4 | D5:16 | A5:4 C6:2 A5:2 G5:8 | F5:4 E5:2 D5:2 C5:8 | B4:4 C5:4 E5:4 G5:4 | D5:16"),128)
+B=chordb("R:2 .:2 F:2 .:2 R:2 .:2 O:2 .:2",["D2","D2","C2","D2","D2","D2","G1","D2"])
+Hm=voice("A4:16 A4:16 G4:16 A4:16 E4:16 F4:16 G4:16 A4:16",128)
+track("JUNGLE PATROL",7,1,L,B,Hm,drums("T...T.T.T...T...",128),duty=1,lenv=1,hduty=2,lvol=10,hvol=5)
+# 36 CORRIDORS - FPS, fast E phrygian metal
+L=voice(R8("E5:2 E5:2 F5:2 E5:2 G5:2 E5:2 F5:4 | E5:2 E5:2 D5:2 C5:2 B4:4 E5:4 | E5:2 E5:2 F5:2 E5:2 A5:2 G5:2 F5:4 | E5:2 F5:2 G5:2 A5:2 B5:8 | C6:2 B5:2 A5:2 G5:2 F5:4 E5:4 | F5:2 E5:2 D5:2 C5:2 B4:8 | E5:2 G5:2 B5:2 G5:2 F5:4 E5:4 | E5:16"),128)
+B=chordb("R:1 R:1 R:1 R:1 O:1 R:1 R:1 F:1 R:1 R:1 R:1 R:1 O:1 R:1 F:1 F:1",["E2","E2","F2","E2","C2","D2","E2","E2"])
+Hm=voice("B4:16 B4:16 C5:16 B4:16 A4:16 F4:16 G4:16 B4:16",128)
+track("CORRIDORS",4,1,L,B,Hm,drums("KKS.KKS.KKS.KSSS",128),duty=2,hduty=1,lvol=12,hvol=6)
+# 37 DEFEAT (one-shot)
 track("DEFEAT",8,0,voice("G4:4 F#4:4 F4:4 E4:12 .:8",32),voice("C3:4 B2:4 A#2:4 A2:12 .:8",32),voice("E4:4 D#4:4 D4:4 C#4:12 .:8",32),drums("K...K...K...C...................",32),duty=1,lvol=11)
-# 34 MISSION CLEAR (one-shot)
+# 38 MISSION CLEAR (one-shot)
 track("MISSION CLEAR",6,0,voice("C5:2 D5:2 E5:2 G5:2 E5:2 G5:2 C6:8 .:12",32),voice("C3:8 G2:4 C3:8 .:12",32),voice("E4:8 B4:4 E5:8 .:12",32),drums("K.S.K.S.RRRRK...................",32),duty=2,lvol=13)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)

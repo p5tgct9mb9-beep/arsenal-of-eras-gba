@@ -66,12 +66,12 @@ static void cat_bgc(int c){chrome(c,0);}
 static void banner(const char*t,const char*sub,u16 c){m3_fill(0,4,240,30,RGB(10,12,24));m3_fill(0,4,240,1,c);m3_fill(0,33,240,1,c);m3_ctext(8,t,C_YEL,2);if(sub)m3_ctext(24,sub,C_GRAY,1);}
 // ---- stubs for modes still being built
 static void bradley_ops(void);static void sniper_ops(void);static void eod_ops(void);static void lrrp_ops(void);static void fps_ops(void);
-static int mode_avail(int md){return md!=MD_SNIPE&&md!=MD_EOD&&md!=MD_LRRP&&md!=MD_FPS;}
+static int mode_avail(int md){return md!=MD_EOD&&md!=MD_LRRP&&md!=MD_FPS;}
 // ---- per-mode pages
 static void how_to(int md,int c){int redraw=1;for(;;){BEAT->screen=SCR_HOW;BEAT->mode=md;
   if(redraw){chrome(c,2);banner(MDN[md],"HOW TO PLAY",C_YEL);for(int i=0;i<6;i++)m3_text(16,50+i*13,HOW[md][i],C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
-static void rec_brad(const char**L);
+static void rec_brad(const char**L);static void rec_snipe(const char**L);
 static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5;i++)L[i]="";
  #define SB(k,s) {const char*_s=(s);int _n=0;while(_s[_n]&&_n<38){b[k][_n]=_s[_n];_n++;}b[k][_n]=0;L[k]=b[k];}
  switch(md){
@@ -79,6 +79,7 @@ static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5
  case MD_SPEC:{ps_read();SB(0,cat3("COURSES CLEARED: ",itoa(total_clear()),""));SB(1,cat3("INTEL FOUND: ",itoa(total_intel()),""));L[2]="31 PLAYABLE UNITS";break;}
  case MD_AA:{aa_load();static const char*const EN[4]={"WW1     ","WW2     ","COLD WAR","MODERN  "};for(int e=0;e<4;e++){char*o=b[e];int k=0;const char*p[5]={EN[e],"  10-WAVE ",itoa(aaBest[e][0]),"  ENDLESS ",itoa(aaBest[e][1])};for(int j=0;j<5;j++)for(const char*q=p[j];*q&&k<38;q++)o[k++]=*q;o[k]=0;L[e]=o;}L[4]="BEST SCORE PER ERA AND MODE";break;}
  case MD_BRAD:rec_brad(L);break;
+ case MD_SNIPE:rec_snipe(L);break;
  default:L[0]="NO SAVED RECORDS FOR THIS MODE YET.";L[1]="RESULTS ARE SHOWN AFTER EACH MATCH.";}
  #undef SB
 }
@@ -165,7 +166,6 @@ static void wip(const char*n){int redraw=1;for(;;){if(redraw){cat_bgc(CAT_SPECIA
 #ifndef HAVE_BRADLEY
 #endif
 #ifndef HAVE_SNIPER
-static void sniper_ops(void){wip("SNIPER");}
 #endif
 #ifndef HAVE_EOD
 static void eod_ops(void){wip("EOD");}
