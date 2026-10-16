@@ -83,7 +83,7 @@ static void fi_sim(void){fTick++;
   if(fTyp!=1&&fi_smkp(t))fS[y][x]=hmn(255,fS[y][x]+h);
   for(int d=0;d<4;d++){int nx=x+FDX[d],ny=y+FDY[d];if(!fi_in(nx,ny)||fH[ny][nx]||!fFu[ny][nx])continue;int u=fT[ny][nx];
    int K=u==FT_GRASS?4:u==FT_FLOOR?2:u==FT_DOOR||u==FT_LOCK?1:u==FT_TREE?1:u==FT_HOUSE?1:2;int p=h*K*2;
-   if(fWind){int wd=fWind==1?3:fWind==2?1:fWind==3?0:2; // wind blows TOWARD direction wd
+   if(fWind){int wd=fWind==1?1:fWind==2?3:fWind==3?0:2; // wind blows TOWARD direction wd
     if(d==wd)p*=3;else if(d==((wd+2)&3))p/=3;}
    if(u==FT_DOOR||u==FT_LOCK)p/=3;
    if(rr(256)<p)fH[ny][nx]=1;}}

@@ -90,7 +90,7 @@ mis("APARTMENT LADDER RESCUE",0,750,0,180,60,"APARTMENT FIRE, PEOPLE AT THE","WI
 "==============================",
 "",
 ""])
-mis("BRUSH FIRE",1,300,1,150,70,"BRUSH FIRE PUSHED BY AN EAST","WIND. THREE HOMES IN ITS PATH.","SPRAY THE EDGE. B DIGS A FIREBREAK.",4,[
+mis("BRUSH FIRE",1,300,1,150,70,"BRUSH FIRE PUSHED BY A WEST","WIND. THREE HOMES IN ITS PATH.","SPRAY THE EDGE. B DIGS A FIREBREAK.",4,[
 ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
 ",,,t,,,,,,,,,,,,,,,,,,,,,,,,t,",
 ",,,,,,,,,,,,,,,,,,,,,,,,,,hh,,",
