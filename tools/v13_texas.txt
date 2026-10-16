@@ -3,17 +3,21 @@ tap START
 wait 15
 tap A
 wait 20
+tap A
+wait 10
+tap A
+wait 20
 tap UP
-wait 4
+wait 6
+shot v13_naval_texas_msel
 tap A
 wait 30
+shot v13_naval_texas_brief
 tap A
 wait 30
 tap A
 wait 60
 hold UP 40
-hold A+UP 600
-shot t_coast
-hold A+UP 400
-shot t_coast2
+hold A+UP 1000
+shot v13_naval_texas
 beat end
