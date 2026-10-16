@@ -1,0 +1,7 @@
+build/
+gen/
+nitrofiles/
+*.nds
+*.elf
+tools/dsharness
+*.ppm

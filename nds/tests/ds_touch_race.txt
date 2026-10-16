@@ -1,0 +1,33 @@
+#newmenu
+#kc
+# DS touch-UI test: reach Grand Prix through the bottom-screen tiles/lists, then drive (mode 7 HBlank affine)
+wait 100
+ttap 128 80
+wait 60
+shot t_kc
+tap START
+wait 30
+poke32 0x0203FFE8 4447534E
+wait 60
+shot t_menu
+ttap 180 90
+wait 60
+shot t_arcade
+ttap 60 66
+wait 60
+shot t_gp
+ttap 206 27
+wait 60
+shot t_gp2
+tap A
+wait 30
+tap A
+wait 90
+shot t_race0
+hold A 120
+shot t_race1
+hold A+RIGHT 60
+shot t_race2
+hold A+LEFT 60
+shot t_race3
+beat end
