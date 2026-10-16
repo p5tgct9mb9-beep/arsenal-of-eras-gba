@@ -54,7 +54,7 @@ static void f_palette(int outdoor){ // v1.3: per wall type 4 texel colours x 4 l
   {{104,118,132},{60,66,76},{168,182,196},{140,100,60}},                                  // 'M' metal: plate, seam, sheen, rust
   {{176,156,104},{124,106,70},{206,190,140},{96,84,56}},                                  // 'S' sandbags: bag, crease, highlight, shadow
   {{132,86,44},{86,54,28},{220,190,60},{164,116,64}}};                                    // 'D' door: plank, gap, brass/sign, grain
- static const u8 LK[4]={255,200,150,104};
+ static const u8 LK[4]={240,184,132,88}; // v1.3 Doom-gritty: darker falloff
  for(int t=0;t<5;t++)for(int k=0;k<4;k++)for(int l=0;l<4;l++){int m=LK[l];PAL_BG[16+t*16+k*4+l]=f_rgb(WC[t][k][0]*m/256,WC[t][k][1]*m/256,WC[t][k][2]*m/256);}
  for(int i=0;i<16;i++){PAL_BG[96+i]=outdoor?f_rgb(60+i*8,110+i*6,190+i*3):f_rgb(20+i,20+i,24+i);PAL_BG[112+i]=outdoor?f_rgb(90+i*5,80+i*4,60+i*3):f_rgb(40+i*3,40+i*3,38+i*3);}
  static const u8 SC[16][3]={{0,0,0},{200,160,120},{70,90,50},{45,60,35},{30,30,30},{90,90,96},{60,70,40},{255,230,120},{150,40,40},{230,230,220},{60,60,180},{180,140,60},{40,120,40},{200,60,60},{120,90,60},{250,250,250}};
@@ -62,9 +62,9 @@ static void f_palette(int outdoor){ // v1.3: per wall type 4 texel colours x 4 l
  if(fNight)for(int i=16;i<176;i++){u16 c=PAL_BG[i];int r=(c&31)*2/5,g=((c>>5)&31)*2/5,b=((c>>10)&31)*3/5;if(i>=96&&i<112){r=1+(i-96)/8;g=1+(i-96)/8;b=3+(i-96)/5;}PAL_BG[i]=r|(g<<5)|(b<<10);}
  PAL_BG[0]=0;PAL_BG[1]=RGB(248,248,248);PAL_BG[2]=RGB(255,220,80);PAL_BG[3]=RGB(240,60,50);PAL_BG[4]=RGB(80,220,80);PAL_BG[5]=RGB(20,22,30);PAL_BG[6]=RGB(70,74,90);PAL_BG[7]=RGB(140,140,150);PAL_BG[8]=RGB(255,250,200);PAL_BG[9]=RGB(40,40,46);PAL_BG[10]=RGB(90,60,40);PAL_BG[11]=RGB(255,140,40);}
 static void f_textures(void){for(int t=0;t<5;t++)for(int y=0;y<16;y++)for(int x=0;x<16;x++){u32 h=xh(t*977+y*16+x);int v=0;
-  if(t==0){v=(x==0||y==0||y==8)?1:(x==1||y==1||y==9)?2:((h&15)==0||(y>11&&(h&7)==0&&x>5&&x<10))?3:0;}                       // concrete panels + water stains
-  else if(t==1){int off=(y/4)&1?4:0;if((y&3)==3||((x+off)&7)==7)v=1;else if((y&3)==0||((x+off)&7)==0)v=3;else v=(h%5==0)?2:0;} // running-bond brick
-  else if(t==2){v=(x==0||x==8||y==0)?1:(x==1||x==9||y==1)?2:((x==3||x==12)&&(y==3||y==12))?2:(y>12&&(h&3)==0)?3:0;}        // riveted plates, rust at foot
+  if(t==0){v=(x==0||y==0||y==8)?1:(x==1||y==1||y==9)?2:((h&7)==0||(y>11&&(h&3)==0&&x>4&&x<11)||(x==4+(y>>2)&&y>3&&y<11))?3:0;}                       // concrete panels + water stains
+  else if(t==1){int off=(y/4)&1?4:0;if((y&3)==3||((x+off)&7)==7)v=1;else if((y&3)==0||((x+off)&7)==0)v=3;else v=(h%4==0)?2:(h%11==0)?1:0;} // running-bond brick
+  else if(t==2){v=(x==0||x==8||y==0)?1:(x==1||x==9||y==1)?2:((x==3||x==12)&&(y==3||y==12))?2:(y>10&&(h&3)!=0)?3:((h&31)==0)?3:0;}        // riveted plates, rust at foot
   else if(t==3){int yy=y%5,o=((y/5)&1)*4;v=yy==4?1:yy==0?2:(((x+o)%8)==0)?1:(yy==3&&(h&1))?3:0;}                              // stacked sandbags
   else{v=(x==0||x==15)?1:(x%5==0)?1:(x==12&&(y==7||y==8))?2:(y==3&&x>3&&x<12)?2:((h&7)==0)?3:0;}                              // plank door, brass handle, sign
   FTEX[t][y*16+x]=v;}}
@@ -161,23 +161,46 @@ static void f_pickups(void){for(int i=0;i<nFK;i++){FPk*k=&FK[i];if(!k->on)contin
   else{int w=t==2?2:t==3?3:t==4?4:-1;if(w>=0){if(FP.have&(1<<w))FP.res[w]+=FWP[w].mag;else{FP.have|=1<<w;FP.mag[w]=FWP[w].mag;FP.res[w]=FWP[w].mag;FP.wep=w;}}if(t>=5)FP.intel=1;}
   k->on=0;sfx_ok();f_msg(FPKN[t]);}}
 // ---------------------------------------------------------------- frame
-static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=136-(FP.cd>FWP[w].rate-3?3:0);const int G=131,S=129,K=9,M=6,L=7,W=10;
- // right glove + sleeve, left hand on the handguard
- if(w==0){f_rect(bx-5,by-26,10,12,K);f_rect(bx-4,by-30,8,5,M);f_rect(bx-1,by-32,2,3,L);f_rect(bx-7,by-16,14,10,S);f_rect(bx-8,by-8,16,8,G);}
- else{int len=w==2?44:w==4?46:42;int hw=w==4?8:w==2?6:7;
-  f_rect(bx-hw,by-len,hw*2,len,w==3||w==2?W:K);f_rect(bx-hw+2,by-len,hw*2-4,len,w==3||w==2?W:M);
-  f_rect(bx-2,by-len-8,4,9,K);if(w==1){f_rect(bx-3,by-len+10,6,5,K);f_rect(bx-1,by-len+11,2,3,L);}
-  if(w==3){f_rect(bx+hw-1,by-len+18,5,12,K);}if(w==4){f_rect(bx-hw-4,by-len+20,4,8,K);}
-  f_rect(bx-hw-10,by-len+16,12,10,S);f_rect(bx-hw-14,by-len+24,10,len-24,G);
-  f_rect(bx+hw-6,by-18,12,10,S);f_rect(bx+hw-4,by-8,14,8,G);}
- if(FP.flash>0){int fy=by-(w==0?36:(w==4?54:w==2?52:50));f_rect(bx-7,fy-6,14,8,8);f_rect(bx-4,fy-10,8,6,2);f_rect(bx-10,fy-3,20,3,11);}}
+static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=138-(FP.cd>FWP[w].rate-3?4:0);const int G=131,S=129,K=9,M=6,L=7,W=10,O=5;
+ // v1.3 Doom-style chunky gun: rect list drawn twice (dark 1px outline pass, then fill pass)
+ s16 R[16][5];int n=0;
+#define FR(x,y,ww,hh,c) {R[n][0]=x;R[n][1]=y;R[n][2]=ww;R[n][3]=hh;R[n][4]=c;n++;}
+ if(w==0){FR(bx-7,by-32,14,15,K);FR(bx-5,by-37,10,6,M);FR(bx-2,by-40,4,4,L);FR(bx-4,by-30,3,10,M);FR(bx-9,by-19,18,12,S);FR(bx-10,by-9,20,9,G);}
+ else{int len=w==2?50:w==4?54:48;int hw=w==4?10:w==2?8:9;int bc=w==3||w==2?W:K,mc=w==3||w==2?W:M;
+  FR(bx-hw,by-len,hw*2,len,bc);FR(bx-hw+3,by-len,hw*2-6,len,mc);FR(bx-hw+2,by-len+4,2,len-8,L);
+  FR(bx-3,by-len-10,6,11,K);FR(bx-1,by-len-12,2,3,L);
+  if(w==1){FR(bx-4,by-len+12,8,6,K);FR(bx-1,by-len+13,2,4,L);}
+  if(w==3){FR(bx+hw-1,by-len+20,7,15,K);}if(w==4){FR(bx-hw-5,by-len+22,5,10,K);}
+  if(w==2){FR(bx-hw,by-len+26,hw*2,6,K);}
+  FR(bx-hw-12,by-len+18,14,12,S);FR(bx-hw-16,by-len+28,12,len-28,G);
+  FR(bx+hw-7,by-20,14,12,S);FR(bx+hw-5,by-9,17,9,G);}
+#undef FR
+ for(int k=0;k<n;k++)f_rect(R[k][0]-1,R[k][1]-1,R[k][2]+2,R[k][3]+2,O);
+ for(int k=0;k<n;k++)f_rect(R[k][0],R[k][1],R[k][2],R[k][3],R[k][4]);
+ if(FP.flash>0){int fy=by-(w==0?42:(w==4?66:w==2?62:60));f_rect(bx-9,fy-7,18,10,8);f_rect(bx-5,fy-12,10,7,2);f_rect(bx-13,fy-3,26,4,11);f_rect(bx-2,fy-15,4,4,1);}}
+// v1.3 Doom-style reacting face portrait in the HUD (original pixel art, procedural)
+static int f_facest(void){int hp=FP.hp<0?0:FP.hp;int band=hp>=70?0:hp>=40?1:hp>0?2:3;int look=FP.hurt>0?3:((FP.t>>6)%3);return band*4+look;}
+static void f_face(int x,int y,int st){int band=st>>2,look=st&3;const int SK=129,SD=145,SX=161,K=9,WH=1,RD=3,DR=136,HG=130,HD=131;
+ f_rect(x,y,20,22,5);f_rect(x+3,y+5,14,15,SK);f_rect(x+12,y+6,5,13,SD);f_rect(x+4,y+18,12,3,SD);       // face + cel shadow + jaw
+ f_rect(x+2,y+1,16,6,HG);f_rect(x+1,y+5,18,2,HD);f_rect(x+12,y+1,6,5,HD);f_rect(x+4,y+2,4,1,7);            // helmet + rim + sheen
+ if(band<3){int ey=y+9,dx=look==1?-1:look==2?1:0;
+  if(look==3){f_rect(x+5,ey+1,4,1,K);f_rect(x+11,ey+1,4,1,K);}                                              // grimace squint
+  else{f_rect(x+5,ey,4,3,WH);f_rect(x+11,ey,4,3,WH);f_rect(x+6+dx,ey,2,3,K);f_rect(x+12+dx,ey,2,3,K);}
+  f_rect(x+4,ey-2,5,1,band?SX:K);f_rect(x+11,ey-2,5,1,band?SX:K);                                         // brows
+  f_rect(x+9,ey+3,2,3,SD);                                                                                  // nose
+  if(look==3){f_rect(x+7,y+16,6,3,K);f_rect(x+8,y+16,4,1,WH);}else f_rect(x+7,y+17,6,1,band>=2?K:SX);       // mouth
+  if(band>=1){f_rect(x+14,y+12,2,2,SX);f_rect(x+4,y+14,2,1,SX);}                                            // bruises
+  if(band>=2){f_rect(x+5,y+7,2,6,RD);f_rect(x+5,y+13,1,3,DR);f_rect(x+13,y+15,3,2,RD);}}                    // blood
+ else{f_rect(x+5,y+9,4,1,K);f_rect(x+11,y+9,4,1,K);f_rect(x+6,y+8,2,3,K);f_rect(x+12,y+8,2,3,K);f_rect(x+7,y+16,6,2,K);f_rect(x+4,y+6,12,3,RD);}
+ f_rect(x,y,20,1,6);f_rect(x,y+21,20,1,6);f_rect(x,y,1,22,6);f_rect(x+19,y,1,22,6);}
 static u32*FHS EWRAM;
 static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)+(u32)(FMI[FP.mi].surv?FSEC():0)*0x9E3779B1u|((u32)FP.mag[FP.wep]<<8)|((u32)FP.res[FP.wep]<<16)|((u32)FP.wep<<26)|((u32)(FP.reload>0)<<29);sig^=(u32)(FP.kills*7919+f_alive()*104729+FP.intel*31+FP.fpsv*1299709+FP.deaths*15485863);int pg=fbk==(u16*)0x06000000?0:1;
- if(FHS[pg]!=sig){FHS[pg]=sig;f_rect(0,136,240,24,5);f_rect(0,136,240,1,6);char b[48],*o;
- o=sp_put(b,"HP ");sp_int(o,FP.hp<0?0:FP.hp);f_text(2,139,b,FP.hp<30?3:4);f_rect(2,149,50,4,9);f_rect(2,149,(FP.hp<0?0:FP.hp)/2,4,FP.hp<30?3:4);
- f_text(60,139,FWP[FP.wep].n,1);o=sp_int(b,FP.mag[FP.wep]);o=sp_put(o,"/");sp_int(o,FP.res[FP.wep]);f_text(60,149,FP.reload?"RELOADING":b,FP.reload?2:7);
- if(M->surv){int r=180-FSEC();o=sp_put(b,"HOLD ");o=sp_int(o,r<0?0:r);o=sp_put(o,"S K");sp_int(o,FP.kills);}else if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"HOSTILES ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INTEL");}f_text(150,139,b,2);
- o=sp_int(b,FP.fpsv);sp_put(o," FPS");f_text(196,149,b,7);}
+ int fst=f_facest();sig^=(u32)fst*0x01000193u;
+ if(FHS[pg]!=sig){FHS[pg]=sig;f_rect(0,136,240,24,5);f_rect(0,136,240,1,6);char b[48],*o;f_face(2,137,fst);
+ o=sp_put(b,"HP ");sp_int(o,FP.hp<0?0:FP.hp);f_text(26,139,b,FP.hp<30?3:4);f_rect(26,149,50,4,9);f_rect(26,149,(FP.hp<0?0:FP.hp)/2,4,FP.hp<30?3:4);
+ f_text(82,139,FWP[FP.wep].n,1);o=sp_int(b,FP.mag[FP.wep]);o=sp_put(o,"/");sp_int(o,FP.res[FP.wep]);f_text(82,149,FP.reload?"RELOAD":b,FP.reload?2:7);
+ if(M->surv){int r=180-FSEC();o=sp_put(b,"HOLD ");o=sp_int(o,r<0?0:r);o=sp_put(o,"S K");sp_int(o,FP.kills);}else if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"ENEMY ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INT");}f_text(130,149,b,2);
+ o=sp_int(b,FP.fpsv);sp_put(o," FPS");f_text(196,139,b,7);}
  int cx=120,cy=FVH/2;f_rect(cx-6,cy,4,1,4);f_rect(cx+3,cy,4,1,4);f_rect(cx,cy-6,1,4,4);f_rect(cx,cy+3,1,4,4);
  if(FP.hurt>0){f_rect(0,0,240,3,3);f_rect(0,133,240,3,3);f_rect(0,0,3,136,3);f_rect(237,0,3,136,3);}
  if(F.msgT>0){F.msgT--;f_ctext(12,F.msg,2);}}

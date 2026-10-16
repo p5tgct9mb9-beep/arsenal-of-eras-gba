@@ -1,0 +1,83 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 3
+tap A
+wait 6
+tap A
+wait 10
+tap A
+wait 10
+wait 6
+tap START
+wait 20
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+wait 20
+tap A
+wait 150
+hold UP+A 60
+hold A 2
+shot v13_style_6v6_01a
+wait 5
+shot v13_style_6v6_01b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_02a
+wait 5
+shot v13_style_6v6_02b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_03a
+wait 5
+shot v13_style_6v6_03b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_04a
+wait 5
+shot v13_style_6v6_04b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_05a
+wait 5
+shot v13_style_6v6_05b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_06a
+wait 5
+shot v13_style_6v6_06b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_07a
+wait 5
+shot v13_style_6v6_07b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_08a
+wait 5
+shot v13_style_6v6_08b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_09a
+wait 5
+shot v13_style_6v6_09b
+hold UP+A 25
+hold A 2
+shot v13_style_6v6_10a
+wait 5
+shot v13_style_6v6_10b
+hold UP+A 25
+beat end

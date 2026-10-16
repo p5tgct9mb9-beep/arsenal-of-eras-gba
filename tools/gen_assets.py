@@ -767,10 +767,10 @@ fx+=t8(["........","...cc...","..cwwc..",".cwwwwc.",".cwwwwc.","..cwwc..","...cc
 fx+=t8(["........","...mm...","..mwwm..",".mwwwwm.",".mwwwwm.","..mwwm..","...mm...","........"],M)  #2 plasma
 fx+=t8(["........","...oo...","..oyyo..",".oywwyo.",".oywwyo.","..oyyo..","...oo...","........"],M)  #3 shell
 fx+=t8(["........","....g...","...kkk..","..kGGGk.","..kGdGk.","..kGGGk.","...kkk..","........"],M)  #4 grenade
-fx+=t8(["...y....","..yww...",".ywwwy.y","yywwwwy.",".ywwwy..","..yyw...","...y....","........"],M)  #5 flash
+fx+=t8(["...c....","..ywy..c","c.ywwyy.",".ywwwwwy","ywwwwwy.",".yywwy.c","c..ywy..","...c...."],M)  #5 flash (v1.3 energy-style: white core, cyan aura, spikes)
 fx+=t8(["..lll...",".lllll..","lllgllll","llggglll",".lllll..","..lll...","........","........"],M)  #6 smoke
 fx+=t8(["........","...ll...","..lggl..","..lggl..","...ll...","........","........","........"],M)  #7 smoke small
-fx+=t8(["...w....","w..w..w.",".w.w.w..","...w....","www.www.","...w....",".w.w.w..","w..w..w."],M)  #8 spark
+fx+=t8(["y..w..y.",".y.w.y..","..ywy...","wwwwwww.","..ywy...",".y.w.y..","y..w..y.","........"],M)  #8 spark (v1.3 impact star)
 fx+=t8(["BB......","BB......","........","........","........","........","........","........"],M)  #9 radar ally
 fx+=t8(["EE......","EE......","........","........","........","........","........","........"],M)  #10 radar enemy
 fx+=t8(["yy......","yy......","........","........","........","........","........","........"],M)  #11 radar player
@@ -782,6 +782,11 @@ def expl(k):
     c=Cv(16,16);r=[3,6,7,7][k]
     if k<3:c.e(8-r,8-r,7+r,7+r,7);c.e(8-r+2,8-r+2,7+r-2,7+r-2,6)
     if k<2:c.e(8-r+3,8-r+3,7+r-3,7+r-3,5)
+    if k<2:   # v1.3 anime impact: radial speed-line spikes + white core on the first frames
+        for i in range(8):
+            a=i*math.pi/4+(0.39 if k else 0);L=7.4 if i%2==0 else 5.5
+            for t in range(3,int(L)+1):c.px(min(15,max(0,int(8+math.cos(a)*t))),min(15,max(0,int(8+math.sin(a)*t))),5 if k==0 else 6)
+        c.e(6,6,9,9,5)
     if k>=2:
         for i in range(7):
             a=i*0.9;x=8+int(math.cos(a)*(r-2));y=8+int(math.sin(a)*(r-2))

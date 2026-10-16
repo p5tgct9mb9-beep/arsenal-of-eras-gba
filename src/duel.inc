@@ -19,7 +19,7 @@ static const char*const ARN[4]={"CASTLE COURTYARD","DOJO","SHIP DECK","COLOSSEUM
 static u16 dl_bg[240*160] EWRAM;
 enum{DS_IDLE,DS_WALK,DS_WIND,DS_STRIKE,DS_REC,DS_BLOCK,DS_STUN,DS_HIT,DS_DODGE,DS_KO,DS_WIN};
 typedef struct{int x,face,hp,st,s,t,h,g,pw,inv,f,wins,cd,ai_t,ai_plan,flash;}Duelist;
-static Duelist DL[2];
+static Duelist DL[2];static int dlShk; // v1.3 DBZ-style screen shake
 static void dl_arena(int a){u16*o=fb;
  switch(a){
   case 0:lf(0,0,240,160,RGB(120,170,230));for(int x=0;x<240;x+=40){lf(x,20,30,104,RGB(150,140,124));lf(x+30,32,10,92,RGB(126,118,104));lf(x+4,8,8,12,RGB(150,140,124));lf(x+18,8,8,12,RGB(150,140,124));}
@@ -86,7 +86,13 @@ static void dl_draw(const Duelist*d,int gy){const Fighter*F=&FTR[d->f];int x=d->
  if(F->wk==2){dl_line(hx2,hy2,bx,by,2,RGB(120,80,40));cf(bx-3,by-4,6,8,bc);}
  else if(F->wk==5){dl_line(hx2-f*(ca*10>>8),hy2-(sa*10>>8),bx,by,2,RGB(140,100,60));cf(bx-2,by-2,4,4,bc);}
  else {dl_line(hx2,hy2,bx,by,F->wk==4?3:2,bc);cf(hx2-2*(sa!=0),hy2-2,4,1+2*(sa==0),RGB(200,170,60));}
- if(d->s==DS_STRIKE){for(int k=0;k<3;k++)cf(bx+f*(2+k),by+(k-1)*2,1,1,RGB(255,255,255));}}
+ if(d->s==DS_STRIKE){for(int k=0;k<3;k++)cf(bx+f*(2+k),by+(k-1)*2,1,1,RGB(255,255,255));
+  // v1.3: energy slash arc from the wind-up angle to the strike angle (anime ki trail)
+  int a0=d->h==0?-70:d->h==1?-40:20;for(int g=a0;g<ang;g+=6){int c2=COS(deg2a(g)),s2=SIN(deg2a(g));int R=14+L;
+   cf(lx+f*(c2*R>>8)-1,sh+4+(s2*R>>8)-1,3,3,RGB(150,240,255));cf(lx+f*(c2*(R-4)>>8),sh+4+(s2*(R-4)>>8),2,2,RGB(255,255,255));}}
+ if(d->s==DS_DODGE){for(int k=0;k<5;k++){int ly=sh-6+k*9+((k*7)&3),ln=10+((k*13+d->t*3)&15);cf(f>0?x+10:x-10-ln,ly,ln,1,k&1?RGB(255,255,255):RGB(170,220,255));}} // dash speed lines
+ if(d->s==DS_HIT&&d->t>6){int cx=lx-f*2,cy=sh+10,R=6+(16-d->t)*2;for(int r=0;r<8;r++){int A2=r*32+(d->t&1)*16;int ex=cx+(SIN(A2)*R>>8),ey=cy-(COS(A2)*R>>8);
+   dl_line(cx+(SIN(A2)*4>>8),cy-(COS(A2)*4>>8),ex,ey,r&1?1:2,r&1?RGB(255,255,255):RGB(255,220,60));}cf(cx-3,cy-3,6,6,RGB(255,255,255));}} // impact burst
 static int cvx0(int i){return (DL[i].x>>8)-CW/2;}
 static void dl_msgclr(void){dma32(dl_bg+40*240,(void*)(0x06000000+40*480),240*12/2);}
 static int dl_lo(int d){return d<0?0:d;}
@@ -94,11 +100,11 @@ static int dl_lo(int d){return d<0?0:d;}
 static void dl_strike(int a){Duelist*A=&DL[a],*D=&DL[1-a];const Fighter*FA=&FTR[A->f],*FD=&FTR[D->f];
  int dist=iabs((A->x-D->x)>>8);if(dist>FA->reach+6||D->inv>0||D->s==DS_KO)return;
  int dmg=(A->h==0?14:A->h==1?10:8)*FA->pow/10;
- if(D->s==DS_BLOCK&&D->g==A->h){if(D->pw<=(8+FD->blk)){A->s=DS_STUN;A->t=42;D->st=clampi(D->st+15,0,100);D->s=DS_IDLE;sfx_ok();lmsg("PARRY!",40);D->flash=6;return;}
+ if(D->s==DS_BLOCK&&D->g==A->h){if(D->pw<=(8+FD->blk)){A->s=DS_STUN;A->t=42;D->st=clampi(D->st+15,0,100);D->s=DS_IDLE;sfx_ok();lmsg("PARRY!",40);D->flash=6;dlShk=5;return;}
   D->st-=14-FD->blk*2;D->x+=(D->face<0?1:-1)*(D->face<0?-1:1)*0;D->x-=D->face*(5<<8);sfx_shot(0);
-  if(D->st<=0){D->st=0;D->s=DS_STUN;D->t=30;D->hp-=dmg/2;lmsg("GUARD BREAK!",40);}return;}
+  if(D->st<=0){D->st=0;D->s=DS_STUN;D->t=30;D->hp-=dmg/2;lmsg("GUARD BREAK!",40);dlShk=12;}return;}
  if(D->s==DS_BLOCK&&D->g!=A->h)lmsg(A->h==0?"HIGH CUT!":A->h==2?"LOW SWEEP!":"THRUST!",30);
- dmg=dmg*(100-FD->armor)/100;D->hp-=dmg;D->s=DS_HIT;D->t=16;D->x-=D->face*(8<<8);D->flash=8;sfx_hurt();if(D->hp<=0){D->hp=0;D->s=DS_KO;D->t=0;}}
+ dmg=dmg*(100-FD->armor)/100;D->hp-=dmg;D->s=DS_HIT;D->t=16;D->x-=D->face*(8<<8);D->flash=8;dlShk=10;sfx_hurt();if(D->hp<=0){D->hp=0;D->s=DS_KO;D->t=0;}}
 static void dl_act(int i,int left,int right,int up,int down,int atk,int blk,int bpress,int dodge){Duelist*d=&DL[i];const Fighter*F=&FTR[d->f];
  if(d->inv>0)d->inv--;if(d->flash>0)d->flash--;if(d->pw<99)d->pw++;
  if(d->s==DS_KO||d->s==DS_WIN)return;
@@ -153,7 +159,8 @@ static int dl_round(int round,int lvl){Duelist*A=&DL[0],*B=&DL[1];
   if(res>=0&&fr-endT>130){cv_hide();return res;}
   // render both fighters into canvases, then upload in vblank
   for(int i=0;i<2;i++){cv_begin(i,DL[i].x>>8,gy);dl_draw(&DL[i],gy);}
-  next_frame();for(int i=0;i<2;i++){cv_upload(i);cv_oam(i,cvx0(i),gy-CH+2,1);}
+  next_frame();{int sx=dlShk>0?((dlShk&2)?2:-2):0,sy=dlShk>0?((dlShk&4)?1:-1):0;if(dlShk>0)dlShk--;
+   for(int i=0;i<2;i++){cv_upload(i);cv_oam(i,cvx0(i)+sx,gy-CH+2+sy,1);}}
   dl_hud(round,(T+59)/60,0);
   if(lMsgT>0){if(lMsg!=shown){dl_msgclr();lfb=(u16*)0x06000000;ltc(42,lMsg,C_YEL);lfb=0;shown=lMsg;}if(--lMsgT==0){dl_msgclr();shown=0;}}}}
 static void dl_match(int pf,int cf,int ar){int lvl=SET.bot;DL[0].f=pf;DL[1].f=cf;DL[0].wins=DL[1].wins=0;dl_arena(ar);bgm_t(TR_DUEL);
