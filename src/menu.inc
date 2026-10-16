@@ -68,12 +68,12 @@ static void cat_bgc(int c){chrome(c,0);}
 static void banner(const char*t,const char*sub,u16 c){m3_fill(0,4,240,30,RGB(10,12,24));m3_fill(0,4,240,1,c);m3_fill(0,33,240,1,c);m3_ctext(8,t,C_YEL,2);if(sub)m3_ctext(24,sub,C_GRAY,1);}
 // ---- stubs for modes still being built
 static void bradley_ops(void);static void sniper_ops(void);static void eod_ops(void);static void lrrp_ops(void);static void fps_ops(void);static void space_program(void);static void astro_explorer(void);
-static int mode_avail(int md){return md!=MD_FPS;}
+static int mode_avail(int md){(void)md;return 1;}
 // ---- per-mode pages
 static void how_to(int md,int c){int redraw=1;for(;;){BEAT->screen=SCR_HOW;BEAT->mode=md;
   if(redraw){chrome(c,2);banner(MDN[md],"HOW TO PLAY",C_YEL);for(int i=0;i<6;i++)m3_text(16,50+i*13,HOW[md][i],C_WHITE,1);m3_ctext(138,"B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&(K_A|K_B|K_START)){sfx_menu();pressed=0;return;}}}
-static void rec_brad(const char**L);static void rec_snipe(const char**L);static void rec_eod(const char**L);static void rec_lrrp(const char**L);static void rec_space(const char**L);static void rec_astro(const char**L);
+static void rec_brad(const char**L);static void rec_snipe(const char**L);static void rec_eod(const char**L);static void rec_lrrp(const char**L);static void rec_space(const char**L);static void rec_astro(const char**L);static void rec_fps(const char**L);
 static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5;i++)L[i]="";
  #define SB(k,s) {const char*_s=(s);int _n=0;while(_s[_n]&&_n<38){b[k][_n]=_s[_n];_n++;}b[k][_n]=0;L[k]=b[k];}
  switch(md){
@@ -86,6 +86,7 @@ static void rec_lines(int md,const char**L){static char b[5][40];for(int i=0;i<5
  case MD_LRRP:rec_lrrp(L);break;
  case MD_SPACE:rec_space(L);break;
  case MD_ASTRO:rec_astro(L);break;
+ case MD_FPS:rec_fps(L);break;
  default:L[0]="NO SAVED RECORDS FOR THIS MODE YET.";L[1]="RESULTS ARE SHOWN AFTER EACH MATCH.";}
  #undef SB
 }
@@ -126,7 +127,7 @@ static void mode_loadout(int md){int era=0;if(md==MD_SPEC){ps_read();so_read();s
 static s8 mpPickI[5]={-1,-1,-1,-1,-1},mpPickE[5];
 enum{OP_PLAY,OP_MAP,OP_SIDE,OP_BOTS,OP_LOAD,OP_REC,OP_HOW};
 static int mode_ops(int md,u8*o){int n=0;o[n++]=OP_PLAY;if(md>=MD_INF&&md<=MD_SEA){o[n++]=OP_MAP;o[n++]=OP_SIDE;}
- if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_BOTS;if(md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
+ if(md!=MD_LAUNCH&&md!=MD_FLIGHT&&md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO)o[n++]=OP_BOTS;if(md!=MD_CAMP&&md!=MD_SPACE&&md!=MD_ASTRO&&md!=MD_FPS)o[n++]=OP_LOAD;o[n++]=OP_REC;o[n++]=OP_HOW;return n;}
 static const char*op_label(int md,int op){static char b[24];static const char*const BN[4]={"EASY","NORMAL","VETERAN","ELITE"};const char*v=0;const char*k="";
  switch(op){case OP_PLAY:return "PLAY";case OP_LOAD:return "LOADOUT";case OP_REC:return md==MD_CAMP?"PROGRESS":"HIGH SCORES";case OP_HOW:return "HOW TO PLAY";
  case OP_MAP:k="MAP: ";v=mpPickI[md]<0?"PICK":map_def(md,mpPickE[md],mpPickI[md])->n;break;
@@ -176,5 +177,5 @@ static void wip(const char*n){int redraw=1;for(;;){if(redraw){cat_bgc(CAT_SPECIA
 #ifndef HAVE_SNIPER
 #endif
 #ifndef HAVE_FPS
-static void fps_ops(void){wip("FPS");}
+
 #endif

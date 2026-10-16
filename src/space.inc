@@ -344,16 +344,18 @@ static int sp_fly(int mi){const SPm*m=&SPM[mi];memset(&F,0,sizeof F);F.lv=vblN;m
    for(int s=0;s<3;s++)m3_fill(186+s*14,114,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(141,"A: CONTINUE",C_GRAY,1);m3_present();}
   if(sp_isauto()&&t>200)pressed=K_A;if(t>20&&(pressed&(K_A|K_B))){pressed=0;break;}}
  bgCached=-1;return sc;}
+static int spCatOv EWRAM; // 0 = explore chrome, else category+1
+#define spCat (spCatOv?spCatOv-1:CAT_EXPLORE)
 static int sp_list(const char*title,const char*sub,int n,const char*(*nm)(int),const char*(*rt)(int,char*),int sel,int scr){int redraw=1;
  for(;;){BEAT->screen=scr;BEAT->x=sel;
-  if(redraw){chrome(CAT_EXPLORE,0);banner(title,sub,C_YEL);m3_box(4,38,232,118,1);int top=sel>8?sel-8:0;
+  if(redraw){chrome(spCat,0);banner(title,sub,C_YEL);m3_box(4,38,232,118,1);int top=sel>8?sel-8:0;
    for(int i=top;i<n&&i<top+9;i++){int y=44+(i-top)*11;char b[24];m3_text(12,y,i==sel?">":" ",C_YEL,1);m3_text(20,y,nm(i),i==sel?C_YEL:C_WHITE,1);const char*r=rt(i,b);m3_text(150,y,r,C_GRAY,1);}
    m3_ctext(146,"A: SELECT   B: BACK",C_GRAY,1);m3_present();redraw=0;}
   next_frame();if(pressed&K_UP){sel=(sel+n-1)%n;redraw=1;sfx_menu();}if(pressed&K_DOWN){sel=(sel+1)%n;redraw=1;sfx_menu();}
   if(pressed&K_B){pressed=0;return -1;}if(pressed&K_A){pressed=0;sfx_ok();return sel;}}}
 static const char*spm_nm(int i){return SPM[i].n;}
 static const char*spm_rt(int i,char*b){char*o=sp_put(b,"");for(int s=0;s<3;s++)*o++=s<SPR.flyS[i]?'*':'-';*o++=' ';sp_int(o,SPR.fly[i]);return b;}
-static void sp_brief(const char*n,const char*l1,const char*l2,const char*l3,const char*l4,const char*help){chrome(CAT_EXPLORE,0);banner(n,l1,C_YEL);m3_box(4,38,232,118,1);m3_text(12,46,l2,C_WHITE,1);m3_text(12,58,l3,C_GRAY,1);m3_text(12,70,l4,C_GRAY,1);
+static void sp_brief(const char*n,const char*l1,const char*l2,const char*l3,const char*l4,const char*help){chrome(spCat,0);banner(n,l1,C_YEL);m3_box(4,38,232,118,1);m3_text(12,46,l2,C_WHITE,1);m3_text(12,58,l3,C_GRAY,1);m3_text(12,70,l4,C_GRAY,1);
  int y=86;const char*p=help;char b[40];while(*p&&y<136){int k=0;while(p[k]&&p[k]!='|'&&k<38){b[k]=p[k];k++;}b[k]=0;m3_text(12,y,b,RGB(170,200,255),1);y+=10;p+=k;if(*p=='|')p++;}m3_ctext(146,"A: GO   B: BACK",C_GRAY,1);m3_present();}
 static int sp_wait_ab(int scr){for(int t=0;;t++){next_frame();BEAT->screen=scr;if(sp_isauto()&&t>30)return 1;if(pressed&K_A){pressed=0;return 1;}if(pressed&K_SEL){pressed=0;return 2;}if(pressed&K_B){pressed=0;return 0;}}}
 static void sp_profiles(void){int sel=SPR.last<SPM_N?SPR.last:0;
@@ -367,7 +369,7 @@ static const char*const SPHN[4]={"MISSION PROFILES","SATELLITE DEPLOY","ISS DOCK
 static const char*sph_nm(int i){return SPHN[i];}
 static const char*sph_rt(int i,char*b){int n=0,s=0;if(i==0){for(int k=0;k<SPM_N;k++){n+=SPR.fly[k]>0;s+=SPR.flyS[k];}}else if(i==1){for(int k=0;k<8;k++){n+=SPR.sat[k]>0;s+=SPR.satS[k];}}else if(i==2){for(int k=0;k<8;k++){n+=SPR.iss[k]>0;s+=SPR.issS[k];}}else{for(int k=0;k<6;k++){n+=SPR.eva[k]>0;s+=SPR.evaS[k];}}
  char*o=sp_int(b,n);o=sp_put(o," DONE ");o=sp_int(o,s);sp_put(o,"*");return b;}
-static void space_program(void){spr_read();bgm_t(TR_SPACE);int sel=0;
+static void space_program(void){spCatOv=0;spr_read();bgm_t(TR_SPACE);int sel=0;
  for(;;){int i=sp_list("SPACE PROGRAM","REAL MISSIONS - NO SHORTCUTS",4,sph_nm,sph_rt,sel,SCR_SPSEL);if(i<0){bgCached=-1;return;}sel=i;
   if(i==0)sp_profiles();else if(i==1)sp_satellites();else if(i==2)sp_iss();else sp_eva();bgm_t(TR_SPACE);}}
 static void rec_space(const char**L){spr_read();static char b[4][40];for(int i=0;i<4;i++){char t[24];char*o=sp_put(b[i],SPHN[i]);o=sp_put(o,": ");sp_put(o,sph_rt(i,t));L[i]=b[i];}L[4]="REAL PROFILES, SATS, ISS, EVA";}
@@ -547,7 +549,7 @@ static SPD1 DK EWRAM;
 static int sp_dock(int vi){const SPiv*V=&SPI[vi];memset(&DK,0,sizeof DK);DK.x=V->arm?30:200;DK.y=3.5f;DK.z=-2.0f;DK.ro=4;DK.pi=-3;DK.ya=5;int au=sp_isauto();int capT=0;
  for(;;DK.t++){next_frame();u16 ky=keys,pr=pressed;
   if(au){ky=0;pr=0;DK.ff=DK.x>12?1:0;int ph=DK.t%12;float tx=V->arm?10:0;float vt=DK.x>40?-0.8f:DK.x>12?-0.3f:-0.1f;if(V->arm&&DK.x<tx+0.3f)vt=0;
-   float tr=0;if(ph==0){if(DK.vy> -DK.y*0.02f+0.01f)pr|=K_LEFT;else if(DK.vy< -DK.y*0.02f-0.01f)pr|=K_RIGHT;}if(ph==3){if(DK.vz> -DK.z*0.02f+0.01f)pr|=K_DOWN;else if(DK.vz< -DK.z*0.02f-0.01f)pr|=K_UP;}
+   float tr=0;{float gy=DK.x>40?0.02f:0.08f,gt=-DK.y*gy,gz=-DK.z*gy;if(gt>0.06f)gt=0.06f;if(gt<-0.06f)gt=-0.06f;if(gz>0.06f)gz=0.06f;if(gz<-0.06f)gz=-0.06f;if(ph==0){if(DK.vy>gt+0.012f)pr|=K_LEFT;else if(DK.vy<gt-0.012f)pr|=K_RIGHT;}if(ph==3){if(DK.vz>gz+0.012f)pr|=K_DOWN;else if(DK.vz<gz-0.012f)pr|=K_UP;}}
    if(ph==6){if(-DK.vx< -vt-0.02f)pr|=K_L;else if(-DK.vx> -vt+0.02f)pr|=K_R;}
    if(ph==9){ky|=K_B;float*a[3]={&DK.ro,&DK.pi,&DK.ya};float*v[3]={&DK.vro,&DK.vpi,&DK.vya};int w=(DK.t/12)%3;float dsr=-*a[w]*0.03f;if(*v[w]>dsr+0.02f)pr|=w==0?K_L:w==1?K_DOWN:K_LEFT;else if(*v[w]<dsr-0.02f)pr|=w==0?K_R:w==1?K_UP:K_RIGHT;}(void)tr;
    if(V->arm&&DK.x<tx+0.5f&&fabsi((int)(DK.y*10))<3&&fabsi((int)(DK.z*10))<3)capT++;}
@@ -657,7 +659,8 @@ static int sp_eva_run(int mi){const EvMis*M=&EVM[mi];memset(&EV,0,sizeof EV);int
    else if(EV.task>=0){const EvStep*S2=&ETK[M->task[0]][EV.step];if(S2->hold)ky|=S2->key;else if((EV.t&15)==0)pr|=S2->key;}
    else{int fw=goal>EV.s;int dist=fw?goal-EV.s:EV.s-goal;
     // anchors every 60 px; clip at the anchor nearest when tether nearly taut
-    int an=((EV.s+30)/60)*60;if(EV.clipS<0||(fabsi(EV.s-EV.clipS)>40&&fabsi(EV.s-an)<3&&an!=EV.clipS))pr|=K_SEL;
+    int an=((EV.s+30)/60)*60;if(an>EV.len)an-=60;if(EV.clipS<0&&fabsi(EV.s-an)>=3){fw=an>EV.s;dist=3;}
+    if((EV.clipS<0&&fabsi(EV.s-an)<3)||(EV.clipS>=0&&fabsi(EV.s-EV.clipS)>40&&fabsi(EV.s-an)<3&&an!=EV.clipS))pr|=K_SEL;
     else if(dist>2){ky|=fw?K_RIGHT:K_LEFT;if((EV.t&7)==0)pr|=(EV.hand&1)?K_L:K_R;}
     else if(!EV.done&&EV.task<0&&(EV.t&15)==0)pr|=K_A;}}
   if(pr&K_B){EV.cam^=1;sfx_menu();}

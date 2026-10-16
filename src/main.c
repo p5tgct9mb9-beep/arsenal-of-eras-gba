@@ -162,6 +162,7 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "lrrp.inc"
 #include "space.inc"
 #include "explorer.inc"
+#include "fps.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
  for(;;){

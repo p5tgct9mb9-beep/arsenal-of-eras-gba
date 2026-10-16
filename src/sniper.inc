@@ -45,10 +45,10 @@ static const u16 SN_DF[5]={2600,1700,1000,550,250},SN_DN[5]={1700,1000,550,250,7
 // ---------------------------------------------------------------- state
 typedef struct{s32 wx;s16 x0,x1,D,tm,glint,aim,hp;u8 L,t8,k,st,alive,pose,face,hostile,tag,cover;s16 vx;}SnT;
 #define NST 24
-static SnT SNT[NST];static int nST;
+static SnT SNT[NST] EWRAM;static int nST;
 typedef struct{s32 wx;s16 w,h;u8 L,t8,k,pad;u16 col;}SnO;
 #define NSO 48
-static SnO SOB[NSO];static int nSO;
+static SnO SOB[NSO] EWRAM;static int nSO;
 static s32 RH[6][122] EWRAM; // ridge heights (8.8 world units) every 8 wu
 static s16 colY[5][240] EWRAM;static u16 colTx[240] EWRAM;static s16 snSpan[160];
 static u16 snPal[5][5],snSky[17];
