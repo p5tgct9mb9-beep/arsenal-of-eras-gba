@@ -1,0 +1,56 @@
+wait 100
+tap START
+wait 40
+tap UP
+wait 6
+shot cr_menu
+tap A
+wait 30
+wait 150
+shot cr_00
+beat
+wait 150
+shot cr_01
+beat
+wait 150
+shot cr_02
+beat
+wait 150
+shot cr_03
+beat
+wait 150
+shot cr_04
+beat
+wait 150
+shot cr_05
+beat
+wait 150
+shot cr_06
+beat
+wait 150
+shot cr_07
+beat
+wait 150
+shot cr_08
+beat
+wait 150
+shot cr_09
+beat
+wait 150
+shot cr_10
+beat
+wait 150
+shot cr_11
+beat
+wait 150
+shot cr_12
+beat
+wait 150
+shot cr_13
+beat
+wait 60
+tap A
+wait 30
+shot cr_back
+beat
+end

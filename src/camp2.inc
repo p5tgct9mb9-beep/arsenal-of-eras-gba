@@ -253,7 +253,7 @@ static void ms_result_fn(int win){Unit*P=&U[0];int was=(campUnlock>>(cmIdx+1))&1
   else hctxt(r+1,(cm->flags&MF_ROE)&&msCivPlayer>=2?"RULES OF ENGAGEMENT BROKEN":"TRY AGAIN, SOLDIER",HB_GRAY,1);
   if(i>40)hctxt(16,"A: CONTINUE",HB_YEL,1);
   oam_begin();present(0,0,0);if(i>40&&(pressed&(K_A|K_START)))break;}
- music_stop();}
+ music_stop();if(win&&!was&&cmIdx+1>=NCM){REG_BLDCNT=0;credits_roll(1);}}
 // ---- alternate side (mirrored objectives, fictional characters, generic markings, no civilians involved)
 typedef struct{u8 mi;const char*side0,*side1,*pov;u8 ob[3];s16 arg[3];const char*od[3];const char*b[4];}CAlt;
 #define NALT 10

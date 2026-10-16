@@ -149,6 +149,7 @@ static int faction_select(int mode){int col=0,redraw=2;
   if(pressed&K_B){sfx_menu();return 0;}}}
 static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present();next_frame();}
 #include "portraits.inc"
+static void credits_roll(int after_campaign);
 #include "camp2.inc"
 #include "char.inc"
 #include "world.inc"
@@ -175,6 +176,7 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "race.inc"
 #include "v132core.inc"
 #include "hangar.inc"
+#include "credits.inc"
 #include "v132_stub.inc"
 #include "menu131.inc"
 int main(void){
