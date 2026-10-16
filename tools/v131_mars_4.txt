@@ -59,4 +59,12 @@ wait 500
 shot v131_mars_4_14
 wait 500
 shot v131_mars_4_15
+wait 500
+shot v131_mars_4_16
+wait 500
+shot v131_mars_4_17
+wait 500
+shot v131_mars_4_18
+wait 500
+shot v131_mars_4_19
 end

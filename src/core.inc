@@ -14,7 +14,9 @@ typedef struct{u32 magic,frame,screen,mode,era,hp,scoreA,scoreB,timer,phase,kill
 #define BEAT ((volatile Beat*)0x0203FF00)
 enum{SCR_TITLE=1,SCR_MENU,SCR_ERA,SCR_CAMP,SCR_INF,SCR_TANK,SCR_AIR,SCR_RESULT,SCR_PAUSE,SCR_DONE,SCR_LOADOUT,SCR_SETTINGS,SCR_MAPSEL,SCR_MSEL,SCR_MISSION,SCR_MBRIEF,SCR_DRONE,SCR_HANGAR,SCR_SEA,SCR_LAUNCH,SCR_WMENU,SCR_WORLD,SCR_WMAP,SCR_WLOG};
 static u16 keys,prevk,pressed;static u32 frame;
-static void poll(void){prevk=keys;keys=~REG_KEYINPUT&0x3FF;pressed=keys&~prevk;}
+static u16 klq[8],klp;static u8 kln; // key-press queue: taps during long blocking draws (menu bakes) are kept, one per frame
+static inline void kl_poll(void){u16 k=~REG_KEYINPUT&0x3FF,e=k&~klp;klp=k;if(e){if(kln<8)klq[kln++]=e;else klq[7]|=e;}}
+static void poll(void){prevk=keys;keys=~REG_KEYINPUT&0x3FF;kl_poll();pressed=0;if(kln){pressed=klq[0];for(int i=1;i<kln;i++)klq[i-1]=klq[i];kln--;}}
 static void vsync(void){while(REG_VCOUNT>=160);while(REG_VCOUNT<160);}
 static void dma32(const void*src,volatile void*dst,u32 words){REG_DMA3CNT=0;REG_DMA3SAD=(u32)src;REG_DMA3DAD=(u32)dst;REG_DMA3CNT=words|0x84000000;while(REG_DMA3CNT&0x80000000);}
 static void fill32(volatile void*dst,u32 val,u32 words){static volatile u32 v;v=val;REG_DMA3CNT=0;REG_DMA3SAD=(u32)&v;REG_DMA3DAD=(u32)dst;REG_DMA3CNT=words|0x85000000;while(REG_DMA3CNT&0x80000000);}

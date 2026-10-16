@@ -12,7 +12,7 @@ static void mm_kc_bake(int x0,int y0);static void mm_stars_init(void);
 static int mm_ls,mm_cs,mm_part;
 static inline int mm_under(int x,int y){return (x>=4&&x<MP_X1&&y>=MP_Y0&&y<MP_Y1)||(x>=4&&x<236&&y>=MD_Y0&&y<158);}
 IWCODE static void mm_earth_rows(int y0,int y1,int both){u16*B=bigbuf;int ls=mm_ls,cs=mm_cs;
- for(int y=y0;y<y1;y++){int x0=ea_row[y*3],n=ea_row[y*3+1],o=ea_row[y*3+2];
+ for(int y=y0;y<y1;y++){kl_poll();int x0=ea_row[y*3],n=ea_row[y*3+1],o=ea_row[y*3+2];
   int pu0=(y>=MP_Y0&&y<MP_Y1)?MP_X1:(y>=MD_Y0&&y<158)?236:0;int i0=0;if(both&&pu0>x0){i0=pu0-x0;if(i0>n)i0=n;}
   u16*d=&B[y*240+x0];u16*f=&MMV[y*240+x0];const u16*L=&ea_lut[o];const u8*S=&ea_sh[o];
   for(int i=i0;i<n;i++){int l=L[i];int u=l&511,v=l>>9;int sh=S[i];int t=ea_tex[(v<<9)+((u+ls)&511)];int c=ea_cld[(v<<9)+((u+cs)&511)];
@@ -23,19 +23,19 @@ static void mm_logo(void){const char*s="ARSENAL OF ERAS";int w=slen(s)*12,x0=120
  m3_text(x0,y0,s,M,2);
  static const u16 G[14]={RGB(250,250,255),RGB(236,240,248),RGB(214,222,236),RGB(190,200,220),RGB(160,172,196),RGB(120,132,160),RGB(250,224,150),RGB(240,200,110),RGB(222,176,80),RGB(200,150,60),RGB(176,128,48),RGB(150,104,40),RGB(120,84,32),RGB(100,70,28)};
  for(int y=y0;y<y0+14;y++)for(int x=x0-1;x<x0+w+1;x++){u16*p=&fb[y*240+x];if(*p==M)*p=G[y-y0];}
- for(int y=y0-1;y<y0+15;y++)for(int x=x0-2;x<x0+w+2;x++){u16 c=fb[y*240+x];if(c==RGB(250,250,255)||c==RGB(8,248,8))continue;
+ for(int y=y0-1;y<y0+15;y++)for(int x=(kl_poll(),x0-2);x<x0+w+2;x++){u16 c=fb[y*240+x];if(c==RGB(250,250,255)||c==RGB(8,248,8))continue;
   int edge=0;for(int k=0;k<4;k++){int xx=x+(k==0)-(k==1),yy=y+(k==2)-(k==3);u16 q=fb[yy*240+xx];for(int j=0;j<14;j++)if(q==G[j]){edge=1;break;}if(edge)break;}
   int isg=0;for(int j=0;j<14;j++)if(c==G[j]){isg=1;break;}if(edge&&!isg)fb[y*240+x]=RGB(10,14,30);}
  m3_text(120-(20*6)/2,22,"FIELD EDITION V1.3.1",RGB(110,200,230),1);}
 static void mm_static(void){
- for(int y=0;y<160;y++){u16 c=RGB(2+y/40,3+y/30,10+y/12);m3_fill(0,y,240,1,c);}
+ for(int y=0;y<160;y++){kl_poll();u16 c=RGB(2+y/40,3+y/30,10+y/12);m3_fill(0,y,240,1,c);}
  // atmosphere glow above the limb
  for(int x=0;x<240;x++){int t=ea_top[x];if(t>=160)continue;static const u16 GL[6]={RGB(10,20,60),RGB(20,44,110),RGB(40,90,180),RGB(80,150,230),RGB(150,210,255),RGB(200,236,255)};
   for(int k=0;k<6;k++){int y=t-6+k;if(y>=0&&y<160)fb[y*240+x]=GL[k];}}
  mm_logo();mm_kc_bake(216,3);mm_stars_init();
  // translucent HUD panels over the sky part
- for(int y=MP_Y0;y<158;y++)for(int x=4;x<236;x++){if(!mm_under(x,y))continue;u16 c=fb[y*240+x];int r=c&31,g=(c>>5)&31,b=(c>>10)&31;
-  r=(r*3+1*5)>>3;g=(g*3+2*5)>>3;b=(b*3+6*5)>>3;fb[y*240+x]=r|(g<<5)|(b<<10);}
+ for(int y=MP_Y0;y<158;y++){kl_poll();for(int x=4;x<236;x++){if(!mm_under(x,y))continue;u16 c=fb[y*240+x];int r=c&31,g=(c>>5)&31,b=(c>>10)&31;
+  r=(r*3+1*5)>>3;g=(g*3+2*5)>>3;b=(b*3+6*5)>>3;fb[y*240+x]=r|(g<<5)|(b<<10);}}
  dma32(fb,bigbuf,240*160/2);mm_earth_rows(0,160,0);}
 static void mm_icon(int k,int x0,int y0){const u8*s=&mi_icon[k*144];for(int y=0;y<12;y++)for(int x=0;x<12;x++){int v=s[y*12+x];if(v)fb[(y0+y)*240+x0+x]=mi_pal[v];}}
 
