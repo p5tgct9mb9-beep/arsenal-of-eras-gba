@@ -1,0 +1,27 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 6
+tap A
+wait 8
+tap A
+wait 30
+shot v13_eod_tasks
+tap A
+wait 30
+shot v13_eod_brief
+tap A
+wait 60
+shot v13_eod_field
+hold A+RIGHT 120
+shot v13_eod_sweep
+hold A+RIGHT 120
+shot v13_eod_sweep2
+beat end

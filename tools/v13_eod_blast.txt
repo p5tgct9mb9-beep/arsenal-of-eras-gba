@@ -1,0 +1,24 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 6
+tap A
+wait 8
+tap A
+wait 30
+tap A
+wait 30
+tap A
+wait 30
+hold RIGHT 500
+shot v13_eod_blast
+hold RIGHT+DOWN 300
+shot v13_eod_blast2
+beat end
