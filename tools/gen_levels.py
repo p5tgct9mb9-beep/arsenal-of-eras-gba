@@ -223,7 +223,7 @@ def validate(L,goal,lowg=False):
     return False,best
 def build(w,s,stars,flags,ai,seed):
     r=random.Random(seed);L=Lv();d=stars
-    cf=dict(etypes=ETYPES[w],gmax=3 if 'n' in flags else 4,warped=0,wind='n' in flags,space=w==9)
+    cf=dict(etypes=ETYPES[w],gmax=3 if ('n' in flags or w>=10) else 4,warped=0,wind='n' in flags,space=w==9)
     L.add(6)
     if 'b' in flags or 'a' in flags:return build_auto(w,stars,flags,r,L,cf)
     nseg=(8+3*d+r.randint(0,3)) if not ai else 6+d
