@@ -962,7 +962,7 @@ def C27(L):  # Gunship Valley -> Hind boss
     return dict(obj=0,boss=1,arena=arena_flat,fl=FL_RAIN)
 def street(L,n,roof=True):
     for k in range(n):
-        L.pool(6,('INF','CAR','TECH'),.3);L.e('CAR',L.W+2)
+        L.pool(6,('INF','CAR','TECH'),.3);L.e('CAR',L.W-3)
         L.building(L.r.randint(4,6),L.r.randint(3,4),True,('RPG',) if roof else ('INF',),0 if k%2==0 else 1)
 def C31(L):  # City Outskirts - cars & rooftops
     L.flat(8);street(L,3);L.cache();L.checkpoint();street(L,3);L.high_path(2);L.bunker();L.pool(10,P3,.3)

@@ -1,0 +1,30 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 4
+tap A
+wait 6
+hold A+R 4
+wait 30
+shot m_sel
+tap RIGHT
+wait 10
+tap DOWN
+tap DOWN
+wait 10
+shot m_sel2
+tap SELECT
+wait 20
+shot m_gar
+tap DOWN
+wait 6
+tap RIGHT
+wait 10
+shot m_gar2
+end
