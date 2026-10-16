@@ -1277,6 +1277,24 @@ L=voice(R8("D5:6 A4:2 D5:4 F5:4 | E5:4 D5:4 C#5:8 | D5:4 E5:4 F5:6 G5:2 | A5:16 
 B=chordb("R:4 F:4 R:4 F:4",["D2","A1","D2","A1","G1","C2","A1","D2"])
 Hm=voice("F4:16 E4:16 A4:16 C#5:16 D5:16 C5:16 C#5:16 A4:16",128)
 track("RED SQUARE MARCH",7,1,L,B,Hm,drums("K...S.S.K...S.SS",128),duty=2,lenv=0,hduty=2,henv=2,lvol=12,hvol=6,bvol=2)
+# ======================= v1.3.2 RACING + HANGAR PACK (original compositions, PSG only) =======================
+# 48 VOLTAGE RUSH - main race theme, A major synth-pop drive
+L=voice(R8("E5:2 E5:1 F#5:1 A5:2 E5:2 C#6:4 B5:2 A5:2 | F#5:2 F#5:1 A5:1 B5:4 A5:2 F#5:2 E5:4 | D5:2 D5:1 E5:1 F#5:2 A5:2 D6:4 C#6:2 B5:2 | C#6:4 B5:4 A5:4 G#5:4 | E5:2 E5:1 F#5:1 A5:2 E5:2 C#6:4 B5:2 A5:2 | F#5:2 A5:2 B5:2 C#6:2 D6:4 C#6:2 B5:2 | C#6:2 B5:2 A5:2 F#5:2 B5:4 A5:2 G#5:2 | A5:12 .:4"),128)
+B=chordb("R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1",["A1","F#1","D2","E2","A1","D2","B1","E2"])
+Hm=voice(arp4([["A4","C#5","E5","C#5"],["F#4","A4","C#5","A4"],["D4","F#4","A4","F#4"],["E4","G#4","B4","G#4"],["A4","C#5","E5","C#5"],["D4","F#4","A4","F#4"],["B3","D4","F#4","D4"],["E4","G#4","B4","G#4"]]),128)
+track("VOLTAGE RUSH",4,1,L,B,Hm,drums("K.H.S.H.K.HKS.H.",128),duty=2,lenv=0,hduty=2,lvol=11,hvol=5,wave=1)
+# 49 RED DUST DRIFT - Mars / Starbase race theme, D minor driving synth
+L=voice(R8("D5:3 F5:3 A5:2 G5:4 F5:4 | E5:3 F5:3 G5:2 A5:8 | A#5:3 A5:3 G5:2 F5:4 E5:4 | F5:4 E5:4 D5:4 C#5:4 | D5:3 F5:3 A5:2 D6:4 C6:4 | A#5:3 A5:3 G5:2 A5:8 | G5:2 A5:2 A#5:4 A5:2 G5:2 F5:4 | E5:12 .:4"),128)
+B=chordb("R:1 R:1 O:1 R:1 F:1 R:1 O:1 R:1 R:1 R:1 O:1 R:1 F:1 R:1 O:1 F:1",["D2","C2","A#1","A1","D2","A#1","G1","A1"])
+Hm=voice(arp4([["D4","F4","A4","F4"],["C4","E4","G4","E4"],["A#3","D4","F4","D4"],["A3","C#4","E4","C#4"],["D4","F4","A4","F4"],["A#3","D4","F4","D4"],["G3","A#3","D4","A#3"],["A3","C#4","E4","C#4"]]),128)
+track("RED DUST DRIFT",5,1,L,B,Hm,drums("K...S..KK.K.S...",128),duty=1,lenv=0,hduty=2,lvol=11,hvol=5,wave=1)
+# 50 CHARGE COMPLETE - race finish jingle (one-shot)
+track("CHARGE COMPLETE",5,0,voice("A4:1 C#5:1 E5:1 A5:1 C#6:2 E6:2 .:2 E6:1 E6:1 A6:8 .:12",32),voice("A2:4 E2:4 A2:12 .:12",32),voice("E4:8 C#5:12 .:12",32),drums("K.K.S.S.K...C...................",32),duty=2,lvol=13,hvol=6)
+# 51 HANGAR BAY - aircraft builder workshop groove, G major
+L=voice(R8("G4:2 B4:2 D5:4 B4:2 C5:2 D5:4 | E5:4 D5:2 B4:2 A4:8 | C5:2 E5:2 G5:4 E5:2 F#5:2 G5:4 | A5:4 G5:2 E5:2 D5:8 | G4:2 B4:2 D5:4 B4:2 C5:2 D5:4 | E5:4 G5:4 A5:4 B5:4 | C6:4 B5:2 A5:2 G5:4 F#5:4 | G5:12 .:4"),128)
+B=chordb("R:2 .:1 R:1 F:2 .:2 R:2 .:1 R:1 O:2 .:2",["G2","E2","C2","D2","G2","E2","C2","D2"])
+Hm=voice("B3:16 G3:16 E4:16 F#4:16 B3:16 G4:16 E4:16 D4:16",128)
+track("HANGAR BAY",7,1,L,B,Hm,drums("K..HS.H.K.KHS.H.",128),duty=2,lenv=1,hduty=1,lvol=11,hvol=5)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)
 emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])
