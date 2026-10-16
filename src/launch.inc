@@ -21,13 +21,16 @@ static void launch_tip_overlay(const Rk*r,int cd);static void launch_tip_card(co
 static int rk_tgt(const Rk*r){return r->pad?r->pad*2:187;}
 // ---------------------------------------------------------------- drawing helpers (clipped)
 static u16*lfb=0; // null = fb
+typedef struct{u8 x,y,w,h;}LRect;static LRect lfR[384] EWRAM;static int lfN=-1; // v1.3.1: >=0 logs every lf/ltx rect (VRAM-direct arenas)
 #define IWCODE __attribute__((section(".iwram.code"),target("arm"),noinline,long_call))
 IWCODE static void lf(int x,int y,int w,int h,u16 c){if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>240)w=240-x;if(y+h>160)h=160-y;if(w<=0||h<=0)return;
+ if(lfN>=0&&lfN<384){LRect*r=&lfR[lfN++];r->x=x;r->y=y;r->w=w>255?255:w;r->h=h;}
  u32 cc=c|((u32)c<<16);u16*row=&(lfb?lfb:fb)[y*240+x];
  for(int j=0;j<h;j++,row+=240){u16*p=row;int n=w;if(((u32)p)&2){*p++=c;n--;}u32*q=(u32*)p;int m=n>>1;
   while(m>=4){q[0]=cc;q[1]=cc;q[2]=cc;q[3]=cc;q+=4;m-=4;}while(m-->0)*q++=cc;if(n&1)*(u16*)q=c;}}
 IWCODE static void ltx(int x,int y,const char*s,u16 col){ // fast 1x text with drop shadow (only touches set pixels)
- if(y<0||y>151)return;for(;*s;s++,x+=6){int c=*s;if(c>='a'&&c<='z')c-=32;if(c<=32||c>127)continue;if(x<0||x>233)continue;const u8*g=&font_bits[(c-32)*7];
+ if(y<0||y>151)return;
+ if(lfN>=0&&lfN<384){int n=0;while(s[n])n++;int w=n*6+1;if(x<0){w+=x;}int xx=x<0?0:x;if(xx+w>240)w=240-xx;if(w>0){LRect*r=&lfR[lfN++];r->x=xx;r->y=y;r->w=w>255?255:w;r->h=8;}}for(;*s;s++,x+=6){int c=*s;if(c>='a'&&c<='z')c-=32;if(c<=32||c>127)continue;if(x<0||x>233)continue;const u8*g=&font_bits[(c-32)*7];
   u16*B0=lfb?lfb:fb;u16*row=&B0[y*240+x];for(int gy=0;gy<7;gy++,row+=240){u32 b=g[gy];int gx=0;while(b){if(b&1){row[gx+241]=0x0421;row[gx]=col;}b>>=1;gx++;}}
   row=&B0[y*240+x];for(int gy=0;gy<7;gy++,row+=240){u32 b=g[gy];int gx=0;while(b){if(b&1)row[gx]=col;b>>=1;gx++;}}}}
 static void ltc(int y,const char*s,u16 col){ltx(120-(slen(s)*6-1)/2,y,s,col);}
