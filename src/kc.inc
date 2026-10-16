@@ -32,7 +32,8 @@ static const KStep KST[]={
  {TK_TALK,"EXPLORER",{"ASTRONAUT EXPLORER: LAND","ON REAL WORLDS, JUMP, DROP","A FEATHER, WEIGH YOURSELF.","MOON JUMPS ARE 6X HIGHER!"}},
  {TK_TALK,"DISMISSED!",{"THAT'S BOOT CAMP, CAPTAIN!","REPLAY IT ANY TIME FROM","TUTORIAL ON THE MAIN MENU.","GOOD LUCK OUT THERE. WOOF!"}}};
 #define NKST ((int)(sizeof KST/sizeof KST[0]))
-static u16 kc_bg[240*104] EWRAM;static int kc_bgok;
+#define kc_bg bigbuf
+static int kc_bgok;
 static void tut_yard(void){if(kc_bgok){dma32(kc_bg,fb,240*104/2);return;}u16 g0=RGB(92,150,74),g1=RGB(104,164,82);m3_fill(0,0,240,104,g0);
  for(int y=0;y<104;y+=8)for(int x=((y>>3)&1)*8;x<240;x+=16)m3_fill(x,y,8,8,g1);
  for(int i=0;i<40;i++){int x=(i*53)%236,y=(i*37)%100;m3_px(x,y,RGB(70,120,60));m3_px(x+1,y-1,RGB(70,120,60));m3_px(x+2,y,RGB(70,120,60));}
@@ -55,7 +56,7 @@ static void kflush(int b){u16*V=(u16*)0x06000000;for(int i=0;i<knr[b];i++){KRect
 static int kc_ab(int v){return v<0?-v:v;}
 static void kc_reset(int k,int*px,int*py,int*fx,int*fy,int*tg,int*crate){*fx=1;*fy=0;
  if(k==TK_SHOOT){*tg=0;*px=60;*py=40;}if(k==TK_GREN){*crate=1;*px=98;*py=42;}if(k==TK_COVER){*px=110;*py=46;}if(k==TK_SWAP||k==TK_USE){*px=100;*py=46;}}
-static void tutorial(int first){
+static void tutorial(int first){kc_bgok=0;
  int st=0,t=0,px=40,py=60,fx=1,fy=0,kx=16,ky=64,kf=2,kflip=0,done=0,okT=0,tg=0,crate=1,smoke=0,swap=0,fired=0,anim=0;
  int full_redraw=1,fullcopy=1,lastst=-1;int bx[4],by[4],bvx[4],bvy[4],bl[4];int gx=0,gy=0,gvx=0,gvy=0,gt=0,boomT=0,boomX=0,boomY=0;for(int i=0;i<4;i++)bl[i]=0;
  static const char*const WPN[2]={"PRIMARY: RIFLE","SIDEARM: PISTOL"};

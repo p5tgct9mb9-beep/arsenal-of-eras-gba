@@ -186,6 +186,7 @@ static void spr_aff(int cx,int cy,int tile,int sz,int pal,int ang,int sx,int pri
  o[0]=(y&255)|(1<<8)|(dbl<<9)|(semi?1<<10:0);o[1]=(x&511)|(m<<9)|(sz<<14);o[2]=tile|(prio<<10)|(pal<<12);noam++;}
 
 // ---------------------------------------------------------------- tile world (BG1 SB30 cb1, clouds BG2 SB29)
+static u16 bigbuf[240*160] EWRAM; // v1.3.1: shared by sword-fight arena bg and KC tutorial yard cache (never live together)
 #define MAXW 64
 static u8 map[64*64] EWRAM;static u8 cmap[64*64] EWRAM;static u16 bgw[1024] EWRAM,bgc[1024] EWRAM;
 static int mapW,mapH,mapWrap,camX,camY,borderTile;static u8 tflag[32];static u8 mtBank[32];

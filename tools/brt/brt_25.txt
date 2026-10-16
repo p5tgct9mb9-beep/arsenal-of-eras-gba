@@ -1,0 +1,45 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 4
+tap A
+wait 6
+hold A+R 4
+wait 30
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 42524319
+wait 700
+shot brt25_00
+wait 700
+shot brt25_01
+wait 700
+shot brt25_02
+wait 700
+shot brt25_03
+wait 700
+shot brt25_04
+wait 700
+shot brt25_05
+wait 700
+shot brt25_06
+wait 700
+shot brt25_07
+wait 700
+shot brt25_08
+wait 700
+shot brt25_09
+wait 700
+shot brt25_10
+wait 700
+shot brt25_11
+wait 700
+shot brt25_12
+wait 700
+shot brt25_13
+beat end

@@ -16,7 +16,7 @@ static const Fighter FTR[NFTR]={
  {"SPARTAN HOPLITE","DORY SPEAR + ASPIS","LONGEST REACH",3,11,48,100,8,4,RGB(150,30,30),RGB(200,150,60),RGB(200,180,120),RGB(214,166,124),6,5}};
 static const char*const FSN[NFTR]={"KNIGHT","SAMURAI","VIKING","OFFICER","PIRATE","LEGIONARY","HOPLITE"};
 static const char*const ARN[4]={"CASTLE COURTYARD","DOJO","SHIP DECK","COLOSSEUM"};
-static u16 dl_bg[240*160] EWRAM;
+#define dl_bg bigbuf
 enum{DS_IDLE,DS_WALK,DS_WIND,DS_STRIKE,DS_REC,DS_BLOCK,DS_STUN,DS_HIT,DS_DODGE,DS_KO,DS_WIN};
 typedef struct{int x,face,hp,st,s,t,h,g,pw,inv,f,wins,cd,ai_t,ai_plan,flash;}Duelist;
 static Duelist DL[2];static int dlShk; // v1.3 DBZ-style screen shake

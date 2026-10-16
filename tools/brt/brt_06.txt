@@ -1,0 +1,45 @@
+wait 100
+tap START
+wait 15
+tap DOWN
+tap DOWN
+wait 4
+tap A
+wait 25
+tap DOWN
+wait 4
+tap A
+wait 6
+hold A+R 4
+wait 30
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 42524306
+wait 700
+shot brt06_00
+wait 700
+shot brt06_01
+wait 700
+shot brt06_02
+wait 700
+shot brt06_03
+wait 700
+shot brt06_04
+wait 700
+shot brt06_05
+wait 700
+shot brt06_06
+wait 700
+shot brt06_07
+wait 700
+shot brt06_08
+wait 700
+shot brt06_09
+wait 700
+shot brt06_10
+wait 700
+shot brt06_11
+wait 700
+shot brt06_12
+wait 700
+shot brt06_13
+beat end
