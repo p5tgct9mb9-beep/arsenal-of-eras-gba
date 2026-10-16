@@ -520,7 +520,7 @@ static int sp_rendezvous(int vi){const SPiv*V=&SPI[vi];memset(&RV,0,sizeof RV);R
    if(au){ky=0;r=fsqr(RV.x*RV.x+RV.z*RV.z);dx=RV.hx-RV.x;dz=RV.hz-RV.z;dh=fsqr(dx*dx+dz*dz);float vmax=dh>3000?8:dh>800?3:dh>200?1.0f:0.3f;float k=vmax/(dh>1?dh:1);if(k>0.004f)k=0.004f;float tvx=dx*k*(dh>1?1:0),tvz=dz*k;if(dh<vmax*250){tvx=dx*0.004f;tvz=dz*0.004f;}
    // route around the keep-out sphere: stay outside 260 m until on the approach axis
    if(r<235&&dh>40){float ox=RV.x/r,oz=RV.z/r;tvx+=ox*0.4f;tvz+=oz*0.4f;}
-   float ex=tvx-RV.vx,ez=tvz-RV.vz;if(ex>0.03f)ky|=K_RIGHT;if(ex<-0.03f)ky|=K_LEFT;if(ez>0.03f)ky|=K_UP;if(ez<-0.03f)ky|=K_DOWN;if(i==0)RV.warp=dh>1500?2:dh>300?1:0;}
+   float ex=tvx-RV.vx,ez=tvz-RV.vz;float db=dh>2500?0.4f:dh>600?0.15f:0.03f;if(ex>db)ky|=K_RIGHT;if(ex<-db)ky|=K_LEFT;if(ez>db)ky|=K_UP;if(ez<-db)ky|=K_DOWN;if(i==0)RV.warp=dh>1500?2:dh>300?1:0;}
    float a=0.05f;if(ky&K_RIGHT){RV.vx+=a;RV.dv+=a;th=1;}if(ky&K_LEFT){RV.vx-=a;RV.dv+=a;th=1;}if(ky&K_UP){RV.vz+=a;RV.dv+=a;th=1;}if(ky&K_DOWN){RV.vz-=a;RV.dv+=a;th=1;}
    float ax=-2*CWN*RV.vz,az=2*CWN*RV.vx+3*CWN*CWN*RV.z;RV.vx+=ax;RV.vz+=az;RV.x+=RV.vx;RV.z+=RV.vz;}
   r=fsqr(RV.x*RV.x+RV.z*RV.z);float ae=(RV.x*RV.x)/(2000.0f*2000)+(RV.z*RV.z)/(1000.0f*1000);
@@ -595,7 +595,7 @@ static void sp_iss(void){int sel=SPR.lastIss<8?SPR.lastIss:0;
    "1 RENDEZVOUS: CW ORBIT MECHANICS - THRUST|  PRO/RETRO CHANGES YOUR ALTITUDE TOO.|2 DOCK: <0.25 M/S, ALIGN Y/Z <0.3 M,|  ANGLES <1 DEG. KEEP-OUT SPHERE 200 M.");
   BEAT->mode=i;if(!sp_wait_ab(SCR_SPSEL))continue;
   int ok=sp_rendezvous(i);if(ok&&V->shut)sp_rbar_pitch();if(ok)ok=sp_dock(i);
-  if(ok){int sc=3000-(int)(RV.dv*40)-DK.soft*400-RV.viol*2-DK.t/40;sc=clampi(sc,300,3000);int st=1+(sc>=1800)+(sc>=2400&&!DK.soft&&!RV.viol);int best=sc>SPR.iss[i];if(best)SPR.iss[i]=sc;if(st>SPR.issS[i])SPR.issS[i]=st;SPR.lastIss=i;spr_write();music_victory();
+  if(ok){int sc=3000-(int)(RV.dv*25)-DK.soft*400-RV.viol*2-DK.t/40;sc=clampi(sc,300,3000);int st=1+(sc>=1800)+(sc>=2400&&!DK.soft&&!RV.viol);int best=sc>SPR.iss[i];if(best)SPR.iss[i]=sc;if(st>SPR.issS[i])SPR.issS[i]=st;SPR.lastIss=i;spr_write();music_victory();
    for(int t=0;;t++){next_frame();BEAT->screen=SCR_SPDOCK;BEAT->phase=3;BEAT->scoreA=sc;BEAT->scoreB=st;if(t==0){char b[48],*o;chrome(CAT_EXPLORE,0);m3_box(16,24,208,112,1);m3_ctext(32,V->arm?"BERTHED!":"DOCKED!",C_YEL,2);m3_ctext(52,V->port,C_WHITE,1);
      o=sp_put(b,"DV ");o=sp_dec1(o,(int)(RV.dv*10));o=sp_put(o," M/S  RETRIES ");sp_int(o,DK.soft);m3_ctext(66,b,C_GRAY,1);o=sp_put(b,"KOS VIOLATIONS ");sp_int(o,RV.viol/60);m3_ctext(78,b,C_GRAY,1);
      o=sp_put(b,"SCORE ");o=sp_int(o,sc);if(best)sp_put(o,"  BEST!");m3_ctext(94,b,best?C_GREEN:C_WHITE,1);for(int s=0;s<3;s++)m3_fill(99+s*14,106,10,10,s<st?C_YEL:RGB(50,50,60));m3_ctext(124,"A: CONTINUE",C_GRAY,1);m3_present();}
@@ -659,8 +659,8 @@ static int sp_eva_run(int mi){const EvMis*M=&EVM[mi];memset(&EV,0,sizeof EV);int
    else if(EV.task>=0){const EvStep*S2=&ETK[M->task[0]][EV.step];if(S2->hold)ky|=S2->key;else if((EV.t&15)==0)pr|=S2->key;}
    else{int fw=goal>EV.s;int dist=fw?goal-EV.s:EV.s-goal;
     // anchors every 60 px; clip at the anchor nearest when tether nearly taut
-    int an=((EV.s+30)/60)*60;if(an>EV.len)an-=60;if(EV.clipS<0&&fabsi(EV.s-an)>=3){fw=an>EV.s;dist=3;}
-    if((EV.clipS<0&&fabsi(EV.s-an)<3)||(EV.clipS>=0&&fabsi(EV.s-EV.clipS)>40&&fabsi(EV.s-an)<3&&an!=EV.clipS))pr|=K_SEL;
+    int an=((EV.s+30)/60)*60;if(an>EV.len)an-=60;if(EV.clipS<0&&fabsi(EV.s-an)>3){fw=an>EV.s;dist=3;}
+    if((EV.clipS<0&&fabsi(EV.s-an)<=3)||(EV.clipS>=0&&fabsi(EV.s-EV.clipS)>40&&fabsi(EV.s-an)<=3&&an!=EV.clipS))pr|=K_SEL;
     else if(dist>2){ky|=fw?K_RIGHT:K_LEFT;if((EV.t&7)==0)pr|=(EV.hand&1)?K_L:K_R;}
     else if(!EV.done&&EV.task<0&&(EV.t&15)==0)pr|=K_A;}}
   if(pr&K_B){EV.cam^=1;sfx_menu();}

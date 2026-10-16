@@ -18,8 +18,22 @@ static const FWep FWP[5]={{"M9 PISTOL",15,14,26,1,0,0,60},{"M4 CARBINE",30,6,34,
 typedef struct{s32 x,y;s16 hp,cd,deadT,ang,alert;u8 alive,type,fr,shoot;s32 lkx,lky;u8 seen;}FBot;
 typedef struct{s32 x,y;u8 t,on;}FPk;
 typedef struct{s32 x,y;int a,hp,wep,have,mag[5],res[5],cd,reload,kills,deaths,flash,hurt,intel,t,mi,shots,hits,fpsv,fcnt;u32 v0;int bob,win,lose,respawn;}FPl;
-static FPl FP EWRAM;static FBot FB[12] EWRAM;static FPk FK[24] EWRAM;static int nFB EWRAM,nFK EWRAM;
-static u8 FM[24][24] EWRAM;static u8 FD[24*24] EWRAM;static u8 FTEX[5][256] EWRAM;static u16 FCEIL[FVH] EWRAM,FFLR[FVH] EWRAM;static u16 FZ[120] EWRAM;static u16 FPALB[256] EWRAM;
+static FPl FP EWRAM;static int nFB EWRAM,nFK EWRAM;
+// play-time arrays live in the KC yard cache (kc_bg, regenerated on demand via kc_bgok=0)
+#define FSCR ((u8*)kc_bg)
+#define FM ((u8(*)[24])(FSCR+0))
+#define FD (FSCR+576)
+#define FTEX ((u8(*)[256])(FSCR+1152))
+#define FCEIL ((u16*)(FSCR+2432))
+#define FFLR ((u16*)(FSCR+2720))
+#define FZ ((u16*)(FSCR+3008))
+#define FPALB ((u16*)(FSCR+3264))
+#define FQ ((u16*)(FSCR+3776))
+#define FB ((FBot*)(FSCR+5120))
+#define FK ((FPk*)(FSCR+6400))
+#define FDEP ((int*)(FSCR+7168))
+#define FORD (FSCR+7360)
+#define FSPC (FSCR+7424)
 static u16*fbk EWRAM;
 #define FW(c) ((c)=='#'||(c)=='B'||(c)=='M'||(c)=='S'||(c)=='D')
 static int fwt(int c){return c=='#'?0:c=='B'?1:c=='M'?2:c=='S'?3:4;}
@@ -34,7 +48,7 @@ static void f_palette(int outdoor){static const u8 WC[5][3]={{150,150,140},{170,
  for(int s=0;s<3;s++)for(int i=0;i<16;i++){int k=256-s*70;PAL_BG[128+s*16+i]=f_rgb(SC[i][0]*k/256,SC[i][1]*k/256,SC[i][2]*k/256);}
  PAL_BG[0]=0;PAL_BG[1]=RGB(248,248,248);PAL_BG[2]=RGB(255,220,80);PAL_BG[3]=RGB(240,60,50);PAL_BG[4]=RGB(80,220,80);PAL_BG[5]=RGB(20,22,30);PAL_BG[6]=RGB(70,74,90);PAL_BG[7]=RGB(140,140,150);PAL_BG[8]=RGB(255,250,200);PAL_BG[9]=RGB(40,40,46);PAL_BG[10]=RGB(90,60,40);PAL_BG[11]=RGB(255,140,40);}
 static void f_textures(void){for(int t=0;t<5;t++)for(int y=0;y<16;y++)for(int x=0;x<16;x++){u32 h=xh(t*977+y*16+x);int v=(h&7)==0?1:0;
-  if(t==0){v=(h%5==0)?1:0;if(y==0||y==8)v=2;}
+  if(t==0){v=(h%5==0)?1:0;if(y==0)v=2;}
   else if(t==1){int off=(y/4)&1?4:0;if((y&3)==0||((x+off)&7)==0)v=3;else v=(h&3)==0;}
   else if(t==2){v=(x==0||y==0)?2:((x==2||x==13)&&(y==2||y==13))?3:0;}
   else if(t==3){int yy=y%5;v=yy==4?3:(yy==0?1:0);if(((x+(y/5)*5)%8)==0)v=2;}
@@ -76,19 +90,19 @@ static void f_billboard(s32 wx,s32 wy,const char*const*art,int aw,int ah,int hfr
  int col=60+(u*60*256)/(d*169);int full=FVH*256/d;int hs=full*hfrac>>8;int bot=FVH/2+full/2+FP.bob;int top=bot-hs;int wc=hs*aw/ah/2;if(wc<1)wc=1;int c0=col-wc/2;
  int shade=d>1200?2:d>600?1:0;if(c0+wc<0||c0>=120)return;
  for(int c=c0;c<c0+wc;c++){if(c<0||c>=120||FZ[c]<d)continue;int tx=(c-c0)*aw/wc;u16*p=fbk+c;int y0=top<0?0:top,y1=bot>FVH?FVH:bot;
-  for(int y=y0;y<y1;y++){int ty=(y-top)*ah/(hs?hs:1);char ch=art[ty][tx];if(ch=='.')continue;int k=f_spc(ch);int idx=128+shade*16+k;p[y*120]=idx|(idx<<8);}}}
+  int st=(ah<<16)/(hs?hs:1),ty=(y0-top)*st;for(int y=y0;y<y1;y++,ty+=st){char ch=art[ty>>16][tx];if(ch=='.')continue;int idx=128+shade*16+FSPC[(u8)ch];p[y*120]=idx*0x101;}}}
 // ---------------------------------------------------------------- world
 static int f_pass(int cx,int cy){if((unsigned)cx>=24||(unsigned)cy>=24)return 0;return !FW(FM[cy][cx]);}
 static int f_free(s32 x,s32 y,int r){return f_pass((x-r)>>8,(y-r)>>8)&&f_pass((x+r)>>8,(y-r)>>8)&&f_pass((x-r)>>8,(y+r)>>8)&&f_pass((x+r)>>8,(y+r)>>8);}
 static void f_move(s32*x,s32*y,int dx,int dy,int r){if(f_free(*x+dx,*y,r))*x+=dx;if(f_free(*x,*y+dy,r))*y+=dy;}
-static int f_los(s32 x0,s32 y0,s32 x1,s32 y1){int dx=x1-x0,dy=y1-y0;int n=idist(dx,dy)/48+1;for(int i=1;i<n;i++){int x=x0+dx*i/n,y=y0+dy*i/n;if(FW(FM[y>>8][x>>8]))return 0;}return 1;}
-static void f_bfs(void){static u16 Q[576] EWRAM;memset(FD,255,sizeof FD);int h=0,t=0;int s=(FP.y>>8)*24+(FP.x>>8);FD[s]=0;Q[t++]=s;
+static int f_los(s32 x0,s32 y0,s32 x1,s32 y1){int dx=x1-x0,dy=y1-y0;int n=idist(dx,dy)/48+1;int sx=(dx<<8)/n,sy=(dy<<8)/n;s32 x=x0<<8,y=y0<<8;for(int i=1;i<n;i++){x+=sx;y+=sy;if(FW(FM[y>>16][x>>16]))return 0;}return 1;}
+static void f_bfs(void){u16*Q=FQ;memset(FD,255,576);int h=0,t=0;int s=(FP.y>>8)*24+(FP.x>>8);FD[s]=0;Q[t++]=s;
  while(h<t){int c=Q[h++];int cx=c%24,cy=c/24;int d=FD[c];static const s8 NX[4]={1,-1,0,0},NY[4]={0,0,1,-1};for(int k=0;k<4;k++){int nx=cx+NX[k],ny=cy+NY[k];if((unsigned)nx>=24||(unsigned)ny>=24)continue;int n=ny*24+nx;if(FD[n]!=255)continue;int ch=FM[ny][nx];if(ch=='#'||ch=='B'||ch=='M'||ch=='S')continue;FD[n]=d+1<254?d+1:254;Q[t++]=n;}}}
-static int f_ang(int dx,int dy){float a=fatan2((float)dy,(float)dx);int r=(int)(a*1024/(2*FPI));return r&1023;}
+static int f_ang(int dx,int dy){return (atan2i(dx,dy)*4+768)&1023;}
 static int f_adiff(int a,int b){int d=(a-b)&1023;return d>512?d-1024:d;}
 static FPk*f_pk(int t,s32 x,s32 y){if(nFK>=24){for(int i=0;i<24;i++)if(!FK[i].on){nFK=i;break;}if(nFK>=24)return 0;}FPk*k=&FK[nFK++];k->x=x;k->y=y;k->t=t;k->on=1;return k;}
 static void f_msg(const char*m){F.msg=m;F.msgT=120;}
-static void f_load(int mi){const FMis*M=&FMI[mi];const char(*m)[25]=FMAPS[M->map];memset(&FP,0,sizeof FP);nFB=0;nFK=0;memset(FB,0,sizeof FB);memset(FK,0,sizeof FK);FP.mi=mi;
+static void f_load(int mi){const FMis*M=&FMI[mi];const char(*m)[25]=FMAPS[M->map];memset(&FP,0,sizeof FP);nFB=0;nFK=0;memset(FB,0,sizeof(FBot)*12);memset(FK,0,sizeof(FPk)*24);FP.mi=mi;
  for(int y=0;y<24;y++)for(int x=0;x<24;x++){char c=m[y][x];FM[y][x]=FW(c)?c:'.';s32 wx=(x<<8)+128,wy=(y<<8)+128;
   if(c=='P'){FP.x=wx;FP.y=wy;}else if(c=='E'&&nFB<12){FBot*b=&FB[nFB++];b->x=wx;b->y=wy;b->hp=100;b->alive=1;b->type=nFB%4==0?1:nFB%5==0?2:0;b->ang=rr(1024);b->cd=60+rr(60);}
   else if(c=='H')f_pk(0,wx,wy);else if(c=='A')f_pk(1,wx,wy);else if(c=='W')f_pk(2,wx,wy);else if(c=='X'&&!M->dm)f_pk(5,wx,wy);}
@@ -96,16 +110,17 @@ static void f_load(int mi){const FMis*M=&FMI[mi];const char(*m)[25]=FMAPS[M->map
  {int best=0,bd=0;for(int i=0;i<nFB;i++){int d=f_ang(FB[i].x-FP.x,FB[i].y-FP.y);(void)d;}(void)best;(void)bd;}
  FP.a=0;{int dirs[4]={0,256,512,768};int bl=0;for(int k=0;k<4;k++){int ok=0;s32 x=FP.x,y=FP.y;for(int s=0;s<6;s++){x+=fcs(dirs[k]);y+=fsn(dirs[k]);if(!f_pass(x>>8,y>>8))break;ok++;}if(ok>bl){bl=ok;FP.a=dirs[k];}}}
  f_bfs();}
-static void f_hurt(int d){FP.hp-=d;FP.hurt=10;sfx_hurt();}
+static int fLastHurt EWRAM;
+static void f_hurt(int d){FP.hp-=d;FP.hurt=10;fLastHurt=FP.t;sfx_hurt();}
 static void f_bot_spawn(FBot*b){for(int tries=0;tries<200;tries++){int x=1+rr(22),y=1+rr(22);if(!f_pass(x,y))continue;s32 wx=(x<<8)+128,wy=(y<<8)+128;if(idist(wx-FP.x,wy-FP.y)<8*256)continue;if(f_los(wx,wy,FP.x,FP.y))continue;b->x=wx;b->y=wy;b->hp=100;b->alive=1;b->alert=0;b->deadT=0;b->cd=90;return;}}
 static void f_bots(void){const FMis*M=&FMI[FP.mi];
  for(int i=0;i<nFB;i++){FBot*b=&FB[i];if(b->shoot)b->shoot--;
   if(!b->alive){if(M->dm){if(++b->deadT>300)f_bot_spawn(b);}continue;}
   int dx=FP.x-b->x,dy=FP.y-b->y;int dd=idist(dx,dy);int los=dd<14*256&&FP.hp>0&&f_los(b->x,b->y,FP.x,FP.y);
-  if(los){if(!b->alert){b->alert=1;b->cd=30+rr(40);}b->lkx=FP.x;b->lky=FP.y;b->seen=1;}
+  if(los){if(!b->alert){b->alert=1;b->cd=50+rr(40);}b->lkx=FP.x;b->lky=FP.y;b->seen=1;}
   int sp=b->alert?11:5;int mvx=0,mvy=0;
   if(b->alert&&los&&dd<9*256){b->ang=f_ang(dx,dy);if(dd>4*256){mvx=dx*sp/dd/2;mvy=dy*sp/dd/2;}
-   if(--b->cd<=0){b->shoot=8;sfx_shot(0);int ch=62+(SET.bot&3)*8-dd*5/256-((keys&(K_UP|K_DOWN|K_L|K_R))?18:0);if(rr(100)<ch)f_hurt(b->type==1?9+rr(6):6+rr(7));b->cd=b->type==1?(b->fr++%4?7:70):40+rr(45);}}
+   if(--b->cd<=0){b->shoot=8;sfx_shot(0);int ch=46+(SET.bot&3)*8-dd*4/256-((keys&(K_UP|K_DOWN|K_L|K_R))?15:0);if(rr(100)<ch)f_hurt(b->type==1?7+rr(5):5+rr(6));b->cd=b->type==1?(b->fr++%4?7:70):40+rr(45);}}
   else if(b->alert){int cx=b->x>>8,cy=b->y>>8;int bd=FD[cy*24+cx],bx=cx,by=cy;static const s8 NX[4]={1,-1,0,0},NY[4]={0,0,1,-1};for(int k=0;k<4;k++){int nx=cx+NX[k],ny=cy+NY[k];if((unsigned)nx>=24||(unsigned)ny>=24)continue;int v=FD[ny*24+nx];if(v<bd){bd=v;bx=nx;by=ny;}}
    if(FM[by][bx]=='D'){FM[by][bx]='.';}int tx=(bx<<8)+128-b->x,ty=(by<<8)+128-b->y;int td=idist(tx,ty);if(td>0){mvx=tx*sp/td;mvy=ty*sp/td;}b->ang=f_ang(tx,ty);}
   else{if(rr(90)==0)b->ang=rr(1024);mvx=fcs(b->ang)*sp>>8;mvy=fsn(b->ang)*sp>>8;s32 ox=b->x,oy=b->y;f_move(&b->x,&b->y,mvx,mvy,70);if(ox==b->x&&oy==b->y)b->ang=rr(1024);mvx=mvy=0;b->fr++;}
@@ -124,24 +139,29 @@ static void f_pickups(void){for(int i=0;i<nFK;i++){FPk*k=&FK[i];if(!k->on)contin
   else{int w=t==2?2:t==3?3:t==4?4:-1;if(w>=0){if(FP.have&(1<<w))FP.res[w]+=FWP[w].mag;else{FP.have|=1<<w;FP.mag[w]=FWP[w].mag;FP.res[w]=FWP[w].mag;FP.wep=w;}}if(t==5)FP.intel=1;}
   k->on=0;sfx_ok();f_msg(FPKN[t]);}}
 // ---------------------------------------------------------------- frame
-static void f_weapon(void){int w=FP.wep;int bx=120+(FP.bob*2),by=136-(FP.cd>FWP[w].rate-3?3:0);
- if(w==0){f_rect(bx-4,by-22,8,22,9);f_rect(bx-3,by-28,6,8,6);f_rect(bx-6,by-8,12,8,138);}
- else if(w==2){f_rect(bx-5,by-40,10,40,9);f_rect(bx-3,by-46,6,10,7);f_rect(bx-8,by-20,16,10,10);f_rect(bx-10,by-8,20,8,138);}
- else if(w==3){f_rect(bx-5,by-36,10,36,10);f_rect(bx-3,by-46,6,12,9);f_rect(bx+4,by-26,6,12,9);f_rect(bx-10,by-8,20,8,138);}
- else if(w==4){f_rect(bx-7,by-38,14,38,9);f_rect(bx-3,by-48,6,12,6);f_rect(bx-12,by-18,10,12,6);f_rect(bx-10,by-8,20,8,138);}
- else{f_rect(bx-5,by-38,10,38,9);f_rect(bx-2,by-48,4,12,6);f_rect(bx-4,by-30,8,4,7);f_rect(bx+5,by-24,5,10,9);f_rect(bx-10,by-8,20,8,138);}
- if(FP.flash>0){int fy=by-(w==0?32:50);f_rect(bx-7,fy-6,14,8,8);f_rect(bx-4,fy-10,8,6,2);f_rect(bx-10,fy-3,20,3,11);}}
-static void f_hud(void){const FMis*M=&FMI[FP.mi];f_rect(0,136,240,24,5);f_rect(0,136,240,1,6);char b[48],*o;
+static void f_weapon(void){int w=FP.wep;int bx=128+(FP.bob*2),by=136-(FP.cd>FWP[w].rate-3?3:0);const int G=131,S=129,K=9,M=6,L=7,W=10;
+ // right glove + sleeve, left hand on the handguard
+ if(w==0){f_rect(bx-5,by-26,10,12,K);f_rect(bx-4,by-30,8,5,M);f_rect(bx-1,by-32,2,3,L);f_rect(bx-7,by-16,14,10,S);f_rect(bx-8,by-8,16,8,G);}
+ else{int len=w==2?44:w==4?46:42;int hw=w==4?8:w==2?6:7;
+  f_rect(bx-hw,by-len,hw*2,len,w==3||w==2?W:K);f_rect(bx-hw+2,by-len,hw*2-4,len,w==3||w==2?W:M);
+  f_rect(bx-2,by-len-8,4,9,K);if(w==1){f_rect(bx-3,by-len+10,6,5,K);f_rect(bx-1,by-len+11,2,3,L);}
+  if(w==3){f_rect(bx+hw-1,by-len+18,5,12,K);}if(w==4){f_rect(bx-hw-4,by-len+20,4,8,K);}
+  f_rect(bx-hw-10,by-len+16,12,10,S);f_rect(bx-hw-14,by-len+24,10,len-24,G);
+  f_rect(bx+hw-6,by-18,12,10,S);f_rect(bx+hw-4,by-8,14,8,G);}
+ if(FP.flash>0){int fy=by-(w==0?36:(w==4?54:w==2?52:50));f_rect(bx-7,fy-6,14,8,8);f_rect(bx-4,fy-10,8,6,2);f_rect(bx-10,fy-3,20,3,11);}}
+static u32*FHS EWRAM;
+static void f_hud(void){const FMis*M=&FMI[FP.mi];u32 sig=(u32)(FP.hp&255)|((u32)FP.mag[FP.wep]<<8)|((u32)FP.res[FP.wep]<<16)|((u32)FP.wep<<26)|((u32)(FP.reload>0)<<29);sig^=(u32)(FP.kills*7919+f_alive()*104729+FP.intel*31+FP.fpsv*1299709+FP.deaths*15485863);int pg=fbk==(u16*)0x06000000?0:1;
+ if(FHS[pg]!=sig){FHS[pg]=sig;f_rect(0,136,240,24,5);f_rect(0,136,240,1,6);char b[48],*o;
  o=sp_put(b,"HP ");sp_int(o,FP.hp<0?0:FP.hp);f_text(2,139,b,FP.hp<30?3:4);f_rect(2,149,50,4,9);f_rect(2,149,(FP.hp<0?0:FP.hp)/2,4,FP.hp<30?3:4);
  f_text(60,139,FWP[FP.wep].n,1);o=sp_int(b,FP.mag[FP.wep]);o=sp_put(o,"/");sp_int(o,FP.res[FP.wep]);f_text(60,149,FP.reload?"RELOADING":b,FP.reload?2:7);
  if(M->dm){o=sp_put(b,"K ");o=sp_int(o,FP.kills);o=sp_put(o,"/15 D ");sp_int(o,FP.deaths);}else{o=sp_put(b,"HOSTILES ");o=sp_int(o,f_alive());if(FP.intel)sp_put(o," +INTEL");}f_text(150,139,b,2);
- o=sp_int(b,FP.fpsv);sp_put(o," FPS");f_text(196,149,b,7);
+ o=sp_int(b,FP.fpsv);sp_put(o," FPS");f_text(196,149,b,7);}
  int cx=120,cy=FVH/2;f_rect(cx-6,cy,4,1,4);f_rect(cx+3,cy,4,1,4);f_rect(cx,cy-6,1,4,4);f_rect(cx,cy+3,1,4,4);
  if(FP.hurt>0){f_rect(0,0,240,3,3);f_rect(0,133,240,3,3);f_rect(0,0,3,136,3);f_rect(237,0,3,136,3);}
  if(F.msgT>0){F.msgT--;f_ctext(12,F.msg,2);}}
 static void f_render(void){f_cast();
  // sprites back to front
- static u8 ord[36] EWRAM;static int dep[36] EWRAM;int n=0;int dx=fcs(FP.a),dy=fsn(FP.a);
+ u8*ord=FORD;int*dep=FDEP;int n=0;int dx=fcs(FP.a),dy=fsn(FP.a);
  for(int i=0;i<nFB;i++){if(!FB[i].alive&&FB[i].deadT>240&&FMI[FP.mi].dm)continue;dep[n]=((FB[i].x-FP.x)*dx+(FB[i].y-FP.y)*dy)>>8;ord[n++]=i;}
  for(int i=0;i<nFK;i++)if(FK[i].on){dep[n]=((FK[i].x-FP.x)*dx+(FK[i].y-FP.y)*dy)>>8;ord[n++]=100+i;}
  for(int i=1;i<n;i++){int j=i;while(j>0&&dep[j-1]<dep[j]){int t=dep[j];dep[j]=dep[j-1];dep[j-1]=t;u8 o=ord[j];ord[j]=ord[j-1];ord[j-1]=o;j--;}}
@@ -150,7 +170,7 @@ static void f_render(void){f_cast();
 static void f_flip(void){volatile u16*dc=(volatile u16*)0x04000000;*dc^=0x10;fbk=(*dc&0x10)?(u16*)0x06000000:(u16*)0x0600A000;}
 // ---------------------------------------------------------------- autopilot
 static void f_auto(u16*ky,u16*pr){*ky=0;*pr=0;int best=-1,bd=1<<30;for(int i=0;i<nFB;i++){FBot*b=&FB[i];if(!b->alive)continue;int d=idist(b->x-FP.x,b->y-FP.y);if(d<14*256&&d<bd&&f_los(FP.x,FP.y,b->x,b->y)){bd=d;best=i;}}
- if(FP.reload)*ky|=K_DOWN;
+ if(FP.reload||FP.hp<35)*ky|=K_DOWN|((FP.t&64)?K_L:K_R);
  if(best>=0){FBot*b=&FB[best];int a=f_ang(b->x-FP.x,b->y-FP.y);int df=f_adiff(a,FP.a);if(df>6)*ky|=K_RIGHT;else if(df<-6)*ky|=K_LEFT;if(iabs(df)<16){*ky|=K_A;if(FWP[FP.wep].auto_==0&&(FP.t&3)==0)*pr|=K_A;}if(FP.mag[FP.wep]==0&&FP.res[FP.wep]==0)*pr|=K_SEL;return;}
  // navigate: goal = nearest alive bot by path distance, else intel, else start
  int gc=-1,gd=255;for(int i=0;i<nFB;i++)if(FB[i].alive){int c=(FB[i].y>>8)*24+(FB[i].x>>8);if(FD[c]<gd){gd=FD[c];gc=c;}}
@@ -164,8 +184,8 @@ static void f_auto(u16*ky,u16*pr){*ky=0;*pr=0;int best=-1,bd=1<<30;for(int i=0;i
 typedef struct{u16 best[4];u8 stars[4];}FRec;static FRec FR EWRAM;
 static void fr_write(void){const u8*b=(const u8*)&FR;u8 s=0x46;SRAM[FP_OFF]='A';SRAM[FP_OFF+1]='O';SRAM[FP_OFF+2]='E';SRAM[FP_OFF+3]='F';for(int i=0;i<(int)sizeof FR;i++){SRAM[FP_OFF+4+i]=b[i];s+=b[i]*(i+1);}SRAM[FP_OFF+4+sizeof FR]=s;}
 static void fr_read(void){memset(&FR,0,sizeof FR);if(SRAM[FP_OFF]!='A'||SRAM[FP_OFF+1]!='O'||SRAM[FP_OFF+2]!='E'||SRAM[FP_OFF+3]!='F')return;u8*b=(u8*)&FR;u8 s=0x46;for(int i=0;i<(int)sizeof FR;i++){b[i]=SRAM[FP_OFF+4+i];s+=b[i]*(i+1);}if(s!=SRAM[FP_OFF+4+sizeof FR])memset(&FR,0,sizeof FR);}
-static int f_play(int mi){const FMis*M=&FMI[mi];f_load(mi);int au=sp_isauto();
- for(int i=0;i<256;i++)FPALB[i]=PAL_BG[i];f_palette(M->outdoor);f_textures();
+static int f_play(int mi){const FMis*M=&FMI[mi];kc_bgok=0;f_load(mi);int au=sp_isauto();
+ for(int i=0;i<256;i++)FPALB[i]=PAL_BG[i];f_palette(M->outdoor);f_textures();for(int c=0;c<128;c++)FSPC[c]=f_spc(c);static u32 hsig[2] EWRAM;hsig[0]=hsig[1]=0xFFFFFFFF;FHS=hsig;
  for(int y=0;y<FVH;y++){int c=y<FVH/2?96+y*16/(FVH/2):112+(y-FVH/2)*16/(FVH/2+1);if(c>127)c=127;if(y<FVH/2&&c>111)c=111;u16 v=c|(c<<8);if(y<FVH/2)FCEIL[y]=v;else FFLR[y]=v;}
  for(int y=0;y<FVH;y++){if(y<FVH/2)FFLR[y]=FCEIL[y];else FCEIL[y]=FFLR[y];}
  vsync();REG_DISPCNT=4|(1<<10);fbk=(u16*)0x0600A000;F.msgT=0;f_msg(M->l1);bgm_t(TR_MODERN);
@@ -181,7 +201,7 @@ static int f_play(int mi){const FMis*M=&FMI[mi];f_load(mi);int au=sp_isauto();
    if(FP.cd>0)FP.cd--;if(FP.flash>0)FP.flash--;if(FP.hurt>0)FP.hurt--;
    if(FP.reload>0){if(--FP.reload==0){int need=FWP[FP.wep].mag-FP.mag[FP.wep];if(need>FP.res[FP.wep])need=FP.res[FP.wep];FP.mag[FP.wep]+=need;FP.res[FP.wep]-=need;}}
    else{int want=FWP[FP.wep].auto_?(ky&K_A):(pr&K_A)||((ky&K_A)&&!prevA);if(want&&FP.cd==0){if(FP.mag[FP.wep]>0)f_fire();else if(FP.res[FP.wep]>0)FP.reload=70;else{f_msg("EMPTY - SELECT: SWITCH");FP.cd=20;}}}
-   prevA=ky&K_A;f_pickups();}
+   prevA=ky&K_A;f_pickups();if(FP.hp<100&&FP.t-fLastHurt>240&&(FP.t%30)==0)FP.hp++;}
   if(FP.t%20==0)f_bfs();
   f_bots();
   if(!res){if(M->dm){if(FP.kills>=15){res=1;endT=FP.t;}if(FP.hp<=0){if(!FP.respawn){FP.deaths++;FP.respawn=120;f_msg("KILLED - RESPAWNING");}else if(--FP.respawn==0){const char(*m)[25]=FMAPS[M->map];for(int y=0;y<24;y++)for(int x=0;x<24;x++)if(m[y][x]=='P'){FP.x=(x<<8)+128;FP.y=(y<<8)+128;}FP.hp=100;f_bfs();}}if(FP.deaths>=15){res=3;endT=FP.t;}}
