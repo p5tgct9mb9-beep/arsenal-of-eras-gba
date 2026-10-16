@@ -1,0 +1,20 @@
+wait 100
+tap START
+wait 40
+shot mm_a
+wait 150
+shot mm_b
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 300
+shot mm_c
+wait 260
+shot mm_d
+tap RIGHT
+wait 700
+shot mm_e
+wait 500
+shot mm_f
+end
