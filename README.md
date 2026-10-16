@@ -1,5 +1,8 @@
 # Arsenal of Eras — GBA demake (personal build) · v1.3.4
 
+> **Status (Oct 2026): the GBA version is frozen at v1.3.5.** Development has moved to the **Nintendo DS** port in [`nds/`](nds/), released under `ds-v*` tags.
+> The GBA source stays in `src/` and is shared by the DS build. Unreleased GBA work-in-progress (the infantry soldier sprite pipeline) is on the `gba-wip` branch.
+
 A Game Boy Advance homebrew demake of LT Vasquez's *Arsenal of Eras*: a top-down 240x160 pixel-art shooter.
 It's a personal build, made to be played in an emulator such as Delta on iPhone. All art and music are original and generated procedurally.
 
