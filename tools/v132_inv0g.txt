@@ -1,0 +1,361 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+shot inv0_menu
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 52490000
+wait 90
+shot inv0_start
+wait 150
+beat
+shot g_001
+wait 150
+beat
+shot g_002
+wait 150
+beat
+shot g_003
+wait 150
+beat
+shot g_004
+wait 150
+beat
+shot g_005
+wait 150
+beat
+shot g_006
+wait 150
+beat
+shot g_007
+wait 150
+beat
+shot g_008
+wait 150
+beat
+shot g_009
+wait 150
+beat
+shot g_010
+wait 150
+beat
+shot g_011
+wait 150
+beat
+shot g_012
+wait 150
+beat
+shot g_013
+wait 150
+beat
+shot g_014
+wait 150
+beat
+shot g_015
+wait 150
+beat
+shot g_016
+wait 150
+beat
+shot g_017
+wait 150
+beat
+shot g_018
+wait 150
+beat
+shot g_019
+wait 150
+beat
+shot g_020
+wait 150
+beat
+shot g_021
+wait 150
+beat
+shot g_022
+wait 150
+beat
+shot g_023
+wait 150
+beat
+shot g_024
+wait 150
+beat
+shot g_025
+wait 150
+beat
+shot g_026
+wait 150
+beat
+shot g_027
+wait 150
+beat
+shot g_028
+wait 150
+beat
+shot g_029
+wait 150
+beat
+shot g_030
+wait 150
+beat
+shot g_031
+wait 150
+beat
+shot g_032
+wait 150
+beat
+shot g_033
+wait 150
+beat
+shot g_034
+wait 150
+beat
+shot g_035
+wait 150
+beat
+shot g_036
+wait 150
+beat
+shot g_037
+wait 150
+beat
+shot g_038
+wait 150
+beat
+shot g_039
+wait 150
+beat
+shot g_040
+wait 150
+beat
+shot g_041
+wait 150
+beat
+shot g_042
+wait 150
+beat
+shot g_043
+wait 150
+beat
+shot g_044
+wait 150
+beat
+shot g_045
+wait 150
+beat
+shot g_046
+wait 150
+beat
+shot g_047
+wait 150
+beat
+shot g_048
+wait 150
+beat
+shot g_049
+wait 150
+beat
+shot g_050
+wait 150
+beat
+shot g_051
+wait 150
+beat
+shot g_052
+wait 150
+beat
+shot g_053
+wait 150
+beat
+shot g_054
+wait 150
+beat
+shot g_055
+wait 150
+beat
+shot g_056
+wait 150
+beat
+shot g_057
+wait 150
+beat
+shot g_058
+wait 150
+beat
+shot g_059
+wait 150
+beat
+shot g_060
+wait 150
+beat
+shot g_061
+wait 150
+beat
+shot g_062
+wait 150
+beat
+shot g_063
+wait 150
+beat
+shot g_064
+wait 150
+beat
+shot g_065
+wait 150
+beat
+shot g_066
+wait 150
+beat
+shot g_067
+wait 150
+beat
+shot g_068
+wait 150
+beat
+shot g_069
+wait 150
+beat
+shot g_070
+wait 150
+beat
+shot g_071
+wait 150
+beat
+shot g_072
+wait 150
+beat
+shot g_073
+wait 150
+beat
+shot g_074
+wait 150
+beat
+shot g_075
+wait 150
+beat
+shot g_076
+wait 150
+beat
+shot g_077
+wait 150
+beat
+shot g_078
+wait 150
+beat
+shot g_079
+wait 150
+beat
+shot g_080
+wait 150
+beat
+shot g_081
+wait 150
+beat
+shot g_082
+wait 150
+beat
+shot g_083
+wait 150
+beat
+shot g_084
+wait 150
+beat
+shot g_085
+wait 150
+beat
+shot g_086
+wait 150
+beat
+shot g_087
+wait 150
+beat
+shot g_088
+wait 150
+beat
+shot g_089
+wait 150
+beat
+shot g_090
+wait 150
+beat
+shot g_091
+wait 150
+beat
+shot g_092
+wait 150
+beat
+shot g_093
+wait 150
+beat
+shot g_094
+wait 150
+beat
+shot g_095
+wait 150
+beat
+shot g_096
+wait 150
+beat
+shot g_097
+wait 150
+beat
+shot g_098
+wait 150
+beat
+shot g_099
+wait 150
+beat
+shot g_100
+wait 150
+beat
+shot g_101
+wait 150
+beat
+shot g_102
+wait 150
+beat
+shot g_103
+wait 150
+beat
+shot g_104
+wait 150
+beat
+shot g_105
+wait 150
+beat
+shot g_106
+wait 150
+beat
+shot g_107
+wait 150
+beat
+shot g_108
+wait 150
+beat
+shot g_109

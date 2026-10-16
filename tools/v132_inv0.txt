@@ -1,0 +1,127 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+shot inv0_menu
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 52490000
+wait 90
+shot inv0_start
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_4
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_8
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_12
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_16
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_20
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_24
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_28
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_32
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_36
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv0_40
+wait 300
+shot inv0_end
+beat

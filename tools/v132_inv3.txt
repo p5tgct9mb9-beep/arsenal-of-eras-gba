@@ -1,0 +1,128 @@
+wait 100
+tap START
+wait 40
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 40
+shot inv3_menu
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 52490003
+wait 90
+shot inv3_start
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_4
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_8
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_12
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_16
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_20
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_24
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_28
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_32
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_36
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+wait 600
+beat
+shot inv3_40
+wait 300
+shot inv3_end
+beat
+savedump /workspace/aoe-gba/build/inv.sav
