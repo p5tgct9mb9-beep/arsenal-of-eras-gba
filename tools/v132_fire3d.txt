@@ -1,0 +1,384 @@
+wait 100
+tap START
+wait 40
+tap UP
+wait 4
+tap UP
+wait 4
+shot fire3_mm
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 30
+shot fire3_ded
+tap A
+wait 40
+shot fire3_hub
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 46490003
+wait 40
+shot fire3_call
+wait 100
+shot fire3_drive
+wait 100
+beat
+shot d3_001
+wait 100
+beat
+shot d3_002
+wait 100
+beat
+shot d3_003
+wait 100
+beat
+shot d3_004
+wait 100
+beat
+shot d3_005
+wait 100
+beat
+shot d3_006
+wait 100
+beat
+shot d3_007
+wait 100
+beat
+shot d3_008
+wait 100
+beat
+shot d3_009
+wait 100
+beat
+shot d3_010
+wait 100
+beat
+shot d3_011
+wait 100
+beat
+shot d3_012
+wait 100
+beat
+shot d3_013
+wait 100
+beat
+shot d3_014
+wait 100
+beat
+shot d3_015
+wait 100
+beat
+shot d3_016
+wait 100
+beat
+shot d3_017
+wait 100
+beat
+shot d3_018
+wait 100
+beat
+shot d3_019
+wait 100
+beat
+shot d3_020
+wait 100
+beat
+shot d3_021
+wait 100
+beat
+shot d3_022
+wait 100
+beat
+shot d3_023
+wait 100
+beat
+shot d3_024
+wait 100
+beat
+shot d3_025
+wait 100
+beat
+shot d3_026
+wait 100
+beat
+shot d3_027
+wait 100
+beat
+shot d3_028
+wait 100
+beat
+shot d3_029
+wait 100
+beat
+shot d3_030
+wait 100
+beat
+shot d3_031
+wait 100
+beat
+shot d3_032
+wait 100
+beat
+shot d3_033
+wait 100
+beat
+shot d3_034
+wait 100
+beat
+shot d3_035
+wait 100
+beat
+shot d3_036
+wait 100
+beat
+shot d3_037
+wait 100
+beat
+shot d3_038
+wait 100
+beat
+shot d3_039
+wait 100
+beat
+shot d3_040
+wait 100
+beat
+shot d3_041
+wait 100
+beat
+shot d3_042
+wait 100
+beat
+shot d3_043
+wait 100
+beat
+shot d3_044
+wait 100
+beat
+shot d3_045
+wait 100
+beat
+shot d3_046
+wait 100
+beat
+shot d3_047
+wait 100
+beat
+shot d3_048
+wait 100
+beat
+shot d3_049
+wait 100
+beat
+shot d3_050
+wait 100
+beat
+shot d3_051
+wait 100
+beat
+shot d3_052
+wait 100
+beat
+shot d3_053
+wait 100
+beat
+shot d3_054
+wait 100
+beat
+shot d3_055
+wait 100
+beat
+shot d3_056
+wait 100
+beat
+shot d3_057
+wait 100
+beat
+shot d3_058
+wait 100
+beat
+shot d3_059
+wait 100
+beat
+shot d3_060
+wait 100
+beat
+shot d3_061
+wait 100
+beat
+shot d3_062
+wait 100
+beat
+shot d3_063
+wait 100
+beat
+shot d3_064
+wait 100
+beat
+shot d3_065
+wait 100
+beat
+shot d3_066
+wait 100
+beat
+shot d3_067
+wait 100
+beat
+shot d3_068
+wait 100
+beat
+shot d3_069
+wait 100
+beat
+shot d3_070
+wait 100
+beat
+shot d3_071
+wait 100
+beat
+shot d3_072
+wait 100
+beat
+shot d3_073
+wait 100
+beat
+shot d3_074
+wait 100
+beat
+shot d3_075
+wait 100
+beat
+shot d3_076
+wait 100
+beat
+shot d3_077
+wait 100
+beat
+shot d3_078
+wait 100
+beat
+shot d3_079
+wait 100
+beat
+shot d3_080
+wait 100
+beat
+shot d3_081
+wait 100
+beat
+shot d3_082
+wait 100
+beat
+shot d3_083
+wait 100
+beat
+shot d3_084
+wait 100
+beat
+shot d3_085
+wait 100
+beat
+shot d3_086
+wait 100
+beat
+shot d3_087
+wait 100
+beat
+shot d3_088
+wait 100
+beat
+shot d3_089
+wait 100
+beat
+shot d3_090
+wait 100
+beat
+shot d3_091
+wait 100
+beat
+shot d3_092
+wait 100
+beat
+shot d3_093
+wait 100
+beat
+shot d3_094
+wait 100
+beat
+shot d3_095
+wait 100
+beat
+shot d3_096
+wait 100
+beat
+shot d3_097
+wait 100
+beat
+shot d3_098
+wait 100
+beat
+shot d3_099
+wait 100
+beat
+shot d3_100
+wait 100
+beat
+shot d3_101
+wait 100
+beat
+shot d3_102
+wait 100
+beat
+shot d3_103
+wait 100
+beat
+shot d3_104
+wait 100
+beat
+shot d3_105
+wait 100
+beat
+shot d3_106
+wait 100
+beat
+shot d3_107
+wait 100
+beat
+shot d3_108
+wait 100
+beat
+shot d3_109
+wait 100
+beat
+shot d3_110
+wait 100
+beat
+shot d3_111
+wait 100
+beat
+shot d3_112
+wait 100
+beat
+shot d3_113
+wait 100
+beat
+shot d3_114
+wait 100
+beat
+shot d3_115
+wait 100
+beat
+shot d3_116
+wait 100
+beat
+shot d3_117
+wait 100
+beat
+shot d3_118
+wait 100
+beat
+shot d3_119
+wait 100
+beat
+shot d3_120

@@ -1,0 +1,164 @@
+wait 100
+tap START
+wait 40
+tap UP
+wait 4
+tap UP
+wait 4
+shot fire4_mm
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 30
+shot fire4_ded
+tap A
+wait 40
+shot fire4_hub
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 46490004
+wait 40
+shot fire4_call
+wait 100
+shot fire4_drive
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_03
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_06
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_09
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_12
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_15
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_18
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_21
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_24
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_27
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_30
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_33
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_36
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_39
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_42
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_45
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_48
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_51
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_54
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_57
+wait 300
+beat
+wait 300
+beat
+wait 300
+beat
+shot fire4_60

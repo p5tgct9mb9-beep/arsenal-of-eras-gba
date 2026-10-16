@@ -1,0 +1,189 @@
+wait 100
+tap START
+wait 40
+tap UP
+wait 6
+shot cr_menu
+tap A
+wait 30
+shot cr_start
+wait 120
+beat
+shot cr_01
+wait 120
+beat
+shot cr_02
+wait 120
+beat
+shot cr_03
+wait 120
+beat
+shot cr_04
+wait 120
+beat
+shot cr_05
+wait 120
+beat
+shot cr_06
+wait 120
+beat
+shot cr_07
+wait 120
+beat
+shot cr_08
+wait 120
+beat
+shot cr_09
+wait 120
+beat
+shot cr_10
+wait 120
+beat
+shot cr_11
+wait 120
+beat
+shot cr_12
+wait 120
+beat
+shot cr_13
+wait 120
+beat
+shot cr_14
+wait 120
+beat
+shot cr_15
+wait 120
+beat
+shot cr_16
+wait 120
+beat
+shot cr_17
+wait 120
+beat
+shot cr_18
+wait 120
+beat
+shot cr_19
+wait 120
+beat
+shot cr_20
+wait 120
+beat
+shot cr_21
+wait 120
+beat
+shot cr_22
+wait 120
+beat
+shot cr_23
+wait 120
+beat
+shot cr_24
+wait 120
+beat
+shot cr_25
+wait 120
+beat
+shot cr_26
+wait 120
+beat
+shot cr_27
+wait 120
+beat
+shot cr_28
+wait 120
+beat
+shot cr_29
+wait 120
+beat
+shot cr_30
+wait 120
+beat
+shot cr_31
+wait 120
+beat
+shot cr_32
+wait 120
+beat
+shot cr_33
+wait 120
+beat
+shot cr_34
+wait 120
+beat
+shot cr_35
+wait 120
+beat
+shot cr_36
+wait 120
+beat
+shot cr_37
+wait 120
+beat
+shot cr_38
+wait 120
+beat
+shot cr_39
+wait 120
+beat
+shot cr_40
+wait 120
+beat
+shot cr_41
+wait 120
+beat
+shot cr_42
+wait 120
+beat
+shot cr_43
+wait 120
+beat
+shot cr_44
+wait 120
+beat
+shot cr_45
+wait 120
+beat
+shot cr_46
+wait 120
+beat
+shot cr_47
+wait 120
+beat
+shot cr_48
+wait 120
+beat
+shot cr_49
+wait 120
+beat
+shot cr_50
+wait 120
+beat
+shot cr_51
+wait 120
+beat
+shot cr_52
+wait 120
+beat
+shot cr_53
+wait 120
+beat
+shot cr_54
+wait 120
+beat
+shot cr_55
+wait 120
+beat
+shot cr_56
+wait 120
+beat
+shot cr_57
+wait 120
+beat
+shot cr_58
+wait 120
+beat
+shot cr_59
+wait 120
+beat
+shot cr_60

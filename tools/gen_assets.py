@@ -1300,6 +1300,11 @@ L=voice(R8("E5:2 G5:2 B5:2 G5:2 E6:4 B5:4 | D6:2 B5:2 A5:2 F#5:2 G5:8 | C6:2 B5:
 B=chordb("R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1",["E2","G2","C2","B1","E2","A1","A1","B1"])
 Hm=voice(arp4([["E4","G4","B4","G4"],["G4","B4","D5","B4"],["C4","E4","G4","E4"],["B3","D#4","F#4","D#4"],["E4","G4","B4","G4"],["A3","C4","E4","C4"],["A3","C4","E4","C4"],["B3","D#4","F#4","D#4"]]),128)
 track("ORBIT DEFENDERS",4,1,L,B,Hm,drums("K.H.S.HKK.H.S.HS",128),duty=1,lenv=0,hduty=2,lvol=11,hvol=5,wave=1)
+# 53 ENGINE ONE - Firefighter theme, heroic march in B-flat (dedicated to LT's dad)
+L=voice(R8("F5:2 A#5:2 D6:4 C6:2 A#5:2 | F5:4 G5:2 A5:2 A#5:8 | D#6:2 D6:2 C6:2 A#5:2 G5:4 A#5:4 | C6:12 .:4 | F5:2 A#5:2 D6:4 F6:2 D6:2 | D#6:4 D6:2 C6:2 A#5:8 | G5:2 A5:2 A#5:2 C6:2 D6:4 C6:4 | A#5:12 .:4"),128)
+B=chordb("R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1 R:1 O:1",["A#1","D#2","D#2","F2","A#1","D#2","D#2","A#1"])
+Hm=voice(arp4([["A#3","D4","F4","D4"],["D#4","G4","A#4","G4"],["D#4","G4","A#4","G4"],["F4","A4","C5","A4"],["A#3","D4","F4","D4"],["D#4","G4","A#4","G4"],["D#4","G4","C5","G4"],["A#3","D4","F4","D4"]]),128)
+track("ENGINE ONE",4,1,L,B,Hm,drums("K.S.K.S.KKS.K.SS",128),duty=2,lenv=0,hduty=1,lvol=12,hvol=5,wave=0)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)
 emit("sq_freq",[max(0,min(2047,int(round(2048-131072/f(m))))) if m>=36 else 0 for m in range(110)])

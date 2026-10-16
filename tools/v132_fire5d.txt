@@ -1,0 +1,384 @@
+wait 100
+tap START
+wait 40
+tap UP
+wait 4
+tap UP
+wait 4
+shot fire5_mm
+tap A
+wait 30
+tap A
+wait 10
+tap A
+wait 30
+shot fire5_ded
+tap A
+wait 40
+shot fire5_hub
+poke32 0x0203FFD0 4F545541
+poke32 0x0203FFD8 46490005
+wait 40
+shot fire5_call
+wait 100
+shot fire5_drive
+wait 100
+beat
+shot d5_001
+wait 100
+beat
+shot d5_002
+wait 100
+beat
+shot d5_003
+wait 100
+beat
+shot d5_004
+wait 100
+beat
+shot d5_005
+wait 100
+beat
+shot d5_006
+wait 100
+beat
+shot d5_007
+wait 100
+beat
+shot d5_008
+wait 100
+beat
+shot d5_009
+wait 100
+beat
+shot d5_010
+wait 100
+beat
+shot d5_011
+wait 100
+beat
+shot d5_012
+wait 100
+beat
+shot d5_013
+wait 100
+beat
+shot d5_014
+wait 100
+beat
+shot d5_015
+wait 100
+beat
+shot d5_016
+wait 100
+beat
+shot d5_017
+wait 100
+beat
+shot d5_018
+wait 100
+beat
+shot d5_019
+wait 100
+beat
+shot d5_020
+wait 100
+beat
+shot d5_021
+wait 100
+beat
+shot d5_022
+wait 100
+beat
+shot d5_023
+wait 100
+beat
+shot d5_024
+wait 100
+beat
+shot d5_025
+wait 100
+beat
+shot d5_026
+wait 100
+beat
+shot d5_027
+wait 100
+beat
+shot d5_028
+wait 100
+beat
+shot d5_029
+wait 100
+beat
+shot d5_030
+wait 100
+beat
+shot d5_031
+wait 100
+beat
+shot d5_032
+wait 100
+beat
+shot d5_033
+wait 100
+beat
+shot d5_034
+wait 100
+beat
+shot d5_035
+wait 100
+beat
+shot d5_036
+wait 100
+beat
+shot d5_037
+wait 100
+beat
+shot d5_038
+wait 100
+beat
+shot d5_039
+wait 100
+beat
+shot d5_040
+wait 100
+beat
+shot d5_041
+wait 100
+beat
+shot d5_042
+wait 100
+beat
+shot d5_043
+wait 100
+beat
+shot d5_044
+wait 100
+beat
+shot d5_045
+wait 100
+beat
+shot d5_046
+wait 100
+beat
+shot d5_047
+wait 100
+beat
+shot d5_048
+wait 100
+beat
+shot d5_049
+wait 100
+beat
+shot d5_050
+wait 100
+beat
+shot d5_051
+wait 100
+beat
+shot d5_052
+wait 100
+beat
+shot d5_053
+wait 100
+beat
+shot d5_054
+wait 100
+beat
+shot d5_055
+wait 100
+beat
+shot d5_056
+wait 100
+beat
+shot d5_057
+wait 100
+beat
+shot d5_058
+wait 100
+beat
+shot d5_059
+wait 100
+beat
+shot d5_060
+wait 100
+beat
+shot d5_061
+wait 100
+beat
+shot d5_062
+wait 100
+beat
+shot d5_063
+wait 100
+beat
+shot d5_064
+wait 100
+beat
+shot d5_065
+wait 100
+beat
+shot d5_066
+wait 100
+beat
+shot d5_067
+wait 100
+beat
+shot d5_068
+wait 100
+beat
+shot d5_069
+wait 100
+beat
+shot d5_070
+wait 100
+beat
+shot d5_071
+wait 100
+beat
+shot d5_072
+wait 100
+beat
+shot d5_073
+wait 100
+beat
+shot d5_074
+wait 100
+beat
+shot d5_075
+wait 100
+beat
+shot d5_076
+wait 100
+beat
+shot d5_077
+wait 100
+beat
+shot d5_078
+wait 100
+beat
+shot d5_079
+wait 100
+beat
+shot d5_080
+wait 100
+beat
+shot d5_081
+wait 100
+beat
+shot d5_082
+wait 100
+beat
+shot d5_083
+wait 100
+beat
+shot d5_084
+wait 100
+beat
+shot d5_085
+wait 100
+beat
+shot d5_086
+wait 100
+beat
+shot d5_087
+wait 100
+beat
+shot d5_088
+wait 100
+beat
+shot d5_089
+wait 100
+beat
+shot d5_090
+wait 100
+beat
+shot d5_091
+wait 100
+beat
+shot d5_092
+wait 100
+beat
+shot d5_093
+wait 100
+beat
+shot d5_094
+wait 100
+beat
+shot d5_095
+wait 100
+beat
+shot d5_096
+wait 100
+beat
+shot d5_097
+wait 100
+beat
+shot d5_098
+wait 100
+beat
+shot d5_099
+wait 100
+beat
+shot d5_100
+wait 100
+beat
+shot d5_101
+wait 100
+beat
+shot d5_102
+wait 100
+beat
+shot d5_103
+wait 100
+beat
+shot d5_104
+wait 100
+beat
+shot d5_105
+wait 100
+beat
+shot d5_106
+wait 100
+beat
+shot d5_107
+wait 100
+beat
+shot d5_108
+wait 100
+beat
+shot d5_109
+wait 100
+beat
+shot d5_110
+wait 100
+beat
+shot d5_111
+wait 100
+beat
+shot d5_112
+wait 100
+beat
+shot d5_113
+wait 100
+beat
+shot d5_114
+wait 100
+beat
+shot d5_115
+wait 100
+beat
+shot d5_116
+wait 100
+beat
+shot d5_117
+wait 100
+beat
+shot d5_118
+wait 100
+beat
+shot d5_119
+wait 100
+beat
+shot d5_120

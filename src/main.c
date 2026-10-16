@@ -180,6 +180,7 @@ static void credits_roll(int after_campaign);
 #include "vbm.inc"
 #include "sandbox.inc"
 #include "invaders.inc"
+#include "fire.inc"
 #include "v132_stub.inc"
 #include "menu131.inc"
 int main(void){

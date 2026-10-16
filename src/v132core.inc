@@ -20,5 +20,9 @@ static void hi_initials(char*nm,const char*title){static const char ICH[]="ABCDE
   if(pressed&K_UP)k[cur]=(k[cur]+1)%nc;if(pressed&K_DOWN)k[cur]=(k[cur]+nc-1)%nc;if(pressed&K_LEFT&&cur>0)cur--;if(pressed&K_RIGHT&&cur<2)cur++;
   if(pressed&(K_A|K_START)){sfx_ok();if(cur<2){cur++;}else{for(int i=0;i<3;i++)nm[i]=ICH[k[i]];nm[3]=0;pressed=0;return;}}}}
 // shareable record code: short checksum of mode, score and initials (letters+digits, no I/O/0/1)
-static const char*hi_code(int mode,u32 s,const char*nm){static char o[10];static const char A[]="23456789ABCDEFGHJKLMNPQRSTUVWXYZ";u32 h=0x9E3779B9u^(mode*0x45D9F3Bu);h^=s*0x27D4EB2Du;for(int i=0;i<3;i++)h=(h^(u8)nm[i])*0x01000193u;h^=h>>15;
+static const char*hi_code(int mode,u32 s,const char*nm){static char o[10] EWRAM;static const char A[]="23456789ABCDEFGHJKLMNPQRSTUVWXYZ";u32 h=0x9E3779B9u^(mode*0x45D9F3Bu);h^=s*0x27D4EB2Du;for(int i=0;i<3;i++)h=(h^(u8)nm[i])*0x01000193u;h^=h>>15;
  for(int i=0;i<8;i++){o[i<4?i:i+1]=A[(h>>(i*4))&31];h=h*1103515245u+12345u;}o[4]='-';o[9]=0;return o;}
+// ---- Mars Rocks wallet (v1.3.2) at SRAM 0x2600 'M'
+typedef struct{u32 bal,earned;}MRS;static MRS MR EWRAM;static int mr_ld;
+static void mr_load(void){if(mr_ld)return;mr_ld=1;if(!sv_get(0x2600,'M',1,&MR,sizeof MR))memset(&MR,0,sizeof MR);}
+static int mr_add(int n){mr_load();if(n<0)n=0;MR.bal+=n;MR.earned+=n;sv_put(0x2600,'M',1,&MR,sizeof MR);return n;}
