@@ -30,3 +30,4 @@ def oscript(name,mis,shots=14,gap=700,wrong=True):
     for k in range(shots):L+=["wait %d"%gap,"shot %s_%02d"%(name,k)]
     L+=["end"];open(os.path.join(D,name+".txt"),"w").write("\n".join(L)+"\n")
 for m in range(11):oscript("v131_over_%d"%m,m,shots=16 if m>=6 else 12,gap=700,wrong=(m==0))
+for m in range(9):script("v131_wif_%d"%m,EXP,9,76,m,shots=14,gap=600)

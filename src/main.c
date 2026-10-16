@@ -170,6 +170,7 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "frontier3.inc"
 #include "frontier4.inc"
 #include "over.inc"
+#include "frontier5.inc"
 #include "frontier_stub.inc"
 #include "menu131.inc"
 int main(void){

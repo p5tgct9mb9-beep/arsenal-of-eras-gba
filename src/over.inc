@@ -66,9 +66,9 @@ static int ov_threat(int kind,int ac,int*alt,int*ecm){ // side view; returns 1 s
  for(int k=30;k<=90;k+=10){int y=150-k*14/10;for(int x=0;x<240;x+=4)fb[y*240+x]=RGB(60,70,110);m3_text(2,y-8,cat(itoa(k),"K"),RGB(90,100,140),1);}
  fr_save_bg();fr_vstart();int gx=0,site=250<<8;lmsg(nm,100);
  for(;;fr++){int pv=ac==AC_SR71?220:ac==AC_U2?52:40;BEAT->screen=SCR_OVER;BEAT->phase=5;BEAT->scoreA=kind;BEAT->scoreB=altk;BEAT->x=mon?mx>>8:-1;BEAT->y=closest;
-  if(res<0){int au=FR_AUTO,ki=keys,climb=0,burn=0,doEcm=0,doBrk=0;int ttg=9999;
-   if(mon){int dx=(150<<8)-mx,dy=(py<<8)-my;int d=isq((dx>>8)*(dx>>8)+(dy>>8)*(dy>>8));int svx=mvx-pv,svy=mvy;int cl=(-(dx>>8)*svx-(dy>>8)*svy)/(d+1);ttg=cl<0?d*256/(-cl+1):9999;}
-   if(au){climb=1;burn=1;if(mon&&ttg<60&&ttg>20&&!jam&&*ecm>0&&ac!=AC_SR71)doEcm=1;if(mon&&ttg<22&&ttg>6&&!brkCd&&!jam)doBrk=1;}
+  if(res<0){int au=FR_AUTO,ki=keys,climb=0,burn=0,doEcm=0,doBrk=0;int ttg=9999,md=999;
+   if(mon){int dx=(150<<8)-mx,dy=(py<<8)-my;int d=md=isq((dx>>8)*(dx>>8)+(dy>>8)*(dy>>8));int svx=mvx-pv,svy=mvy;int cl=(-(dx>>8)*svx-(dy>>8)*svy)/(d+1);ttg=cl<0?d*256/(-cl+1):9999;}
+   if(au){climb=1;burn=1;if(mon&&((ttg<60&&ttg>20)||md<34)&&!jam&&*ecm>0&&ac!=AC_SR71)doEcm=1;if(mon&&((ttg<22&&ttg>6)||md<12)&&!brkCd)doBrk=1;}
    else{climb=(ki&K_UP)!=0;burn=(ki&K_A)!=0;doEcm=(pressed&K_B)!=0;doBrk=(pressed&(K_LEFT|K_RIGHT))!=0;if((ki&K_DOWN)&&(fr&15)==0)altk--;}
    int amax=ac==AC_SR71?86:ac==AC_U2?72:44;if(climb&&(fr&(ac==AC_SR71?11:31))==0&&altk<amax)altk++;
    if(ac==AC_SR71&&burn)pv=250;
@@ -85,6 +85,7 @@ static int ov_threat(int kind,int ac,int*alt,int*ecm){ // side view; returns 1 s
     if(mfuel>0){mfuel--;if(sp<vmax){mvx+=mvx*7/sp;mvy+=mvy*7/sp;}}else{mvx-=mvx*thin/9000;mvy-=mvy*thin/9000;mvy+=1;}
     if(!jam){int dx=(150<<8)-mx,dy=(py<<8)-my;int d=isq((dx>>8)*(dx>>8)+(dy>>8)*(dy>>8))+1;int wx=(dx>>8)*sp/d+pv,wy=(dy>>8)*sp/d;int wl=isq((wx>>2)*(wx>>2)+(wy>>2)*(wy>>2))*4+1;wx=wx*sp/wl;wy=wy*sp/wl;
      int turn=sp*thin/(mfuel>0?2600:5200)+1;mvx+=clampi(wx-mvx,-turn,turn);mvy+=clampi(wy-mvy,-turn,turn);}
+    else if(kind==TH_WASSER){mvy+=(fr&32)?-5:3;mvx-=2;} // radio-command link lost in the chaff: operator loses the track
     {int capk=kind==TH_WASSER?60:mig?ceil+6:84;int capy=(150-capk*14/10)<<8;if(my<capy){my=capy;if(mvy<0)mvy=0;mvx=mvx*31/32;}}
     mx+=mvx-pv;my+=mvy;
     int dx=(mx>>8)-150,dy=(my>>8)-py;int d=isq(dx*dx+dy*dy);if(d<closest){closest=d;recede=0;}else recede++;
