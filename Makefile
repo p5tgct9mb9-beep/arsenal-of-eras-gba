@@ -31,3 +31,6 @@ src/sniperdb.inc: tools/gen_sniper.py
 
 src/v131db.inc: tools/gen_v131.py tools/world_mask.bin
 	python3 tools/gen_v131.py
+
+src/soldierdb.inc: tools/gen_soldiers.py tools/art/sold.py
+	python3 tools/gen_soldiers.py

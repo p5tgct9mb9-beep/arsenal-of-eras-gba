@@ -184,7 +184,7 @@ static int nearest(int i,int maxd,int needlos){Unit*u=&U[i];int best=-1,bd=maxd;
   if(d<bd&&(!needlos||los(u->x>>8,u->y>>8,e->x>>8,e->y>>8))){bd=d;best=k;}}return best;}
 static int steer(Unit*u,int a,int probe,int r){static const s8 off[9]={0,24,-24,48,-48,72,-72,100,-100};
  for(int k=0;k<9;k++){int b=(a+off[k])&255;if(box_free(u->x+SIN(b)*probe,u->y-COS(b)*probe,r)&&box_free(u->x+SIN(b)*probe/2,u->y-COS(b)*probe/2,r))return b;}return (a+128)&255;}
-static Shot*fire_bullet(int i,int a,int spd,int dmg,int life,int kind,int ox){Unit*u=&U[i];Shot*s=shot_new();if(!s)return 0;
+static Shot*fire_bullet(int i,int a,int spd,int dmg,int life,int kind,int ox){Unit*u=&U[i];if(i>=0&&i<MAXU)sdFire[i]=6;Shot*s=shot_new();if(!s)return 0;
  int px=-COS(a),py=-SIN(a); // perpendicular
  s->x=u->x+SIN(a)*10+px*ox;s->y=u->y-COS(a)*10+py*ox;s->vx=SIN(a)*spd>>8;s->vy=-COS(a)*spd>>8;
  if(mpMode==MM_AIR){s->vx+=SIN(u->ang>>8)*u->vel>>8;s->vy-=COS(u->ang>>8)*u->vel>>8;}
@@ -496,16 +496,20 @@ static void draw_radar(void){int W=worldPx(),Hp=mapH*16;hpanel(25,14,5,5);
  for(int k=NU-1;k>=0;k--){Unit*u=&U[k];if(!u->alive||u->team>1)continue;int x=200+1+(u->x>>8)*37/W,y=112+1+(u->y>>8)*37/Hp;
   spr(x,y,OT_FX+FX_RADAR+(k==0?2:u->team?1:0),0,0,3,0);}}
 static int plane_tile(Unit*u){if(!mpMixed&&mpEra<5)return OT_ERA+ES_PLANE+16*AV(u)->spr;return u->vt;}
-static void draw_units(void){
+static void draw_units(void){static u8 sdq[MAXU];int nsq=0;
  for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive)continue;if(u->inv>0&&(frame&4))continue;int x=scrx(u->x),y=scry(u->y);int pal=k==0?2:u->team?1:0;
   if(u->hurt>0)u->hurt--;
   if(msOn&&u->role&&ms_draw(k,x,y))continue;
   if(mpMode==MM_SEA){if(u->role==R_WING)spr_aff(x,y,u->vt,2,pal,u->ang>>8,0x100,1,0);continue;}
   if(u->role==R_DISMOUNT){spr_aff(x,y,OT_ERA+ES_SOLDIER+((u->anim>>3)&1)*4,1,pal,u->tur>>8,0x100,1,0);continue;}
+  if(mpMode==MM_INF&&sdOn){sdq[nsq++]=k;continue;}
   if(mpMode==MM_INF){if(k==0&&CH.use)spr_aff(x,y,CH_TILE+((u->anim>>3)&1)*4,1,6,u->tur>>8,0x100,1,0);else spr_aff(x,y,OT_ERA+ES_SOLDIER+((u->anim>>3)&1)*4,1,pal,u->tur>>8,0x100,1,0);}
   else if(mpMode==MM_TANK){int hb=(mpMixed||mpEra>=5)?u->vt:OT_ERA+ES_HULL;spr_aff(x,y,hb+16,2,pal,u->tur>>8,0x100,1,0);spr_aff(x,y,hb,2,pal,u->ang>>8,0x100,1,0);}
   else{int sx=0x100;if(u->roll>0){int ph=(28-u->roll)*256/28;sx=iabs(COS(ph/2))+24;if(sx>256)sx=256;}
    spr_aff(x,y,plane_tile(u),2,pal,u->ang>>8,sx,1,0);}}
+ if(nsq){for(int a=1;a<nsq;a++){int v=sdq[a],b=a;while(b>0&&U[sdq[b-1]].y<U[v].y){sdq[b]=sdq[b-1];b--;}sdq[b]=v;}
+  for(int a=0;a<nsq;a++){int k=sdq[a];sd_draw_tags(k,scrx(U[k].x),scry(U[k].y));}
+  for(int a=0;a<nsq;a++){int k=sdq[a];sd_draw_unit(k,scrx(U[k].x),scry(U[k].y));}}
  if(mpMode==MM_SEA){for(int k=0;k<NU;k++){Unit*u=&U[k];if(!u->alive||u->role==R_WING||(u->inv>0&&(frame&4)))continue;int x=scrx(u->x),y=scry(u->y);
    if(k==0){int t=u->tur>>8;spr(x+(SIN(t)*72>>8)-8,y-(COS(t)*72>>8)-8,OT_FX+FX_RETICLE,0,1,3,0);}
    spr_aff(x,y,u->vt,2,k==0?2:u->team?1:0,u->ang>>8,0x81,1,0);if(u->vel>40&&((frame+k)&15)==0)fx_add((u->x>>8)-(SIN(u->ang>>8)*30>>8),(u->y>>8)+(COS(u->ang>>8)*30>>8),FXK_SPARK);}
@@ -609,6 +613,7 @@ static void mp_run(int mode,int era,int mapi){mpAP=*(volatile u32*)0x0203FFD0==0
   vsNext=VS_BASE;vsN=0;for(int i=0;i<12;i++){Unit*u=&U[i];u->vt=mode==MM_TANK?vslot(0,TV(u)->gs):mode==MM_AIR?vslot(1,AV(u)->gs):mode==MM_SEA?vslot(2,SV(u)->gs):0;
    if(mode==MM_SEA&&SV(u)->w2==3)wingTile[i]=vslot(1,AIRV[SV(u)->we][SV(u)->wi].gs);}
   if(mode==MM_TANK||mode==MM_SEA)nU=24;}
+ sdOn=0;if(mode==MM_INF){int e0=mpEra,e1=mpEra;if(sbOn&&!sbMix){e0=sbEra[0];e1=sbEra[1];}sd_match_setup(e0,e1,g6.fac0,g6.fac1);}
  if(msOn)ms_init();else feed(mode==MM_INF?"TEAM DEATHMATCH - FIRST TO 30":mode==MM_TANK?"ARMOR BATTLE - FIRST TO 30":mode==MM_SEA?"NAVAL BATTLE - FIRST TO 30":"DOGFIGHT - FIRST TO 30",HB_YEL);
  int scr=mode==MM_INF?SCR_INF:mode==MM_TANK?SCR_TANK:mode==MM_SEA?SCR_SEA:SCR_AIR;int over=0;
  if(sbOn){mpTimer=sbTime;for(int i=0;i<12;i++){int t=i<6?0:1,k=i%6;sbBench[i]=k>=sbCnt[t];if(sbBench[i]){U[i].alive=0;U[i].resp=32000;}}if(sbBench[0]){sbBench[0]=0;}}

@@ -3,6 +3,7 @@
 #include "assets.h"
 #include "core.inc"
 #include "loadout.inc"
+#include "soldier.inc"
 #include "mp.inc"
 #include "camp.inc"
 #include "drone.inc"
