@@ -312,7 +312,7 @@ static int brief_card(int i,const CMis*m){
  return 1;}
 static void mission_run(int i,int side){cmIdx=i;cm=mis_for(i,side);msAlt=side;campWon=0;
  if(cm->mode==MM_DOGGREEN){if(!loadout_menu(2,0))return;loading("DEPLOYING TO DOG GREEN...");msOn=0;nU=12;campaign();if(campWon)ms_unlock(i);return;}
- if(cm->mode==MM_INF){if(!loadout_menu(2,cm->sEra))return;}else if(cm->mode==MM_TANK){if(!loadout_menu(3,cm->sEra))return;}
+ if(cm->mode==MM_INF){if(!loadout_menu(cm->sEra?1:2,cm->sEra))return;}else if(cm->mode==MM_TANK){if(!loadout_menu(3,cm->sEra))return;}
  loading(cat("DEPLOYING: ",cm->name));
  msMapDef.n=cm->name;msMapDef.d=cm->place;msMapDef.layout=cm->layout;msMapDef.theme=cm->theme;msMapDef.seed=100+i;msMap=&msMapDef;msTEra=cm->tEra;
  msNob=0;while(msNob<3&&cm->ob[msNob])msNob++;msReady=0;

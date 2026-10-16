@@ -33,16 +33,17 @@ shot v13_cm19_brief
 tap A
 wait 14
 shot v13_cm19_brief2
+wait 30
 tap START
-wait 30
+wait 40
 tap A
-wait 8
+wait 20
 tap A
-wait 8
+wait 20
 tap A
-wait 8
+wait 20
 tap A
-wait 30
+wait 40
 shot v13_cm19_start
 hold UP+B 200
 hold RIGHT+B 200

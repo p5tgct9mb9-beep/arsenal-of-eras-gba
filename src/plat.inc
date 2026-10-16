@@ -157,7 +157,7 @@ static void pl_respawn(int fromChk){
  P.x=sx<<8;P.y=sy<<8;P.face=1;P.air=600;P.inv=60;
  if(!fromChk&&((pFl&SF_C)||UAB(PS.unit)==AB_GLIDE||UAB(PS.unit)==AB_DEMO||UAB(PS.unit)==AB_RESCUE)&&!(pFl&(SF_T|SF_B|SF_A))){P.y=-8<<8;P.chute=1;}
  memset(&B,0,sizeof B);pBossOn=0;
- pAuto=(pFl&(SF_A|SF_B))?1:0;pCamX8=fromChk?((pChkX-80)<<8):0;if(pCamX8<0)pCamX8=0;
+ pAuto=(pFl&(SF_A|SF_B))?1:0;pCamX8=(fromChk||pChkX)?((pChkX-80)<<8):0;if(pCamX8<0)pCamX8=0;
  pTide=0;pWindOn=0;pWindT=0;pRaft=-1;
  for(int i=0;i<nPE;i++)if(PE[i].alive&&PE[i].k==35){pRaft=i;PE[i].x=(sx-16)<<8;PE[i].y=(9*16+2)<<8;}}
 static void pl_start(int w,int s){pw=w;ps_=s;const PfStage*S=&PF_ST[w][s];pTheme=S->th;pFl=S->fl;pIntel=0;pTags=0;pSecret=0;pDone=0;pT=0;pChkX=0;
@@ -465,7 +465,7 @@ static void ents_update(void){int px=P.x>>8,py=P.y>>8;int stealth=((UAB(PS.unit)
 // ---------------------------------------------------------------- bosses
 static const char*const BKN[BK_NONE+1]={"HEAVY TANK","GUNSHIP","ARMORED TRAIN","ARMORED TRAIN","RIVER GUNBOAT","COMMAND WALKER","FORTRESS CANNON","MI-8 GUNSHIP",
  "PMC COMMANDER 'GRANIT'","T-55 TANK","MI-24 HIND","AA EMPLACEMENT","TIGER TANK","BUNKER COMPLEX","ZERO SQUADRON","ME 262","BROOD QUEEN","MOTHERSHIP CORE",
- "CARTEL ARMORED TRUCK","HEAVY TECHNICAL","KPA TANK","T-90 TANK","TYPE 99 TANK","Z-10 ATTACK HELO","MERC CONVOY"};
+ "CARTEL ARMORED TRUCK","HEAVY TECHNICAL","KPA TANK","T-90 TANK","TYPE 99 TANK","Z-10 ATTACK HELO","A7V STURMPANZER","SHIP OF THE LINE","GREAT TREBUCHET","SIEGE TOWER","MERC CONVOY"};
 _Static_assert(sizeof BKN/sizeof BKN[0]==BK_NONE+1,"boss names");
 static int pPlaneX=-1,pPlaneT;
 static const char*boss_name(void){const PfStage*S=&PF_ST[pw][ps_];if(B.ai==BA_MI8&&B.ph==1)return BKN[BK_CMDR];return BKN[S->ba==BK_NONE?BK_NONE:S->ba];}
