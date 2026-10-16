@@ -1,0 +1,29 @@
+wait 100
+tap START
+wait 15
+tap UP
+tap UP
+wait 4
+shot v13_menu15
+tap A
+wait 30
+shot v13_aa_select
+tap R
+wait 6
+tap DOWN
+wait 6
+shot v13_aa_select_cw
+tap A
+wait 150
+press A
+hold A+LEFT 30
+hold A+RIGHT 30
+hold A 200
+press 0
+shot v13_aa_vads
+press A
+hold A+LEFT 40
+hold A+UP 300
+press 0
+shot v13_aa_vads2
+beat end

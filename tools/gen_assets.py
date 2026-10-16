@@ -1114,9 +1114,19 @@ L=voice(R8("A4:2 A4:2 C5:2 A4:2 E5:2 D5:2 C5:4 | B4:2 G4:2 B4:2 D5:2 C5:8 | A4:2
 B=chordb("R:1 R:1 O:1 R:1 R:1 R:1 O:1 R:1 F:1 F:1 O:1 F:1 R:1 R:1 O:1 R:1",["A1","G1","A1","E2","F1","G1","C2","E2"])
 Hm=voice("E4:16 D4:16 E4:16 E4:16 C4:16 D4:16 E4:16 E4:16",128)
 track("STEEL & HONOR",5,1,L,B,Hm,drums("K.TSK.TSKKTSK.SS",128),duty=2,hduty=1,lvol=12,hvol=6)
-# 31 DEFEAT (one-shot)
+# 31 SKYWATCH - Anti-Aircraft, tense D minor with air-raid siren fifths
+L=voice(R8("D5:4 A4:2 D5:2 F5:4 E5:4 | D5:2 C5:2 A4:4 C5:4 D5:4 | F5:4 G5:2 A5:2 G5:4 F5:4 | E5:2 D5:2 C#5:4 E5:8 | A5:4 G5:2 F5:2 G5:4 A5:4 | A#5:4 A5:2 G5:2 A5:8 | F5:2 E5:2 D5:4 E5:2 F5:2 G5:4 | E5:4 C#5:4 D5:8"),128)
+B=chordb("R:2 R:2 O:2 R:2 F:2 R:2 O:2 R:2",["D2","D2","D2","A1","F1","A#1","D2","A1"])
+Hm=voice("A4:16 F4:16 A4:16 A4:16 C5:16 D5:16 A4:16 A4:16",128)
+track("SKYWATCH",5,1,L,B,Hm,drums("K.H.S.H.K.KHS.HH",128),duty=2,hduty=0,lvol=11,hvol=5)
+# 32 IRON CAVALRY - Spec Ops: Bradley, driving E mixolydian rock march
+L=voice(R8("E5:2 E5:2 B4:2 E5:2 F#5:2 G#5:2 F#5:4 | E5:2 D5:2 B4:4 D5:4 E5:4 | E5:2 E5:2 B4:2 E5:2 A5:4 G#5:4 | F#5:2 E5:2 D5:2 F#5:2 E5:8 | B5:4 A5:2 G#5:2 A5:4 F#5:4 | G#5:4 F#5:2 E5:2 F#5:4 D5:4 | E5:2 F#5:2 G#5:2 A5:2 B5:4 A5:4 | G#5:4 D5:4 E5:8"),128)
+B=chordb("R:1 R:1 O:1 R:1 R:1 F:1 O:1 R:1 R:1 R:1 O:1 R:1 F:1 F:1 O:1 F:1",["E2","D2","E2","A1","E2","D2","A1","E2"])
+Hm=voice("B4:16 A4:16 B4:16 A4:16 G#4:16 F#4:16 E4:16 G#4:16",128)
+track("IRON CAVALRY",5,1,L,B,Hm,drums("K.S.KKS.K.S.KKSS",128),duty=2,hduty=1,lvol=12,hvol=6)
+# 33 DEFEAT (one-shot)
 track("DEFEAT",8,0,voice("G4:4 F#4:4 F4:4 E4:12 .:8",32),voice("C3:4 B2:4 A#2:4 A2:12 .:8",32),voice("E4:4 D#4:4 D4:4 C#4:12 .:8",32),drums("K...K...K...C...................",32),duty=1,lvol=11)
-# 32 MISSION CLEAR (one-shot)
+# 34 MISSION CLEAR (one-shot)
 track("MISSION CLEAR",6,0,voice("C5:2 D5:2 E5:2 G5:2 E5:2 G5:2 C6:8 .:12",32),voice("C3:8 G2:4 C3:8 .:12",32),voice("E4:8 B4:4 E5:8 .:12",32),drums("K.S.K.S.RRRRK...................",32),duty=2,lvol=13)
 # note tables: square x=2048-131072/f, wave(32 samples) x=2048-65536/f
 f=lambda m:440*2**((m-69)/12)

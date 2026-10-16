@@ -1,0 +1,82 @@
+wait 100
+tap START
+wait 15
+tap UP
+tap UP
+wait 4
+tap A
+wait 30
+tap L
+wait 6
+tap A
+wait 150
+hold A+LEFT 20
+hold A 250
+shot v13_aa_ww1
+hold A+RIGHT 30
+hold A 200
+press 0
+tap START
+wait 4
+tap SELECT
+wait 170
+shot v13_aa_results
+tap A
+wait 20
+tap R
+wait 4
+tap R
+wait 4
+tap R
+wait 4
+tap DOWN
+wait 4
+tap DOWN
+wait 4
+shot v13_aa_select_modern
+tap A
+wait 200
+hold LEFT 8
+hold B 30
+wait 2
+hold A 20
+hold RIGHT 15
+hold B 30
+wait 2
+hold A 20
+hold LEFT 15
+hold B 30
+wait 2
+hold A 20
+hold RIGHT 15
+hold B 30
+wait 2
+hold A 20
+hold LEFT 15
+hold B 30
+wait 2
+hold A 20
+shot v13_aa_pantsir
+hold RIGHT 15
+hold B 30
+wait 2
+hold A 20
+hold LEFT 15
+hold B 30
+wait 2
+hold A 20
+hold RIGHT 15
+hold B 30
+wait 2
+hold A 20
+hold LEFT 15
+hold B 30
+wait 2
+hold A 20
+hold RIGHT 15
+hold B 30
+wait 2
+hold A 20
+peek 07000000 4
+shot v13_aa_pantsir2
+beat end

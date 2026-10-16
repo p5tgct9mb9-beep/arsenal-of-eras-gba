@@ -7,7 +7,7 @@ src/assets.c src/assets.h src/vehdb.inc src/worlddb.inc src/platdb.inc src/pflev
 	python3 tools/gen_assets.py
 src/rocketdb.inc: tools/gen_rockets.py
 	python3 tools/gen_rockets.py
-build/game.elf: src/crt0.s src/main.c src/core.inc src/camp.inc src/mp.inc src/camp2.inc src/drone.inc src/loadout.inc src/char.inc src/world.inc src/worlddb.inc src/plat.inc src/kc.inc src/launch.inc src/duel.inc src/rocketdb.inc src/platdb.inc src/pflevels.inc src/vehdb.inc src/assets.c src/assets.h src/gba.h src/gba.ld
+build/game.elf: src/crt0.s src/main.c src/core.inc src/camp.inc src/mp.inc src/camp2.inc src/drone.inc src/loadout.inc src/char.inc src/world.inc src/worlddb.inc src/plat.inc src/kc.inc src/launch.inc src/duel.inc src/aa.inc src/aadb.inc src/rocketdb.inc src/platdb.inc src/pflevels.inc src/vehdb.inc src/assets.c src/assets.h src/gba.h src/gba.ld
 	@mkdir -p build
 	$(CC) $(CFLAGS) -nostartfiles -nostdlib -T src/gba.ld -o $@ src/crt0.s src/main.c src/assets.c -lgcc
 $(ROM): build/game.elf tools/gbafix
@@ -20,3 +20,6 @@ tools/harness: tools/harness.c
 	gcc -O2 -o $@ $< -lmgba
 clean:
 	rm -f build/game.elf $(ROM)
+
+src/aadb.inc: tools/gen_aa.py
+	python3 tools/gen_aa.py

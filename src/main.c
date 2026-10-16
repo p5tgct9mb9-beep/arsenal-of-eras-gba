@@ -46,10 +46,10 @@ static void settings_menu(void){
     case 3:SET.shake^=1;shake(10);break;case 4:SET.diff=(SET.diff+3+dir)%3;break;case 5:SET.bot=(SET.bot+4+dir)%4;break;case 6:SET.hints^=1;break;}
    redraw=1;if(sel!=2)sfx_menu();}
   if(((pressed&K_A)&&sel==8)||(pressed&(K_B|K_START))){save_write();sfx_ok();return;}}}
-#define NMM 13
+#define NMM 15
 static int main_menu(int sel){
- static const char*const items[NMM]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","DRONE OPS","WORLD FLIGHT","SPEC OPS","LOADOUT","SETTINGS","TUTORIAL","SPACE LAUNCH","SWORD FIGHT"};
- static const char*const desc[NMM]={"MISSIONS: WW2, COLD WAR, MODERN","PICK A FACTION, ANY-ERA ARSENAL","TANKS, TDS, IFVS, HALFTRACKS, JEEPS","AIR SUPERIORITY - GUNS + MISSILES","BATTLESHIPS, CARRIERS, DESTROYERS","MODERN UAV STRIKES - MQ-9, TB2, TRITON","FREE ROAM IN THE X-15, LANDMARKS","PLATFORMER: 10 WORLDS, 90 COURSES","ERA KITS, 6V6 ARSENAL, CHARACTER","MUSIC, VOLUME, BOT DIFFICULTY","BOOT CAMP WITH KC - CONTROLS + MODES","35 REAL ROCKETS: ASCENT, LAND, DOCK","1V1 DUEL: KNIGHT, SAMURAI, VIKING..."};
+ static const char*const items[NMM]={"CAMPAIGN","6V6 INFANTRY","6V6 ARMOR","6V6 DOGFIGHT","6V6 NAVAL","DRONE OPS","WORLD FLIGHT","SPEC OPS","LOADOUT","SETTINGS","TUTORIAL","SPACE LAUNCH","SWORD FIGHT","ANTI-AIR","BRADLEY OPS"};
+ static const char*const desc[NMM]={"MISSIONS: WW2, COLD WAR, MODERN","PICK A FACTION, ANY-ERA ARSENAL","TANKS, TDS, IFVS, HALFTRACKS, JEEPS","AIR SUPERIORITY - GUNS + MISSILES","BATTLESHIPS, CARRIERS, DESTROYERS","MODERN UAV STRIKES - MQ-9, TB2, TRITON","FREE ROAM IN THE X-15, LANDMARKS","PLATFORMER: 10 WORLDS, 90 COURSES","ERA KITS, 6V6 ARSENAL, CHARACTER","MUSIC, VOLUME, BOT DIFFICULTY","BOOT CAMP WITH KC - CONTROLS + MODES","35 REAL ROCKETS: ASCENT, LAND, DOCK","1V1 DUEL: KNIGHT, SAMURAI, VIKING...","AA GUNS + SAMS VS PLANES AND DRONES","SPEC OPS: BRADLEY - IFV PLATFORMER"};
  int redraw=1;
  for(;;){BEAT->screen=SCR_MENU;BEAT->menu=sel;
   if(redraw){m3_title(0);m3_fill(4,74,232,84,C_PANEL);m3_box(4,74,232,84,2);
@@ -154,6 +154,7 @@ static void loading(const char*s){m3_title(1);m3_ctext(76,s,C_YEL,1);m3_present(
 #include "kc.inc"
 #include "launch.inc"
 #include "duel.inc"
+#include "aa.inc"
 int main(void){
  REG_WAITCNT=0x4317;snd_init();save_load();irq_init();beat_common(SCR_TITLE);BEAT->frame=0;
  for(;;){
@@ -161,7 +162,8 @@ int main(void){
   if(!kc_done()){ps_read();tutorial(1);}
   int sel=0,era=0;
   for(;;){bgm(1,0);sel=main_menu(sel);if(sel<0)break;
-   if(sel==12){sword_fight();}
+   if(sel==13){anti_air();}
+   else if(sel==12){sword_fight();}
    else if(sel==11){space_launch();}
    else if(sel==10){tutorial(0);}
    else if(sel==9){settings_menu();}
