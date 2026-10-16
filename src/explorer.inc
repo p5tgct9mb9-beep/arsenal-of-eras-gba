@@ -95,13 +95,13 @@ static int x_solmap(int sel){int redraw=1;
   if(F.msgT>0){F.msgT-=16;ltc(147,"WARP DRIVE LOCKED: COLLECT 3 SAMPLES",RGB(255,140,100));}else ltx(4,148,"A:GO  </>:BODY  U/D:PLANET  R:WARP  L:LOG",RGB(120,140,180));
   m3_present();}}
 // ---------------------------------------------------------------- galaxy map + warp (fictional)
-static const u8 XGX[7]={190,176,208,226,166,146,62},XGY[7]={78,60,52,30,86,40,72};
+static const u8 XGX[7]={190,176,208,226,166,146,62},XGY[7]={78,60,52,36,86,44,72};
 static void x_galaxy_draw(int sel,int t){lfb=0;lf(0,0,240,160,RGB(2,2,8));x_stars(77,60,124);
  int cx=62,cy=72;u32 s=12345;for(int k=0;k<520;k++){s=s*1103515245u+12345u;int arm=(s>>16)&3;s=s*1103515245u+12345u;int tt=(s>>16)&255;s=s*1103515245u+12345u;int nz=((s>>16)&15)-8;int r=6+tt*50/256;int an=(arm*64+tt*3/2+nz)&255;int x=cx+(COS(an)*r>>8)+((nz*3)>>3),y=cy+((SIN(an)*r>>8)*3>>2);sp_px(x,y,tt<60?RGB(250,230,170):tt<150?RGB(170,170,210):RGB(110,120,170));}
  sp_disc(cx,cy,5,RGB(255,230,170));sp_disc(cx,cy,2,RGB(255,255,230));
  {int an=200,r=31;int x=cx+(COS(an)*r>>8),y=cy+((SIN(an)*r>>8)*3>>2);lf(x-1,y-1,3,3,RGB(255,255,0));ltx(x+3,y+2,"SUN",RGB(255,255,120));sp_line(x+2,y-2,130,20,RGB(50,60,90));sp_line(x+2,y+2,130,120,RGB(50,60,90));}
  m3_box(130,18,106,104,0);lf(131,19,104,102,RGB(4,6,16));ltx(134,21,"LOCAL STARS",RGB(120,140,180));lf(181,68,3,3,RGB(255,255,120));ltx(176,72,"SUN",RGB(160,160,100));
- for(int k=0;k<7;k++){int x=XGX[k],y=XGY[k];u16 c=XWD[21+k].c1;if(k==6){sp_disc(x,y,3,0);sp_circ(x,y,4,RGB(255,200,100));}else lf(x-1,y-1,3,3,c);if(k==3)ltx(x-24,y-10,"1800LY",RGB(90,100,130));if(k==5)ltx(x-6,y-10,"550LY",RGB(90,100,130));
+ for(int k=0;k<7;k++){int x=XGX[k],y=XGY[k];u16 c=XWD[21+k].c1;if(k==6){sp_disc(x,y,3,0);sp_circ(x,y,4,RGB(255,200,100));}else lf(x-1,y-1,3,3,c);if(k==3)ltx(x-36,y+4,"1800LY",RGB(90,100,130));if(k==5)ltx(x-6,y-10,"550LY",RGB(90,100,130));
   if(k==sel){int r=5;u16 cc=(t>>3)&1?RGB(255,255,120):RGB(255,180,60);sp_circ(x,y,r+1,cc);}if((XP.samp>>(21+k))&1)lf(x-1,y-6,3,2,C_GREEN);}
  lf(0,0,240,11,RGB(8,10,24));ltx(2,2,"MILKY WAY - NOT TO SCALE",RGB(255,220,120));
  lf(0,124,240,36,RGB(8,10,24));lf(0,124,240,1,RGB(60,70,110));const XW*W=&XWD[21+sel];ltx(4,127,W->n,RGB(255,240,160));ltx(4+slen(W->n)*6+6,127,W->sub,RGB(150,170,210));
@@ -205,7 +205,7 @@ static void xe_throw(void){int w=XS.w;float g=xg(w),k=x_ball_k(w),v=10;float Te=
   if(esc){float fr=f/120.0f;int bx=20+(int)(fr*220),by=gy-10-(int)(fr*130);lf(16,gy-12,3,12,C_WH);if(by>10)lf(bx,by,3,3,RGB(255,150,60));xs_bottom("THROWN AT 10 M/S: ESCAPE SPEED IS 5.6","IT LEAVES DEIMOS FOREVER!");m3_present();continue;}
   int m=XS.tn*(f>150?150:f)/150;if(m>=XS.tn)m=XS.tn-1;for(int i=0;i<m;i++)sp_px(XS.TX[i],XS.TY[i],RGB(200,200,120));lf(XS.TX[m]-1,XS.TY[m]-1,3,3,RGB(255,150,60));
   lf(18,gy-8,3,8,C_WH);for(int q=0;q<=4;q++){int sx=20+(int)(R*q/4*hs);lf(sx,gy,1,4,C_WHITE);if(q==4||q==2){char b[16];xm_put(b,R*q/4);ltx(sx-14,gy+6,b,C_WHITE);}}
-  char b[64],*o=sp_put(b,"10 M/S AT 45 DEG  RANGE ");o=xm_put(o,f>=150?R:R*m/(XS.tn>1?XS.tn-1:1));xs_bottom(b,0);o=sp_put(b,"FLIGHT ");o=xs_put(o,T);sp_put(o,R>XWD[w].rkm*1000.0f?"  (FLAT MATH BREAKS!)":"  EARTH VACUUM 10.2 M");ltx(2,151,b,RGB(140,160,200));m3_present();}
+  char b[64],*o=sp_put(b,"10 M/S AT 45 DEG  RANGE ");o=xm_put(o,f>=150?R:R*m/(XS.tn>1?XS.tn-1:1));xs_bottom(b,0);o=sp_put(b,"FLIGHT ");o=xs_put(o,T);sp_put(o,R>XWD[w].rkm*1000.0f?"  (FLAT MATH BREAKS!)":"  EARTH NO-AIR 11.6 M");ltx(2,151,b,RGB(140,160,200));m3_present();}
  xs_store(2,esc?99999:R);xs_wait(150);}
 static float x_fall_time(int w,float h){float g=xg(w),k=x_ball_k(w);if(k<=0)return fsqr(2*h/g);float y=h,vy=0,t=0,dt=fsqr(2*h/g)/600;for(int i=0;i<4000&&y>0;i++){vy+=(g-k*vy*vy)*dt;y-=vy*dt;t+=dt;}return t;}
 static void xe_fall(void){int w=XS.w;float g=xg(w);float T=x_fall_time(w,10);float ts=T/3;if(ts<1)ts=1;int gy=134;float ppm=10;float t=0;float k=x_ball_k(w),y=10,vy=0;
@@ -245,11 +245,11 @@ static void x_view(int w){const XW*W=&XWD[w];XP.vis|=1u<<w;xp_write();
  for(int t=0;;t++){next_frame();BEAT->screen=SCR_XGAL;BEAT->mode=w;BEAT->phase=7;lfb=0;lf(0,0,240,160,RGB(1,1,6));x_stars(w*7+3,70,160);
   if(w==0){for(int j=0;j<160;j++){int dy=j-200;int wd=isq(190*190-dy*dy);if(wd>0)lf(0,j,wd-60>0?(wd-60>240?240:wd-60):0,1,j>120?RGB(255,230,140):RGB(255,200,90));}for(int k=0;k<120;k++){u32 h=xh(k*3+t/8);int x=h%200,y=50+(h>>9)%110;if(isq((x+60)*(x+60)+(y-200)*(y-200))<185)sp_px(x,y,RGB(255,170,60));}
    for(int k=0;k<20;k++){int an=150+k*2;int R=128+(int)(xh(k)%6)+((t+k*5)%40)/8;int x=-60+(COS(an&255)*R>>8)+60,y=200+(SIN(an&255)*R>>8);sp_px(x+20,y,RGB(255,120,60));}ltc(14,"VIEW FROM 0.3 AU - SOLAR ORBITER RANGE",C_WHITE);}
-  else if(w==26){for(int j=-90;j<=90;j++){int wd=isq(95*95-j*j);int y=80+j;if(y<0||y>=160)continue;lf(120-wd,y,wd*2,1,RGB(200,70,30));}for(int k=0;k<160;k++){u32 h=xh(k*5+(t/30));int x=40+h%160,y=(h>>9)%160;int dx=x-120,dy=y-80;if(dx*dx+dy*dy<88*88)lf(x,y,4,3,(h>>20)&1?RGB(240,110,50):RGB(160,50,24));}sp_blend(0,0,240,160,RGB(255,120,60),20);ltc(14,"RED SUPERGIANT - FILLS THE VIEW AT 10 AU",C_WHITE);}
+  else if(w==26){for(int j=-90;j<=90;j++){int wd=isq(95*95-j*j);int y=80+j;if(y<0||y>=160)continue;lf(120-wd,y,wd*2,1,RGB(200,70,30));}for(int k=0;k<160;k++){u32 h=xh(k*5+(t/30));int x=40+h%160,y=(h>>9)%160;int dx=x-120,dy=y-80;if(dx*dx+dy*dy<88*88)lf(x,y,4,3,(h>>20)&1?RGB(240,110,50):RGB(160,50,24));}sp_blend(0,0,240,160,RGB(255,120,60),20);ltc(14,"RED SUPERGIANT SEEN FROM 10 AU",C_WHITE);}
   else if(w==27){int cx=120,cy=76;for(int a=0;a<128;a++){int an=a*2;int r=40+(a*7%5);int x=cx+(COS(an)*r>>8)*1,y=cy+(SIN(an)*r>>8)/4;u16 c=COS(an)>0?RGB(255,230,150):RGB(200,100,40);if(SIN(an)<0)lf(x-1,y,3,2,c);}
    sp_disc(cx,cy,18,0);sp_circ(cx,cy,19,RGB(255,220,150));sp_circ(cx,cy,20,RGB(200,140,70));for(int a=0;a<128;a++){int an=a*2;int r=40+(a*7%5);int x=cx+(COS(an)*r>>8),y=cy+(SIN(an)*r>>8)/4;u16 c=COS(an)>0?RGB(255,230,150):RGB(200,100,40);if(SIN(an)>=0)lf(x-1,y,3,2,c);}
    for(int a=0;a<64;a++)sp_px(cx+20+(COS(a*4)*70>>8),cy-10+(SIN(a*4)*24>>8),RGB(60,80,120));{int an=(t/2)&255;lf(cx+20+(COS(an)*70>>8)-1,cy-10+(SIN(an)*24>>8)-1,3,3,RGB(180,200,255));ltx(cx+40,cy+20,"S2",RGB(140,160,220));}
-   ltc(14,"SGR A* - THE BRIGHT SIDE MOVES TOWARD YOU",C_WHITE);}
+   ltc(14,"SGR A*: BRIGHT SIDE MOVES TOWARD YOU",C_WHITE);}
   else if(w==25){sp_disc(110,78,14,RGB(230,240,255));sp_disc(110,78,9,C_WHITE);lf(60,78,100,1,RGB(200,220,255));lf(110,30,1,96,RGB(200,220,255));lf(170,70,2,2,RGB(240,240,255));ltx(176,66,"SIRIUS B",RGB(170,190,230));ltc(14,"SIRIUS A + B (WHITE DWARF)",C_WHITE);}
   else{sp_disc(120,76,26,W->c2);sp_disc(120,76,22,W->c1);if((t/40)%5==0)sp_blend(126,58,14,10,RGB(255,240,200),160);ltc(14,"RED DWARF - FLARES ARE COMMON",C_WHITE);}
   lf(0,140,240,20,RGB(6,8,18));ltx(2,141,W->n,RGB(255,230,150));ltx(2,151,"OBSERVATION LOGGED - A/B: BACK",RGB(140,160,200));m3_present();
