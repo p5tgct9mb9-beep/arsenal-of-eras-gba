@@ -146,7 +146,7 @@ static void ne_read(void){for(int e=5;e<NERA;e++){memset(&LO[e],0,sizeof LO[e]);
   if(l.prim<NPRIM[e]&&l.sec<NSEC[e]&&l.opt<NATL[0][e]&&l.muz<NATL[1][e]&&l.grip<NATL[2][e]&&l.mag<NATL[3][e]&&l.leth<NLE[e]&&l.tact<NTACT[e]&&l.perk<=4&&l.laun<=NL[e]){LO[e]=l;}
   tankSel[e]=ts<NTK[e]?ts:0;airSel[e]=as<NAIR[e]?as:0;}}
 static int saveLoaded; // 0 none/defaults, 1 v4, 2 migrated from v1, 3 migrated from v2, 4 migrated from v3
-static int save_load0(void);static int save_load(void){int r=save_load0();ne_read();return r;}
+static int save_load0(void);static int save_load(void){int r=save_load0();ne_read();if((campUnlock>>13)&1)campUnlock|=1u<<14;if((campUnlock>>15)&1)campUnlock|=1u<<16;return r;} // v1.3: v1.2 finishers continue straight into the new modern missions
 static int save_load0(void){lo_defaults();saveLoaded=0;if(SRAM[0]!='A'||SRAM[1]!='O'||SRAM[2]!='E'||SRAM[3]!='L')return 0;
  int v=SRAM[4];int nf=v==1?9:LO_F;int n=v==1?5*nf+10:v==2?SAVE_N2:v==3?SAVE_N3:SAVE_N;if(v<1||v>6)return 0;
  u8 b[SAVE_N];u8 sum=0x5A;for(int i=0;i<n;i++){b[i]=SRAM[5+i];sum+=b[i]*(i+1);}if(sum!=SRAM[5+n])return 0;
