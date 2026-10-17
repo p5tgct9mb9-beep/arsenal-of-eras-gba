@@ -1,5 +1,17 @@
 # Arsenal of Eras DS: changelog
 
+## ds-v0.2.5 (Oct 17, 2026): rebuilt tank sprites (ds-v0.3.0 part 1)
+
+First checkpoint of ds-v0.3.0. The top-down armour sprites are rebuilt from real vehicle dimensions. Controls and game rules are the same as in ds-v0.2.4.
+
+* **108 tanks, tank destroyers, SPGs, IFVs and armoured cars are redrawn** (`art/veh_hd.py`). Each vehicle has a spec with its real hull length and width, track width, turret shape, size and position, gun length and calibre, and its fittings. The spec is drawn as a layered 4x model with a height field, lit from the front-left like the approved side-view art, and reduced to the 32x32 hull and turret sprites.
+  * **Proportions:** each vehicle keeps its GBA hull length, so gameplay size is unchanged. The width comes from the real length-to-width ratio, widened 25% so it still reads at 32 px. A Sherman is now long and narrow, and a Tiger or Abrams is wide and flat.
+  * **Turrets:** cast domes (Sherman, T-34/85, IS-2, Pershing), Soviet saucers (T-55 through T-90M), welded boxes (Tiger, Panzer IV, KV-1, Cromwell), flat composite turrets (Abrams, Challenger, K2, Leclerc), arrowhead wedges (Leopard 2A7/2A8, Merkava, Type 99A), and open-top rings (M10, M18, M36). Each has its mantlet, cupola with vision block, loader hatch, bustle rack, smoke dischargers, ERA bricks, sights and roof weapons where the real vehicle has them.
+  * **Hulls:** track links on the pixel grid, side skirts with plate seams, fenders and stowage bins, a sloped glacis with a lit roof edge, driver hatches, engine-deck grilles, exhausts or fuel drums, spare track links, headlights, tools, casemates with their guns (Jagdpanther, StuG III, Elefant, SU-100), and rocket pods (M270, TOS-1A).
+  * Colours stay on the team palette ramps, so team colours, the hangar and the loadout screens still work.
+* **Not rebuilt yet:** soft-skins, halftracks, WWI vehicles, the Goliath, and the fantasy, sci-fi and medieval vehicles. These keep the re-shaded GBA art for now.
+* **Build:** `AOE_GBA_VEH=1 ./build.sh` builds with the original GBA tank sprites, for comparisons.
+
 ## ds-v0.2.4 (Oct 17, 2026): Arcade fixes
 
 Fixes found while checking the ds-v0.2.3 release. Controls are the same as in ds-v0.2.3.
