@@ -11,6 +11,7 @@ First checkpoint of ds-v0.3.0. The top-down armour sprites are rebuilt from real
   * Colours stay on the team palette ramps, so team colours, the hangar and the loadout screens still work.
 * **Not rebuilt yet:** soft-skins, halftracks, WWI vehicles, the Goliath, and the fantasy, sci-fi and medieval vehicles. These keep the re-shaded GBA art for now.
 * **Build:** `AOE_GBA_VEH=1 ./build.sh` builds with the original GBA tank sprites, for comparisons.
+* **Tests:** regression results are the same as ds-v0.2.4: 110 of 116 match, and the same 6 differ by timing only. Arcade: 12/12 clean.
 
 ## ds-v0.2.4 (Oct 17, 2026): Arcade fixes
 
