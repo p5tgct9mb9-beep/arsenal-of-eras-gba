@@ -7,6 +7,7 @@ and moves large assets (16 KB and up) into NitroFS (`nitrofiles/assets.bin`), wh
 * `source/platform.c`: per-frame push of the shadowed GBA display registers and OAM to the DS main engine. The 240x160 picture is centred on the 256x192 top screen with a window border, and GBA bitmap modes are converted. Also handles VBlank music and NitroFS asset paging.
 * `source/sound.c`: translates the GBA PSG registers to DS PSG, PCM and noise channels, with software envelope, length and sweep.
 * `source/save.c`: the GBA SRAM image lives in RAM and is saved to the DS save chip as RLE-compressed ping-pong 4 KB slots, which fit the 8 KB EEPROM melonDS and Delta give this cart. GBA saves can be imported from Slot-2 or `fat:/ArsenalOfEras.sav`, or converted offline with `tools/gbasav2ds.py`.
+* `source/controls.c`: native DSi button layout. It translates A/B/X/Y/L/R/START/SELECT into each mode's GBA keys and adds DS-only actions (smoke, flares, reload, swap). Settings > Controls switches between DS and CLASSIC (GBA). The on-screen text patches are in `tools/dscontrols.py`.
 * `source/touchui.c`: the bottom-screen touch UI (title, main-menu tiles, category lists and mode options, and a virtual pad).
 
 Build: `./build.sh` (needs the BlocksDS toolchain under /opt/wonderful).

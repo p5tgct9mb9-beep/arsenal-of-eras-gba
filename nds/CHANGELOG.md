@@ -1,5 +1,34 @@
 # Arsenal of Eras DS: changelog
 
+## ds-v0.2.3 (Oct 16, 2026): native DSi button layout and the Arcade bug pass
+
+* **Native DSi buttons** (`source/controls.c`, `tools/dscontrols.py`). The game now uses A, B, X, Y, L, R, START, SELECT, the D-pad and touch in every mode. Before this, it used the GBA layout.
+  * **How it works:** X and Y are read through libnds (`keysHeld`, which comes from the ARM7 `REG_KEYXY`). Each physical button is translated into the GBA keys the current mode expects. Two DS-only key bits handle actions the GBA has no key for.
+  * **Infantry:** A fire, B gear (claymore/sensor/strobe), X reload (or take the weapon at your feet), Y switch weapon, L aim/strafe-lock, R grenade.
+  * **Armor:** A main gun, B coax/ATGM, X dismount squad or centre the turret, Y **smoke screen**, L/R turret.
+  * **Dogfight:** A guns, B missile, X scoreboard, Y **flares**, L/R barrel roll. Helicopters and drones: X climbs and Y descends. This replaces the GBA SELECT+UP/DOWN chord.
+  * **Naval:** A main guns, B secondary/torpedoes, X centres the turrets, Y smoke screen, L/R turrets.
+  * **Smoke and flares** break incoming missile locks. Smoke reloads in 12 s and flares in 5 s.
+  * **FPS:** A fire, X reload/door, Y switch weapon, B fast turn, L/R strafe.
+  * **Campaign and Boot Camp** use a similar layout. See the cheat sheet.
+  * **Menus:** A confirm, B back, X option, Y start/loadout, L/R tabs.
+  * **Other modes:** X does the old SELECT action.
+  * **Settings > Controls:** **DS** (default) or **CLASSIC (GBA)**. CLASSIC is the v1.3.5 layout, with X as SELECT. The setting is saved in a DS-only record at SRAM 0xFFF0. It replaces the GBA "Rumble N/A" row.
+  * **On-screen text:** the control hints, HOW TO PLAY, the loadout notes and the Boot Camp tutorial text now name the A/B/X/Y/L/R buttons.
+  * **Bottom-screen legend:** every battle page and the virtual pad page show a per-mode button legend.
+  * **Cheat sheet:** `art/mkcheatsheet.py` makes the controls cheat sheet.
+* **Arcade Cabinet bug pass** covering all 12 games (`tests/ds_arc_NN.txt`, `tools/arccheck.py`). Each game is opened from the cabinet and played by hand with every button for about 25 s. The test then pauses, resumes, quits, enters a score, plays again, quits, returns to the cabinet, plays a full autopilot game (up to 4 min), and leaves to the menu. Result: 12/12 clean. Bugs fixed:
+  1. X and Y did nothing in the cabinet and its games. Now X = A and Y = B, and on the cabinet X plays, Y goes back and L/R choose.
+  2. During arcade play the bottom screen showed the generic virtual pad with a debug "SCREEN 108 MODE n" line. It now shows an arcade page with the game card, live score, lives and level, the HI score, the controls and touch PAUSE/B buttons. The cabinet page has PREV/PLAY/NEXT, and the high-score entry page has help text.
+  3. Frame drops. Each arcade frame was copied twice: frame buffer to the GBA bitmap shadow, then to VRAM. Chopper Rescue drew at 30 fps and Space Pinball at about 41 fps. Frames now go straight from the frame buffer to VRAM, and every game draws at 54-58 fps. Game logic stays at a fixed 60 Hz.
+  4. The bottom-screen arcade page redrew every 8 frames, which cost frames (51 fps). It now redraws only when something changes, at most every 12 frames, and the fill routine is faster.
+  5. The cabinet attract preview ran at half speed. It now catches up by VBlank.
+  6. Starship Hopper fell into the floor about 1.3 s after start, before the player could react. It now waits for A ("PRESS A TO FIRE THE ENGINE") and starts by itself after 5 s. The PLAY AGAIN press no longer fires the engine.
+  7. The Starship Hopper HUD showed 3 lives, but one crash ends the run. It now shows 1.
+  8. Cargo Stack has no lives but showed 3. The lives display is now hidden.
+  * **Checked with no problem found:** launch, exit and return to the cabinet; pause, resume and quit; game over, PLAY AGAIN and back to the cabinet; stalls (at most 3 frames); logic rate (1.00); high-score tables and play counts in SRAM 0x3400; palette or leftover-tile corruption when switching games (none seen in 108 screenshots).
+* **Harness:** `DSH_CTL=classic` makes the GBA regression scripts run with the GBA layout (`dsregress.sh` sets it). Added the `ctlstat TAG` command (translated key mask, control category, X/Y counts) and `chipdump FILE`. New tests: `tests/ds_ctl_*.txt` (made by `tests/mkctl.py`) and `tests/ds_arc_*.txt` (made by `tests/mkarc.py`).
+
 ## ds-v0.2.2 (Oct 16, 2026): official cover art, wakes and afterburners
 
 * **Official cover art** (`nds/art/cover_art.png`, also `docs/cover.png` in the README header):
