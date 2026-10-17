@@ -1,5 +1,17 @@
 # Arsenal of Eras DS: changelog
 
+## ds-v0.2.6 (Oct 17, 2026): rebuilt aircraft sprites (ds-v0.3.0 part 2)
+
+Second checkpoint of ds-v0.3.0. The top-down aircraft sprites used in Dogfight, Campaign air missions and the hangar are rebuilt from real dimensions (`art/veh_air.py`).
+
+* **147 aircraft are redrawn from a spec** of real length and span, wing planform, wing position, root and tip chord, sweep, engine layout, tail type and canopy position.
+  * **Wing planforms:** tapered, elliptical (Spitfire, He 111, Tempest, P-47), gull (Corsair, Stuka), swept (MiG-17 to Su-27), delta (MiG-21, Mirage, A-4), cranked delta with LERX (F-16, F/A-18, MiG-29), forward-swept (Ju 287), flying wing (B-2, Ho 229, XP-79), and biplane and triplane wings for WWI aircraft.
+  * **Engines:** nose propellers drawn as see-through blur discs, twin and four-engine wing nacelles with spinners, push-pull (Do 335), pushers (XP-55, Gotha), wing-pod jets (Me 262, Ar 234), rear pods (A-10), single and twin jet nozzles with an afterburner glow, and the He 162's dorsal jet.
+  * **Tails:** single fin, twin fins (B-25, Lancaster, F-15, Su-27), canted fins (F-35, F/A-18, Su-57), twin booms (P-38, P-61), T-tails (F-104), cruciform tails (Do 335), tailless deltas with a fin (Mirage, Gripen, J-10), and canards (Gripen, J-10, Su-30, J-15).
+  * **Details:** tinted canopies with a sky glint and frame, radial cowlings, belly scoops, intakes, conformal fuel tanks (F-15E/EX), tip tanks, floats, gun pods, wing roundels in team colours, and helicopter rotors drawn as thin dashed blur (Cobra, Hind, Apache, Ka-52 coaxial).
+  * Fuselages are drawn 40% fatter than true scale so they read at 32 px. The larger of span or length keeps the GBA sprite size.
+* **Not rebuilt yet:** balloons, the Da Vinci machines, the Triebflügel, BV 141, XF5U and the sci-fi craft. These keep the re-shaded GBA art.
+
 ## ds-v0.2.5 (Oct 17, 2026): rebuilt tank sprites (ds-v0.3.0 part 1)
 
 First checkpoint of ds-v0.3.0. The top-down armour sprites are rebuilt from real vehicle dimensions. Controls and game rules are the same as in ds-v0.2.4.
