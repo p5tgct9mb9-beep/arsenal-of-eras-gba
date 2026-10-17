@@ -73,7 +73,7 @@ class Model:
         for dy in (-k, 0, k):
             for dx in (-k, 0, k): acc += p[k + dy:k + dy + N, k + dx:k + dx + N]
         cav = np.clip((acc / 9 - h) / (S * 2.0), 0, 1)
-        return s.tone + 0.55 * np.clip(lam, -0.5, 0.35) - 0.22 * cav
+        return s.tone + 0.55 * np.clip(lam, -0.28, 0.35) - 0.22 * cav
     def reduce(s, outline=True, cov_min=0.45):
         g = np.zeros((32, 32), np.uint8); T = s.shade(); tg = np.zeros((32, 32), np.uint8)
         for y in range(32):
@@ -242,6 +242,12 @@ SPEC = {
  'EHRHARDT E-V/4':  V(5.30, 2.00, 0, .5, 'c', 1.4, 1.4, 0.8, 1, wh=2),
 }
 SPEC['T-72A']['tp'] = .40
+# these read better as the re-shaded GBA art for now (open halftracks, soft-skins, WWI rhomboids, the Goliath):
+# the spec'd model is kept for a later pass
+HOLD = ['M3 HALFTRACK', 'WILLYS JEEP', 'SDKFZ 251', 'GOLIATH', 'JLTV (TOW)', 'HUMVEE (M2)', 'MAXXPRO MRAP', 'M142 HIMARS',
+        'PANTSIR-S1', 'MARK IV MALE', 'MARK V', 'A7V STURMPANZER', 'WHIPPET MK A', 'SCHNEIDER CA1', 'ST CHAMOND',
+        'ROLLS-ROYCE AC', 'EHRHARDT E-V/4', 'LK II', 'RENAULT FT', 'AAV/ACV AMPHIB']
+SPEC_HOLD = {k: SPEC.pop(k) for k in HOLD}
 # ------------------------------------------------------------------------------------------------ armour model
 def _geom(sp, glen, gwid):
     """pixel geometry: keep the GBA hull length, width from the real L:W ratio"""
@@ -274,7 +280,7 @@ def hull_model(sp, glen=24, gwid=20):
     else:
         for xa in (x0, x1 - tw):
             m.rect(xa, y0, xa + tw, y1, METAL, 0.30, tag=TRACK, dz=S * 1.0)     # track run (links drawn on the pixel grid by _post)
-        ov = 0.5 if (sp.get('fend') or sp.get('skirt')) else 0.4                 # sponsons / fenders overhang the tracks
+        ov = 0.7 if (sp.get('fend') or sp.get('skirt')) else 0.6                 # sponsons / fenders overhang the tracks
         bx0, bx1 = x0 + tw * (1 - ov), x1 - tw * (1 - ov)
     bw = bx1 - bx0
     if sp.get('mine'):
@@ -339,7 +345,7 @@ def hull_model(sp, glen=24, gwid=20):
         m.rect(cx - 1, y1 - 1.6, cx + 1, y1 - .9, TEAM, .5); return m
     pts = [(bx0, y0 + gl * 0.7), (bx0 + 1.0, y0 + 0.3), (bx1 - 1.0, y0 + 0.3), (bx1, y0 + gl * 0.7), (bx1, y1 - 0.6), (bx1 - 0.6, y1), (bx0 + 0.6, y1), (bx0, y1 - 0.6)]
     if sp.get('chur'): pts = [(bx0, y0 + 1), (bx1, y0 + 1), (bx1, y1), (bx0, y1)]
-    m.poly(pts, CAMO, 0.52, bevel=0.20)
+    m.poly(pts, CAMO, 0.60, bevel=0.20)
     if not sp.get('frontengine'):
         m.poly([(bx0 + 0.6, y0 + gl * 0.75), (bx0 + 1.3, y0 + 0.6), (bx1 - 1.3, y0 + 0.6), (bx1 - 0.6, y0 + gl * 0.75)], CAMO, 0.40)   # sloped glacis (darker than the deck)
         m.rect(bx0 + 1.2, y0 + gl * 0.75 - 0.2, bx1 - 1.2, y0 + gl * 0.75 + 0.6, CAMO, 0.82)                                      # lit roof edge
@@ -359,7 +365,7 @@ def hull_model(sp, glen=24, gwid=20):
     # engine deck
     if not sp.get('open') and not sp.get('frontengine'):
         ed = max(4.0, L * 0.27); ey = y1 - ed
-        m.rect(bx0 + 0.8, ey, bx1 - 0.8, y1 - 0.8, CAMO, 0.44)
+        m.rect(bx0 + 0.8, ey, bx1 - 0.8, y1 - 0.8, CAMO, 0.50)
         m.rect(bx0 + 1.8, round(ey) + 1, cx - 0.6, round(y1) - 1.2, CAMO, 0.4, tag=GRILLE); m.rect(cx + 0.6, round(ey) + 1, bx1 - 1.8, round(y1) - 1.2, CAMO, 0.4, tag=GRILLE)
         m.rect(cx - 0.5, ey, cx + 0.5, y1 - 0.8, CAMO, 0.66)
         if sp.get('drums'):
@@ -471,8 +477,8 @@ def turret_model(sp, glen=24, gwid=20):
         return m
     if sp.get('bus') and tu in ('a', 'w', 's', 'b', 'c'):                                                        # bustle rack / basket
         by0 = ty1 - 0.6; by1 = min(31.0, ty1 + max(1.6, tl * .16))
-        m.rect(tx0 + .8, by0, tx1 - .8, by1, METAL, 0.30, bevel=0.1)
-        for xx in np.arange(tx0 + 1.4, tx1 - 1.2, 1.4): m.rect(xx, by0 + .3, xx + .6, by1 - .3, METAL, 0.12)
+        m.rect(tx0 + .8, by0, tx1 - .8, by1, CAMO, 0.42, bevel=0.1)
+        for xx in np.arange(tx0 + 1.4, tx1 - 1.2, 2.0): m.rect(xx, by0 + .3, xx + .7, by1 - .3, METAL, 0.40)
     if sp.get('era'):                                                                                             # ERA bricks on the front arc
         rows = 2 if sp['era'] >= 2 else 1
         for r in range(rows):
@@ -537,9 +543,13 @@ def tank(sp, glen=24, gwid=20):
     return h.reduce(), turret_model(sp, glen, gwid).reduce()
 # ------------------------------------------------------------------------------------------------ GBA bank patch
 def _gba_dims(hg):
-    ys, xs = np.nonzero(hg > 1)
+    ys, xs = np.nonzero((hg > 1) & ~np.isin(hg, [11, 14]))      # hull only, not a hull-mounted gun
     if not len(ys): return 24, 20
     return int(ys.max() - ys.min() + 1), int(xs.max() - xs.min() + 1)
+def names():
+    import re, os
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'src', 'vehdb.inc')).read()
+    return {int(g): n for n, g in re.findall(r'\{"([^"]+)",\d+,\d+,\d+,\d+,\d+,\d+,VC_\w+,(\d+)', src)}
 def patch_tanks(words, names):
     """words: tank_spr (128 x 256 u32) -> words with every spec'd vehicle rebuilt"""
     import veh_ds
