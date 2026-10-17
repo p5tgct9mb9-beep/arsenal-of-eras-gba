@@ -32,6 +32,12 @@ int ds_tac_flags(int t){return tflag[t&31];}
 int ds_tac_colours(u16*col){
  int px=(U[0].x>>8)>>4,py=(U[0].y>>8)>>4;if(px<0||py<0||px>=mapW||py>=mapH)return 0;
  int t=map[py*MAXW+px];
+ if(ds_ter_on){int cb=(REG_BGCNT(1)>>2)&3; // DS painted terrain: average each metatile's variant 0 in its own bank
+  for(int m=0;m<32;m++){u16 e=ds_ter_entry(m,0,0,(u16)((m*4)|(mtBank[m]<<12)));int pb=e>>12,tb=e&0x3FF;int r=0,g=0,bl=0,nn=0;
+   for(int q=0;q<4;q++){volatile u32*T=(volatile u32*)(0x06000000+cb*0x4000+(tb+q)*32);
+    for(int w=0;w<8;w++){u32 v=T[w];for(int s=0;s<8;s+=2){int ix=(v>>(s*4))&15;if(!ix)continue;u16 c=PAL_BG[pb*16+ix];r+=c&31;g+=(c>>5)&31;bl+=(c>>10)&31;nn++;}}}
+   col[m]=nn?(u16)((r/nn)|((g/nn)<<5)|((bl/nn)<<10)):PAL_BG[0];}
+  return 1;}
  for(int bg=0;bg<4;bg++){u16 cnt=REG_BGCNT(bg);int sb=(cnt>>8)&31,cb=(cnt>>2)&3;
   volatile u16*S=(volatile u16*)(0x06000000+sb*0x800);u16 e=S[((py*2)&31)*32+((px*2)&31)];
   if((e&0x3FF)!=(u16)(t*4))continue;

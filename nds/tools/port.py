@@ -182,11 +182,11 @@ LIT_REPL = [
  ('u16 b=(t*4)|((bank+mtBank[t&31])<<12);', 'u16 b=(t*4)|((bank+mtBank[t&31])<<12);if(ds_ter_on&&buf==bgw)b=ds_ter_entry(t,cx,cy,b);'),
  ('const u16*pal,int era,int clouds){shimmer=0;', 'const u16*pal,int era,int clouds){shimmer=0;ds_ter_on=0;'),
  ('setup_mode0(t,AM_N*4*8,p,era,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(te)[i];tint_bg(curMap->theme,2);',
-  'setup_mode0(t,AM_N*4*8,p,era,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(te)[i];ds_terrain(te<5?te:0);tint_bg(curMap->theme,ds_ter_on?10:2);'),
+  'setup_mode0(t,AM_N*4*8,p,era,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(te)[i];ds_terrain(te<5?te:-1);tint_bg(curMap->theme,ds_ter_on?10:2);'),
  ('setup_mode0(sky_t(ts),32*4*8,sky_p(ts),era,0);if(curMap->theme!=TH_SNOW)tint_bg(curMap->theme,1);',
   'setup_mode0(sky_t(ts),32*4*8,sky_p(ts),era,0);ds_terrain(5+ts);if(curMap->theme!=TH_SNOW)tint_bg(curMap->theme,ds_ter_on?10:1);'),
  ('setup_mode0(t,32*4*8,p,era,clouds);tint_bg(curMap->theme,1);',
-  'setup_mode0(t,32*4*8,p,era,clouds);ds_terrain(te==1?6:(te==0||te>=5)?5:-1);tint_bg(curMap->theme,ds_ter_on?10:1);'),
+  'setup_mode0(t,32*4*8,p,era,clouds);ds_terrain(te==1?6:te==0?5:-1);tint_bg(curMap->theme,ds_ter_on?10:1);'),
  ('setup_mode0(arena_t(2),AM_N*4*8,arena_p(2),2,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(2)[i];',
   'setup_mode0(arena_t(2),AM_N*4*8,arena_p(2),2,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(2)[i];ds_terrain(2);'),
 ]

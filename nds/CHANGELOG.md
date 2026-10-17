@@ -1,5 +1,39 @@
 # Arsenal of Eras DS: changelog
 
+## ds-v0.2.1 (Oct 16, 2026): graphics upgrade, part 1 (soldiers, terrain, effects) and save autodetect
+
+A checkpoint on the way to ds-v0.3.0. Infantry and Dogfight look clearly better. Armor and Naval are only somewhat better, because the vehicles and ships are still the GBA sprites.
+
+* **Infantry soldiers:**
+  * 3/4 top-down 32x32 soldiers (from `sold.py`), ported from the unreleased GBA v1.3.6 work (`gba-wip 5efcaac`) through a new `nds/overlay/`.
+  * Walk, aim and fire frames, with uniform, skin, hair and camo recolouring.
+  * Team chevrons and nameplates near the player.
+  * The 1.1 MB soldier and portrait tables stream from NitroFS one set at a time (`ast_window`), so they cost no main RAM.
+* **Painted terrain** (`nds/art/terrain_ds.py`, `nitro:/terrain.bin`):
+  * **Arenas** (Infantry and Armor, WW2, Cold War, Modern, Future and Space):
+    * Each of the 14 map tiles has 4 painted variants: grass with tufts and flowers, rutted dirt roads, brick walls in 3/4 view, plank crates, stacked sandbags, shaded trees with drop shadows, craters, rock borders, floor slabs, bridges and water.
+    * Each material has its own 15-colour palette in BG banks 1-9.
+    * Variants are picked per cell, so large areas no longer repeat.
+  * **Aerial and sea sets** (WW2 and Cold War Dogfight and Naval): sea with moving wave glints, beach or ice shore, farmland, field furrows and hedgerows, forest, farmhouses.
+  * Collision, line of sight and AI still use the original tile ids. Only the picture changed.
+  * The three bonus eras (WW1, Medieval and Revolutionary) keep their original art.
+  * The bottom-screen TACTICAL map reads its colours from the new tiles.
+* **Effects** (`nds/art/fx_ds.py`): repainted shared FX sheet:
+  * Glowing tracers and shells, star-shaped muzzle flashes and sparks.
+  * Shaded smoke puffs.
+  * A 4-frame explosion: flash, fireball, break-up with embers, then smoke.
+* **Saves:**
+  * The save chip is autodetected: EEPROM at several sizes (half the chip, up to 32 KB) or FLASH (64 KB sectors).
+  * If no usable chip is found, the game saves to `fat:/ArsenalOfEras.dssav` on the SD card. This is meant to stop "NO SAVE CHIP" on flashcarts and Delta.
+  * Every chip write is read back and verified.
+* **Tests:**
+  * New scripts: `nds/tests/ds_inf_soldiers.txt`, `ds_armor.txt` and `ds_naval.txt`.
+  * `nds/tools/beforeafter.py` builds the before/after sheets.
+* **Not done yet** (planned for ds-v0.3.0):
+  * Tanks, aircraft and ships are still the GBA sprites.
+  * The top-screen HUD and the main menu are unchanged.
+  * No new wakes or afterburners yet.
+
 ## ds-v0.2.0 (Oct 16, 2026): second-screen gameplay and the Museum (INSPECT)
 
 * **Bottom screen during gameplay (Phase B):**

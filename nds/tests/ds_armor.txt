@@ -1,0 +1,54 @@
+#newmenu
+# DS graphics sheet: armor 6v6, default era
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 6
+wait 10
+tap A
+wait 50
+tap DOWN
+wait 6
+tap A
+wait 12
+tap A
+wait 10
+shot ds_armor_faction
+tap A
+wait 10
+wait 6
+shot ds_armor_arsenal
+tap START
+wait 20
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+tap R
+wait 80
+wait 20
+shot ds_armor_map
+tap A
+wait 150
+shot ds_armor_start
+hold UP+A 90
+shot ds_armor_play1
+hold LEFT+A 60
+hold UP+A 120
+shot ds_armor_play2
+hold RIGHT+A 200
+shot ds_armor_play3
+wait 600
+shot ds_armor_play4
+beat end
