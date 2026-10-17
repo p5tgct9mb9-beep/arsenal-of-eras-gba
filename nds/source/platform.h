@@ -1,6 +1,7 @@
 #pragma once
 #include <nds.h>
 #include "assets_ds.h"
+
 extern u16 gba_io[0x200];
 extern u16 gba_oam[512];
 extern u16 gba_bmp[0x14000/2];

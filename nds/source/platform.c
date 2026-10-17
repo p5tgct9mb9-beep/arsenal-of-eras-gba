@@ -51,6 +51,11 @@ const void* ast_load(int id){
  ast_ptr[id]=p;ast_used[id]=ds_frame;ds_ast_bytes+=sz;ds_ast_loads++;
  return p;}
 
+// a window into a large NitroFS table (only valid until the next call)
+const unsigned char* ast_window(int id,unsigned off,unsigned len){static u8 wb[16384] __attribute__((aligned(4)));
+ if(len>sizeof wb)len=sizeof wb;fseek(ast_f,ast_index[id][0]+off,SEEK_SET);
+ if(fread(wb,1,len,ast_f)!=len)ds_fatal("NITROFS READ FAILED",ast_names[id]);return wb;}
+
 // ------------------------------------------------------------------ fatal error screen
 void ds_fatal(const char*a,const char*b){
  consoleDemoInit();printf("\x1b[2J ARSENAL OF ERAS DS\n\n FATAL: %s\n %s\n",a,b?b:"");
@@ -126,7 +131,7 @@ void gba_vsync(void){
  ui_frame();
  save_tick();
  ds_dbg[7]=ds_dbg[0]; // keep the block referenced
- {extern u32 ds_save_writes;extern int ds_save_dbg_type;extern u32 ds_save_verified;ds_dbg[8]=ds_save_kind;ds_dbg[9]=ds_save_dbg_type;ds_dbg[10]=ds_save_verified;ds_dbg[11]=ds_save_writes;}
+ {extern u32 ds_save_writes;extern int ds_save_dbg_type,ds_save_dbg_size;extern u32 ds_save_verified;ds_dbg[8]=ds_save_kind;ds_dbg[9]=(ds_save_dbg_type&0xFF)|(ds_save_dbg_size<<8);ds_dbg[10]=ds_save_verified;ds_dbg[11]=ds_save_writes;}
 }
 u16 gba_keyinput(void){return (REG_KEYINPUT&0x3FF)&~ds_vkeys;}
 

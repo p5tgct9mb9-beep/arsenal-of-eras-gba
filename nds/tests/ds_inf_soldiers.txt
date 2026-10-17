@@ -1,0 +1,123 @@
+#newmenu
+# translated from the v1.3.2 menu by tools/menu133_xlate.py
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 6
+wait 10
+tap A
+wait 50
+tap A
+wait 12
+tap A
+wait 10
+tap DOWN
+tap RIGHT
+tap DOWN
+tap DOWN
+tap DOWN
+wait 4
+beat v11_side_select
+tap A
+wait 10
+tap R
+tap R
+wait 4
+beat v11_arsenal_primary_mod
+tap R
+tap R
+tap RIGHT
+wait 4
+beat v11_arsenal_primary_space
+tap DOWN
+tap R
+wait 4
+beat v11_arsenal_sidearm
+tap DOWN
+tap RIGHT
+tap RIGHT
+wait 4
+beat v11_arsenal_launcher
+tap START
+wait 20
+beat v11_maps_all_1
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+tap DOWN
+wait 30
+beat v11_maps_all_2
+tap A
+wait 120
+shot inf_start
+hold UP 40
+hold A+RIGHT 20
+shot inf_00
+hold DOWN+LEFT 30
+hold A 20
+shot inf_00b
+hold UP 40
+hold A+RIGHT 20
+shot inf_01
+hold DOWN+LEFT 30
+hold A 20
+shot inf_01b
+hold UP 40
+hold A+RIGHT 20
+shot inf_02
+hold DOWN+LEFT 30
+hold A 20
+shot inf_02b
+hold UP 40
+hold A+RIGHT 20
+shot inf_03
+hold DOWN+LEFT 30
+hold A 20
+shot inf_03b
+hold UP 40
+hold A+RIGHT 20
+shot inf_04
+hold DOWN+LEFT 30
+hold A 20
+shot inf_04b
+hold UP 40
+hold A+RIGHT 20
+shot inf_05
+hold DOWN+LEFT 30
+hold A 20
+shot inf_05b
+hold UP 40
+hold A+RIGHT 20
+shot inf_06
+hold DOWN+LEFT 30
+hold A 20
+shot inf_06b
+hold UP 40
+hold A+RIGHT 20
+shot inf_07
+hold DOWN+LEFT 30
+hold A 20
+shot inf_07b
+hold UP 40
+hold A+RIGHT 20
+shot inf_08
+hold DOWN+LEFT 30
+hold A 20
+shot inf_08b
+hold UP 40
+hold A+RIGHT 20
+shot inf_09
+hold DOWN+LEFT 30
+hold A 20
+shot inf_09b
+beat play
+hold L+R+SELECT 2
+wait 150
+shot inf_result
+beat end

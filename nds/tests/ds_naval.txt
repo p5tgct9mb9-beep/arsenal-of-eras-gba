@@ -1,0 +1,34 @@
+#newmenu
+# DS: naval battle (menu: 6v6 -> 4th mode) for the graphics before/after sheet
+wait 100
+tap START
+wait 15
+tap RIGHT
+wait 16
+tap A
+wait 50
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+shot naval_menu
+tap A
+wait 12
+tap A
+wait 12
+tap A
+wait 12
+shot naval_select
+tap START
+wait 40
+tap A
+wait 90
+shot naval_start
+hold UP 90
+shot naval_play1
+hold A 40
+shot naval_play2
+hold UP 120
+shot naval_play3
