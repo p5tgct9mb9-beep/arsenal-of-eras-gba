@@ -39,6 +39,13 @@ CODE = [
  # and shows its single life, Cargo Stack shows no lives (it has none)
  ('static void a_show(void){next_frame();dma32(fb,(void*)0x06000000,240*160/2);REG_DISPCNT=3|(1<<10);}',
   'static void a_show(void){REG_DISPCNT=3|(1<<10);ds_fb_src=fb;next_frame();}'),
+ # arcade: filled discs (Chopper Rescue hills, ...) - same pixels, row widths found incrementally, off-screen rows skipped
+ ('static void a_disc(int cx,int cy,int r,u16 c){for(int dy=-r;dy<=r;dy++){int w=0;while((w+1)*(w+1)+dy*dy<=r*r)w++;a_rect(cx-w,cy+dy,2*w+1,1,c);}}',
+  'static void a_disc(int cx,int cy,int r,u16 c){if(cx+r<0||cx-r>=240||cy+r<0||cy-r>=160)return;int w=r;for(int d=0;d<=r;d++){while(w*w+d*d>r*r)w--;if(cy+d<160)a_rect(cx-w,cy+d,2*w+1,1,c);if(d&&cy-d>=0)a_rect(cx-w,cy-d,2*w+1,1,c);}}'),
+ # arcade: Tank Duel moved a tank SIN*speed/2 in 8.8 fixed point, i.e. 55-110 px per frame, so tanks jumped
+ # across the arena (or through gaps) in one frame. Now speed/128 px: player 1.7 px/frame forward, 1.1 reverse, CPU 1.4
+ ('static void td_move(TdT*t,int fw){s32 nx=t->x+SIN(t->a)*fw/2,ny=t->y-COS(t->a)*fw/2;',
+  'static void td_move(TdT*t,int fw){s32 nx=t->x+(SIN(t->a)*fw>>7),ny=t->y-(COS(t->a)*fw>>7);'),
  ('  aiH=aiP=0;AGS[g].ai();agT++;if(AGS[g].step(aiH,aiP)||agT>60*90){agScore=0;agLives=3;agLvl=0;agT=0;AGS[g].init();}AGS[g].draw();',
   '  {static u32 cv;int n=(int)(vblN-cv);cv=vblN;if(n<1)n=1;if(n>2)n=2;for(int q=0;q<n;q++){aiH=aiP=0;AGS[g].ai();agT++;if(AGS[g].step(aiH,aiP)||agT>60*90){agScore=0;agLives=3;agLvl=0;agT=0;AGS[g].init();}}}AGS[g].draw();'),
  ('static void sh_init(void){shY=70<<8;', 'static int shWait;static void sh_init(void){shWait=1;agLives=1;shY=70<<8;'),

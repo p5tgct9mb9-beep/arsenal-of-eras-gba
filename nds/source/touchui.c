@@ -138,7 +138,8 @@ static void draw_arc(int scr){int cab=scr==107;int g=cab?(int)DSBEAT->menu:(int)
  snprintf(s,48,cab?"ARCADE CABINET  %d/12":"ARCADE  GAME %d/12",g+1);text(10,24,s,GR_,1);
  ctext(128,36,ds_arc_txt(g,0),GD,2);ctext(128,56,ds_arc_txt(g,1),WH,1);ctext(128,67,ds_arc_txt(g,2),CY,1);
  if(scr==108){snprintf(s,48,"SCORE %u",(unsigned)DSBEAT->scoreA);text(10,82,s,WH,2);
-  snprintf(s,48,"LIVES %d  LEVEL %u",(int)DSBEAT->hp,(unsigned)DSBEAT->phase+1);text(10,100,s,WH,1);}
+  if(g==5)snprintf(s,48,"LEVEL %u",(unsigned)DSBEAT->phase+1); /* Cargo Stack has no lives */
+  else snprintf(s,48,"LIVES %d  LEVEL %u",(int)DSBEAT->hp,(unsigned)DSBEAT->phase+1);text(10,100,s,WH,1);}
  else if(scr==101){text(10,82,"NEW HIGH SCORE!",GD,2);text(10,100,"UP/DOWN LETTER  </> MOVE  A: OK",WH,1);}
  else if(scr==109){snprintf(s,48,"GAME OVER  %u",(unsigned)DSBEAT->scoreA);text(10,82,s,GD,2);text(10,100,"A PLAY AGAIN   B CABINET",WH,1);}
  else{snprintf(s,48,"PLAYS %u",ds_arc_plays(g));text(10,100,s,GR_,1);}
