@@ -172,7 +172,7 @@ static void redraw(int pg,int scr,int key,int sel){curPg=pg;
   ctext(206,18+no*20+6,foc?"TAP TO START":"TAP A MODE",GR_,1);}
  else if(pg==PG_TAC){if(scr==90)draw_race();else draw_tac(scr);}
  else if(pg==PG_ARC)draw_arc(scr);
- else{draw_pad();legend_box(108,44,90,scr);char t[48];snprintf(t,48,"SCREEN %u  MODE %u",(unsigned)DSBEAT->screen,(unsigned)DSBEAT->mode);ctext(128,150,t,GR_,1);}
+ else{draw_pad();legend_box(108,44,90,scr);}
  {int x,y,w,h,c;const char*l;if(musBtn(pg,scr,&x,&y,&w,&h,&l,&c)){fill(x,y,w,h,PANEL);button(x,y,w,h,l,1);}}
  draw_bar();
  DC_FlushRange(ui,sizeof ui);dmaCopyWords(3,ui,(void*)0x06200000,sizeof ui);}
@@ -208,5 +208,5 @@ void ui_frame(void){
  if(pg==PG_TAC&&scr==90){if(rmapSrc!=RR.surf)race_build();if((uiTick&3)==0)dirty=1;}
  else if(pg==PG_TAC){int key=TT.mw*1000+TT.mh*10+scr;if(key!=tmKey||(++tmTick%240)==0){tmKey=key;tac_build();}if((uiTick&3)==0)dirty=1;}
  ds_vkeys=vk;lastTouch=touching;
- static int lastPh;if(pg!=page||sel!=lastSel||scr!=lastScr||(pg!=PG_ARC&&((int)DSBEAT->phase!=lastPh||(uiTick%60)==0)))dirty=1;lastPh=DSBEAT->phase;
+ static int lastPh;if(pg!=page||sel!=lastSel||scr!=lastScr||(pg!=PG_ARC&&pg!=PG_PAD&&(int)DSBEAT->phase!=lastPh)||(pg==PG_TAC&&(uiTick%60)==0))dirty=1;lastPh=DSBEAT->phase;
  if(dirty){redraw(pg,scr,key,sel);dirty=0;page=pg;lastSel=sel;lastScr=scr;}}
