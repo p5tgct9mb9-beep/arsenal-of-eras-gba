@@ -7,6 +7,7 @@ Fixes found while checking the ds-v0.2.3 release. Controls are the same as in ds
 * **Tank Duel tanks moved 55-110 pixels per frame.** One frame of UP/DOWN made a tank jump across the arena, and the CPU tank could reach the player and win round 1 about a second after the round started. The cause was a fixed-point mistake in the shared arcade code: `SIN*speed/2` was used where `SIN*speed>>7` was meant. The DS build now patches it (`tools/dscontrols.py`). Your tank moves 1.7 px/frame forward and 1.1 px/frame in reverse. The CPU tank moves 1.4 px/frame. Wall collision now works at these speeds.
 * **Cargo Stack:** the bottom-screen arcade page showed "LIVES 0", but the game has no lives. It now shows only the level.
 * **Correction to the ds-v0.2.3 notes:** Chopper Rescue draws at about 48 fps in the harness, not 54-58. Its game logic still runs at the full 60 Hz. A faster hill-drawing routine was tried, but it changed the code layout and cost 2-3% of frames in infantry missions under melonDS, so it was left out.
+* **Tests:** 116 regression scripts: 110 match the ds-v0.2.3 run. The 6 that differ are timing-only (v11_m_aircav, v11_m_blacksky, v11_m_suribachi, v13_brad_boss0, v13_brad_boss3, v11_camp), and none of that code changed. Arcade: 12/12 cabinet checks clean.
 
 ## ds-v0.2.3 (Oct 16, 2026): native DSi button layout and the Arcade bug pass
 
