@@ -126,6 +126,7 @@ static int musBtn(int pg,int scr,int*x,int*y,int*w,int*h,const char**l,int*cat){
  if(pg==PG_PAD&&(scr==11||scr==18)){*x=80;*y=44;*w=96;*h=20;*l=scr==18?"INSPECT HANGAR":"INSPECT ARMORY";*cat=scr==18?0:2;return 1;}
  return 0;}
 static void redraw(int pg,int scr,int key,int sel){curPg=pg;
+ {extern int ds_cover_bottom(u16*);if(pg==PG_TITLE&&ds_cover_bottom(ui)){DC_FlushRange(ui,sizeof ui);dmaCopyWords(3,ui,(void*)0x06200000,sizeof ui);return;}}
  fill(0,0,256,192,BG);header();
  if(pg==PG_TITLE){fill(28,40,200,80,PANEL);frame(28,40,200,80,CY);fill(28,40,20,3,GD);ctext(128,62,"TAP TO START",GD,2);ctext(128,96,"OR PRESS START",GR_,1);
   ctext(128,140,"TOP SCREEN: GAME  -  BOTTOM: TOUCH",GR_,1);}

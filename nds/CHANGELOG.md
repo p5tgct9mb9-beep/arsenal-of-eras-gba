@@ -1,5 +1,18 @@
 # Arsenal of Eras DS: changelog
 
+## ds-v0.2.2 (Oct 16, 2026): official cover art, wakes and afterburners
+
+* **Official cover art** (`nds/art/cover_art.png`, also `docs/cover.png` in the README header):
+  * **Title screen:** the top screen shows a 256x192 crop of the cover (Earthrise over the lunar horizon), with the title and the tagline "FROM THE TRENCHES TO THE STARS" re-set as crisp spaced text. The bottom screen shows TOUCH TO START / OR PRESS START over the lunar surface. Made by `nds/art/mkcover.py`.
+  * **DS menu icon:** Earth over the Moon horizon (32x32, 16 colours).
+  * **Banner text:** "Arsenal of Eras / From the trenches to the stars / DS v0.2.2 - LT Vasquez".
+  * **Credits:** the opener now carries the tagline.
+* **Effects:**
+  * Ships leave white foam wakes on both sides of the stern. The foam uses its own sprite palette.
+  * Jets (Cold War through Space) show afterburner glow at the tail.
+  * The effect pool grew from 40 to 96 entries.
+* **Not done yet** (still planned for ds-v0.3.0): tanks, aircraft and ships rebuilt from the detailed art, the top-screen HUD and main menu to match the mockups, and Modern+ Dogfight/Naval terrain.
+
 ## ds-v0.2.1 (Oct 16, 2026): graphics upgrade, part 1 (soldiers, terrain, effects) and save autodetect
 
 A checkpoint on the way to ds-v0.3.0. Infantry and Dogfight look clearly better. Armor and Naval are only somewhat better, because the vehicles and ships are still the GBA sprites.

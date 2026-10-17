@@ -120,7 +120,8 @@ static void push_display(void){
    for(int y=0;y<160;y++){for(int i=0;i<120;i++)d[i]=s[i]|0x80008000u;d+=128;s+=120;}}
   else{const u8*s=(const u8*)gba_bmp+((dc&0x10)?0xA000:0);u32*d=(u32*)0x06000000;
    for(int y=0;y<160;y++){memcpy(d,s,240);d+=64;s+=240;}}}
- push_oam();}
+ push_oam();
+ {extern void ds_cover_top(void);if(DSBEAT->screen==1)ds_cover_top();}}
 
 // ------------------------------------------------------------------ vblank
 static void vbl_isr(void){ds_frame++;IO(0x202)|=1;mus_isr();IO(0x202)=0;}

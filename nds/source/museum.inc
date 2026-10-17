@@ -37,7 +37,7 @@ static void mus_video(void){
  REG_BG3CNT=BG_BMP16_256x256|BG_BMP_BASE(8);REG_BG3PA=256;REG_BG3PB=0;REG_BG3PC=0;REG_BG3PD=256;REG_BG3X=0;REG_BG3Y=0;}
 // returns when the player backs out of the museum
 void ds_museum(int cat){
- mus_open();if(MN<=0)return;
+ mus_open();if(MN<=0)return;{extern void ds_cover_invalidate(void);ds_cover_invalidate();}
  u32 bs=DSBEAT->screen,bm=DSBEAT->menu,bp=DSBEAT->phase,bx=DSBEAT->extra;
  musCat=cat;int inspect=0,redraw=1,lastT=1;int ids[64];
  for(;;){

@@ -179,6 +179,16 @@ def srcread(fn):
     return t
 # DS graphics upgrade hooks (literal source replacements)
 LIT_REPL = [
+ ('{"ARSENAL OF ERAS",0},{"FIELD EDITION V1.3.5",3},', '{"ARSENAL OF ERAS",0},{"FROM THE TRENCHES TO THE STARS",1},{"FIELD EDITION V1.3.5",3},'),
+ ('#define NFX 40', '#define NFX 96'),
+ ('for(int i=0;i<16;i++)PAL_OBJ[4*16+i]=RGB(8,8,16);', 'for(int i=0;i<16;i++)PAL_OBJ[4*16+i]=RGB(8,8,16);ds_foam_pal();'),
+ ('enum{FXK_SMALL,FXK_BIG,FXK_SMOKE,FXK_FLASH,FXK_SPARK};', 'enum{FXK_SMALL,FXK_BIG,FXK_SMOKE,FXK_FLASH,FXK_SPARK,FXK_WAKE,FXK_BURN};'),
+ ('kind==FXK_FLASH?4:8;', 'kind==FXK_FLASH?4:kind==FXK_WAKE?30:kind==FXK_BURN?5:8;'),
+ ('   case FXK_SMOKE:', '   case FXK_WAKE:spr(x-4,y-4,OT_FX+(f->t<14?FX_SMOKE2:FX_SMOKE),0,0,14,1);break;\n   case FXK_BURN:spr(x-4,y-4,OT_FX+(f->t<2?FX_SHELL:FX_BULLET),0,0,3,1);break;\n   case FXK_SMOKE:'),
+ ('if(u->vel>40&&((frame+k)&15)==0)fx_add((u->x>>8)-(SIN(u->ang>>8)*30>>8),(u->y>>8)+(COS(u->ang>>8)*30>>8),FXK_SPARK);',
+  'if(u->vel>20&&((frame+k)%6)==0){int wa=u->ang>>8,ws=((frame/6+k)&1)?7:-7;fx_add((u->x>>8)-(SIN(wa)*30>>8)-(COS(wa)*ws>>8),(u->y>>8)+(COS(wa)*30>>8)-(SIN(wa)*ws>>8),FXK_WAKE);}'),
+ ('   spr_aff(x,y,plane_tile(u),2,pal,u->ang>>8,sx,1,0);}}',
+  '   if(mpEra>=1&&mpEra<5&&((frame+k)&1)){int ba=u->ang>>8;fx_add((u->x>>8)-(SIN(ba)*13>>8),(u->y>>8)+(COS(ba)*13>>8),FXK_BURN);}\n   spr_aff(x,y,plane_tile(u),2,pal,u->ang>>8,sx,1,0);}}'),
  ('u16 b=(t*4)|((bank+mtBank[t&31])<<12);', 'u16 b=(t*4)|((bank+mtBank[t&31])<<12);if(ds_ter_on&&buf==bgw)b=ds_ter_entry(t,cx,cy,b);'),
  ('const u16*pal,int era,int clouds){shimmer=0;', 'const u16*pal,int era,int clouds){shimmer=0;ds_ter_on=0;'),
  ('setup_mode0(t,AM_N*4*8,p,era,0);for(int i=1;i<16;i++)PAL_BG[16+i]=water_p(te)[i];tint_bg(curMap->theme,2);',

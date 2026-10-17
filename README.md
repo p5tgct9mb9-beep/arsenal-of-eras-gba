@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/cover.png" alt="Arsenal of Eras - From the trenches to the stars" width="480"></p>
+
 # Arsenal of Eras — GBA demake (personal build) · v1.3.4
 
 > **Status (Oct 2026): the GBA version is frozen at v1.3.5.** Development has moved to the **Nintendo DS** port in [`nds/`](nds/), released under `ds-v*` tags.

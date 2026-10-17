@@ -4,6 +4,7 @@
 #include <nds.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 static u8 terBank[32],terN;static u16 terBase;
 int ds_ter_on;
 int ds_terrain(int set){ // returns 1 if the DS tiles for this set were loaded
@@ -22,3 +23,20 @@ int ds_terrain(int set){ // returns 1 if the DS tiles for this set were loaded
 u16 ds_ter_entry(int t,int cx,int cy,u16 orig){if(t<0||t>=terN)return orig;
  u32 h=(u32)(cx*73856093)^(u32)(cy*19349663);h^=h>>13;h*=0x5bd1e995u;h^=h>>15;int v=h&3;
  return (u16)((terBase+(t*4+v)*4)|(terBank[t]<<12));}
+// OBJ bank 14 = FX sheet recoloured as sea foam (wakes): greys become white/pale blue
+void ds_foam_pal(void){volatile u16*p=(volatile u16*)0x05000200+14*16;
+ static const u16 F[16]={0,RGB15(4,8,14),RGB15(9,15,21),RGB15(18,24,28),RGB15(26,29,31),RGB15(31,31,31),RGB15(31,31,31),RGB15(28,30,31),
+  RGB15(31,31,31),RGB15(20,24,28),RGB15(31,31,31),RGB15(31,31,31),RGB15(31,31,31),RGB15(31,31,31),RGB15(31,31,31),RGB15(31,31,31)};
+ for(int i=1;i<16;i++)p[i]=F[i];}
+
+// ---- official cover art title screen (art/mkcover.py -> nitro:/cover.bin: top + bottom 256x192 RGB15)
+static int coverState; // 0 not loaded, 1 in VRAM bank D, -1 missing
+void ds_cover_invalidate(void){if(coverState>0)coverState=0;}
+int ds_cover_bottom(u16*dst){FILE*f=fopen("nitro:/cover.bin","rb");if(!f)return 0;fseek(f,256*192*2,SEEK_SET);
+ int ok=fread(dst,2,256*192,f)==256*192;fclose(f);return ok;}
+void ds_cover_top(void){ // called from push_display while the GBA title screen is up
+ if(coverState==0){coverState=-1;FILE*f=fopen("nitro:/cover.bin","rb");
+  if(f){u32*b=malloc(256*192*2);if(b){if(fread(b,2,256*192,f)==256*192){volatile u32*d=(volatile u32*)0x06020000;for(int i=0;i<256*192/2;i++)d[i]=b[i];coverState=1;}free(b);}fclose(f);}}
+ if(coverState<0)return;
+ DMA_CR(0)=0;REG_BLDCNT=0;REG_DISPCNT=MODE_5_2D|DISPLAY_BG3_ACTIVE;
+ REG_BG3CNT=BG_BMP16_256x256|BG_BMP_BASE(8);REG_BG3PA=256;REG_BG3PB=0;REG_BG3PC=0;REG_BG3PD=256;REG_BG3X=0;REG_BG3Y=0;}
