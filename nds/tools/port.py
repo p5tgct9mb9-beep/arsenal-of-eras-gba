@@ -41,9 +41,10 @@ for l in open(os.path.join(SRC, 'assets.c')):
         sys.path.insert(0, os.path.join(NDS, 'art')); import fx_ds
         vals = fx_ds.patch([int(v, 0) for v in m.group(5).split(',') if v.strip()])
         l = 'const %s %s[%d]%s={%s};\n' % (t, name, n, m.group(4) or '', ','.join('0x%x' % v for v in vals))
-    if name == 'tank_spr' and os.environ.get('AOE_GBA_VEH') != '1':  # ds-v0.3.0 rebuilt armour sprites (art/veh_hd.py)
-        sys.path.insert(0, os.path.join(NDS, 'art')); import veh_hd
-        vals = veh_hd.patch_tanks([int(v, 0) for v in m.group(5).split(',') if v.strip()], veh_hd.names())
+    if name in ('tank_spr', 'plane_spr') and os.environ.get('AOE_GBA_VEH') != '1':  # ds-v0.3.0 rebuilt vehicle sprites (art/veh_hd.py, art/veh_air.py)
+        sys.path.insert(0, os.path.join(NDS, 'art')); import veh_hd, veh_air
+        raw = [int(v, 0) for v in m.group(5).split(',') if v.strip()]
+        vals = veh_hd.patch_tanks(raw, veh_hd.names()) if name == 'tank_spr' else veh_air.patch_planes(raw, veh_air.names())
         l = 'const %s %s[%d]%s={%s};\n' % (t, name, n, m.group(4) or '', ','.join('0x%x' % v for v in vals))
         m = re.match(r'const (.+?) (\w+)\[(\d+)\]( __attribute__\(\(aligned\(4\)\)\))?=\{(.*)\};\s*$', l)
     if sz < BIG or name in KEEP:

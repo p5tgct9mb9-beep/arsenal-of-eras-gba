@@ -50,9 +50,14 @@ def _names():
     N['tank_spr']={int(g):n for n,g in re.findall(r'\{"([^"]+)",\d+,\d+,\d+,\d+,\d+,\d+,VC_\w+,(\d+)',s)}
     return N
 NAMES=_names()
+try:
+    import veh_air; NAMES['plane_spr']=veh_air.names()
+except Exception: pass
 def hd(bank,w):
-    import veh_hd
-    return veh_hd.patch_tanks(w,NAMES['tank_spr']) if bank=='tank_spr' else veh_ds.patch(bank,w)
+    import veh_hd, veh_air
+    if bank=='tank_spr': return veh_hd.patch_tanks(w,NAMES['tank_spr'])
+    if bank=='plane_spr': return veh_air.patch_planes(w,NAMES['plane_spr'])
+    return veh_ds.patch(bank,w)
 def ba(bank,ids,out,sc=5,cols=8):
     """before (GBA) / after (DS HD) pairs side by side"""
     a=out+'.a.png';b=out+'.b.png';solo(bank,ids,a,sc,cols);solo(bank,ids,b,sc,cols,fn=hd)

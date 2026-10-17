@@ -134,7 +134,7 @@ SPEC = {
  'EA-18G GROWLER': A(18.31, 13.62, wing='cd', sw=28, wp=.40, cr=5.0, ct=1.8, eng='j2', tail='cv', tb=6.6, can=.16, lex=1, pods=1),
  'AV-8B HARRIER II': A(14.12, 9.25, wing='sw', sw=37, wp=.40, cr=4.0, ct=1.4, eng='j1v', tb=4.2, can=.18, intake=1),
  'A-10C WARTHOG': A(16.26, 17.53, wp=.42, cr=3.0, ct=1.8, eng='jp2', tail='tw', tb=5.7, can=.12),
- 'B-1B LANCER': A(44.5, 24.0, wing='sw', sw=67, wp=.36, cr=10.0, ct=2.0, eng='jb4', tb=13.7, can=.06, blend=1),
+ 'B-1B LANCER': A(44.5, 41.8, wing='sw', sw=18, fw=.55, wp=.36, cr=10.0, ct=2.0, eng='jb4', tb=13.7, can=.06, blend=1),
  'B-2 SPIRIT': A(21.0, 52.4, wing='fw', sw=33, wp=.0, cr=21.0, ct=1.0, eng='j4', tail='n', can=.12, saw=1),
  'AC-130J GHOSTRIDER': A(29.8, 40.4, wp=.36, cr=4.2, ct=2.6, eng='p4', tb=16.0, ne=(.14, .29), can=.05, fw=1.0),
  'GRIPEN E': A(15.2, 8.6, wing='d', sw=50, wp=.50, cr=5.6, ct=1.0, eng='j1', tail='n', fin=1, can=.2, canard=1),
@@ -146,7 +146,7 @@ SPEC = {
  'SU-34 FULLBACK': A(23.3, 14.7, wing='cd', sw=42, wp=.40, cr=6.6, ct=1.4, eng='j2', tail='tw', tb=9.9, can=.10, canard=1, sbs=1),
  'SU-35 FLANKER-E': A(21.9, 15.3, wing='cd', sw=42, wp=.38, cr=6.6, ct=1.4, eng='j2', tail='tw', tb=9.9, can=.12),
  'MIG-31 FOXHOUND': A(22.69, 13.46, wing='sw', sw=41, wp=.48, cr=5.6, ct=1.4, eng='j2', tail='tw', tb=8.8, can=.12, box=1),
- 'TU-160 BLACKJACK': A(54.1, 35.6, wing='sw', sw=65, wp=.36, cr=11.0, ct=2.0, eng='jb4', tb=13.3, can=.05, blend=1),
+ 'TU-160 BLACKJACK': A(54.1, 55.7, wing='sw', sw=22, fw=.5, wp=.36, cr=11.0, ct=2.0, eng='jb4', tb=13.3, can=.05, blend=1),
  'J-10C': A(16.9, 9.75, wing='d', sw=54, wp=.46, cr=6.4, ct=.8, eng='j1', tail='n', fin=1, can=.18, canard=1),
  'J-35': A(17.3, 11.5, wing='d', sw=40, wp=.42, cr=6.4, ct=1.6, eng='j2', tail='cv', tb=6.6, can=.16),
  'JF-17 THUNDER': A(14.93, 9.45, wing='cd', sw=42, wp=.40, cr=4.8, ct=1.2, eng='j1', tb=5.0, can=.18, lex=1),
@@ -222,8 +222,8 @@ def plane_model(sp, gspan=30, glen=29):
     # tailplanes
     tb = sp['tb'] * sc / 2; tcr = max(1.6, sp['cr'] * sc * .45); tail = sp['tail']
     if tail not in ('n', 'c', 'x', 'box'):
-        tys = y1 - tcr - (0 if tail != 'boom' else 0.5)
         tsw = math.tan(math.radians(max(0, sp['sw'] - 5)))
+        tys = y1 - tcr - tb * tsw - (0 if tail != 'boom' else 0.5)              # tip trailing edge ends at the tail
         for s in (-1, 1): m.poly([(cx, tys), (cx + s * tb, tys + tb * tsw), (cx + s * tb, tys + tb * tsw + tcr * .6), (cx, tys + tcr)], CAMO, .56, bevel=.15, dz=H.S * .8)
     if tail == 'x' or tail == 'box':
         for s in (-1, 1): m.poly([(cx, y1 - 2.4), (cx + s * max(2.0, tb), y1 - 1.6), (cx + s * max(2.0, tb), y1 - .4), (cx, y1)], CAMO, .56, bevel=.15, dz=H.S * .8)
@@ -268,7 +268,7 @@ def plane_model(sp, gspan=30, glen=29):
         fy0 = y0; fy1 = y0 + fl
         nose = fl * (.10 if not jet else .18); tailtap = fl * (.30 if not jet else .12)
         pts = [(cx - fw * .25, fy0), (cx + fw * .25, fy0), (cx + fw / 2, fy0 + nose), (cx + fw / 2, fy1 - tailtap), (cx + fw * .18, fy1), (cx - fw * .18, fy1), (cx - fw / 2, fy1 - tailtap), (cx - fw / 2, fy0 + nose)]
-        if sp.get('box'): pts = [(cx - fw * .2, fy0), (cx + fw * .2, fy0), (cx + fw * .45, fy0 + nose), (cx + fw * .95, fy0 + fl * .42), (cx + fw * .95, fy1 - .4), (cx - fw * .95, fy1 - .4), (cx - fw * .95, fy0 + fl * .42), (cx - fw * .45, fy0 + nose)]
+        if sp.get('box'): pts = [(cx - fw * .2, fy0), (cx + fw * .2, fy0), (cx + fw * .45, fy0 + nose), (cx + fw * .78, fy0 + fl * .42), (cx + fw * .78, fy1 - .4), (cx - fw * .78, fy1 - .4), (cx - fw * .78, fy0 + fl * .42), (cx - fw * .45, fy0 + nose)]
         if sp.get('blend'): pts = [(cx - fw * .2, fy0), (cx + fw * .2, fy0), (cx + fw * .5, fy0 + nose), (cx + fw * 1.1, fy0 + fl * .45), (cx + fw * .7, fy1 - tailtap), (cx + fw * .2, fy1), (cx - fw * .2, fy1), (cx - fw * .7, fy1 - tailtap), (cx - fw * 1.1, fy0 + fl * .45), (cx - fw * .5, fy0 + nose)]
         if sp['wing'] == 'fw': pts = [(cx - fw * .3, fy0 + 1), (cx + fw * .3, fy0 + 1), (cx + fw * .55, fy0 + fl * .3), (cx + fw * .5, fy0 + fl * .8), (cx - fw * .5, fy0 + fl * .8), (cx - fw * .55, fy0 + fl * .3)]
         m.poly(pts, CAMO, .66, dome=.85, dz=H.S * 3.2)
