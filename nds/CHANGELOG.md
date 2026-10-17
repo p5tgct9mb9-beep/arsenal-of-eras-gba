@@ -1,5 +1,13 @@
 # Arsenal of Eras DS: changelog
 
+## ds-v0.2.4 (Oct 17, 2026): Arcade fixes
+
+Fixes found while checking the ds-v0.2.3 release. Controls are the same as in ds-v0.2.3.
+
+* **Tank Duel tanks moved 55-110 pixels per frame.** One frame of UP/DOWN made a tank jump across the arena, and the CPU tank could reach the player and win round 1 about a second after the round started. The cause was a fixed-point mistake in the shared arcade code: `SIN*speed/2` was used where `SIN*speed>>7` was meant. The DS build now patches it (`tools/dscontrols.py`). Your tank moves 1.7 px/frame forward and 1.1 px/frame in reverse. The CPU tank moves 1.4 px/frame. Wall collision now works at these speeds.
+* **Cargo Stack:** the bottom-screen arcade page showed "LIVES 0", but the game has no lives. It now shows only the level.
+* **Correction to the ds-v0.2.3 notes:** Chopper Rescue draws at about 48 fps in the harness, not 54-58. Its game logic still runs at the full 60 Hz. A faster hill-drawing routine was tried, but it changed the code layout and cost 2-3% of frames in infantry missions under melonDS, so it was left out.
+
 ## ds-v0.2.3 (Oct 16, 2026): native DSi button layout and the Arcade bug pass
 
 * **Native DSi buttons** (`source/controls.c`, `tools/dscontrols.py`). The game now uses A, B, X, Y, L, R, START, SELECT, the D-pad and touch in every mode. Before this, it used the GBA layout.
