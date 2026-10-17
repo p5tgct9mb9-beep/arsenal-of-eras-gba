@@ -50,3 +50,12 @@ def _names():
     N['tank_spr']={int(g):n for n,g in re.findall(r'\{"([^"]+)",\d+,\d+,\d+,\d+,\d+,\d+,VC_\w+,(\d+)',s)}
     return N
 NAMES=_names()
+def hd(bank,w):
+    import veh_hd
+    return veh_hd.patch_tanks(w,NAMES['tank_spr']) if bank=='tank_spr' else veh_ds.patch(bank,w)
+def ba(bank,ids,out,sc=5,cols=8):
+    """before (GBA) / after (DS HD) pairs side by side"""
+    a=out+'.a.png';b=out+'.b.png';solo(bank,ids,a,sc,cols);solo(bank,ids,b,sc,cols,fn=hd)
+    A_,B_=Image.open(a),Image.open(b);S=Image.new('RGB',(A_.width*2+16,A_.height+18),(20,22,28));d=ImageDraw.Draw(S)
+    S.paste(A_,(0,18));S.paste(B_,(A_.width+16,18));d.text((4,3),'BEFORE (GBA sprites)',fill=(240,200,120));d.text((A_.width+20,3),'AFTER (DS v0.3 rebuilt)',fill=(120,240,160))
+    S.save(out);os.remove(a);os.remove(b)
