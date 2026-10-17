@@ -85,8 +85,9 @@ class Model:
                 tv, tc = np.unique(s.tag[y * S:(y + 1) * S, x * S:(x + 1) * S], return_counts=True); tg[y, x] = tv[tc.argmax()]
         _post(g, tg)
         if outline:
-            m = g > 0; p = np.pad(m, 1); nb = p[:-2, 1:-1] | p[2:, 1:-1] | p[1:-1, :-2] | p[1:-1, 2:]
-            g[(~m) & nb] = 1
+            m = (g > 0) & (tg < 3); p = np.pad(m, 1)                      # tags >= 3 (prop discs, rotor blur) get no outline
+            nb = p[:-2, 1:-1] | p[2:, 1:-1] | p[1:-1, :-2] | p[1:-1, 2:]
+            g[(g == 0) & (tg < 3) & nb] = 1
         return g
 TRACK, GRILLE = 1, 2
 def _post(g, tg):
