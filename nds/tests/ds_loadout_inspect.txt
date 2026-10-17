@@ -1,0 +1,38 @@
+#newmenu
+# translated from the v1.3.2 menu by tools/menu133_xlate.py
+wait 100
+tap START
+wait 15
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap RIGHT
+wait 6
+wait 10
+tap A
+wait 50
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap DOWN
+wait 6
+tap A
+wait 12
+tap A
+wait 12
+shot v11_loadout_ww2_default
+ttap 128 54
+wait 20
+shot lo_armory
+tap A
+wait 20
+shot lo_inspect
+tap B
+wait 10
+tap B
+wait 30
+shot lo_back

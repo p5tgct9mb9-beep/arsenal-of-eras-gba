@@ -1,0 +1,52 @@
+#newmenu
+#kc
+# DS Museum / INSPECT: open from the main-menu header, browse the three halls, open tabs, back out to the menu
+wait 100
+ttap 128 80
+wait 60
+tap START
+wait 30
+poke32 0x0203FFE8 4447534E
+wait 58
+shot mu_menu
+ttap 215 7
+wait 20
+shot mu_hangar
+ttap 192 82
+wait 10
+ttap 192 82
+wait 20
+shot mu_f4_overview
+ttap 128 8
+wait 15
+shot mu_f4_arm
+ttap 210 8
+wait 15
+shot mu_f4_hist
+tap R
+wait 15
+shot mu_next
+tap B
+wait 15
+ttap 128 25
+wait 15
+shot mu_motorpool
+tap A
+wait 20
+shot mu_sherman
+tap B
+wait 10
+ttap 210 25
+wait 15
+shot mu_armory
+tap A
+wait 20
+shot mu_garand
+ttap 210 8
+wait 15
+shot mu_garand_att
+tap B
+wait 10
+tap B
+wait 40
+shot mu_back_menu

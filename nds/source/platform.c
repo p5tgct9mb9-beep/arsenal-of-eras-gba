@@ -135,7 +135,7 @@ int main(int argc,char**argv){
  for(int i=0;i<3;i++)swiWaitForVBlank();
  powerOn(POWER_ALL_2D);lcdMainOnTop();
  vramSetBankA(VRAM_A_MAIN_BG_0x06000000);vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
- vramSetBankC(VRAM_C_SUB_BG_0x06200000);
+ vramSetBankC(VRAM_C_SUB_BG_0x06200000);vramSetBankD(VRAM_D_MAIN_BG_0x06020000); // D: museum bitmap
  videoSetMode(MODE_0_2D);
  IO(0x20)=IO(0x26)=IO(0x30)=IO(0x36)=256; // GBA reset state of the affine matrices
  memset((void*)0x06000000,0,128*1024);memset((void*)0x06400000,0,128*1024);

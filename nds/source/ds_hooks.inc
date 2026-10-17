@@ -42,3 +42,9 @@ int ds_tac_colours(u16*col){
    col[m]=nn?(u16)((r/nn)|((g/nn)<<5)|((bl/nn)<<10)):PAL_BG[0];}
   return 1;}
  return 0;}
+
+// ---- Grand Prix track map for the bottom screen
+typedef struct{int n,laps,phase,me;const u8*surf;s16 x[8],y[8];u8 lap[8],order[8];const char*name[8];u16 h;}DsRace;
+int ds_race(DsRace*r){if(!rcSurf||rcN<=0||rcN>8)return 0;r->n=rcN;r->laps=rcLaps;r->phase=rcPhase;r->me=0;r->surf=rcSurf;r->h=rc[0].h;
+ for(int i=0;i<rcN;i++){r->x[i]=rc[i].x>>(RQ+3);r->y[i]=rc[i].y>>(RQ+3);r->lap[i]=rc[i].lap;r->order[i]=rcOrder[i];r->name[i]=RCARS[rc[i].car].n;}
+ return 1;}

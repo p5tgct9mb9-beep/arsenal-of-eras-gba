@@ -8,9 +8,11 @@
 extern const unsigned char font_bits[672];
 typedef struct{s16 x,y;u8 team,kind;u16 ang;}DsBlip;
 typedef struct{int mw,mh,camx,camy,maxhp,hp,gren,fuel,alive,resp,ang,nb;const char*wpn;}DsTac;
+typedef struct{int n,laps,phase,me;const u8*surf;s16 x[8],y[8];u8 lap[8],order[8];const char*name[8];u16 h;}DsRace;
+int ds_race(DsRace*r);static DsRace RR;static u16 rmap[128*128];static const u8*rmapSrc;
 int ds_tac(int scr,DsTac*t,DsBlip*b,int max);int ds_tac_cell(int cx,int cy);int ds_tac_flags(int t);int ds_tac_colours(u16*col);
 static u16 ui[256*192] __attribute__((aligned(32)));
-static int dirty=1,page=-1,lastSel=-1,lastScr=-1,padForce=0,lastTouch=0,tx,ty,uiTick;
+static int curPg=-1,dirty=1,page=-1,lastSel=-1,lastScr=-1,padForce=0,lastTouch=0,tx,ty,uiTick;
 u32 ds_ui_taps;
 #define RGB(r,g,b) ((u16)(0x8000|((b)>>3)<<10|((g)>>3)<<5|((r)>>3)))
 enum{PG_TITLE,PG_TILES,PG_LIST,PG_PAD,PG_TAC};
@@ -51,10 +53,11 @@ static int pad_hit(int x,int y){int k=0;for(const PB*b=PADB;b->k;b++)if(x>=b->x-
 #define TM_S 142
 static u16 tmap[TM_S*TM_S];static int tmKey=-1,tmTick;static DsTac TT;static DsBlip TB[24];
 typedef struct{s16 x,y,w,h;u16 k;const char*l;}AB;
-static const char*TAC_NAME(int scr){return scr==5?"INFANTRY":scr==6?"ARMOR":scr==7?"AIR":scr==19?"NAVAL":"CAMPAIGN";}
+static const char*TAC_NAME(int scr){return scr==90?"GRAND PRIX":scr==5?"INFANTRY":scr==6?"ARMOR":scr==7?"AIR":scr==19?"NAVAL":"CAMPAIGN";}
 static void tac_buttons(int scr,const char*l[4],u16 k[4]){
  static const char*const L[5][4]={{"FIRE","GRENADE","SWAP","STRAFE"},{"GUN","MG/ATGM","TURRET L","TURRET R"},{"GUNS","ROCKET","ROLL L","ROLL R"},
   {"MAIN GUNS","SECONDARY","TURRET L","TURRET R"},{"FIRE","GRENADE","TACTICAL","STRAFE"}};
+ if(scr==90){static const char*const RL[4]={"THROTTLE","BRAKE","BOOST","DRIFT"};for(int i=0;i<4;i++){l[i]=RL[i];k[i]=i==0?GA:i==1?GB:i==2?GL:GR;}return;}
  int r=scr==5?0:scr==6?1:scr==7?2:scr==19?3:4;
  static const u16 K[5][4]={{GA,GB,GL,GR},{GA,GB,GL,GR},{GA,GB,GL,GR},{GA,GB,GL,GR},{GA,GB,GSEL,GR}};
  for(int i=0;i<4;i++){l[i]=L[r][i];k[i]=K[r][i];}}
@@ -100,9 +103,29 @@ static void draw_tac(int scr){
  {unsigned t=DSBEAT->timer/60;snprintf(s,40,"TIME %u:%02u",t/60,t%60);text(X,92,s,GR_,1);}
  const char*l[4];u16 k[4];tac_buttons(scr,l,k);
  for(int i=0;i<4;i++){int bx,by,bw,bh;tac_brect(i,&bx,&by,&bw,&bh);button(bx,by,bw,bh,l[i],(ds_vkeys&k[i])!=0);}}
+
+static void race_build(void){static const u16 SC[8]={0x8000|(13<<10)|(13<<5)|13,0x8000|(8<<10)|(8<<5)|28,0x8000|(6<<10)|(14<<5)|5,0x8000|(4<<10)|(4<<5)|4,
+  0x8000|(28<<10)|(26<<5)|6,0x8000|(4<<10)|(16<<5)|30,0x8000|(22<<10)|(10<<5)|4,0x8000|(6<<10)|(14<<5)|5};
+ for(int i=0;i<128*128;i++){int v=RR.surf[i];rmap[i]=SC[v&7];}rmapSrc=RR.surf;}
+static void draw_race(void){
+ const int X0=8,Y0=20;for(int y=0;y<128;y++)memcpy(&ui[(Y0+y)*256+X0],&rmap[y*128],256);frame(X0-1,Y0-1,130,130,CY);
+ for(int i=RR.n-1;i>=0;i--){int x=X0+RR.x[i],y=Y0+RR.y[i];if(x<X0||y<Y0||x>=X0+128||y>=Y0+128)continue;
+  if(i==0){fill(x-3,y-3,7,7,RGB(0,0,0));fill(x-2,y-2,5,5,GD);}else{fill(x-2,y-2,4,4,RGB(0,0,0));fill(x-1,y-1,3,3,RGB(240,80,70));}}
+ int X=146;char s[40];text(X,20,"GRAND PRIX",GD,1);
+ int pos=1;for(int i=0;i<RR.n;i++)if(RR.order[i]==0)pos=i+1;
+ snprintf(s,40,"POS %d/%d",pos,RR.n);text(X,32,s,WH,2);
+ int lp=RR.lap[0]<1?1:RR.lap[0];if(lp>RR.laps)lp=RR.laps;snprintf(s,40,"LAP %d/%d",lp,RR.laps);text(X,50,s,WH,1);
+ for(int i=0;i<RR.n&&i<4;i++){int c=RR.order[i];snprintf(s,40,"%d %.15s",i+1,RR.name[c]?RR.name[c]:"?");text(X,62+i*9,s,c==0?GD:GR_,1);}
+ const char*l[4];u16 k[4];tac_buttons(90,l,k);
+ for(int i=0;i<4;i++){int bx,by,bw,bh;tac_brect(i,&bx,&by,&bw,&bh);button(bx,by,bw,bh,l[i],(ds_vkeys&k[i])!=0);}}
+#include "museum.inc"
 static void header(void){fill(0,0,256,15,PANEL);fill(0,15,256,1,CY);text(4,4,"ARSENAL OF ERAS",GD,1);text(100,4,"DS",CY,1);
- const char*s=ds_save_status;text(252-tw(s,1),4,s,GR_,1);}
-static void redraw(int pg,int scr,int key,int sel){
+ const char*s=ds_save_status;if(curPg==PG_TILES){char t[10];snprintf(t,10,"%s",s);text(116,4,t,GR_,1);}else text(252-tw(s,1),4,s,GR_,1);}
+static int musBtn(int pg,int scr,int*x,int*y,int*w,int*h,const char**l,int*cat){
+ if(pg==PG_TILES){*x=176;*y=0;*w=80;*h=15;*l="MUSEUM";*cat=0;return 1;}
+ if(pg==PG_PAD&&(scr==11||scr==18)){*x=80;*y=44;*w=96;*h=20;*l=scr==18?"INSPECT HANGAR":"INSPECT ARMORY";*cat=scr==18?0:2;return 1;}
+ return 0;}
+static void redraw(int pg,int scr,int key,int sel){curPg=pg;
  fill(0,0,256,192,BG);header();
  if(pg==PG_TITLE){fill(28,40,200,80,PANEL);frame(28,40,200,80,CY);fill(28,40,20,3,GD);ctext(128,62,"TAP TO START",GD,2);ctext(128,96,"OR PRESS START",GR_,1);
   ctext(128,140,"TOP SCREEN: GAME  -  BOTTOM: TOUCH",GR_,1);}
@@ -116,8 +139,9 @@ static void redraw(int pg,int scr,int key,int sel){
   for(int j=0;j<no;j++){int x,y,w,h;opt_rect(j,&x,&y,&w,&h);ds_ui_query(scr,key,100+j,&a,&b);int on=foc?j==os:j==0;
    fill(x,y,w,h,on?SEL:PANEL);frame(x,y,w,h,on?(foc?GD:CY):RGB(60,80,110));ctext(x+w/2,y+h/2-3,a,on?GD:WH,1);}
   ctext(206,18+no*20+6,foc?"TAP TO START":"TAP A MODE",GR_,1);}
- else if(pg==PG_TAC)draw_tac(scr);
+ else if(pg==PG_TAC){if(scr==90)draw_race();else draw_tac(scr);}
  else{draw_pad();char t[48];snprintf(t,48,"SCREEN %u  MODE %u",(unsigned)DSBEAT->screen,(unsigned)DSBEAT->mode);ctext(128,150,t,GR_,1);}
+ {int x,y,w,h,c;const char*l;if(musBtn(pg,scr,&x,&y,&w,&h,&l,&c)){fill(x,y,w,h,PANEL);button(x,y,w,h,l,1);}}
  draw_bar();
  DC_FlushRange(ui,sizeof ui);dmaCopyWords(3,ui,(void*)0x06200000,sizeof ui);}
 void ui_init(void){videoSetModeSub(MODE_5_2D);bgInitSub(3,BgType_Bmp16,BgSize_B16_256x256,0,0);memset(ui,0,sizeof ui);}
@@ -129,12 +153,13 @@ void ui_frame(void){
  uiTick++;
  scanKeys();int held=keysHeld();touchPosition t;int touching=(held&KEY_TOUCH)!=0;if(touching){touchRead(&t);tx=t.px;ty=t.py;}
  int scr=DSBEAT->screen,key=DSBEAT->extra,sel=DSBEAT->menu;
- int tac=(scr==4||scr==5||scr==6||scr==7||scr==19)&&ds_tac(scr,&TT,TB,24);
+ int tac=scr==90?ds_race(&RR):(scr==4||scr==5||scr==6||scr==7||scr==19)&&ds_tac(scr,&TT,TB,24);
  int pg=padForce?PG_PAD:tac?PG_TAC:scr==1?PG_TITLE:scr==105?PG_TILES:((scr==53||scr==54)&&ds_ui_query(scr,key,-1,&(const char*){0},&(const char*){0})>0)?PG_LIST:PG_PAD;
  u16 vk=0;
  // macro queue
  if(qh!=qt){vk=Q[qh].k;if(--Q[qh].n==0)qh=(qh+1)&63;}
  if(touching&&!lastTouch){ // new tap
+  int mx,my,mw,mh,mc;const char*ml;if(musBtn(pg,scr,&mx,&my,&mw,&mh,&ml,&mc)&&tx>=mx&&tx<mx+mw&&ty>=my&&ty<my+mh){ds_ui_taps++;ds_museum(mc);dirty=1;lastTouch=0;ds_vkeys=0;page=-1;return;}
   if(ty>=BAR_Y){int b=tx/64;if(b>3)b=3;if(b==0)q_tap(GB);else if(b==1)q_tap(GSEL);else if(b==2)q_tap(GSTART);else{padForce^=1;dirty=1;}}
   else if(pg==PG_TITLE){q_tap(GSTART);}
   else if(pg==PG_TILES||pg==PG_LIST){int n=10;const char*a,*b;n=ds_ui_query(scr,key,-1,&a,&b);
@@ -144,7 +169,8 @@ void ui_frame(void){
  if(touching&&pg==PG_PAD&&ty<BAR_Y)vk|=pad_hit(tx,ty);
  if(touching&&pg==PG_TAC&&ty<BAR_Y)vk|=tac_hit(scr,tx,ty);
  if(vk!=ds_vkeys&&(pg==PG_PAD||pg==PG_TAC))dirty=1;
- if(pg==PG_TAC){int key=TT.mw*1000+TT.mh*10+scr;if(key!=tmKey||(++tmTick%240)==0){tmKey=key;tac_build();}if((uiTick&3)==0)dirty=1;}
+ if(pg==PG_TAC&&scr==90){if(rmapSrc!=RR.surf)race_build();if((uiTick&3)==0)dirty=1;}
+ else if(pg==PG_TAC){int key=TT.mw*1000+TT.mh*10+scr;if(key!=tmKey||(++tmTick%240)==0){tmKey=key;tac_build();}if((uiTick&3)==0)dirty=1;}
  ds_vkeys=vk;lastTouch=touching;
  static int lastPh;if(pg!=page||sel!=lastSel||scr!=lastScr||(int)DSBEAT->phase!=lastPh||(uiTick%60)==0)dirty=1;lastPh=DSBEAT->phase;
  if(dirty){redraw(pg,scr,key,sel);dirty=0;page=pg;lastSel=sel;lastScr=scr;}}

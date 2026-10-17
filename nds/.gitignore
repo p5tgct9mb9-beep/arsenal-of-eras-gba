@@ -5,3 +5,5 @@ nitrofiles/
 *.elf
 tools/dsharness
 *.ppm
+__pycache__/
+*.pyc
