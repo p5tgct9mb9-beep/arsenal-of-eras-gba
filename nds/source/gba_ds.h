@@ -67,6 +67,7 @@ static inline volatile void* gba_ioaddr(u32 a){
 #define SCREENBLOCK(n) ((volatile u16*)(0x06000000+(n)*0x800))
 #define OBJ_TILES ((volatile u32*)0x06400000)
 #define OAM ((volatile u16*)gba_oam)
-enum{K_A=1,K_B=2,K_SEL=4,K_START=8,K_RIGHT=16,K_LEFT=32,K_UP=64,K_DOWN=128,K_R=256,K_L=512};
+enum{K_A=1,K_B=2,K_SEL=4,K_START=8,K_RIGHT=16,K_LEFT=32,K_UP=64,K_DOWN=128,K_R=256,K_L=512,K_DSX=1024,K_DSY=2048}; // K_DSX/K_DSY: DS X/Y (controls.c)
+extern int ds_ctl_preset;void ds_ctl_set(int v);const char*ds_ctl_name(void);int ds_ctl_testmode(void);extern int ds_arc_on;extern const void*volatile ds_fb_src;void ds_fb_end(const void*fb);
 extern int ds_ter_on;int ds_terrain(int era);unsigned short ds_ter_entry(int t,int cx,int cy,unsigned short orig);
 void ds_foam_pal(void);

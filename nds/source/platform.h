@@ -8,6 +8,7 @@ extern u16 gba_bmp[0x14000/2];
 extern u8 gba_sram[0x10000];
 extern u32 gba_beat_area[1+64];
 extern u16 ds_vkeys;
+extern int ds_arc_on;
 extern volatile u32 ds_frame;
 extern u32 ds_ast_bytes, ds_ast_loads;
 void ds_fatal(const char*a,const char*b) __attribute__((noreturn));

@@ -15,7 +15,7 @@ static u16 ui[256*192] __attribute__((aligned(32)));
 static int curPg=-1,dirty=1,page=-1,lastSel=-1,lastScr=-1,padForce=0,lastTouch=0,tx,ty,uiTick;
 u32 ds_ui_taps;
 #define RGB(r,g,b) ((u16)(0x8000|((b)>>3)<<10|((g)>>3)<<5|((r)>>3)))
-enum{PG_TITLE,PG_TILES,PG_LIST,PG_PAD,PG_TAC};
+enum{PG_TITLE,PG_TILES,PG_LIST,PG_PAD,PG_TAC,PG_ARC};
 // GBA key bits
 enum{GA=1,GB=2,GSEL=4,GSTART=8,GRIGHT=16,GLEFT=32,GUP=64,GDOWN=128,GR=256,GL=512};
 // ---- key macro queue
@@ -23,7 +23,8 @@ static struct{u16 k;u8 n;}Q[64];static int qh,qt;
 static void q_push(u16 k,int n){int nt=(qt+1)&63;if(nt==qh)return;Q[qt].k=k;Q[qt].n=n;qt=nt;}
 static void q_tap(u16 k){q_push(k,3);q_push(0,3);}
 // ---- drawing
-static void fill(int x,int y,int w,int h,u16 c){for(int j=y;j<y+h;j++){if(j<0||j>=192)continue;for(int i=x;i<x+w;i++)if(i>=0&&i<256)ui[j*256+i]=c;}}
+static void fill(int x,int y,int w,int h,u16 c){if(x<0){w+=x;x=0;}if(y<0){h+=y;y=0;}if(x+w>256)w=256-x;if(y+h>192)h=192-y;if(w<=0||h<=0)return;
+ for(int j=y;j<y+h;j++){u16*p=&ui[j*256+x];for(int i=0;i<w;i++)p[i]=c;}}
 static void frame(int x,int y,int w,int h,u16 c){fill(x,y,w,1,c);fill(x,y+h-1,w,1,c);fill(x,y,1,h,c);fill(x+w-1,y,1,h,c);}
 static int text(int x,int y,const char*s,u16 c,int sc){
  for(;s&&*s;s++,x+=6*sc){int ch=*s;if(ch>='a'&&ch<='z')ch-=32;if(ch<32||ch>127)ch='?';const u8*g=&font_bits[(ch-32)*7];
@@ -54,6 +55,7 @@ static int pad_hit(int x,int y){int k=0;for(const PB*b=PADB;b->k;b++)if(x>=b->x-
 static u16 tmap[TM_S*TM_S];static int tmKey=-1,tmTick;static DsTac TT;static DsBlip TB[24];
 typedef struct{s16 x,y,w,h;u16 k;const char*l;}AB;
 static const char*TAC_NAME(int scr){return scr==90?"GRAND PRIX":scr==5?"INFANTRY":scr==6?"ARMOR":scr==7?"AIR":scr==19?"NAVAL":"CAMPAIGN";}
+static void legend2(int X,int Y,int scr);
 static void tac_buttons(int scr,const char*l[4],u16 k[4]){
  static const char*const L[5][4]={{"FIRE","GRENADE","SWAP","STRAFE"},{"GUN","MG/ATGM","TURRET L","TURRET R"},{"GUNS","ROCKET","ROLL L","ROLL R"},
   {"MAIN GUNS","SECONDARY","TURRET L","TURRET R"},{"FIRE","GRENADE","TACTICAL","STRAFE"}};
@@ -61,7 +63,7 @@ static void tac_buttons(int scr,const char*l[4],u16 k[4]){
  int r=scr==5?0:scr==6?1:scr==7?2:scr==19?3:4;
  static const u16 K[5][4]={{GA,GB,GL,GR},{GA,GB,GL,GR},{GA,GB,GL,GR},{GA,GB,GL,GR},{GA,GB,GSEL,GR}};
  for(int i=0;i<4;i++){l[i]=L[r][i];k[i]=K[r][i];}}
-static void tac_brect(int i,int*x,int*y,int*w,int*h){*x=148+(i&1)*54;*y=104+(i>>1)*30;*w=52;*h=28;}
+static void tac_brect(int i,int*x,int*y,int*w,int*h){*x=148+(i&1)*54;*y=119+(i>>1)*22;*w=52;*h=21;}
 static int tac_hit(int scr,int x,int y){const char*l[4];u16 k[4];tac_buttons(scr,l,k);int v=0;
  for(int i=0;i<4;i++){int bx,by,bw,bh;tac_brect(i,&bx,&by,&bw,&bh);if(x>=bx-2&&x<bx+bw+2&&y>=by-2&&y<by+bh+2)v|=k[i];}return v;}
 static u16 c15(u16 c){return 0x8000|c;}
@@ -90,17 +92,18 @@ static void draw_tac(int scr){
   else{fill(x-1,y-1,3,3,c);}}
  // right column: status
  int X=148;char s[40];
- text(X,20,TAC_NAME(scr),GD,1);
- int hp=TT.hp<0?0:TT.hp,mx=TT.maxhp>0?TT.maxhp:100;text(X,32,"HP",GR_,1);fill(X+16,32,88,7,RGB(30,30,40));
- fill(X+16,32,hp>=mx?88:hp*88/mx,7,hp*4<mx?RGB(230,60,50):hp*2<mx?RGB(240,190,60):RGB(90,210,90));
- if(!TT.alive){snprintf(s,40,"RESPAWN %d",TT.resp/60+1);text(X,44,s,GD,1);}
- else if(TT.wpn){text(X,44,TT.wpn,WH,1);}
- snprintf(s,40,"KILLS %u  DOWN %u",(unsigned)DSBEAT->kills,(unsigned)DSBEAT->deaths);text(X,56,s,WH,1);
- if(scr!=4){snprintf(s,40,"SCORE %u - %u",(unsigned)DSBEAT->scoreA,(unsigned)DSBEAT->scoreB);text(X,68,s,WH,1);}
- else{snprintf(s,40,"BUNKER %u",(unsigned)DSBEAT->extra);text(X,68,s,WH,1);}
- if(scr==5||scr==4){snprintf(s,40,"GRENADES %d",TT.gren);text(X,80,s,WH,1);}
- else if(TT.fuel>0){snprintf(s,40,"FUEL %d",TT.fuel/60);text(X,80,s,WH,1);}
- {unsigned t=DSBEAT->timer/60;snprintf(s,40,"TIME %u:%02u",t/60,t%60);text(X,92,s,GR_,1);}
+ text(X,19,TAC_NAME(scr),GD,1);
+ int hp=TT.hp<0?0:TT.hp,mx=TT.maxhp>0?TT.maxhp:100;text(X,29,"HP",GR_,1);fill(X+16,29,88,7,RGB(30,30,40));
+ fill(X+16,29,hp>=mx?88:hp*88/mx,7,hp*4<mx?RGB(230,60,50):hp*2<mx?RGB(240,190,60):RGB(90,210,90));
+ if(!TT.alive){snprintf(s,40,"RESPAWN %d",TT.resp/60+1);text(X,39,s,GD,1);}
+ else if(TT.wpn){text(X,39,TT.wpn,WH,1);}
+ snprintf(s,40,"KILLS %u  DOWN %u",(unsigned)DSBEAT->kills,(unsigned)DSBEAT->deaths);text(X,49,s,WH,1);
+ if(scr!=4){snprintf(s,40,"SCORE %u - %u",(unsigned)DSBEAT->scoreA,(unsigned)DSBEAT->scoreB);text(X,59,s,WH,1);}
+ else{snprintf(s,40,"BUNKER %u",(unsigned)DSBEAT->extra);text(X,59,s,WH,1);}
+ if(scr==5||scr==4){snprintf(s,40,"GRENADES %d",TT.gren);text(X,69,s,WH,1);}
+ else if(TT.fuel>0){snprintf(s,40,"FUEL %d",TT.fuel/60);text(X,69,s,WH,1);}
+ {unsigned t=DSBEAT->timer/60;snprintf(s,40,"TIME %u:%02u",t/60,t%60);text(X,79,s,GR_,1);}
+ fill(X,89,106,1,RGB(60,80,110));legend2(X,91,scr);
  const char*l[4];u16 k[4];tac_buttons(scr,l,k);
  for(int i=0;i<4;i++){int bx,by,bw,bh;tac_brect(i,&bx,&by,&bw,&bh);button(bx,by,bw,bh,l[i],(ds_vkeys&k[i])!=0);}}
 
@@ -118,7 +121,34 @@ static void draw_race(void){
  for(int i=0;i<RR.n&&i<4;i++){int c=RR.order[i];snprintf(s,40,"%d %.15s",i+1,RR.name[c]?RR.name[c]:"?");text(X,62+i*9,s,c==0?GD:GR_,1);}
  const char*l[4];u16 k[4];tac_buttons(90,l,k);
  for(int i=0;i<4;i++){int bx,by,bw,bh;tac_brect(i,&bx,&by,&bw,&bh);button(bx,by,bw,bh,l[i],(ds_vkeys&k[i])!=0);}}
+// per-mode button legend (controls.c)
+int ds_ctl_legend(int scr,const char*btn[8],const char*lab[8],const char**name);
+static void legend2(int X,int Y,int scr){const char*b[8],*l[8],*nm;ds_ctl_legend(scr,b,l,&nm);char t[16];
+ for(int i=0;i<6;i++){int x=X+(i&1)*54,y=Y+(i>>1)*9;snprintf(t,16,"%s",l[i]);text(x,y,b[i],GD,1);text(x+8,y,t,WH,1);}}
+static void legend_box(int X,int Y,int W,int scr){const char*b[8],*l[8],*nm;ds_ctl_legend(scr,b,l,&nm);
+ fill(X,Y,W,60,PANEL);frame(X,Y,W,60,CY);ctext(X+W/2,Y+3,nm,CY,1);
+ for(int i=0;i<6;i++){int y=Y+12+i*8;text(X+4,y,b[i],GD,1);text(X+16,y,l[i],WH,1);}}
 #include "museum.inc"
+// ---- arcade cabinet page (cabinet screen + every cabinet game): game card, live score, controls, touch buttons
+const char*ds_arc_txt(int g,int i);unsigned ds_arc_hi(int g);unsigned ds_arc_plays(int g);
+static int arc_brect(int cab,int i,int*x,int*y,int*w,int*h){*y=126;*h=34;if(cab){*w=80;*x=4+i*84;return 3;}*w=122;*x=4+i*126;return 2;}
+static u16 arc_bkey(int cab,int i){return cab?(i==0?GLEFT:i==1?GA:GRIGHT):(i==0?GSTART:GB);}
+static void draw_arc(int scr){int cab=scr==107;int g=cab?(int)DSBEAT->menu:(int)DSBEAT->mode;char s[48];
+ if(g<0||g>11)g=0;fill(4,18,248,104,PANEL);frame(4,18,248,104,CY);fill(4,18,248,2,GD);
+ snprintf(s,48,cab?"ARCADE CABINET  %d/12":"ARCADE  GAME %d/12",g+1);text(10,24,s,GR_,1);
+ ctext(128,36,ds_arc_txt(g,0),GD,2);ctext(128,56,ds_arc_txt(g,1),WH,1);ctext(128,67,ds_arc_txt(g,2),CY,1);
+ if(scr==108){snprintf(s,48,"SCORE %u",(unsigned)DSBEAT->scoreA);text(10,82,s,WH,2);
+  snprintf(s,48,"LIVES %d  LEVEL %u",(int)DSBEAT->hp,(unsigned)DSBEAT->phase+1);text(10,100,s,WH,1);}
+ else if(scr==101){text(10,82,"NEW HIGH SCORE!",GD,2);text(10,100,"UP/DOWN LETTER  </> MOVE  A: OK",WH,1);}
+ else if(scr==109){snprintf(s,48,"GAME OVER  %u",(unsigned)DSBEAT->scoreA);text(10,82,s,GD,2);text(10,100,"A PLAY AGAIN   B CABINET",WH,1);}
+ else{snprintf(s,48,"PLAYS %u",ds_arc_plays(g));text(10,100,s,GR_,1);}
+ snprintf(s,48,"HI %s %u",ds_arc_txt(g,3),ds_arc_hi(g));text(246-tw(s,1),100,s,GD,1);
+ text(10,111,cab?"L/R OR </>: CHOOSE   A/X: PLAY   B: BACK":"X = A   Y = B   START: PAUSE",GR_,1);
+ static const char*const CL[3]={"< PREV","PLAY","NEXT >"},*const GL_[2]={"PAUSE","B"};
+ int n=arc_brect(cab,0,&(int){0},&(int){0},&(int){0},&(int){0});
+ for(int i=0;i<n;i++){int x,y,w,h;arc_brect(cab,i,&x,&y,&w,&h);button(x,y,w,h,cab?CL[i]:GL_[i],(ds_vkeys&arc_bkey(cab,i))!=0);}}
+static int arc_hit(int scr,int x,int y){int cab=scr==107;int v=0;int n=arc_brect(cab,0,&(int){0},&(int){0},&(int){0},&(int){0});
+ for(int i=0;i<n;i++){int bx,by,bw,bh;arc_brect(cab,i,&bx,&by,&bw,&bh);if(x>=bx&&x<bx+bw&&y>=by&&y<by+bh)v|=arc_bkey(cab,i);}return v;}
 static void header(void){fill(0,0,256,15,PANEL);fill(0,15,256,1,CY);text(4,4,"ARSENAL OF ERAS",GD,1);text(100,4,"DS",CY,1);
  const char*s=ds_save_status;if(curPg==PG_TILES){char t[10];snprintf(t,10,"%s",s);text(116,4,t,GR_,1);}else text(252-tw(s,1),4,s,GR_,1);}
 static int musBtn(int pg,int scr,int*x,int*y,int*w,int*h,const char**l,int*cat){
@@ -141,7 +171,8 @@ static void redraw(int pg,int scr,int key,int sel){curPg=pg;
    fill(x,y,w,h,on?SEL:PANEL);frame(x,y,w,h,on?(foc?GD:CY):RGB(60,80,110));ctext(x+w/2,y+h/2-3,a,on?GD:WH,1);}
   ctext(206,18+no*20+6,foc?"TAP TO START":"TAP A MODE",GR_,1);}
  else if(pg==PG_TAC){if(scr==90)draw_race();else draw_tac(scr);}
- else{draw_pad();char t[48];snprintf(t,48,"SCREEN %u  MODE %u",(unsigned)DSBEAT->screen,(unsigned)DSBEAT->mode);ctext(128,150,t,GR_,1);}
+ else if(pg==PG_ARC)draw_arc(scr);
+ else{draw_pad();legend_box(108,44,90,scr);char t[48];snprintf(t,48,"SCREEN %u  MODE %u",(unsigned)DSBEAT->screen,(unsigned)DSBEAT->mode);ctext(128,150,t,GR_,1);}
  {int x,y,w,h,c;const char*l;if(musBtn(pg,scr,&x,&y,&w,&h,&l,&c)){fill(x,y,w,h,PANEL);button(x,y,w,h,l,1);}}
  draw_bar();
  DC_FlushRange(ui,sizeof ui);dmaCopyWords(3,ui,(void*)0x06200000,sizeof ui);}
@@ -155,7 +186,8 @@ void ui_frame(void){
  scanKeys();int held=keysHeld();touchPosition t;int touching=(held&KEY_TOUCH)!=0;if(touching){touchRead(&t);tx=t.px;ty=t.py;}
  int scr=DSBEAT->screen,key=DSBEAT->extra,sel=DSBEAT->menu;
  int tac=scr==90?ds_race(&RR):(scr==4||scr==5||scr==6||scr==7||scr==19)&&ds_tac(scr,&TT,TB,24);
- int pg=padForce?PG_PAD:tac?PG_TAC:scr==1?PG_TITLE:scr==105?PG_TILES:((scr==53||scr==54)&&ds_ui_query(scr,key,-1,&(const char*){0},&(const char*){0})>0)?PG_LIST:PG_PAD;
+ int arc=ds_arc_on&&(scr==107||scr==108||scr==109||scr==101);
+ int pg=padForce?PG_PAD:arc?PG_ARC:tac?PG_TAC:scr==1?PG_TITLE:scr==105?PG_TILES:((scr==53||scr==54)&&ds_ui_query(scr,key,-1,&(const char*){0},&(const char*){0})>0)?PG_LIST:PG_PAD;
  u16 vk=0;
  // macro queue
  if(qh!=qt){vk=Q[qh].k;if(--Q[qh].n==0)qh=(qh+1)&63;}
@@ -169,9 +201,12 @@ void ui_frame(void){
    if(pg==PG_LIST){int no=ds_ui_query(scr,key,100,&a,&b);for(int j=0;j<no;j++){int x,y,w,h;opt_rect(j,&x,&y,&w,&h);if(tx>=x&&tx<x+w&&ty>=y&&ty<y+h){tap_opt(j);break;}}}}}
  if(touching&&pg==PG_PAD&&ty<BAR_Y)vk|=pad_hit(tx,ty);
  if(touching&&pg==PG_TAC&&ty<BAR_Y)vk|=tac_hit(scr,tx,ty);
- if(vk!=ds_vkeys&&(pg==PG_PAD||pg==PG_TAC))dirty=1;
+ if(pg==PG_ARC){static int ah;int h=touching&&ty<BAR_Y?arc_hit(scr,tx,ty):0;if(scr==107||(h&GSTART)){if(h&&!ah)q_tap(h);}else vk|=h;ah=h;
+  // redraw only when something shown changed, at most every 12 frames (a full bottom-screen redraw costs game frames)
+  static u32 ak,at;u32 k=DSBEAT->scoreA*31+DSBEAT->hp*7+DSBEAT->phase*3+DSBEAT->menu+scr*1000+DSBEAT->mode*100000;if(k!=ak&&uiTick-at>=12){ak=k;at=uiTick;dirty=1;}}
+ if(vk!=ds_vkeys&&(pg==PG_PAD||pg==PG_TAC||pg==PG_ARC))dirty=1;
  if(pg==PG_TAC&&scr==90){if(rmapSrc!=RR.surf)race_build();if((uiTick&3)==0)dirty=1;}
  else if(pg==PG_TAC){int key=TT.mw*1000+TT.mh*10+scr;if(key!=tmKey||(++tmTick%240)==0){tmKey=key;tac_build();}if((uiTick&3)==0)dirty=1;}
  ds_vkeys=vk;lastTouch=touching;
- static int lastPh;if(pg!=page||sel!=lastSel||scr!=lastScr||(int)DSBEAT->phase!=lastPh||(uiTick%60)==0)dirty=1;lastPh=DSBEAT->phase;
+ static int lastPh;if(pg!=page||sel!=lastSel||scr!=lastScr||(pg!=PG_ARC&&((int)DSBEAT->phase!=lastPh||(uiTick%60)==0)))dirty=1;lastPh=DSBEAT->phase;
  if(dirty){redraw(pg,scr,key,sel);dirty=0;page=pg;lastSel=sel;lastScr=scr;}}

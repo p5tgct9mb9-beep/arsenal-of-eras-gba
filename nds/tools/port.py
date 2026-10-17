@@ -176,7 +176,8 @@ def srcread(fn):
     t = t.replace('sd_rle+sd_off[set]', 'ast_window(sd_rle_ID,sd_off[set],sd_off[set+1]-sd_off[set])')
     for a, b in LIT_REPL:
         if a in t: t = t.replace(a, b)
-    return t
+    return dscontrols.apply(fn, t)
+sys.path.insert(0, HERE); import dscontrols  # native DSi button layout patches
 # DS graphics upgrade hooks (literal source replacements)
 LIT_REPL = [
  ('{"ARSENAL OF ERAS",0},{"FIELD EDITION V1.3.5",3},', '{"ARSENAL OF ERAS",0},{"FROM THE TRENCHES TO THE STARS",1},{"FIELD EDITION V1.3.5",3},'),
@@ -210,5 +211,6 @@ for fn in files:
     out = os.path.join(GEN, 'game.c' if fn == 'main.c' else fn)
     if not os.path.exists(out) or open(out, encoding='latin-1').read() != o:
         open(out, 'w', encoding='latin-1').write(o); changed += 1
+dscontrols.report()
 print('port.py: %d files (%d changed), %d assets kept in RAM, %d moved to NitroFS (%d KB)' % (
     len(files), changed, len(decl) - len(moved), len(moved), len(blob) // 1024))

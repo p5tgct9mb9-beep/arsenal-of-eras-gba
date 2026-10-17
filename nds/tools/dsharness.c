@@ -59,7 +59,8 @@ static long mapaddr(unsigned a){finddbg();
  if(a>=0x0E000000u&&a<0x0E010000u)return sramOff<0?-1:sramOff+(a-0x0E000000u);
  return a&0x3FFFFF;}
 static unsigned lastBeat;static int stall,maxstall;
-static void step(void){p_run();total++;finddbg();if(beatOff>=0){unsigned f=rd32(beatOff+8);if(f==lastBeat){stall++;if(stall>maxstall)maxstall=stall;}else stall=0;lastBeat=f;}}
+static int ctlClassic=-1;
+static void step(void){if(ctlClassic<0)ctlClassic=getenv("DSH_CTL")&&!strcmp(getenv("DSH_CTL"),"classic");p_run();total++;finddbg();if(ctlClassic&&dbgOff>=0)wr32(dbgOff+48,0xC1A55100u);if(beatOff>=0){unsigned f=rd32(beatOff+8);if(f==lastBeat){stall++;if(stall>maxstall)maxstall=stall;}else stall=0;lastBeat=f;}}
 static void stepk(int k){int o=keys;keys=k;step();keys=o;}
 static void shot(const char*dir,const char*name){char p[512];snprintf(p,512,"%s/%s.ppm",dir,name);FILE*f=fopen(p,"wb");if(!f)return;fprintf(f,"P6 %u %u 255\n",W,H);
  for(unsigned y=0;y<H;y++)for(unsigned x=0;x<W;x++){unsigned char px[3];
@@ -108,6 +109,8 @@ int main(int argc,char**argv){
   else if(!strcmp(c,"peekds")){long o=strtoul(a,0,16)&0x3FFFFF;int N=atoi(b);printf("[peekds %08lx]",o);for(int i=0;i<N;i++)printf(" %08x",rd32(o+4*i));printf("\n");}
   else if(!strcmp(c,"sram64")){unsigned so=a[0]?strtoul(a,0,16):0;finddbg();printf("[sram64]");for(int i=0;i<64;i++)printf(" %02x",sramOff<0?0:ram[sramOff+so+i]);printf("\n");}
   else if(!strcmp(c,"savestat")){finddbg();if(dbgOff>=0)printf("[savestat] kind=%u type=%d size=%u verified=%u writes=%u\n",rd32(dbgOff+32),(int)(signed char)(rd32(dbgOff+36)&0xFF),rd32(dbgOff+36)>>8,rd32(dbgOff+40),rd32(dbgOff+44));}
+  else if(!strcmp(c,"ctlstat")){finddbg();if(dbgOff>=0){unsigned m=rd32(dbgOff+52),n=rd32(dbgOff+56);printf("[ctlstat_%s] scr=%u map=%03x cat=%u nX=%u nY=%u preset=%u\n",a,rd32(beatOff+12),m&0xFFF,(m>>12)&15,n&0xFFFF,n>>16,rd32(dbgOff+60));}}
+  else if(!strcmp(c,"chipdump")){void*m=p_get_memory_data(RETRO_MEMORY_SAVE_RAM);size_t n=p_get_memory_size(RETRO_MEMORY_SAVE_RAM);FILE*o=fopen(a,"wb");if(o&&m)fwrite(m,1,n,o);if(o)fclose(o);printf("[chipdump %s] %zu bytes\n",a,m?n:0);}
   else if(!strcmp(c,"sram")){finddbg();printf("[sram]");for(int i=0;i<16;i++)printf(" %02x",sramOff<0?0:ram[sramOff+i]);printf("\n");}
   else if(!strcmp(c,"savedump")){finddbg();FILE*o=fopen(a,"wb");if(o&&sramOff>=0)fwrite(ram+sramOff,1,32768,o);if(o)fclose(o);printf("[savedump %s]\n",a);}
   else if(!strcmp(c,"audio")){

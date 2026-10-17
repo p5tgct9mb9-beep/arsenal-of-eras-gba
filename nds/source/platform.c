@@ -19,10 +19,13 @@ u8  gba_sram[0x10000] __attribute__((aligned(4)));
 u32 gba_beat_area[1+64]={0x5EA7A0E5u};
 u32 gba_dummy[4];
 u16 ds_vkeys;
+// arcade: the game's 240x160 frame buffer is converted to VRAM directly (no copy into gba_bmp)
+const void*volatile ds_fb_src;
+void ds_fb_end(const void*fb){if(ds_fb_src){memcpy(gba_bmp,fb,240*160*2);ds_fb_src=0;}}
 volatile u32 ds_frame;
 int ds_last_screen;
 // harness debug block (nds/tools/dsharness scans RAM for the two magic words)
-volatile u32 ds_dbg[12]={0x5EA7DB60u,0xDB60DB60u,(u32)&gba_beat_area[1],(u32)gba_sram,(u32)gba_io,(u32)gba_bmp,(u32)&ds_frame,0};
+volatile u32 ds_dbg[16]={0x5EA7DB60u,0xDB60DB60u,(u32)&gba_beat_area[1],(u32)gba_sram,(u32)gba_io,(u32)gba_bmp,(u32)&ds_frame,0};
 
 void mus_isr(void);
 void isr_stub(void){}
@@ -116,7 +119,7 @@ static void push_display(void){
  REG_MOSAIC=IO(0x4C);REG_BLDCNT=IO(0x50);REG_BLDALPHA=IO(0x52);REG_BLDY=IO(0x54);
  REG_DISPCNT=ds;
  if(bmp){ // convert the 240-stride GBA bitmap into the DS 256-stride bitmap
-  if(mode==3||mode==5){u32*d=(u32*)0x06000000;const u32*s=(const u32*)gba_bmp;
+  if(mode==3||mode==5){u32*d=(u32*)0x06000000;const u32*s=(const u32*)(mode==3&&ds_fb_src?ds_fb_src:gba_bmp);
    for(int y=0;y<160;y++){for(int i=0;i<120;i++)d[i]=s[i]|0x80008000u;d+=128;s+=120;}}
   else{const u8*s=(const u8*)gba_bmp+((dc&0x10)?0xA000:0);u32*d=(u32*)0x06000000;
    for(int y=0;y<160;y++){memcpy(d,s,240);d+=64;s+=240;}}}
@@ -134,7 +137,10 @@ void gba_vsync(void){
  ds_dbg[7]=ds_dbg[0]; // keep the block referenced
  {extern u32 ds_save_writes;extern int ds_save_dbg_type,ds_save_dbg_size;extern u32 ds_save_verified;ds_dbg[8]=ds_save_kind;ds_dbg[9]=(ds_save_dbg_type&0xFF)|(ds_save_dbg_size<<8);ds_dbg[10]=ds_save_verified;ds_dbg[11]=ds_save_writes;}
 }
-u16 gba_keyinput(void){return (REG_KEYINPUT&0x3FF)&~ds_vkeys;}
+// keys: physical DS buttons -> GBA layout of the current mode (controls.c), then the touch-screen virtual keys
+u16 ds_ctl_map(u16 hw,u16 xy);
+u16 gba_keyinput(void){u16 hw=~REG_KEYINPUT&0x3FF;u32 c=keysHeld(); /* scanKeys() runs once per frame in ui_frame() */u16 xy=((c&KEY_X)?1:0)|((c&KEY_Y)?2:0);
+ return (u16)~(ds_ctl_map(hw,xy)|ds_vkeys);}
 
 int main(int argc,char**argv){
  defaultExceptionHandler();
@@ -152,6 +158,7 @@ int main(int argc,char**argv){
  ast_f=fopen("nitro:/assets.bin","rb");if(!ast_f)ds_fatal("NO nitro:/assets.bin",0);
  setvbuf(ast_f,NULL,_IONBF,0);
  save_init();
+ {extern void ds_ctl_load(void);ds_ctl_load();}
  irqSet(IRQ_VBLANK,vbl_isr);irqEnable(IRQ_VBLANK);
  int gba_main(void);
  gba_main();

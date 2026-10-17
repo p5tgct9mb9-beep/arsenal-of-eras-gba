@@ -54,3 +54,10 @@ typedef struct{int n,laps,phase,me;const u8*surf;s16 x[8],y[8];u8 lap[8],order[8
 int ds_race(DsRace*r){if(!rcSurf||rcN<=0||rcN>8)return 0;r->n=rcN;r->laps=rcLaps;r->phase=rcPhase;r->me=0;r->surf=rcSurf;r->h=rc[0].h;
  for(int i=0;i<rcN;i++){r->x[i]=rc[i].x>>(RQ+3);r->y[i]=rc[i].y>>(RQ+3);r->lap[i]=rc[i].lap;r->order[i]=rcOrder[i];r->name[i]=RCARS[rc[i].car].n;}
  return 1;}
+
+// controls.c: hover flight model active (SELECT+UP/DOWN altitude -> X/Y)
+int ds_ctl_hover(void){return mpMode==MM_AIR&&hgHov;}
+// touchui.c arcade page: game name / controls / top score
+const char*ds_arc_txt(int g,int i){if(g<0||g>=AG_N)return "";return i==0?AGNM[g]:i==1?AGD[g][0]:i==2?AGD[g][1]:i==3?AS.t[g][0].n:"";}
+unsigned ds_arc_hi(int g){return g>=0&&g<AG_N?AS.t[g][0].s:0;}
+unsigned ds_arc_plays(int g){return g>=0&&g<AG_N?AS.plays[g]:0;}

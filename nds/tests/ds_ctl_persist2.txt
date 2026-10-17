@@ -1,0 +1,9 @@
+#newmenu
+# boot with the save written by ds_ctl_persist.txt: CONTROLS must still read CLASSIC (GBA)
+wait 100
+tap START
+wait 30
+ctlstat boot
+hold X 3
+ctlstat boot_X
+beat end
